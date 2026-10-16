@@ -23,7 +23,7 @@ public static class NakamaSetup
         if (PlayerSettings.insecureHttpOption == InsecureHttpOption.NotAllowed)
             PlayerSettings.insecureHttpOption = InsecureHttpOption.DevelopmentOnly;
 
-        var connection = Object.FindFirstObjectByType<NakamaConnection>();
+        var connection = Object.FindAnyObjectByType<NakamaConnection>();
         if (connection == null)
         {
             var go = new GameObject("Network");

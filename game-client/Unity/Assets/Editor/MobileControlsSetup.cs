@@ -17,8 +17,8 @@ public static class MobileControlsSetup
     [MenuItem("Thai Life/Add Mobile Controls")]
     private static void AddMobileControls()
     {
-        var player = Object.FindFirstObjectByType<PlayerController>();
-        var cameraFollow = Object.FindFirstObjectByType<CameraFollow>();
+        var player = Object.FindAnyObjectByType<PlayerController>();
+        var cameraFollow = Object.FindAnyObjectByType<CameraFollow>();
         if (player == null || cameraFollow == null)
         {
             EditorUtility.DisplayDialog("Mobile Controls", "ไม่พบ Player หรือ CameraFollow ในฉาก — เปิดฉาก ThaiVillage ก่อน", "OK");
@@ -136,7 +136,7 @@ public static class MobileControlsSetup
 
     private static void EnsureEventSystem()
     {
-        if (Object.FindFirstObjectByType<EventSystem>() != null) return;
+        if (Object.FindAnyObjectByType<EventSystem>() != null) return;
 
         var go = new GameObject("EventSystem", typeof(EventSystem));
 #if ENABLE_INPUT_SYSTEM

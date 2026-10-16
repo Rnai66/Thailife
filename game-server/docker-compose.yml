@@ -33,6 +33,10 @@ services:
         --socket.server_key ${NAKAMA_SERVER_KEY:-defaultkey}
         --console.username ${NAKAMA_CONSOLE_USER:-admin}
         --console.password ${NAKAMA_CONSOLE_PASSWORD:-password}
+        --session.encryption_key ${NAKAMA_SESSION_KEY:-defaultencryptionkey}
+        --session.refresh_encryption_key ${NAKAMA_REFRESH_KEY:-defaultrefreshencryptionkey}
+        --runtime.http_key ${NAKAMA_HTTP_KEY:-defaulthttpkey}
+        --console.signing_key ${NAKAMA_CONSOLE_SIGNING_KEY:-defaultsigningkey}
         --session.token_expiry_sec 7200
         --logger.level INFO
     volumes:

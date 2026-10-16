@@ -12,7 +12,7 @@
 - [x] กด Play ผ่านเกณฑ์ใน Editor: เดิน, หมุนตัว, กล้องตาม, ไม่ตกพื้น, ชนสิ่งกีดขวาง, Console ไม่มี error (16 ต.ค. 2026)
 - [x] จอยเสมือน (ครึ่งซ้าย) + ลากหมุนกล้อง (ครึ่งขวา) — ทดสอบด้วยเมาส์ใน Editor (16 ต.ค. 2026)
 - [x] ปุ่ม A/B/C/D แบบ PlayStation: กระโดด / เตะ / ต่อย / ป้องกัน (ภาพชั่วคราว) + ซิงก์ท่าผ่านเน็ต — ฐานสำหรับอาชีพนักมวย
-- [ ] ทดสอบบน iPhone จริง
+- [x] ทดสอบบน iPhone 16 Pro Max จริง: จอย, ปุ่ม, เล่นข้ามเครื่องกับ Mac ผ่าน Wi-Fi (16 ต.ค. 2026)
 - [x] Multiplayer ขั้น 1: Unity เชื่อมต่อ Nakama local (Docker) ได้ — device auth + realtime socket (16 ต.ค. 2026)
 - [x] Multiplayer ขั้น 2: เห็นผู้เล่นอื่นและซิงก์ตำแหน่ง (relayed match "thaivillage", ทดสอบ Editor + Mac build) (16 ต.ค. 2026)
 
@@ -65,6 +65,19 @@ tools/, tests/         (ภายหลัง)
 - Heroic Cloud (org `rnaisys`): Development deployment ราคา $420/เดือน — ยังไม่ใช้จนกว่าจะเปิดให้คนนอกเล่น
 - SDK: `com.heroiclabs.nakama-unity` v3.22.1 (ติดตั้งผ่าน Packages/manifest.json)
 - ตั้งค่า: เมนู **Thai Life → Setup Nakama Connection** แล้วกรอก Host / Server Key ใน `Assets/Settings/NakamaConfig.asset` (ไฟล์นี้ไม่เข้า Git)
+
+## Build ลง iPhone
+
+1. Unity: เมนู **Thai Life → Build iOS (Xcode project)** → ได้ `Builds/iOS` (Bundle ID `com.rnai66.thailife`, Team `H4X9654279`)
+2. คอมไพล์ + ติดตั้ง (iPhone เสียบสาย/ปลดล็อก):
+   ```bash
+   cd game-client/Unity/Builds/iOS
+   xcodebuild -project Unity-iPhone.xcodeproj -scheme Unity-iPhone -configuration Debug -destination "id=<UDID>" -derivedDataPath ../iOS_DerivedData -allowProvisioningUpdates build
+   xcrun devicectl device install app --device <UDID> ../iOS_DerivedData/Build/Products/Debug-iphoneos/ThaiLife.app
+   ```
+   หรือเปิด `Unity-iPhone.xcodeproj` ใน Xcode แล้วกด Run
+3. iPhone ต้องอยู่ Wi-Fi เดียวกับ Mac และอนุญาต Local Network; `NakamaConfig.host` = IP ของ Mac
+4. ถ้าติดตั้ง iOS Build Support ระหว่างที่ Unity เปิดอยู่ ต้องรีสตาร์ต Unity ก่อน build
 
 ## สภาพแวดล้อม
 - Unity: 6000.6.6f1 (URP 17.6.0, Input System 1.20.0)

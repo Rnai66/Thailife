@@ -36,7 +36,7 @@ public class MatchSync : MonoBehaviour
 
         if (localPlayer == null)
         {
-            var player = FindFirstObjectByType<PlayerController>();
+            var player = FindAnyObjectByType<PlayerController>();
             if (player != null) localPlayer = player.transform;
         }
 

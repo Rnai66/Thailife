@@ -70,7 +70,17 @@ public class NakamaConnection : MonoBehaviour
         {
             var restored = Nakama.Session.Restore(token, refresh);
             if (!restored.HasExpired(DateTime.UtcNow.AddMinutes(1)))
-                return restored;
+            {
+                try
+                {
+                    await Client.GetAccountAsync(restored); // token still accepted by this server?
+                    return restored;
+                }
+                catch (ApiResponseException)
+                {
+                    Debug.Log("[Nakama] Saved session rejected (server keys changed?) — logging in again.");
+                }
+            }
         }
 
         var session = await Client.AuthenticateDeviceAsync(GetDeviceId(), create: true);
