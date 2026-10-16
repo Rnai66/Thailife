@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thai Life Simulator — GDD v0.1</title>
+<style>
+:root{--bg:#f4f6f8;--paper:#fff;--ink:#17212b;--muted:#5d6975;--line:#dbe1e6;--accent:#176b59;--soft:#eaf5f1;--code:#101820}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.75 -apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,sans-serif}
+.hero{background:linear-gradient(135deg,#123e36,#277660);color:#fff;padding:54px max(22px,calc((100% - 980px)/2));}
+.eyebrow{letter-spacing:.14em;font-size:.78rem;font-weight:700;opacity:.8}.hero h1{font-size:clamp(2rem,5vw,3.5rem);line-height:1.15;margin:.25em 0}.subtitle{font-size:1.1rem;opacity:.9}.chips{display:flex;gap:8px;flex-wrap:wrap;margin:22px 0}.chips span{border:1px solid #ffffff55;border-radius:999px;padding:4px 12px;font-size:.86rem}.notice{background:var(--soft);border-left:4px solid var(--accent);padding:12px 16px;border-radius:4px;margin:18px 0}.hero .notice{background:#ffffff16;border-color:#a9e0d0}
+nav{max-width:980px;margin:18px auto;padding:16px 20px;background:var(--paper);border:1px solid var(--line);border-radius:12px;display:flex;gap:12px;flex-wrap:wrap}nav strong{width:100%}nav a{color:var(--accent);text-decoration:none}
+section{max-width:980px;margin:18px auto;padding:30px clamp(18px,4vw,40px);background:var(--paper);border:1px solid var(--line);border-radius:12px}
+h2{font-size:1.6rem;margin-top:0;border-bottom:1px solid var(--line);padding-bottom:10px}h3{margin-bottom:.3em}a{color:var(--accent)}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}.cards article{border:1px solid var(--line);border-radius:10px;padding:16px;background:#fcfdfd}.cards h3{margin-top:0}
+pre{background:var(--code);color:#eaf2f7;border-radius:9px;padding:18px;overflow:auto;font-size:.88rem;line-height:1.55}code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.92em}p code,li code{background:#edf1f4;padding:2px 5px;border-radius:4px;color:#233}
+table{width:100%;border-collapse:collapse;display:block;overflow-x:auto}th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);white-space:nowrap}th{background:#f0f4f5}
+.checks li{margin:.35em 0}footer{text-align:center;color:var(--muted);padding:24px}
+@media(max-width:600px){.hero{padding:34px 20px}nav{margin:10px}section{margin:10px;padding:22px 17px}.hero h1{font-size:2.2rem}}
+@media print{body{background:#fff}nav{display:none}section{border:0;break-inside:avoid;margin:0 auto}.hero{background:#fff;color:#000;padding:20px}.hero .notice{color:#000;background:#fff;border-color:#333}a{color:#000;text-decoration:none}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <p class="eyebrow">GAME DESIGN DOCUMENT · VERSION 0.1</p>
+  <h1>Thai Life Simulator</h1>
+  <p class="subtitle">GDD · Technical Plan · Prototype Roadmap</p>
+  <div class="chips"><span>3D Life Simulation</span><span>iOS + Android</span><span>Online Multiplayer — Later Phase</span><span>Solo Developer</span></div>
+  <p class="notice">เอกสารตั้งต้น ณ 16 ตุลาคม 2026 — แผนและโค้ดตัวอย่างยังไม่ได้รับการทดสอบในเครื่องของผู้พัฒนา</p>
+</header>
+<nav>
+  <strong>สารบัญ</strong>
+  <a href="#vision">วิสัยทัศน์</a><a href="#prototype">Prototype</a><a href="#tools">เครื่องมือ</a>
+  <a href="#structure">โครงสร้างไฟล์</a><a href="#scene">สร้างฉาก</a><a href="#roadmap">Roadmap</a><a href="#next">ขั้นตอนถัดไป</a>
+</nav>
+<section id="vision">
+  <h2>1. วิสัยทัศน์ผลิตภัณฑ์</h2>
+  <p>สร้างเกมจำลองชีวิต 3D ที่มีเอกลักษณ์ประเทศไทย ผู้เล่นสร้างตัวละคร ใช้ชีวิต ทำงาน หาเงิน ปรับปรุงที่อยู่อาศัย สร้างความสัมพันธ์ และพบผู้เล่นคนอื่นในโลกออนไลน์ โดยเริ่มจากต้นแบบขนาดเล็กและขยายอย่างเป็นขั้นตอน</p>
+  <ul><li>เล่นได้ก่อน ขยายทีหลัง</li><li>เอกลักษณ์ไทยในสถาปัตยกรรม ร้านค้า อาหาร และชุมชน</li><li>ออกแบบให้เหมาะกับข้อจำกัดมือถือ</li><li>ข้อมูลสำคัญในระบบออนไลน์ต้องตรวจสอบฝั่งเซิร์ฟเวอร์</li><li>ขอบเขตงานต้องเหมาะกับผู้พัฒนาคนเดียว</li></ul>
+  <h3>โลกของเกม</h3>
+  <div class="cards"><article><h3>โซนชนบทไทย</h3><p>บ้านไม้ บ้านสวน ถนนชุมชน ร้านขายของชำ ตลาดท้องถิ่น และกิจกรรมเกษตรกรรม</p></article><article><h3>โซนเมืองไทย</h3><p>คอนโด ร้านอาหาร ตลาดกลางคืน สำนักงาน ร้านค้า และพื้นที่สาธารณะสำหรับพบปะผู้เล่น</p></article></div>
+</section>
+<section id="prototype">
+  <h2>2. ขอบเขต Prototype 0.1</h2>
+  <h3>ต้องมี</h3><ul><li>ฉาก 3D ขนาดเล็กหนึ่งฉาก</li><li>พื้น บ้านจำลอง และต้นไม้จาก primitive objects</li><li>ตัวละครต้นแบบและการเดิน/หมุนตัว</li><li>กล้องติดตามตัวละคร</li><li>Collider และ Character Controller</li><li>ทดสอบใน Unity Editor ก่อนเพิ่มระบบสัมผัสบนมือถือ</li></ul>
+  <h3>ยังไม่ทำ</h3><ul><li>Multiplayer และบัญชีออนไลน์</li><li>โลกเปิดขนาดใหญ่</li><li>เศรษฐกิจเต็มรูปแบบ แต่งงาน มีลูก หรือซื้อขายระหว่างผู้เล่น</li><li>AI สนทนาอิสระและระบบสร้างรายได้</li></ul>
+  <p class="notice">ห้ามเริ่ม Multiplayer จนกว่าการเดิน กล้อง การชน และฉากพื้นฐานจะผ่านการทดสอบ</p>
+</section>
+<section id="tools">
+  <h2>3. เครื่องมือที่วางแผนใช้</h2>
+  <div class="cards">
+    <article><h3>Unity 6 LTS + URP</h3><p>เอนจินหลักสำหรับ 3D, physics, animation, UI และ build มือถือ</p><a href="https://unity.com/download">ดาวน์โหลด Unity</a></article>
+    <article><h3>Blender</h3><p>สร้างโมเดลบ้าน เฟอร์นิเจอร์ และ asset 3D</p><a href="https://www.blender.org/">blender.org</a></article>
+    <article><h3>Visual Studio Code</h3><p>แก้ไข C# และเอกสารประกอบ</p><a href="https://code.visualstudio.com/">ดาวน์โหลด VS Code</a></article>
+    <article><h3>Git</h3><p>เก็บประวัติการแก้ไขและย้อนกลับโค้ด</p><code>git --version</code></article>
+    <article><h3>Xcode</h3><p>ใช้สร้างและทดสอบแอปบน iPhone พร้อมตั้งค่า signing</p><a href="https://apps.apple.com/app/xcode/id497799835">ดู Xcode ใน Mac App Store</a></article>
+    <article><h3>Nakama + Docker (ภายหลัง)</h3><p>ตัวเลือกสำหรับ multiplayer backend หลังระบบพื้นฐานผ่าน</p><a href="https://heroiclabs.com/nakama/">Nakama</a> · <a href="https://www.docker.com/">Docker</a></article>
+  </div>
+  <p class="notice">เครื่องมือหลักบางรายการใช้ฟรีตามเงื่อนไขผู้ให้บริการ แต่การเผยแพร่แอปและระบบออนไลน์อาจมีค่าใช้จ่ายหรือข้อกำหนดเพิ่มเติม</p>
+</section>
+<section id="structure">
+  <h2>4. โครงสร้างโฟลเดอร์</h2>
+  <pre><code>ThaiLifeSimulator/
+├── README.md
+├── docs/
+│   ├── GDD.md
+│   ├── TECHNICAL_DESIGN.md
+│   ├── ROADMAP.md
+│   └── ASSET_LICENSES.md
+├── game-client/Unity/Assets/
+│   ├── Scenes/
+│   ├── Scripts/
+│   │   ├── Player/
+│   │   ├── Camera/
+│   │   ├── Interaction/
+│   │   ├── Multiplayer/
+│   │   ├── UI/
+│   │   └── SaveSystem/
+│   ├── Prefabs/
+│   ├── Art/
+│   ├── Animations/
+│   ├── Audio/
+│   └── Settings/
+├── game-server/
+│   ├── docker-compose.yml
+│   ├── nakama/
+│   └── database/
+├── tools/
+└── tests/</code></pre>
+  <p>โครงสร้างนี้เป็นแบบเสนอ ยังไม่ใช่โฟลเดอร์ Unity ที่สร้างเสร็จทั้งหมด</p>
+</section>
+<section id="scene">
+  <h2>5. สร้างฉากต้นแบบใน Unity</h2>
+  <ol><li>ติดตั้ง Unity Hub และ Unity 6 LTS</li><li>สร้างโปรเจกต์ด้วยเทมเพลต <code>Universal 3D (URP)</code></li><li>ตั้งชื่อ <code>ThaiLifeSimulator</code></li><li>บันทึก Scene เป็น <code>Assets/Scenes/ThaiVillage.unity</code></li></ol>
+  <h3>วัตถุที่ต้องสร้าง</h3>
+  <table><thead><tr><th>Object</th><th>ชนิด</th><th>Position</th><th>Scale</th></tr></thead><tbody>
+  <tr><td>Ground</td><td>Plane</td><td>(0, 0, 0)</td><td>(5, 1, 5)</td></tr>
+  <tr><td>Player</td><td>Capsule</td><td>(0, 1, 0)</td><td>(1, 1, 1)</td></tr>
+  <tr><td>House</td><td>Cube</td><td>(4, 1, 4)</td><td>(3, 2, 3)</td></tr>
+  <tr><td>TreeTrunk</td><td>Cylinder</td><td>(-4, 1, 3)</td><td>(0.4, 2, 0.4)</td></tr>
+  <tr><td>TreeTop</td><td>Sphere</td><td>(-4, 3, 3)</td><td>(2, 2, 2)</td></tr>
+  </tbody></table>
+  <p>Ground ต้องมี Collider; Player ต้องมี Character Controller (Height 2, Radius 0.5, Center 0,1,0 โดยประมาณ)</p>
+  <h3>PlayerController.cs</h3>
+  <p>สร้างไฟล์ใน <code>Assets/Scripts/Player/PlayerController.cs</code></p>
+  <pre><code>using UnityEngine;
+
+[RequireComponent(typeof(CharacterController))]
+public class PlayerController : MonoBehaviour
+{
+    [SerializeField] private float moveSpeed = 4f;
+    [SerializeField] private float gravity = -20f;
+    [SerializeField] private Transform cameraTransform;
+
+    private CharacterController controller;
+    private float verticalVelocity;
+
+    private void Awake()
+    {
+        controller = GetComponent&lt;CharacterController&gt;();
+    }
+
+    private void Update()
+    {
+        float x = Input.GetAxisRaw("Horizontal");
+        float z = Input.GetAxisRaw("Vertical");
+
+        Vector3 forward = cameraTransform != null
+            ? cameraTransform.forward : Vector3.forward;
+        Vector3 right = cameraTransform != null
+            ? cameraTransform.right : Vector3.right;
+
+        forward.y = 0f;
+        right.y = 0f;
+        forward.Normalize();
+        right.Normalize();
+
+        Vector3 move = Vector3.ClampMagnitude(forward * z + right * x, 1f);
+
+        if (move.sqrMagnitude &gt; 0.001f)
+        {
+            transform.rotation = Quaternion.Slerp(
+                transform.rotation,
+                Quaternion.LookRotation(move),
+                12f * Time.deltaTime
+            );
+        }
+
+        if (controller.isGrounded &amp;&amp; verticalVelocity &lt; 0f)
+            verticalVelocity = -2f;
+
+        verticalVelocity += gravity * Time.deltaTime;
+        Vector3 velocity = move * moveSpeed;
+        velocity.y = verticalVelocity;
+        controller.Move(velocity * Time.deltaTime);
+    }
+}</code></pre>
+  <h3>CameraFollow.cs</h3>
+  <p>สร้างไฟล์ใน <code>Assets/Scripts/Camera/CameraFollow.cs</code></p>
+  <pre><code>using UnityEngine;
+
+public class CameraFollow : MonoBehaviour
+{
+    [SerializeField] private Transform target;
+    [SerializeField] private Vector3 offset = new Vector3(0f, 4f, -6f);
+    [SerializeField] private float followSpeed = 8f;
+    [SerializeField] private float lookHeight = 1.2f;
+
+    private void LateUpdate()
+    {
+        if (target == null) return;
+
+        Vector3 desiredPosition = target.position + offset;
+        transform.position = Vector3.Lerp(
+            transform.position, desiredPosition,
+            followSpeed * Time.deltaTime
+        );
+        transform.LookAt(target.position + Vector3.up * lookHeight);
+    }
+}</code></pre>
+  <h3>ผูก Component</h3><ol><li>เพิ่ม PlayerController และ Character Controller ให้ Player</li><li>เพิ่ม CameraFollow ให้ Main Camera</li><li>ลาก Player ไปใส่ Target ของ CameraFollow</li><li>ลาก Main Camera ไปใส่ Camera Transform ของ PlayerController</li><li>บันทึก Scene แล้วกด Play</li></ol>
+  <p class="notice">โค้ดเดินใช้ Input Manager แบบเดิม หากโปรเจกต์เปิด Input System แบบใหม่อย่างเดียว ให้ตั้ง Active Input Handling เป็น Both หากมีตัวเลือก หรือเปลี่ยนโค้ดให้ใช้ Input System package โค้ดยังไม่ได้ทดสอบในเครื่องผู้ใช้</p>
+</section>
+<section id="roadmap">
+  <h2>6. Roadmap 12 สัปดาห์</h2>
+  <div class="cards">
+    <article><h3>สัปดาห์ 1–2</h3><p>ติดตั้ง Unity/Git สร้างฉาก ตัวละคร และกล้อง</p><strong>ผลลัพธ์:</strong> เดินใน Editor ได้</article>
+    <article><h3>สัปดาห์ 3–4</h3><p>เพิ่มการควบคุมสัมผัส ตั้งค่า Xcode และทดสอบ iPhone</p><strong>ผลลัพธ์:</strong> เดินบนมือถือได้</article>
+    <article><h3>สัปดาห์ 5–6</h3><p>สร้างฉากชุมชนไทยและปรับประสิทธิภาพ</p><strong>ผลลัพธ์:</strong> ฉากต้นแบบ</article>
+    <article><h3>สัปดาห์ 7–9</h3><p>เริ่ม backend, sync การเคลื่อนไหว และทดสอบผู้เล่นสองเครื่อง เฉพาะเมื่อพื้นฐานผ่านแล้ว</p><strong>ผลลัพธ์:</strong> พบกันออนไลน์ได้</article>
+    <article><h3>สัปดาห์ 10–11</h3><p>เพิ่ม interaction และบันทึกข้อมูลอย่างง่าย</p><strong>ผลลัพธ์:</strong> วงจรการเล่นสั้น ๆ</article>
+    <article><h3>สัปดาห์ 12</h3><p>ทดสอบ แก้ข้อผิดพลาด และจัดทำ build ภายใน</p><strong>ผลลัพธ์:</strong> Prototype สำหรับทดสอบ</article>
+  </div>
+  <p>ประมาณการนี้สมมติว่าทำงาน 10–15 ชั่วโมงต่อสัปดาห์และไม่ใช่การรับประกันกำหนดเสร็จ</p>
+</section>
+<section>
+  <h2>7. เกณฑ์ผ่าน Prototype</h2>
+  <ul class="checks"><li>Scene เปิดได้โดยไม่มี compile errors</li><li>Player เดินและหมุนตัวได้</li><li>กล้องติดตาม Player</li><li>Player ไม่ตกทะลุพื้นและชนสิ่งกีดขวางได้</li><li>Console ไม่มี error สีแดง</li><li>เพิ่มการควบคุมสัมผัสและทดสอบ iPhone</li><li>ทดสอบบนอุปกรณ์จริงก่อนเริ่ม Multiplayer</li></ul>
+  <h2>8. ความปลอดภัยและลิขสิทธิ์</h2>
+  <ul><li>บันทึกชื่อ asset ผู้สร้าง URL และใบอนุญาต</li><li>ตรวจสอบสิทธิ์ใช้เชิงพาณิชย์และข้อกำหนดเครดิต</li><li>ห้ามใช้ asset จากเกมอื่นโดยไม่มีสิทธิ์</li><li>เมื่อมีระบบออนไลน์ ให้เซิร์ฟเวอร์ตรวจสอบเงินและไอเท็ม</li><li>อย่าเปิดฐานข้อมูลหรือแผงควบคุมออกอินเทอร์เน็ตโดยไม่มีการป้องกัน</li></ul>
+</section>
+<section id="next">
+  <h2>9. ขั้นตอนถัดไป</h2>
+  <ol><li>ติดตั้ง Unity Hub และ Unity 6 LTS</li><li>สร้างโปรเจกต์ URP ชื่อ ThaiLifeSimulator</li><li>สร้าง Scene ThaiVillage และ primitive objects</li><li>เพิ่ม PlayerController และ CameraFollow</li><li>ทดสอบการเดินและแก้ Console errors</li><li>เพิ่มระบบสัมผัสและทดสอบ iPhone</li><li>เริ่ม Multiplayer หลังผ่านเกณฑ์พื้นฐาน</li></ol>
+  <p class="notice"><strong>สถานะ:</strong> เอกสารแผนและโค้ดตัวอย่างรวบรวมไว้แล้ว แต่การติดตั้งและทดสอบในเครื่องจริงยังต้องทำต่อ</p>
+</section>
+<footer>Thai Life Simulator · GDD v0.1 · Prepared 16 October 2026</footer>
+
+</body></html>
