@@ -10,7 +10,9 @@
 - [x] `ThaiVillageSceneBuilder.cs` — สร้างฉาก ThaiVillage อัตโนมัติ (พื้น, บ้าน+หลังคา, ต้นไม้, Player, กล้อง, แสง) และตั้ง URP ให้ถ้ายังไม่มี
 - [x] เปิดใน Unity ได้ ไม่มี compile error, ฉาก ThaiVillage สร้างแล้ว
 - [x] กด Play ผ่านเกณฑ์ใน Editor: เดิน, หมุนตัว, กล้องตาม, ไม่ตกพื้น, ชนสิ่งกีดขวาง, Console ไม่มี error (16 ต.ค. 2026)
-- [ ] จอยสัมผัส + ทดสอบบน iPhone
+- [x] จอยเสมือน (ครึ่งซ้าย) + ลากหมุนกล้อง (ครึ่งขวา) — ทดสอบด้วยเมาส์ใน Editor (16 ต.ค. 2026)
+- [x] ปุ่ม A/B/C/D แบบ PlayStation: กระโดด / เตะ / ต่อย / ป้องกัน (ภาพชั่วคราว) + ซิงก์ท่าผ่านเน็ต — ฐานสำหรับอาชีพนักมวย
+- [ ] ทดสอบบน iPhone จริง
 - [x] Multiplayer ขั้น 1: Unity เชื่อมต่อ Nakama local (Docker) ได้ — device auth + realtime socket (16 ต.ค. 2026)
 - [x] Multiplayer ขั้น 2: เห็นผู้เล่นอื่นและซิงก์ตำแหน่ง (relayed match "thaivillage", ทดสอบ Editor + Mac build) (16 ต.ค. 2026)
 
@@ -39,6 +41,19 @@ game-client/Unity/     Unity project (Assets, Packages)
 game-server/           Nakama + PostgreSQL ผ่าน Docker (docker-compose.yml)
 tools/, tests/         (ภายหลัง)
 ```
+
+## การควบคุม
+
+| | จอบนมือถือ | คีย์บอร์ด | Gamepad |
+|---|---|---|---|
+| เดิน | จอยครึ่งซ้าย | WASD / ลูกศร | Left stick |
+| หมุนกล้อง | ลากครึ่งขวา | — | — |
+| กระโดด | A (ล่าง) | Space | South (✕) |
+| เตะ | B (ขวา) | K | East (○) |
+| ต่อย | C (ซ้าย) | J | West (□) |
+| ป้องกัน (ค้าง) | D (บน) | L | North (△) |
+
+ตั้งค่า UI: เมนู **Thai Life → Add Mobile Controls**
 
 ## Multiplayer (Nakama)
 

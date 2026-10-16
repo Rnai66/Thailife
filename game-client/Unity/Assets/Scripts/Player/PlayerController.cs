@@ -9,6 +9,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float moveSpeed = 4f;
     [SerializeField] private float turnSpeed = 12f;
     [SerializeField] private float gravity = -20f;
+    [SerializeField] private float jumpHeight = 1.2f;
     [SerializeField] private Transform cameraTransform;
 
     private CharacterController controller;
@@ -17,6 +18,18 @@ public class PlayerController : MonoBehaviour
     // Set by on-screen controls (virtual joystick) in the mobile phase.
     // When non-zero it takes priority over keyboard/gamepad.
     public Vector2 ExternalMoveInput { get; set; }
+
+    // Lowered while blocking (PlayerActions)
+    public float MoveSpeedMultiplier { get; set; } = 1f;
+
+    public bool IsGrounded => controller != null && controller.isGrounded;
+
+    public bool Jump()
+    {
+        if (!controller.isGrounded) return false;
+        verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
+        return true;
+    }
 
     private void Awake()
     {
@@ -55,7 +68,7 @@ public class PlayerController : MonoBehaviour
 
         verticalVelocity += gravity * Time.deltaTime;
 
-        Vector3 velocity = move * moveSpeed;
+        Vector3 velocity = move * (moveSpeed * MoveSpeedMultiplier);
         velocity.y = verticalVelocity;
 
         controller.Move(velocity * Time.deltaTime);

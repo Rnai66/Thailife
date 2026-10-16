@@ -11,6 +11,7 @@ using UnityEngine;
 public class MatchSync : MonoBehaviour
 {
     private const long OpPosition = 1;
+    private const long OpAction = 2;
 
     [SerializeField] private string matchName = "thaivillage";
     [SerializeField] private Transform localPlayer;
@@ -18,6 +19,7 @@ public class MatchSync : MonoBehaviour
     [SerializeField] private float heartbeatInterval = 1f;
 
     private NakamaConnection connection;
+    private PlayerActions localActions;
     private IMatch match;
     private readonly Dictionary<string, RemotePlayer> remotes = new Dictionary<string, RemotePlayer>();
     private readonly byte[] sendBuffer = new byte[16];
@@ -37,17 +39,22 @@ public class MatchSync : MonoBehaviour
             var player = FindFirstObjectByType<PlayerController>();
             if (player != null) localPlayer = player.transform;
         }
+
+        if (localPlayer != null)
+            localActions = localPlayer.GetComponent<PlayerActions>();
     }
 
     private void OnEnable()
     {
         connection.Connected += OnConnected;
+        if (localActions != null) localActions.Performed += OnLocalAction;
         if (connection.IsConnected) OnConnected(connection);
     }
 
     private void OnDisable()
     {
         connection.Connected -= OnConnected;
+        if (localActions != null) localActions.Performed -= OnLocalAction;
         if (connection.Socket != null)
         {
             connection.Socket.ReceivedMatchState -= OnMatchState;
@@ -117,15 +124,35 @@ public class MatchSync : MonoBehaviour
         }
     }
 
+    private async void OnLocalAction(PlayerAction action)
+    {
+        if (match == null || !connection.IsConnected) return;
+        try
+        {
+            await connection.Socket.SendMatchStateAsync(match.Id, OpAction, new[] { (byte)action });
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning($"[Match] Send action failed: {e.Message}");
+        }
+    }
+
     private void OnMatchState(IMatchState state)
     {
-        if (state.OpCode != OpPosition || state.State == null || state.State.Length < 16) return;
+        if (state.State == null) return;
         if (!remotes.TryGetValue(state.UserPresence.SessionId, out var remote))
             remote = AddRemote(state.UserPresence);
         if (remote == null) return;
 
-        Buffer.BlockCopy(state.State, 0, floatBuffer, 0, 16);
-        remote.SetTarget(new Vector3(floatBuffer[0], floatBuffer[1], floatBuffer[2]), floatBuffer[3]);
+        if (state.OpCode == OpPosition && state.State.Length >= 16)
+        {
+            Buffer.BlockCopy(state.State, 0, floatBuffer, 0, 16);
+            remote.SetTarget(new Vector3(floatBuffer[0], floatBuffer[1], floatBuffer[2]), floatBuffer[3]);
+        }
+        else if (state.OpCode == OpAction && state.State.Length >= 1)
+        {
+            remote.PlayAction((PlayerAction)state.State[0]);
+        }
     }
 
     private void OnMatchPresence(IMatchPresenceEvent e)

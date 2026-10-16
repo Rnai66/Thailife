@@ -28,6 +28,7 @@ public class RemotePlayer : MonoBehaviour
 
         AddNameLabel(go.transform, presence.Username);
 
+        go.AddComponent<ActionFeedback>();
         var remote = go.AddComponent<RemotePlayer>();
         remote.UserId = presence.UserId;
         go.SetActive(false); // hidden until the first position arrives
@@ -45,6 +46,11 @@ public class RemotePlayer : MonoBehaviour
             hasTarget = true;
             gameObject.SetActive(true);
         }
+    }
+
+    public void PlayAction(PlayerAction action)
+    {
+        GetComponent<ActionFeedback>().Play(action);
     }
 
     private void Update()
