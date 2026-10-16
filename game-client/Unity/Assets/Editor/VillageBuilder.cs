@@ -3,9 +3,10 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 
 // Menu: Thai Life > Build Thai Village
-// Lays out a small Thai village from primitives (GDD section 3.1) under one "Village" object:
-// road, stilt house (บ้านไม้ใต้ถุนสูง), spirit house (ศาลพระภูมิ), grocery shop (ร้านโชห่วย),
-// banana trees (ต้นกล้วย — career tier 1) and a boxing camp (ค่ายมวย — career tier 3).
+// Lays out the home village (หมู่บ้าน, GDD section 3.1) from primitives under one "Village" object.
+// Everything here is walkable: home (stilt house, spirit house, banana trees for training tier 1),
+// grocery shop, temple (วัด), school, health station (รพ.สต.), Kok Nong Na farm and a songthaew stop
+// that travels to the sub-district (ตำบล) scene where the boxing camp is.
 // Re-running replaces the Village object; other scene objects are kept.
 public static class VillageBuilder
 {
@@ -47,18 +48,44 @@ public static class VillageBuilder
         var root = new GameObject(RootName);
         Undo.RegisterCreatedObjectUndo(root, "Build Thai Village");
 
-        BuildRoad(root.transform);
-        BuildStiltHouse(root.transform, new Vector3(7f, 0f, 7f));
-        BuildSpiritHouse(root.transform, new Vector3(2.8f, 0f, 3.2f));
-        BuildShop(root.transform, new Vector3(-7f, 0f, -12f), yaw: 180f);
-        BuildTrainingYard(root.transform);
-        BuildBoxingCamp(root.transform, new Vector3(-12f, 0f, 8f));
+        // 120 x 120 m of ground for the whole village
+        var ground = GameObject.Find("Ground");
+        if (ground != null)
+        {
+            Undo.RecordObject(ground.transform, "Resize Ground");
+            ground.transform.localScale = new Vector3(12f, 1f, 12f);
+        }
 
+        var v = root.transform;
+        BuildRoad(v);
+        BuildStiltHouse(v, new Vector3(7f, 0f, 7f));
+        BuildSpiritHouse(v, new Vector3(2.8f, 0f, 3.2f));
+        BuildShop(v, new Vector3(-7f, 0f, -12f), yaw: 180f);
+
+        // Home yard training (tier 1: banana trees)
+        Places.BananaTree(v, new Vector3(-3f, 0f, -2.5f), trainable: true);
+        Places.BananaTree(v, new Vector3(-4.8f, 0f, -0.8f), trainable: true);
+        Places.Sign(v, new Vector3(-3.8f, 0f, -4.4f), "ซ้อมเตะต้นกล้วย\nLv 1+", 0f);
         foreach (var pos in new[] { new Vector3(11f, 0f, 2.5f), new Vector3(12.5f, 0f, 5.5f), new Vector3(11.5f, 0f, 9f), new Vector3(10f, 0f, 12f) })
-            BuildBananaTree(root.transform, pos, trainable: false);
+            Places.BananaTree(v, pos, trainable: false);
 
-        foreach (var pos in new[] { new Vector3(-18f, 0f, -2f), new Vector3(16f, 0f, -3f), new Vector3(-6f, 0f, 16f), new Vector3(3f, 0f, 15f) })
-            BuildShadeTree(root.transform, pos);
+        // Places around the village, each reached by a dirt lane from the main road
+        Places.Temple(v, new Vector3(-32f, 0f, 21f), "วัดหนองบัว");
+        Lane(v, -32f, -6f, 7f);
+        Places.School(v, new Vector3(28f, 0f, 22f), "โรงเรียนบ้านหนองบัว");
+        Lane(v, 28f, -6f, 9f);
+        Places.HealthStation(v, new Vector3(30f, 0f, -24f), 180f, "รพ.สต.หนองบัว");
+        Lane(v, 30f, -17.5f, -10f);
+        Places.KokNongNa(v, new Vector3(-12f, 0f, -36f));
+        Lane(v, -12f, -21f, -10f);
+
+        // Songthaew stop on the south side of the road, facing it
+        Places.BusStop(v, new Vector3(14f, 0f, -11.5f), 180f);
+        Places.Sign(v, new Vector3(17f, 0f, -11f), "ไปตำบล / ค่ายมวย\n(ยืนใต้ป้ายรถ)", 180f);
+
+        foreach (var pos in new[] { new Vector3(-18f, 0f, -2f), new Vector3(16f, 0f, -3f), new Vector3(-6f, 0f, 16f), new Vector3(3f, 0f, 15f),
+                     new Vector3(-48f, 0f, -20f), new Vector3(48f, 0f, 2f), new Vector3(-20f, 0f, 42f), new Vector3(10f, 0f, 45f), new Vector3(45f, 0f, -45f) })
+            Places.ShadeTree(v, pos);
 
         EnsureCareerWiring();
 
@@ -86,7 +113,7 @@ public static class VillageBuilder
         }
 
         var village = GameObject.Find(RootName).transform;
-        BuildSign(village, new Vector3(2.5f, 0f, -4.6f), "กระสอบทราย\nLv 3+", 0f);
+        Places.Sign(village, new Vector3(2.5f, 0f, -4.6f), "กระสอบทราย\nLv 3+", 0f);
     }
 
     private static void BuildRoad(Transform parent)
@@ -96,8 +123,8 @@ public static class VillageBuilder
         var paint = PrimitiveKit.Mat("RoadPaint", new Color(0.95f, 0.9f, 0.6f));
         var dirt = PrimitiveKit.Mat("Dirt", new Color(0.55f, 0.42f, 0.28f));
 
-        PrimitiveKit.Box("Asphalt", road.transform, new Vector3(0f, 0.02f, 0f), new Vector3(50f, 0.04f, 4f), asphalt);
-        for (float x = -22f; x <= 22f; x += 4f)
+        PrimitiveKit.Box("Asphalt", road.transform, new Vector3(0f, 0.02f, 0f), new Vector3(120f, 0.04f, 4f), asphalt);
+        for (float x = -58f; x <= 58f; x += 4f)
             PrimitiveKit.Box("Dash", road.transform, new Vector3(x, 0.045f, 0f), new Vector3(1.6f, 0.01f, 0.15f), paint, collider: false);
 
         // Dirt lane from the road up to the stilt house
@@ -220,100 +247,11 @@ public static class VillageBuilder
         PrimitiveKit.Label("ร้านค้า", t, new Vector3(0f, 3.65f, -2.12f), 0.09f, new Color(0.7f, 0.1f, 0.1f));
     }
 
-    private static void BuildTrainingYard(Transform parent)
+    // Dirt lane along Z at x, from z0 to z1 (decoration only)
+    private static void Lane(Transform parent, float x, float z0, float z1)
     {
-        // Career tier 1: kick the banana trees (เตะต้นกล้วย), close to spawn
-        BuildBananaTree(parent, new Vector3(-3f, 0f, -2.5f), trainable: true);
-        BuildBananaTree(parent, new Vector3(-4.8f, 0f, -0.8f), trainable: true);
-        BuildSign(parent, new Vector3(-3.8f, 0f, -4.4f), "ซ้อมเตะต้นกล้วย\nLv 1+", 0f);
-    }
-
-    private static void BuildBananaTree(Transform parent, Vector3 position, bool trainable)
-    {
-        var tree = PrimitiveKit.Group(trainable ? "Training_BananaTree" : "BananaTree", parent, position);
-        if (trainable)
-            tree.AddComponent<TrainingTarget>().Configure("banana", 1, 2);
-
-        var trunkMat = PrimitiveKit.Mat("BananaTrunk", new Color(0.5f, 0.58f, 0.25f));
-        var leafMat = PrimitiveKit.Mat("BananaLeaf", new Color(0.3f, 0.7f, 0.2f));
-        var fruitMat = PrimitiveKit.Mat("BananaFruit", new Color(0.75f, 0.8f, 0.2f));
-
-        // Pivot at the base so the trunk bends when kicked; trunk must be the first child (PunchingBag.IsRooted)
-        var pivot = PrimitiveKit.Group("Pivot", tree.transform, Vector3.zero);
-        if (trainable) pivot.AddComponent<PunchingBag>();
-
-        PrimitiveKit.Cylinder("Trunk", pivot.transform, new Vector3(0f, 1.2f, 0f), new Vector3(0.35f, 1.2f, 0.35f), trunkMat);
-        for (int i = 0; i < 6; i++)
-        {
-            var holder = PrimitiveKit.Group("LeafHolder", pivot.transform, new Vector3(0f, 2.35f, 0f), i * 60f + 15f);
-            PrimitiveKit.Box("Leaf", holder.transform, new Vector3(0f, 0.15f, 0.8f), new Vector3(0.4f, 0.04f, 1.8f), leafMat, new Vector3(20f, 0f, 0f), collider: false);
-        }
-        PrimitiveKit.Sphere("Bunch", pivot.transform, new Vector3(0.25f, 1.95f, 0.1f), new Vector3(0.3f, 0.5f, 0.3f), fruitMat);
-    }
-
-    private static void BuildBoxingCamp(Transform parent, Vector3 position)
-    {
-        var camp = PrimitiveKit.Group("BoxingCamp_ค่ายมวย", parent, position);
-        var t = camp.transform;
-        var baseMat = PrimitiveKit.Mat("RingBase", new Color(0.2f, 0.2f, 0.22f));
-        var canvas = PrimitiveKit.Mat("RingCanvas", new Color(0.35f, 0.6f, 0.9f));
-        var red = PrimitiveKit.Mat("CornerRed", new Color(0.85f, 0.15f, 0.15f));
-        var blue = PrimitiveKit.Mat("CornerBlue", new Color(0.15f, 0.3f, 0.85f));
-        var white = PrimitiveKit.Mat("RopeWhite", Color.white);
-        var banner = PrimitiveKit.Mat("SignYellow", new Color(1f, 0.85f, 0.15f));
-        var wood = PrimitiveKit.Mat("WoodPlank", Wood);
-
-        // Ring (เวทีมวย): 6x6 m, top at 0.6 m
-        PrimitiveKit.Box("RingBase", t, new Vector3(0f, 0.25f, 0f), new Vector3(6f, 0.5f, 6f), baseMat);
-        PrimitiveKit.Box("RingCanvas", t, new Vector3(0f, 0.55f, 0f), new Vector3(5.8f, 0.1f, 5.8f), canvas);
-
-        PrimitiveKit.Cylinder("CornerRed", t, new Vector3(-2.8f, 1.5f, -2.8f), new Vector3(0.15f, 0.9f, 0.15f), red);
-        PrimitiveKit.Cylinder("CornerBlue", t, new Vector3(2.8f, 1.5f, 2.8f), new Vector3(0.15f, 0.9f, 0.15f), blue);
-        PrimitiveKit.Cylinder("CornerWhite", t, new Vector3(2.8f, 1.5f, -2.8f), new Vector3(0.15f, 0.9f, 0.15f), white);
-        PrimitiveKit.Cylinder("CornerWhite", t, new Vector3(-2.8f, 1.5f, 2.8f), new Vector3(0.15f, 0.9f, 0.15f), white);
-
-        // Ropes on three sides; the front (-Z) is left open as the entrance
-        Material[] ropeColors = { red, white, blue };
-        float[] ropeHeights = { 1.0f, 1.4f, 1.8f };
-        for (int i = 0; i < 3; i++)
-        {
-            PrimitiveKit.Box("Rope", t, new Vector3(0f, ropeHeights[i], 2.8f), new Vector3(5.6f, 0.05f, 0.05f), ropeColors[i]);
-            PrimitiveKit.Box("Rope", t, new Vector3(-2.8f, ropeHeights[i], 0f), new Vector3(0.05f, 0.05f, 5.6f), ropeColors[i]);
-            PrimitiveKit.Box("Rope", t, new Vector3(2.8f, ropeHeights[i], 0f), new Vector3(0.05f, 0.05f, 5.6f), ropeColors[i]);
-        }
-
-        // Steps up to the ring (0.2 m rises)
-        PrimitiveKit.Box("Step", t, new Vector3(0f, 0.1f, -3.6f), new Vector3(2f, 0.2f, 0.4f), baseMat);
-        PrimitiveKit.Box("Step", t, new Vector3(0f, 0.2f, -3.2f), new Vector3(2f, 0.4f, 0.4f), baseMat);
-
-        // Entrance arch with banner
-        PrimitiveKit.Box("ArchPostL", t, new Vector3(-3.6f, 1.9f, -5.2f), new Vector3(0.3f, 3.8f, 0.3f), red);
-        PrimitiveKit.Box("ArchPostR", t, new Vector3(3.6f, 1.9f, -5.2f), new Vector3(0.3f, 3.8f, 0.3f), red);
-        PrimitiveKit.Box("Banner", t, new Vector3(0f, 3.6f, -5.2f), new Vector3(7.5f, 0.9f, 0.15f), banner, collider: false);
-        PrimitiveKit.Label("ค่ายมวย", t, new Vector3(0f, 3.62f, -5.3f), 0.1f, new Color(0.75f, 0.1f, 0.1f));
-        PrimitiveKit.Label("Lv 6+", t, new Vector3(0f, 2.9f, -5.3f), 0.06f, Color.white);
-
-        // Career tier 3: heavy bags beside the ring
-        TrainingSetup.BuildBag("Training_CampBag", t, new Vector3(4.6f, 0f, -1.2f), "camp", 6, 7, new Color(0.1f, 0.2f, 0.55f));
-        TrainingSetup.BuildBag("Training_CampBag", t, new Vector3(4.6f, 0f, 1.8f), "camp", 6, 7, new Color(0.1f, 0.2f, 0.55f));
-
-        PrimitiveKit.Box("Bench", t, new Vector3(-4.6f, 0.225f, 0f), new Vector3(0.6f, 0.45f, 2.4f), wood);
-    }
-
-    private static void BuildShadeTree(Transform parent, Vector3 position)
-    {
-        var tree = PrimitiveKit.Group("ShadeTree", parent, position);
-        PrimitiveKit.Cylinder("Trunk", tree.transform, new Vector3(0f, 1.4f, 0f), new Vector3(0.45f, 1.4f, 0.45f), PrimitiveKit.Mat("Bark", new Color(0.4f, 0.26f, 0.13f)));
-        PrimitiveKit.Sphere("Canopy", tree.transform, new Vector3(0f, 3.6f, 0f), new Vector3(3.2f, 2.6f, 3.2f), PrimitiveKit.Mat("Leaves", new Color(0.18f, 0.5f, 0.2f)));
-    }
-
-    private static void BuildSign(Transform parent, Vector3 position, string text, float yaw)
-    {
-        var sign = PrimitiveKit.Group("Sign", parent, position, yaw);
-        var wood = PrimitiveKit.Mat("WoodPlank", Wood);
-        var board = PrimitiveKit.Mat("SignBoard", new Color(0.95f, 0.92f, 0.8f));
-        PrimitiveKit.Box("Post", sign.transform, new Vector3(0f, 0.6f, 0f), new Vector3(0.1f, 1.2f, 0.1f), wood);
-        PrimitiveKit.Box("Board", sign.transform, new Vector3(0f, 1.35f, 0f), new Vector3(1.6f, 0.7f, 0.06f), board, collider: false);
-        PrimitiveKit.Label(text, sign.transform, new Vector3(0f, 1.35f, -0.04f), 0.035f, new Color(0.25f, 0.15f, 0.05f));
+        float length = Mathf.Abs(z1 - z0);
+        PrimitiveKit.Box("DirtLane", parent, new Vector3(x, 0.012f, (z0 + z1) * 0.5f), new Vector3(2.4f, 0.02f, length),
+            PrimitiveKit.Mat("Dirt", new Color(0.55f, 0.42f, 0.28f)), collider: false);
     }
 }

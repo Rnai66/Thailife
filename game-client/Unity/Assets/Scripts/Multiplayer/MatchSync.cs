@@ -18,7 +18,8 @@ public class MatchSync : MonoBehaviour
     // Sanity check on incoming hits: the attacker must be roughly within reach
     private const float MaxHitDistance = 3f;
 
-    [SerializeField] private string matchName = "thaivillage";
+    [Tooltip("Empty = use the scene name, so each location (village, tambon, …) has its own match")]
+    [SerializeField] private string matchName = "";
     [SerializeField] private Transform localPlayer;
     [SerializeField] private float sendRate = 10f;
     [SerializeField] private float heartbeatInterval = 1f;
@@ -39,6 +40,8 @@ public class MatchSync : MonoBehaviour
     private void Awake()
     {
         connection = GetComponent<NakamaConnection>();
+        if (string.IsNullOrWhiteSpace(matchName))
+            matchName = gameObject.scene.name.ToLowerInvariant();
 
         if (localPlayer == null)
         {

@@ -50,20 +50,7 @@ public static class ThaiVillageSceneBuilder
         Directory.CreateDirectory(Path.GetDirectoryName(ScenePath));
         AssetDatabase.Refresh();
 
-        Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
-
-        // Lighting
-        var sun = new GameObject("Directional Light");
-        var light = sun.AddComponent<Light>();
-        light.type = LightType.Directional;
-        light.color = new Color(1f, 0.95f, 0.84f);
-        light.intensity = 1.2f;
-        light.shadows = LightShadows.Soft;
-        sun.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
-
-        // Environment (positions/scales from GDD 7.2)
-        CreatePrimitive(PrimitiveType.Plane, "Ground", Vector3.zero, new Vector3(5f, 1f, 5f),
-            GetMaterial("Grass", new Color(0.36f, 0.62f, 0.29f)));
+        Scene scene = CreateBaseScene();
 
         CreatePrimitive(PrimitiveType.Cube, "House", new Vector3(4f, 1f, 4f), new Vector3(3f, 2f, 3f),
             GetMaterial("Wood", new Color(0.55f, 0.36f, 0.2f)));
@@ -80,6 +67,35 @@ public static class ThaiVillageSceneBuilder
             GetMaterial("Leaves", new Color(0.18f, 0.5f, 0.2f)));
         trunk.transform.SetParent(tree.transform, true);
         top.transform.SetParent(tree.transform, true);
+
+        EditorSceneManager.SaveScene(scene, ScenePath);
+        AddSceneToBuildSettings(ScenePath);
+
+        Selection.activeGameObject = Object.FindAnyObjectByType<PlayerController>().gameObject;
+        Debug.Log($"[ThaiLife] Built {ScenePath}. Press Play and move with WASD / arrow keys.");
+    }
+
+    // New empty scene with light, ground, player and follow camera (shared by the village and other locations)
+    internal static Scene CreateBaseScene()
+    {
+        EnsureUrp();
+        Directory.CreateDirectory(MaterialFolder);
+        AssetDatabase.Refresh();
+
+        Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+
+        // Lighting
+        var sun = new GameObject("Directional Light");
+        var light = sun.AddComponent<Light>();
+        light.type = LightType.Directional;
+        light.color = new Color(1f, 0.95f, 0.84f);
+        light.intensity = 1.2f;
+        light.shadows = LightShadows.Soft;
+        sun.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
+
+        // Environment (positions/scales from GDD 7.2)
+        CreatePrimitive(PrimitiveType.Plane, "Ground", Vector3.zero, new Vector3(5f, 1f, 5f),
+            GetMaterial("Grass", new Color(0.36f, 0.62f, 0.29f)));
 
         // Player: capsule mesh, CharacterController instead of CapsuleCollider, no Rigidbody
         var player = CreatePrimitive(PrimitiveType.Capsule, "Player", new Vector3(0f, 1f, 0f), Vector3.one,
@@ -104,11 +120,7 @@ public static class ThaiVillageSceneBuilder
         SetReference(follow, "target", player.transform);
         SetReference(controller, "cameraTransform", camGo.transform);
 
-        EditorSceneManager.SaveScene(scene, ScenePath);
-        AddSceneToBuildSettings(ScenePath);
-
-        Selection.activeGameObject = player;
-        Debug.Log($"[ThaiLife] Built {ScenePath}. Press Play and move with WASD / arrow keys.");
+        return scene;
     }
 
     private static GameObject CreatePrimitive(PrimitiveType type, string name, Vector3 position, Vector3 scale, Material material)
@@ -141,7 +153,7 @@ public static class ThaiVillageSceneBuilder
         so.ApplyModifiedPropertiesWithoutUndo();
     }
 
-    private static void AddSceneToBuildSettings(string path)
+    internal static void AddSceneToBuildSettings(string path)
     {
         var scenes = EditorBuildSettings.scenes;
         foreach (var s in scenes)

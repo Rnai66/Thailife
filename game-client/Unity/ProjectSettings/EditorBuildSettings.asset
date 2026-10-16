@@ -8,4 +8,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/ThaiVillage.unity
     guid: d89f2343a68cd446aa4d158ab8b5c35d
+  - enabled: 1
+    path: Assets/Scenes/Tambon.unity
+    guid: bae47da9035b743a2ac01bdc080bc3b3
   m_configObjects: {}

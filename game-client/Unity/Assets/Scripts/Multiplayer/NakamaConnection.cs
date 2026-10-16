@@ -114,9 +114,11 @@ public class NakamaConnection : MonoBehaviour
         return Application.isEditor ? "editor" : "default";
     }
 
-    private async void OnApplicationQuit()
+    // Covers quitting and travelling to another scene (each scene has its own connection)
+    private async void OnDestroy()
     {
-        if (Socket != null)
-            await Socket.CloseAsync();
+        if (Socket == null) return;
+        try { await Socket.CloseAsync(); }
+        catch (Exception) { /* already closed */ }
     }
 }

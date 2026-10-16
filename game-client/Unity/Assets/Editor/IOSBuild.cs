@@ -30,7 +30,7 @@ public static class IOSBuild
 
         var options = new BuildPlayerOptions
         {
-            scenes = new[] { "Assets/Scenes/ThaiVillage.unity" },
+            scenes = BuildScenes(),
             locationPathName = OutputPath,
             target = BuildTarget.iOS,
             options = BuildOptions.Development // allows http to the local Nakama server
@@ -47,6 +47,15 @@ public static class IOSBuild
             Debug.LogError("[ThaiLife] iOS build produced no Xcode project. If iOS Build Support was just installed, restart Unity and build again.");
         else
             Debug.LogError($"[ThaiLife] iOS build failed: {report.summary.result} ({report.summary.totalErrors} errors)");
+    }
+
+    // All enabled scenes in Build Settings (village first = the scene the app starts in)
+    internal static string[] BuildScenes()
+    {
+        var list = new System.Collections.Generic.List<string>();
+        foreach (var scene in EditorBuildSettings.scenes)
+            if (scene.enabled) list.Add(scene.path);
+        return list.ToArray();
     }
 
     private static void Configure()

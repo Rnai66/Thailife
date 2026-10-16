@@ -64,7 +64,7 @@ public static class NakamaSetup
         const string appPath = "Builds/Mac/ThaiLifeTest.app";
         var options = new BuildPlayerOptions
         {
-            scenes = new[] { "Assets/Scenes/ThaiVillage.unity" },
+            scenes = IOSBuild.BuildScenes(),
             locationPathName = appPath,
             target = BuildTarget.StandaloneOSX,
             options = BuildOptions.Development // development build: allows http to the local server
