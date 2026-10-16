@@ -3,13 +3,14 @@ using System.Threading.Tasks;
 using Nakama;
 using UnityEngine;
 
-// Step 1 of multiplayer: log in anonymously with the device ID and open a realtime socket.
-// Position sync comes later, once this connects reliably.
+// Logs in anonymously with the device ID and opens a realtime socket.
+// Each "profile" is a separate account, so the Editor and a local build can play together:
+// the Editor uses profile "editor"; a build can be started with  -profile <name>.
 public class NakamaConnection : MonoBehaviour
 {
-    private const string DeviceIdKey = "nakama.deviceId";
-    private const string SessionTokenKey = "nakama.authToken";
-    private const string RefreshTokenKey = "nakama.refreshToken";
+    private string DeviceIdKey => $"nakama.{Profile}.deviceId";
+    private string SessionTokenKey => $"nakama.{Profile}.authToken";
+    private string RefreshTokenKey => $"nakama.{Profile}.refreshToken";
 
     [SerializeField] private NakamaConfig config;
     [SerializeField] private bool connectOnStart = true;
@@ -18,6 +19,12 @@ public class NakamaConnection : MonoBehaviour
     public ISession Session { get; private set; }
     public ISocket Socket { get; private set; }
     public bool IsConnected => Socket != null && Socket.IsConnected;
+
+    // Raised on the main thread once the socket is open.
+    public event Action<NakamaConnection> Connected;
+
+    private string profile;
+    public string Profile => profile ??= ResolveProfile();
 
     private async void Start()
     {
@@ -41,7 +48,8 @@ public class NakamaConnection : MonoBehaviour
             Socket = Client.NewSocket(useMainThread: true);
             await Socket.ConnectAsync(Session, appearOnline: true);
 
-            Debug.Log($"[Nakama] Connected to {config.host} as user {Session.UserId}");
+            Debug.Log($"[Nakama] Connected to {config.host} as user {Session.UserId} (profile '{Profile}')");
+            Connected?.Invoke(this);
         }
         catch (ApiResponseException e)
         {
@@ -72,18 +80,28 @@ public class NakamaConnection : MonoBehaviour
         return session;
     }
 
-    private static string GetDeviceId()
+    private string GetDeviceId()
     {
         string id = PlayerPrefs.GetString(DeviceIdKey, "");
         if (!string.IsNullOrEmpty(id)) return id;
 
-        id = SystemInfo.deviceUniqueIdentifier;
+        // Only the default profile on a real device uses the hardware ID; others get their own.
+        id = Profile == "default" ? SystemInfo.deviceUniqueIdentifier : "";
         if (string.IsNullOrEmpty(id) || id == SystemInfo.unsupportedIdentifier)
             id = Guid.NewGuid().ToString();
 
         PlayerPrefs.SetString(DeviceIdKey, id);
         PlayerPrefs.Save();
         return id;
+    }
+
+    private static string ResolveProfile()
+    {
+        string[] args = Environment.GetCommandLineArgs();
+        for (int i = 0; i < args.Length - 1; i++)
+            if (args[i] == "-profile") return args[i + 1];
+
+        return Application.isEditor ? "editor" : "default";
     }
 
     private async void OnApplicationQuit()

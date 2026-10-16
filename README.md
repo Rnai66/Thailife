@@ -12,7 +12,7 @@
 - [x] กด Play ผ่านเกณฑ์ใน Editor: เดิน, หมุนตัว, กล้องตาม, ไม่ตกพื้น, ชนสิ่งกีดขวาง, Console ไม่มี error (16 ต.ค. 2026)
 - [ ] จอยสัมผัส + ทดสอบบน iPhone
 - [x] Multiplayer ขั้น 1: Unity เชื่อมต่อ Nakama local (Docker) ได้ — device auth + realtime socket (16 ต.ค. 2026)
-- [ ] Multiplayer ขั้น 2: เห็นผู้เล่นอื่นและซิงก์ตำแหน่ง
+- [x] Multiplayer ขั้น 2: เห็นผู้เล่นอื่นและซิงก์ตำแหน่ง (relayed match "thaivillage", ทดสอบ Editor + Mac build) (16 ต.ค. 2026)
 
 
 ## เริ่มต้นใช้งาน
@@ -46,6 +46,7 @@ tools/, tests/         (ภายหลัง)
   - เริ่ม: `cd game-server && docker compose up -d` · หยุด: `docker compose down`
   - Admin console: http://127.0.0.1:7351
   - Unity config: scheme `http`, host `127.0.0.1` (iPhone ใช้ IP ของ Mac ในวง Wi-Fi), port `7350`, server key ตาม `.env` (ค่าเริ่มต้น `defaultkey`)
+- ทดสอบ 2 คนบน Mac: เมนู **Thai Life → Build & Run Mac Test Client** แล้วกด Play ใน Editor (Editor = profile `editor`, build = `-profile mac2`)
 - Heroic Cloud (org `rnaisys`): Development deployment ราคา $420/เดือน — ยังไม่ใช้จนกว่าจะเปิดให้คนนอกเล่น
 - SDK: `com.heroiclabs.nakama-unity` v3.22.1 (ติดตั้งผ่าน Packages/manifest.json)
 - ตั้งค่า: เมนู **Thai Life → Setup Nakama Connection** แล้วกรอก Host / Server Key ใน `Assets/Settings/NakamaConfig.asset` (ไฟล์นี้ไม่เข้า Git)

@@ -31,6 +31,12 @@ public static class NakamaSetup
             connection = go.AddComponent<NakamaConnection>();
         }
 
+        if (connection.GetComponent<MatchSync>() == null)
+            Undo.AddComponent<MatchSync>(connection.gameObject);
+
+        // Keep sending/receiving while the window is not focused (two windows side by side)
+        PlayerSettings.runInBackground = true;
+
         var so = new SerializedObject(connection);
         so.FindProperty("config").objectReferenceValue = config;
         so.ApplyModifiedProperties();
@@ -39,5 +45,38 @@ public static class NakamaSetup
         Selection.activeObject = config;
         EditorGUIUtility.PingObject(config);
         Debug.Log("[ThaiLife] Fill in Host and Server Key on NakamaConfig, save the scene (Cmd+S), then press Play.");
+    }
+
+    // Builds a small windowed Mac client and launches it as a second player ("-profile mac2").
+    [MenuItem("Thai Life/Build && Run Mac Test Client")]
+    private static void BuildMacTestClient()
+    {
+        if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+
+        PlayerSettings.runInBackground = true;
+        PlayerSettings.fullScreenMode = FullScreenMode.Windowed;
+        PlayerSettings.defaultScreenWidth = 960;
+        PlayerSettings.defaultScreenHeight = 540;
+        PlayerSettings.resizableWindow = true;
+
+        const string appPath = "Builds/Mac/ThaiLifeTest.app";
+        var options = new BuildPlayerOptions
+        {
+            scenes = new[] { "Assets/Scenes/ThaiVillage.unity" },
+            locationPathName = appPath,
+            target = BuildTarget.StandaloneOSX,
+            options = BuildOptions.Development // development build: allows http to the local server
+        };
+
+        var report = BuildPipeline.BuildPlayer(options);
+        if (report.summary.result != UnityEditor.Build.Reporting.BuildResult.Succeeded)
+        {
+            Debug.LogError($"[ThaiLife] Mac build failed: {report.summary.result}");
+            return;
+        }
+
+        string fullPath = System.IO.Path.GetFullPath(appPath);
+        System.Diagnostics.Process.Start("open", $"-n \"{fullPath}\" --args -profile mac2");
+        Debug.Log($"[ThaiLife] Launched {fullPath} as profile 'mac2'.");
     }
 }
