@@ -12,6 +12,11 @@ public class MatchSync : MonoBehaviour
 {
     private const long OpPosition = 1;
     private const long OpAction = 2;
+    private const long OpHit = 3;     // attacker → victim only
+    private const long OpHealth = 4;  // victim → everyone
+
+    // Sanity check on incoming hits: the attacker must be roughly within reach
+    private const float MaxHitDistance = 3f;
 
     [SerializeField] private string matchName = "thaivillage";
     [SerializeField] private Transform localPlayer;
@@ -20,6 +25,7 @@ public class MatchSync : MonoBehaviour
 
     private NakamaConnection connection;
     private PlayerActions localActions;
+    private PlayerCombat localCombat;
     private IMatch match;
     private readonly Dictionary<string, RemotePlayer> remotes = new Dictionary<string, RemotePlayer>();
     private readonly byte[] sendBuffer = new byte[16];
@@ -41,13 +47,17 @@ public class MatchSync : MonoBehaviour
         }
 
         if (localPlayer != null)
+        {
             localActions = localPlayer.GetComponent<PlayerActions>();
+            localCombat = PlayerCombat.GetOrAdd(localPlayer.gameObject);
+        }
     }
 
     private void OnEnable()
     {
         connection.Connected += OnConnected;
         if (localActions != null) localActions.Performed += OnLocalAction;
+        if (localCombat != null) localCombat.HealthChanged += OnLocalHealthChanged;
         if (connection.IsConnected) OnConnected(connection);
     }
 
@@ -55,6 +65,7 @@ public class MatchSync : MonoBehaviour
     {
         connection.Connected -= OnConnected;
         if (localActions != null) localActions.Performed -= OnLocalAction;
+        if (localCombat != null) localCombat.HealthChanged -= OnLocalHealthChanged;
         if (connection.Socket != null)
         {
             connection.Socket.ReceivedMatchState -= OnMatchState;
@@ -77,6 +88,7 @@ public class MatchSync : MonoBehaviour
                 AddRemote(presence);
 
             await SendPositionAsync(force: true);
+            await SendHealthAsync(null);
         }
         catch (Exception e)
         {
@@ -137,6 +149,36 @@ public class MatchSync : MonoBehaviour
         }
     }
 
+    private void OnLocalHealthChanged(int health) => _ = SendHealthAsync(null);
+
+    // presences == null broadcasts to everyone in the match
+    private async Task SendHealthAsync(IUserPresence[] presences)
+    {
+        if (match == null || localCombat == null || !connection.IsConnected) return;
+        try
+        {
+            await connection.Socket.SendMatchStateAsync(match.Id, OpHealth, new[] { (byte)localCombat.Health }, presences);
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning($"[Match] Send health failed: {e.Message}");
+        }
+    }
+
+    // Our punch/kick reached another player's avatar; tell only that player.
+    public async void SendHit(RemotePlayer target, HitInfo hit)
+    {
+        if (match == null || !connection.IsConnected) return;
+        try
+        {
+            await connection.Socket.SendMatchStateAsync(match.Id, OpHit, hit.ToBytes(), new[] { target.Presence });
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning($"[Match] Send hit failed: {e.Message}");
+        }
+    }
+
     private void OnMatchState(IMatchState state)
     {
         if (state.State == null) return;
@@ -153,6 +195,16 @@ public class MatchSync : MonoBehaviour
         {
             remote.PlayAction((PlayerAction)state.State[0]);
         }
+        else if (state.OpCode == OpHealth && state.State.Length >= 1)
+        {
+            remote.SetHealth(state.State[0]);
+        }
+        else if (state.OpCode == OpHit && localCombat != null && HitInfo.TryParse(state.State, out var hit))
+        {
+            bool inReach = Vector3.Distance(remote.transform.position, localPlayer.position) <= MaxHitDistance;
+            if (inReach && !remote.IsKnockedOut)
+                localCombat.ApplyHit(hit);
+        }
     }
 
     private void OnMatchPresence(IMatchPresenceEvent e)
@@ -160,7 +212,11 @@ public class MatchSync : MonoBehaviour
         foreach (var join in e.Joins)
         {
             if (AddRemote(join) != null)
-                _ = SendPositionAsync(force: true); // let the newcomer see us right away
+            {
+                // Let the newcomer see us (and our health) right away
+                _ = SendPositionAsync(force: true);
+                _ = SendHealthAsync(new[] { join });
+            }
         }
 
         foreach (var leave in e.Leaves)
@@ -178,7 +234,7 @@ public class MatchSync : MonoBehaviour
     {
         if (IsSelf(presence) || remotes.ContainsKey(presence.SessionId)) return null;
 
-        var remote = RemotePlayer.Create(presence, localPlayer);
+        var remote = RemotePlayer.Create(presence, localPlayer, this);
         remotes[presence.SessionId] = remote;
         Debug.Log($"[Match] {presence.Username} joined");
         return remote;

@@ -39,6 +39,7 @@ public class PlayerActions : MonoBehaviour
 
     private PlayerController controller;
     private ActionFeedback feedback;
+    private PlayerCombat combat;
     private float nextAttackTime;
     private bool blockHeldByButton;
     private bool blockHeldByKey;
@@ -48,10 +49,13 @@ public class PlayerActions : MonoBehaviour
         controller = GetComponent<PlayerController>();
         feedback = GetComponent<ActionFeedback>();
         if (feedback == null) feedback = gameObject.AddComponent<ActionFeedback>();
+        combat = PlayerCombat.GetOrAdd(gameObject);
     }
 
     public void Press(ActionInput input)
     {
+        if (combat.IsKnockedOut) return;
+
         switch (input)
         {
             case ActionInput.Jump:
@@ -65,7 +69,7 @@ public class PlayerActions : MonoBehaviour
                 break;
             case ActionInput.Block:
                 blockHeldByButton = true;
-                UpdateBlock();
+                RefreshBlock();
                 break;
         }
     }
@@ -74,7 +78,7 @@ public class PlayerActions : MonoBehaviour
     {
         if (input != ActionInput.Block) return;
         blockHeldByButton = false;
-        UpdateBlock();
+        RefreshBlock();
     }
 
     private void Update()
@@ -87,11 +91,13 @@ public class PlayerActions : MonoBehaviour
         if (IsBlocking || Time.time < nextAttackTime) return;
         nextAttackTime = Time.time + cooldown;
         Perform(attack);
+        combat.PerformAttack(attack);
     }
 
-    private void UpdateBlock()
+    // Re-evaluates blocking from held buttons/keys (also called by PlayerCombat on knockout/respawn).
+    public void RefreshBlock()
     {
-        bool blocking = blockHeldByButton || blockHeldByKey;
+        bool blocking = (blockHeldByButton || blockHeldByKey) && !combat.IsKnockedOut;
         if (blocking == IsBlocking) return;
 
         IsBlocking = blocking;
@@ -108,7 +114,7 @@ public class PlayerActions : MonoBehaviour
     private void OnDisable()
     {
         blockHeldByButton = blockHeldByKey = false;
-        UpdateBlock();
+        RefreshBlock();
     }
 
     private void ReadKeyboardAndGamepad()
@@ -143,7 +149,7 @@ public class PlayerActions : MonoBehaviour
         if (blockHeld != blockHeldByKey)
         {
             blockHeldByKey = blockHeld;
-            UpdateBlock();
+            RefreshBlock();
         }
 
         if (jump) Press(ActionInput.Jump);

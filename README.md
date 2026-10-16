@@ -13,6 +13,7 @@
 - [x] จอยเสมือน (ครึ่งซ้าย) + ลากหมุนกล้อง (ครึ่งขวา) — ทดสอบด้วยเมาส์ใน Editor (16 ต.ค. 2026)
 - [x] ปุ่ม A/B/C/D แบบ PlayStation: กระโดด / เตะ / ต่อย / ป้องกัน (ภาพชั่วคราว) + ซิงก์ท่าผ่านเน็ต — ฐานสำหรับอาชีพนักมวย
 - [x] ทดสอบบน iPhone 16 Pro Max จริง: จอย, ปุ่ม, เล่นข้ามเครื่องกับ Mac ผ่าน Wi-Fi (16 ต.ค. 2026)
+- [x] ระบบชกมวย v1: ต่อย 10 / เตะ 18 / ป้องกันลด 80%, กระเด็น, HP 100, KO 3 วิ แล้วฟื้น, ซิงก์ผ่านเน็ต, กระสอบทราย (16 ต.ค. 2026)
 - [x] Multiplayer ขั้น 1: Unity เชื่อมต่อ Nakama local (Docker) ได้ — device auth + realtime socket (16 ต.ค. 2026)
 - [x] Multiplayer ขั้น 2: เห็นผู้เล่นอื่นและซิงก์ตำแหน่ง (relayed match "thaivillage", ทดสอบ Editor + Mac build) (16 ต.ค. 2026)
 
@@ -53,7 +54,7 @@ tools/, tests/         (ภายหลัง)
 | ต่อย | C (ซ้าย) | J | West (□) |
 | ป้องกัน (ค้าง) | D (บน) | L | North (△) |
 
-ตั้งค่า UI: เมนู **Thai Life → Add Mobile Controls**
+ตั้งค่า UI: เมนู **Thai Life → Add Mobile Controls** · กระสอบทรายซ้อม: **Thai Life → Add Punching Bag**
 
 ## Multiplayer (Nakama)
 

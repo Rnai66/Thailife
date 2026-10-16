@@ -14,6 +14,7 @@ public class PlayerController : MonoBehaviour
 
     private CharacterController controller;
     private float verticalVelocity;
+    private Vector3 impulseVelocity; // knockback, decays over time
 
     // Set by on-screen controls (virtual joystick) in the mobile phase.
     // When non-zero it takes priority over keyboard/gamepad.
@@ -24,9 +25,27 @@ public class PlayerController : MonoBehaviour
 
     public bool IsGrounded => controller != null && controller.isGrounded;
 
+    // False while knocked out
+    public bool InputEnabled { get; set; } = true;
+
+    public void AddImpulse(Vector3 velocity)
+    {
+        velocity.y = 0f;
+        impulseVelocity += velocity;
+    }
+
+    public void Teleport(Vector3 position, Quaternion rotation)
+    {
+        controller.enabled = false; // CharacterController overrides direct position changes
+        transform.SetPositionAndRotation(position, rotation);
+        controller.enabled = true;
+        verticalVelocity = 0f;
+        impulseVelocity = Vector3.zero;
+    }
+
     public bool Jump()
     {
-        if (!controller.isGrounded) return false;
+        if (!InputEnabled || !controller.isGrounded) return false;
         verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
         return true;
     }
@@ -41,7 +60,7 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        Vector2 input = ReadMoveInput();
+        Vector2 input = InputEnabled ? ReadMoveInput() : Vector2.zero;
 
         Vector3 forward = cameraTransform != null ? cameraTransform.forward : Vector3.forward;
         Vector3 right = cameraTransform != null ? cameraTransform.right : Vector3.right;
@@ -68,8 +87,9 @@ public class PlayerController : MonoBehaviour
 
         verticalVelocity += gravity * Time.deltaTime;
 
-        Vector3 velocity = move * (moveSpeed * MoveSpeedMultiplier);
+        Vector3 velocity = move * (moveSpeed * MoveSpeedMultiplier) + impulseVelocity;
         velocity.y = verticalVelocity;
+        impulseVelocity = Vector3.Lerp(impulseVelocity, Vector3.zero, 1f - Mathf.Exp(-8f * Time.deltaTime));
 
         controller.Move(velocity * Time.deltaTime);
     }

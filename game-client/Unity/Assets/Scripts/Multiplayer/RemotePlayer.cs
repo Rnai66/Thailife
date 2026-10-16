@@ -2,7 +2,8 @@ using Nakama;
 using UnityEngine;
 
 // Another player's avatar. Smoothly follows the latest position received from the network.
-public class RemotePlayer : MonoBehaviour
+// Punches/kicks that land on it are forwarded to that player through MatchSync.
+public class RemotePlayer : MonoBehaviour, IHittable
 {
     [SerializeField] private float smoothing = 12f;
     [SerializeField] private float snapDistance = 5f;
@@ -10,14 +11,20 @@ public class RemotePlayer : MonoBehaviour
     private Vector3 targetPosition;
     private Quaternion targetRotation;
     private bool hasTarget;
+    private MatchSync owner;
+    private TextMesh nameLabel;
+    private int health = -1;
 
-    public string UserId { get; private set; }
+    public IUserPresence Presence { get; private set; }
+    public string UserId => Presence.UserId;
+    public bool IsKnockedOut => health == 0;
 
-    public static RemotePlayer Create(IUserPresence presence, Transform template)
+    public static RemotePlayer Create(IUserPresence presence, Transform template, MatchSync owner)
     {
         var go = GameObject.CreatePrimitive(PrimitiveType.Capsule);
         go.name = $"Remote_{presence.Username}";
-        Destroy(go.GetComponent<Collider>()); // remotes don't block the local player (yet)
+        // Trigger: punches can find it, but it doesn't block the local player's movement (yet)
+        go.GetComponent<Collider>().isTrigger = true;
 
         // Same shader as the local player, different color per user
         var renderer = go.GetComponent<Renderer>();
@@ -26,11 +33,11 @@ public class RemotePlayer : MonoBehaviour
         material.color = ColorFor(presence.UserId);
         renderer.sharedMaterial = material;
 
-        AddNameLabel(go.transform, presence.Username);
-
         go.AddComponent<ActionFeedback>();
         var remote = go.AddComponent<RemotePlayer>();
-        remote.UserId = presence.UserId;
+        remote.Presence = presence;
+        remote.owner = owner;
+        remote.nameLabel = AddNameLabel(go.transform, presence.Username);
         go.SetActive(false); // hidden until the first position arrives
         return remote;
     }
@@ -53,13 +60,33 @@ public class RemotePlayer : MonoBehaviour
         GetComponent<ActionFeedback>().Play(action);
     }
 
+    public void ReceiveHit(HitInfo hit, Transform attacker)
+    {
+        if (IsKnockedOut || owner == null) return;
+        owner.SendHit(this, hit); // the victim applies the damage and broadcasts their new health
+    }
+
+    public void SetHealth(int value)
+    {
+        if (health > value && gameObject.activeInHierarchy)
+        {
+            Color color = value == 0 ? new Color(1f, 0.85f, 0.2f) : new Color(1f, 0.35f, 0.3f);
+            FloatingText.Spawn(transform.position + Vector3.up * 1.6f, value == 0 ? "KO!" : $"-{health - value}", color);
+        }
+
+        health = value;
+        nameLabel.text = $"{Presence.Username}\nHP {value}";
+    }
+
     private void Update()
     {
         if (!hasTarget) return;
 
         float t = 1f - Mathf.Exp(-smoothing * Time.deltaTime);
         transform.position = Vector3.Lerp(transform.position, targetPosition, t);
-        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, t);
+        // Lie down while knocked out (placeholder for a knockdown animation)
+        Quaternion pose = IsKnockedOut ? targetRotation * Quaternion.Euler(0f, 0f, 90f) : targetRotation;
+        transform.rotation = Quaternion.Slerp(transform.rotation, pose, t);
     }
 
     private static Color ColorFor(string userId)
@@ -69,7 +96,7 @@ public class RemotePlayer : MonoBehaviour
         return Color.HSVToRGB(hue, 0.6f, 0.9f);
     }
 
-    private static void AddNameLabel(Transform parent, string username)
+    private static TextMesh AddNameLabel(Transform parent, string username)
     {
         var label = new GameObject("NameLabel");
         label.transform.SetParent(parent, false);
@@ -87,6 +114,7 @@ public class RemotePlayer : MonoBehaviour
         text.color = Color.white;
 
         label.AddComponent<FaceCamera>();
+        return text;
     }
 }
 

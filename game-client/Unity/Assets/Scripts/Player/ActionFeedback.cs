@@ -6,8 +6,8 @@ using UnityEngine;
 // Used by both the local player and RemotePlayer avatars.
 public class ActionFeedback : MonoBehaviour
 {
-    private static readonly Vector3 PunchOffset = new Vector3(0.25f, 0.4f, 0.8f);
-    private static readonly Vector3 KickOffset = new Vector3(0f, -0.5f, 0.9f);
+    public static readonly Vector3 PunchOffset = new Vector3(0.25f, 0.4f, 0.8f);
+    public static readonly Vector3 KickOffset = new Vector3(0f, -0.5f, 0.9f);
     private static readonly Vector3 ShieldOffset = new Vector3(0f, 0.2f, 0.6f);
 
     private Material punchMaterial;
