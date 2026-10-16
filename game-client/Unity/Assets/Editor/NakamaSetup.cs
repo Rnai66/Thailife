@@ -9,7 +9,7 @@ public static class NakamaSetup
     private const string ConfigPath = "Assets/Settings/NakamaConfig.asset";
 
     [MenuItem("Thai Life/Setup Nakama Connection")]
-    private static void Setup()
+    internal static void Setup()
     {
         var config = AssetDatabase.LoadAssetAtPath<NakamaConfig>(ConfigPath);
         if (config == null)
@@ -33,6 +33,8 @@ public static class NakamaSetup
 
         if (connection.GetComponent<MatchSync>() == null)
             Undo.AddComponent<MatchSync>(connection.gameObject);
+        if (connection.GetComponent<CareerClient>() == null)
+            Undo.AddComponent<CareerClient>(connection.gameObject);
 
         // Keep sending/receiving while the window is not focused (two windows side by side)
         PlayerSettings.runInBackground = true;

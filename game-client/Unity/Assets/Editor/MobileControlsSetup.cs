@@ -15,7 +15,15 @@ public static class MobileControlsSetup
     private const string CanvasName = "MobileControls";
 
     [MenuItem("Thai Life/Add Mobile Controls")]
-    private static void AddMobileControls()
+    private static void AddMobileControls() => Build(askBeforeReplace: true);
+
+    // Adds the controls only if they are missing (used by Repair Scene)
+    internal static void EnsureMobileControls()
+    {
+        if (GameObject.Find(CanvasName) == null) Build(askBeforeReplace: false);
+    }
+
+    private static void Build(bool askBeforeReplace)
     {
         var player = Object.FindAnyObjectByType<PlayerController>();
         var cameraFollow = Object.FindAnyObjectByType<CameraFollow>();
@@ -28,7 +36,7 @@ public static class MobileControlsSetup
         var existing = GameObject.Find(CanvasName);
         if (existing != null)
         {
-            if (!EditorUtility.DisplayDialog("Mobile Controls", "มี MobileControls อยู่แล้ว ต้องการสร้างใหม่ทับหรือไม่?", "สร้างใหม่", "ยกเลิก"))
+            if (askBeforeReplace && !EditorUtility.DisplayDialog("Mobile Controls", "มี MobileControls อยู่แล้ว ต้องการสร้างใหม่ทับหรือไม่?", "สร้างใหม่", "ยกเลิก"))
                 return;
             Undo.DestroyObjectImmediate(existing);
         }

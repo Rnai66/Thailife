@@ -10,8 +10,14 @@ public struct HitInfo
     public const int PunchDamage = 10;
     public const int KickDamage = 18;
 
-    public static int MaxDamageFor(PlayerAction attack) =>
+    // Career levels raise damage up to +95% (level 20), so victims accept up to 2x the base.
+    public const float MaxDamageMultiplier = 2f;
+
+    public static int BaseDamageFor(PlayerAction attack) =>
         attack == PlayerAction.Kick ? KickDamage : attack == PlayerAction.Punch ? PunchDamage : 0;
+
+    public static int MaxDamageFor(PlayerAction attack) =>
+        Mathf.CeilToInt(BaseDamageFor(attack) * MaxDamageMultiplier);
 
     public byte[] ToBytes()
     {

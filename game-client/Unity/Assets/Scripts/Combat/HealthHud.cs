@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-// Local player's health bar (top-left) and a "KO!" banner. Builds its own canvas at runtime.
+// Local player's health bar, career level/XP (top-left) and a "KO!" banner. Builds its own canvas at runtime.
 [RequireComponent(typeof(PlayerCombat))]
 public class HealthHud : MonoBehaviour
 {
@@ -10,6 +10,9 @@ public class HealthHud : MonoBehaviour
     private Image fillImage;
     private Text label;
     private GameObject koBanner;
+    private RectTransform xpFill;
+    private Text careerLabel;
+    private CareerClient career;
 
     private void Awake()
     {
@@ -18,8 +21,37 @@ public class HealthHud : MonoBehaviour
     }
 
     private void OnEnable() => combat.HealthChanged += Refresh;
-    private void OnDisable() => combat.HealthChanged -= Refresh;
-    private void Start() => Refresh(combat.Health);
+
+    private void OnDisable()
+    {
+        combat.HealthChanged -= Refresh;
+        if (career != null) career.StatsChanged -= RefreshCareer;
+    }
+
+    private void Start()
+    {
+        Refresh(combat.Health);
+
+        career = CareerClient.Instance;
+        if (career != null) career.StatsChanged += RefreshCareer;
+        RefreshCareer(null, career != null ? career.Current : null);
+    }
+
+    private void RefreshCareer(CareerClient.Stats previous, CareerClient.Stats stats)
+    {
+        if (stats == null)
+        {
+            careerLabel.text = "อาชีพนักมวย: ออฟไลน์";
+            xpFill.anchorMax = new Vector2(0f, 1f);
+            return;
+        }
+
+        bool maxed = stats.xp_to_next <= 0;
+        careerLabel.text = maxed
+            ? $"Lv {stats.level} {CareerClient.RankFor(stats.level)} · MAX"
+            : $"Lv {stats.level} {CareerClient.RankFor(stats.level)} · XP {stats.xp}/{stats.xp_to_next}";
+        xpFill.anchorMax = new Vector2(maxed ? 1f : (float)stats.xp / stats.xp_to_next, 1f);
+    }
 
     private void Refresh(int health)
     {
@@ -61,6 +93,27 @@ public class HealthHud : MonoBehaviour
         label.rectTransform.anchorMin = Vector2.zero;
         label.rectTransform.anchorMax = Vector2.one;
         label.rectTransform.offsetMin = label.rectTransform.offsetMax = Vector2.zero;
+
+        // Career: XP bar + level/rank text under the health bar
+        var xpBackground = CreateRect("XpBar", canvasGo.transform, new Color(0f, 0f, 0f, 0.5f));
+        xpBackground.anchorMin = xpBackground.anchorMax = new Vector2(0f, 1f);
+        xpBackground.pivot = new Vector2(0f, 1f);
+        xpBackground.anchoredPosition = new Vector2(120f, -100f);
+        xpBackground.sizeDelta = new Vector2(520f, 14f);
+
+        xpFill = CreateRect("Fill", xpBackground, new Color(0.4f, 0.85f, 1f));
+        xpFill.anchorMin = Vector2.zero;
+        xpFill.anchorMax = new Vector2(0f, 1f);
+        xpFill.offsetMin = new Vector2(2f, 2f);
+        xpFill.offsetMax = new Vector2(-2f, -2f);
+
+        careerLabel = CreateText("Career", canvasGo.transform, font, 30, TextAnchor.MiddleLeft);
+        var careerRect = careerLabel.rectTransform;
+        careerRect.anchorMin = careerRect.anchorMax = new Vector2(0f, 1f);
+        careerRect.pivot = new Vector2(0f, 1f);
+        careerRect.anchoredPosition = new Vector2(120f, -120f);
+        careerRect.sizeDelta = new Vector2(900f, 44f);
+        careerLabel.gameObject.AddComponent<Shadow>();
 
         var ko = CreateText("KO", canvasGo.transform, font, 160, TextAnchor.MiddleCenter);
         ko.text = "KO!";

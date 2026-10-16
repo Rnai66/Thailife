@@ -7,7 +7,7 @@ using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
 
 // Builds the Prototype 0.1 scene (GDD section 7) so it doesn't have to be assembled by hand.
-// Menu: Thai Life > Build ThaiVillage Scene
+// Menu: Thai Life > Advanced > Reset Scene to Prototype (destructive: replaces the whole scene)
 // Runs automatically once if Assets/Scenes/ThaiVillage.unity does not exist yet.
 [InitializeOnLoad]
 public static class ThaiVillageSceneBuilder
@@ -29,16 +29,18 @@ public static class ThaiVillageSceneBuilder
         };
     }
 
-    [MenuItem("Thai Life/Build ThaiVillage Scene")]
+    [MenuItem("Thai Life/Advanced/Reset Scene to Prototype (deletes everything)")]
     private static void BuildFromMenu() => Build(askBeforeOverwrite: true);
 
-    [MenuItem("Thai Life/Setup URP")]
+    [MenuItem("Thai Life/Advanced/Setup URP")]
     private static void SetupUrpFromMenu() => EnsureUrp();
 
     private static void Build(bool askBeforeOverwrite)
     {
         if (askBeforeOverwrite && File.Exists(ScenePath) &&
-            !EditorUtility.DisplayDialog("ThaiVillage", "ThaiVillage.unity มีอยู่แล้ว ต้องการสร้างใหม่ทับหรือไม่?", "สร้างใหม่", "ยกเลิก"))
+            !EditorUtility.DisplayDialog("รีเซ็ตฉาก",
+                "จะลบทุกอย่างในฉาก ThaiVillage (หมู่บ้าน, Network, ปุ่มควบคุม ฯลฯ) แล้วสร้างฉากต้นแบบใหม่\n\nถ้าแค่ต้องการเติมส่วนที่หาย ให้ใช้ Thai Life → Repair Scene แทน",
+                "ลบและรีเซ็ต", "ยกเลิก"))
             return;
 
         if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;

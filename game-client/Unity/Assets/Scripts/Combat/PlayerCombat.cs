@@ -9,7 +9,7 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerController))]
 public class PlayerCombat : MonoBehaviour
 {
-    [SerializeField] private int maxHealth = 100;
+    [SerializeField] private int baseMaxHealth = 100;
     [SerializeField, Range(0f, 1f)] private float blockDamageFactor = 0.2f;
     [SerializeField] private float punchRadius = 0.6f;
     [SerializeField] private float kickRadius = 0.7f;
@@ -20,6 +20,9 @@ public class PlayerCombat : MonoBehaviour
 
     public int MaxHealth => maxHealth;
     public int Health { get; private set; }
+    public float DamageMultiplier { get; private set; } = 1f;
+
+    private int maxHealth;
     public bool IsKnockedOut { get; private set; }
 
     // Raised whenever health changes (MatchSync broadcasts it, HealthHud shows it).
@@ -37,10 +40,20 @@ public class PlayerCombat : MonoBehaviour
     {
         controller = GetComponent<PlayerController>();
         actions = GetComponent<PlayerActions>();
+        maxHealth = baseMaxHealth;
         Health = maxHealth;
 
         if (GetComponent<HealthHud>() == null)
             gameObject.AddComponent<HealthHud>();
+    }
+
+    // Career level from the server: +5% damage and +5 max HP per level above 1.
+    public void ApplyCareerLevel(int level)
+    {
+        level = Mathf.Max(1, level);
+        DamageMultiplier = 1f + 0.05f * (level - 1);
+        maxHealth = baseMaxHealth + 5 * (level - 1);
+        if (!IsKnockedOut) SetHealth(maxHealth);
     }
 
     // Called by PlayerActions right after a punch/kick starts.
@@ -65,7 +78,7 @@ public class PlayerCombat : MonoBehaviour
             target.ReceiveHit(new HitInfo
             {
                 Attack = attack,
-                Damage = HitInfo.MaxDamageFor(attack),
+                Damage = Mathf.RoundToInt(HitInfo.BaseDamageFor(attack) * DamageMultiplier),
                 Direction = direction.normalized,
             }, transform);
         }
