@@ -26,3 +26,10 @@ game-client/Unity/Assets/Settings/NakamaConfig.asset.meta
 # Local server secrets
 game-server/.env
 game-client/Unity/*.slnx
+
+# Mixamo characters/animations: free to use in the game, but not to redistribute as files
+# (public repo). Re-download them and run Thai Life > Setup Character.
+game-client/Unity/Assets/Characters/
+game-client/Unity/Assets/Characters.meta
+game-client/Unity/Assets/Resources/Characters/
+game-client/Unity/Assets/Resources/Characters.meta

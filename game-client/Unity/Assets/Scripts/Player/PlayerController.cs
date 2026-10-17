@@ -53,6 +53,7 @@ public class PlayerController : MonoBehaviour
     private void Awake()
     {
         controller = GetComponent<CharacterController>();
+        CharacterModel.Attach(gameObject);
 
         if (cameraTransform == null && Camera.main != null)
             cameraTransform = Camera.main.transform;

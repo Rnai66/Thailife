@@ -35,6 +35,7 @@ public class RemotePlayer : MonoBehaviour, IHittable
         renderer.sharedMaterial = material;
 
         go.AddComponent<ActionFeedback>();
+        go.AddComponent<CharacterModel>();
         var remote = go.AddComponent<RemotePlayer>();
         remote.Presence = presence;
         remote.DisplayName = presence.Username; // replaced by the character name once looked up

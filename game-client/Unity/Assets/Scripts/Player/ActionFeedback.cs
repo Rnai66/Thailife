@@ -16,6 +16,9 @@ public class ActionFeedback : MonoBehaviour
 
     public void Play(PlayerAction action)
     {
+        var model = GetComponent<CharacterModel>();
+        if (model != null && model.Play(action)) return; // real animation instead of shapes
+
         bool canAnimate = isActiveAndEnabled; // coroutines can't start on hidden avatars
 
         switch (action)
