@@ -37,6 +37,16 @@ public static class Places2
         PrimitiveKit.Box("NameBoard", t, new Vector3(0f, 3.45f, -3.75f), new Vector3(5f, 0.6f, 0.08f), wood, collider: false);
         PrimitiveKit.Label(name, t, new Vector3(0f, 3.45f, -3.8f), 0.06f, new Color(1f, 0.95f, 0.8f));
 
+        // Music corner inside the hall (เวทีดนตรีศาลากลางหมู่บ้าน, Lv 1)
+        var music = new GameObject("MusicZone");
+        music.transform.SetParent(t, false);
+        music.transform.localPosition = new Vector3(3.5f, 1.3f, -2.6f);
+        var musicBox = music.AddComponent<BoxCollider>();
+        musicBox.isTrigger = true;
+        musicBox.size = new Vector3(3f, 2f, 2f);
+        music.AddComponent<MusicSpot>().Configure("village_hall");
+        Places.Sign(t, new Vector3(5.6f, 0f, -4.6f), "เล่นดนตรีรับทิป\nยืนตรงมุมนี้", 0f);
+
         // หอกระจายข่าว: pole with horn speakers
         var tower = PrimitiveKit.Group("BroadcastTower_หอกระจายข่าว", t, new Vector3(7.5f, 0f, -3f));
         PrimitiveKit.Cylinder("Pole", tower.transform, new Vector3(0f, 4f, 0f), new Vector3(0.2f, 4f, 0.2f), metal);
@@ -129,6 +139,65 @@ public static class Places2
         return coop;
     }
 
+    // ── Music stage (เวทีดนตรี): platform, backdrop, lights; stand in front to perform ──
+    public static GameObject MusicStage(Transform parent, Vector3 position, float yaw, string venueId, string title, Color backdropColor)
+    {
+        var stage = PrimitiveKit.Group("MusicStage_" + venueId, parent, position, yaw);
+        var t = stage.transform;
+        var floor = PrimitiveKit.Mat("StageFloor", new Color(0.25f, 0.2f, 0.18f));
+        var back = PrimitiveKit.Mat("StageBack_" + venueId, backdropColor);
+        var metal = PrimitiveKit.Mat("Metal", new Color(0.35f, 0.35f, 0.38f));
+        Material[] lights =
+        {
+            PrimitiveKit.Mat("LightRed", new Color(1f, 0.3f, 0.3f)),
+            PrimitiveKit.Mat("SignYellow", new Color(1f, 0.85f, 0.15f)),
+            PrimitiveKit.Mat("LightBlue", new Color(0.3f, 0.6f, 1f)),
+        };
+
+        PrimitiveKit.Box("Platform", t, new Vector3(0f, 0.25f, 0f), new Vector3(5f, 0.5f, 3.4f), floor);
+        PrimitiveKit.Box("Backdrop", t, new Vector3(0f, 2f, 1.6f), new Vector3(5f, 3f, 0.12f), back);
+        PrimitiveKit.Label(title, t, new Vector3(0f, 3f, 1.52f), 0.07f, Color.white);
+        foreach (float x in new[] { -2.4f, 2.4f })
+            PrimitiveKit.Cylinder("TrussPost", t, new Vector3(x, 2f, 1.3f), new Vector3(0.1f, 2f, 0.1f), metal, collider: false);
+        PrimitiveKit.Box("Truss", t, new Vector3(0f, 3.9f, 1.3f), new Vector3(5f, 0.12f, 0.12f), metal, collider: false);
+        for (int i = 0; i < 3; i++)
+            PrimitiveKit.Sphere("StageLight", t, new Vector3(-1.5f + i * 1.5f, 3.75f, 1.2f), Vector3.one * 0.3f, lights[i]);
+        // Speakers either side
+        foreach (float x in new[] { -3f, 3f })
+            PrimitiveKit.Box("Speaker", t, new Vector3(x, 0.8f, 0.6f), new Vector3(0.7f, 1.6f, 0.6f), floor);
+
+        var zone = new GameObject("MusicZone");
+        zone.transform.SetParent(t, false);
+        zone.transform.localPosition = new Vector3(0f, 1f, -2.4f);
+        var box = zone.AddComponent<BoxCollider>();
+        box.isTrigger = true;
+        box.size = new Vector3(4f, 2f, 1.6f);
+        zone.AddComponent<MusicSpot>().Configure(venueId);
+        return stage;
+    }
+
+    // ── Pub (ผับ) in the city, named by its music style: dark building, neon sign, stage inside ──
+    public static GameObject Pub(Transform parent, Vector3 position, float yaw, string venueId, string name, Color wallColor, Color neonColor)
+    {
+        var pub = PrimitiveKit.Group("Pub_" + venueId, parent, position, yaw);
+        var t = pub.transform;
+        var wall = PrimitiveKit.Mat("PubWall_" + venueId, wallColor);
+        var neon = PrimitiveKit.Mat("Neon_" + venueId, neonColor);
+
+        PrimitiveKit.Box("BackWall", t, new Vector3(0f, 2.5f, 3.4f), new Vector3(10f, 5f, 0.3f), wall);
+        PrimitiveKit.Box("SideL", t, new Vector3(-5f, 2.5f, 0.5f), new Vector3(0.3f, 5f, 6f), wall);
+        PrimitiveKit.Box("SideR", t, new Vector3(5f, 2.5f, 0.5f), new Vector3(0.3f, 5f, 6f), wall);
+        PrimitiveKit.Box("Roof", t, new Vector3(0f, 5.1f, 0.5f), new Vector3(10.6f, 0.2f, 6.4f), wall, collider: false);
+        PrimitiveKit.Box("NeonFrame", t, new Vector3(0f, 4.6f, -2.45f), new Vector3(10f, 0.12f, 0.1f), neon, collider: false);
+        PrimitiveKit.Box("SignBoard", t, new Vector3(0f, 5.8f, -2.4f), new Vector3(6f, 1.1f, 0.12f), wall, collider: false);
+        PrimitiveKit.Label(name, t, new Vector3(0f, 5.8f, -2.48f), 0.1f, neonColor);
+        PrimitiveKit.Label("เปิด 19:00 - 03:00 · นักดนตรี Lv 10+", t, new Vector3(0f, 5.25f, -2.48f), 0.045f, Color.white);
+        PrimitiveKit.Box("Bar", t, new Vector3(3f, 0.55f, 2.2f), new Vector3(3f, 1.1f, 0.8f), neon);
+
+        MusicStage(t, new Vector3(-1.5f, 0f, 1.2f), 0f, venueId, name, Color.Lerp(wallColor, neonColor, 0.35f));
+        return pub;
+    }
+
     // ── SAO office (อบต. — องค์การบริหารส่วนตำบล) ───────────────────────────────
     public static GameObject SaoOffice(Transform parent, Vector3 position, string name)
     {
@@ -207,6 +276,9 @@ public static class Places2
 
         foreach (var pos in new[] { new Vector3(-11f, 0f, -6f), new Vector3(-12f, 0f, 6f), new Vector3(12f, 0f, -7f), new Vector3(0f, 0f, 12f) })
             Places.ShadeTree(t, pos, 0.9f);
+
+        // Event stage (เวทีอีเวนต์ตำบล, musician Lv 5)
+        MusicStage(t, new Vector3(-11f, 0f, 0f), -90f, "tambon_event", "เวทีอีเวนต์ตำบล", new Color(0.15f, 0.45f, 0.3f));
 
         Places.Sign(t, new Vector3(3f, 0f, -10f), name, 0f);
         return park;

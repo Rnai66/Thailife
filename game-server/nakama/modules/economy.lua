@@ -152,6 +152,9 @@ local function checkout(user_id, lines)
     if entry.rod then
       items.rods[entry.rod] = true
       items.rod = entry.rod -- equip the new rod
+    elseif entry.instrument then
+      items.instruments[entry.instrument] = true
+      items.instrument = entry.instrument -- play the new instrument
     elseif entry.seed then
       items.seeds[entry.seed] = (items.seeds[entry.seed] or 0) + qty
     elseif entry.feed then

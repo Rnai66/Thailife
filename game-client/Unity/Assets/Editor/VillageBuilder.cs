@@ -85,9 +85,9 @@ public static class VillageBuilder
             Places.BananaTree(v, pos, trainable: false);
 
         // Places around the village, each reached by a dirt lane from the main road
-        Places.Temple(v, new Vector3(-32f, 0f, 21f), "วัดหนองบัว");
+        Places.Temple(v, new Vector3(-32f, 0f, 21f), "วัดคอโค");
         Lane(v, -32f, -6f, 7f);
-        Places2.VillageHall(v, new Vector3(28f, 0f, 16f), "ศาลากลางบ้านหนองบัว");
+        Places2.VillageHall(v, new Vector3(28f, 0f, 16f), "ศาลากลางบ้านคอโค");
         Lane(v, 28f, -6f, 11.5f);
         Places.KokNongNa(v, new Vector3(-12f, 0f, -36f));
         Lane(v, -12f, -21f, -10f);

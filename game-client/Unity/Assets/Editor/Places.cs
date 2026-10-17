@@ -101,6 +101,9 @@ public static class Places
         contest.AddComponent<WindowSpot>().Configure(WindowSpot.Window.Contest);
         Sign(t, new Vector3(-2.6f, 0f, -2.2f), "ประกวดไก่สวย\nงานวัด เดือนละครั้ง", 0f);
 
+        // Music stage behind the contest stage (folk instruments shine here); keeps the gate path clear
+        Places2.MusicStage(t, new Vector3(0f, 0f, 5.2f), 0f, "temple_fair", "ดนตรีงานวัด", new Color(0.75f, 0.15f, 0.12f));
+
         // Fair stalls (ซุ้มงานวัด) with striped roofs
         for (int i = 0; i < 2; i++)
         {

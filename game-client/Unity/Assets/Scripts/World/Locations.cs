@@ -26,8 +26,8 @@ public static class Locations
 {
     public static readonly IReadOnlyList<Location> All = new List<Location>
     {
-        new Location { Id = "village_nongbua", NameTh = "บ้านหนองบัว หมู่ 1", Level = LocationLevel.Village, Scene = "ThaiVillage", SpawnId = "busstop" },
-        new Location { Id = "tambon_nongbua", NameTh = "ตำบลหนองบัว · อบต. รพ.สต. โรงเรียน คลองตกปลา", Level = LocationLevel.Subdistrict, Scene = "Tambon", SpawnId = "busstop" },
+        new Location { Id = "village_khoko", NameTh = "บ้านคอโค หมู่ 1", Level = LocationLevel.Village, Scene = "ThaiVillage", SpawnId = "busstop" },
+        new Location { Id = "tambon_khoko", NameTh = "ตำบลคอโค · อบต. รพ.สต. โรงเรียน คลองตกปลา", Level = LocationLevel.Subdistrict, Scene = "Tambon", SpawnId = "busstop" },
         new Location { Id = "city", NameTh = "ตัวเมือง · ค่ายมวย หอนาฬิกา", Level = LocationLevel.City, Scene = "City", SpawnId = "busstop" },
     };
 

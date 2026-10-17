@@ -38,6 +38,19 @@ M.FOODS = {
 }
 M.FOOD_ORDER = { "soda", "iced_coffee", "moo_ping", "som_tam", "thai_tea", "coffee", "khao_man_gai" }
 
+-- Musical instruments (เครื่องดนตรี): folk ones shine at village/temple venues, modern ones in the city
+M.INSTRUMENTS = {
+  pin      = { name = "พิณ",      folk = true,  mult = 1.00 },
+  khaen    = { name = "แคน",      folk = true,  mult = 1.05 },
+  so       = { name = "ซอ",       folk = true,  mult = 1.05 },
+  ranat    = { name = "ระนาด",    folk = true,  mult = 1.10 },
+  guitar   = { name = "กีต้าร์",   folk = false, mult = 1.15 },
+  drums    = { name = "กลอง",     folk = false, mult = 1.15 },
+  bass     = { name = "เบส",      folk = false, mult = 1.15 },
+  keyboard = { name = "คีย์บอร์ด", folk = false, mult = 1.25 },
+}
+M.INSTRUMENT_ORDER = { "pin", "khaen", "so", "ranat", "guitar", "drums", "bass", "keyboard" }
+
 -- Rice barn (ยุ้งข้าว): harvested rice is stored here; full barn = can't harvest
 M.BARN_START = 100
 M.BARN_STEP = 100
@@ -51,6 +64,14 @@ M.CATALOG = {
   { id = "food_iced_coffee",  shop = "community", price = 25, name = "กาแฟเย็น",          desc = "พลังงาน +15", food = "iced_coffee", consumable = true },
   { id = "food_moo_ping",     shop = "community", price = 30, name = "ข้าวเหนียวหมูปิ้ง",  desc = "พลังงาน +20", food = "moo_ping",    consumable = true },
   { id = "food_som_tam",      shop = "community", price = 40, name = "ส้มตำ",             desc = "พลังงาน +25", food = "som_tam",     consumable = true },
+  -- City music shop (ร้านเครื่องดนตรี)
+  { id = "inst_khaen",    shop = "music", price = 300,  name = "แคน",      desc = "พื้นบ้าน · ทิป x1.05 · โบนัสที่หมู่บ้าน/งานวัด", instrument = "khaen" },
+  { id = "inst_so",       shop = "music", price = 350,  name = "ซอ",       desc = "พื้นบ้าน · ทิป x1.05 · โบนัสที่หมู่บ้าน/งานวัด", instrument = "so" },
+  { id = "inst_ranat",    shop = "music", price = 600,  name = "ระนาด",    desc = "พื้นบ้าน · ทิป x1.10 · โบนัสที่หมู่บ้าน/งานวัด", instrument = "ranat" },
+  { id = "inst_guitar",   shop = "music", price = 800,  name = "กีต้าร์",   desc = "สากล · ทิป x1.15 · โบนัสที่ผับ/อีเวนต์เมือง", instrument = "guitar" },
+  { id = "inst_drums",    shop = "music", price = 900,  name = "กลอง",     desc = "สากล · ทิป x1.15 · โบนัสที่ผับ/อีเวนต์เมือง", instrument = "drums" },
+  { id = "inst_bass",     shop = "music", price = 900,  name = "เบส",      desc = "สากล · ทิป x1.15 · โบนัสที่ผับ/อีเวนต์เมือง", instrument = "bass" },
+  { id = "inst_keyboard", shop = "music", price = 1200, name = "คีย์บอร์ด", desc = "สากล · ทิป x1.25 · โบนัสที่ผับ/อีเวนต์เมือง", instrument = "keyboard" },
   -- City restaurants (ร้านข้าวมันไก่ / ร้านกาแฟ)
   { id = "food_thai_tea",     shop = "city_food", price = 35, name = "ชาไทย",             desc = "พลังงาน +18", food = "thai_tea",    consumable = true },
   { id = "food_coffee",       shop = "city_food", price = 45, name = "กาแฟสด",            desc = "พลังงาน +25", food = "coffee",      consumable = true },
@@ -80,6 +101,8 @@ function M.read_items(user_id)
   for _, v in ipairs(M.RICE_ORDER) do items.seeds[v] = items.seeds[v] or 0 end
   items.barn_capacity = items.barn_capacity or M.BARN_START
   items.feed = items.feed or 0
+  items.instruments = items.instruments or { pin = true }   -- everyone starts with a พิณ
+  items.instrument = items.instrument or "pin"
   items.food = items.food or {}
   for _, f in ipairs(M.FOOD_ORDER) do items.food[f] = items.food[f] or 0 end
   return items
@@ -122,6 +145,7 @@ function M.owns(items, entry)
   if entry.barn then return items.barn_capacity >= M.BARN_MAX end -- "owned" = maxed out
   if entry.consumable then return false end
   if entry.rod then return items.rods[entry.rod] == true end
+  if entry.instrument then return items.instruments[entry.instrument] == true end
   if entry.id == "camp_membership" then return items.camp_member == true end
   return false
 end

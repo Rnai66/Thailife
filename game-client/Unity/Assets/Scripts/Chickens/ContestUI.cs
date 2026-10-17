@@ -35,7 +35,7 @@ public class ContestUI : MonoBehaviour
     private void Awake()
     {
         var card = UiKit.Window(transform, "ContestCanvas", new Vector2(1100f, 900f), 50, out backdrop);
-        UiKit.Label(card, 54, "ประกวดไก่สวย · งานวัดหนองบัว", new Vector2(0f, 400f), new Vector2(1000f, 70f), UiKit.Brown);
+        UiKit.Label(card, 54, "ประกวดไก่สวย · งานวัดคอโค", new Vector2(0f, 400f), new Vector2(1000f, 70f), UiKit.Brown);
         infoText = UiKit.Label(card, 32, "", new Vector2(0f, 320f), new Vector2(1000f, 90f), UiKit.Green);
         enterButton = UiKit.Button(card, "ส่งไก่เข้าประกวด (พลังงาน 5)", new Vector2(0f, 220f), new Vector2(560f, 90f), new Color(1f, 0.8f, 0.3f), Enter);
         resultText = UiKit.Label(card, 32, "", new Vector2(0f, -80f), new Vector2(1000f, 460f), UiKit.Brown);

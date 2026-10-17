@@ -45,6 +45,8 @@ public static class NakamaSetup
             Undo.AddComponent<FarmClient>(connection.gameObject);
         if (connection.GetComponent<CoopClient>() == null)
             Undo.AddComponent<CoopClient>(connection.gameObject);
+        if (connection.GetComponent<MusicClient>() == null)
+            Undo.AddComponent<MusicClient>(connection.gameObject);
 
         // Keep sending/receiving while the window is not focused (two windows side by side)
         PlayerSettings.runInBackground = true;

@@ -134,6 +134,7 @@ public class ShopUI : MonoBehaviour
             FarmClient.Instance?.Refresh(); // seeds / barn size changed
             CoopClient.Instance?.Refresh(); // chickens / feed changed
             LifeClient.Instance?.Refresh(); // food in the bag
+            if (MusicClient.Instance != null) _ = MusicClient.Instance.RefreshAsync(); // instruments
             FloatAbovePlayer($"-{result.spent} ฿", new Color(1f, 0.6f, 0.3f));
         }
         catch (ApiResponseException e)
@@ -162,7 +163,10 @@ public class ShopUI : MonoBehaviour
     private void Render(WalletClient.Snapshot snapshot, string message)
     {
         last = snapshot;
-        titleText.text = IsCommunity ? "ร้านค้าชุมชน" : shopId == "city_food" ? "ร้านอาหารในเมือง — ข้าวมันไก่ · กาแฟ" : "ค่ายมวย — โต๊ะรับสมัคร";
+        titleText.text = IsCommunity ? "ร้านค้าชุมชน"
+            : shopId == "city_food" ? "ร้านอาหารในเมือง — ข้าวมันไก่ · กาแฟ"
+            : shopId == "music" ? "ร้านเครื่องดนตรี — พื้นบ้านและสากล"
+            : "ค่ายมวย — โต๊ะรับสมัคร";
         balanceText.text = snapshot != null
             ? $"เงินของคุณ: {snapshot.baht:N0} บาท" + (IsCommunity && !string.IsNullOrEmpty(snapshot.rod_name) ? $"   ·   ใช้{snapshot.rod_name}" : "")
             : "";
