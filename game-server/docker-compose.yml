@@ -37,6 +37,7 @@ services:
         --session.refresh_encryption_key ${NAKAMA_REFRESH_KEY:-defaultrefreshencryptionkey}
         --runtime.http_key ${NAKAMA_HTTP_KEY:-defaulthttpkey}
         --console.signing_key ${NAKAMA_CONSOLE_SIGNING_KEY:-defaultsigningkey}
+        --runtime.env "fair_always_open=${FAIR_ALWAYS_OPEN:-false}"
         --session.token_expiry_sec 7200
         --logger.level INFO
     volumes:

@@ -73,8 +73,9 @@ public static class VillageBuilder
         BuildSpiritHouse(v, new Vector3(2.8f, 0f, 3.2f));
         BuildShop(v, new Vector3(-7f, 0f, -12f), yaw: 180f);
 
-        // Rice barn next to the house (harvests are stored here)
+        // Rice barn next to the house (harvests are stored here) and the chicken coop
         Places2.Granary(v, new Vector3(1.5f, 0f, 11f), 0f);
+        Places2.ChickenCoop(v, new Vector3(-6.5f, 0f, 11f), 0f);
 
         // Home yard training (tier 1: banana trees)
         Places.BananaTree(v, new Vector3(-3f, 0f, -2.5f), trainable: true);

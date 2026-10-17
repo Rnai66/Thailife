@@ -85,6 +85,50 @@ public static class Places2
         return barn;
     }
 
+    // ── Chicken coop (เล้าไก่) with a fenced pen; stand at the gate to open the coop window ──
+    public static GameObject ChickenCoop(Transform parent, Vector3 position, float yaw)
+    {
+        var coop = PrimitiveKit.Group("ChickenCoop_เล้าไก่", parent, position, yaw);
+        var t = coop.transform;
+        var dark = PrimitiveKit.Mat("DarkWood", DarkWood);
+        var bamboo = PrimitiveKit.Mat("Bamboo", new Color(0.75f, 0.68f, 0.4f));
+        var thatch = PrimitiveKit.Mat("Thatch", new Color(0.75f, 0.62f, 0.35f));
+        var dirt = PrimitiveKit.Mat("Dirt", new Color(0.55f, 0.42f, 0.28f));
+        const float w = 6f, d = 5f;
+
+        PrimitiveKit.Box("PenGround", t, new Vector3(0f, 0.011f, 0f), new Vector3(w, 0.02f, d), dirt, collider: false);
+        // Bamboo fence (gap at the front for the gate)
+        PrimitiveKit.Box("FenceBack", t, new Vector3(0f, 0.45f, d * 0.5f), new Vector3(w, 0.9f, 0.08f), bamboo);
+        PrimitiveKit.Box("FenceL", t, new Vector3(-w * 0.5f, 0.45f, 0f), new Vector3(0.08f, 0.9f, d), bamboo);
+        PrimitiveKit.Box("FenceR", t, new Vector3(w * 0.5f, 0.45f, 0f), new Vector3(0.08f, 0.9f, d), bamboo);
+        PrimitiveKit.Box("FenceFrontL", t, new Vector3(-1.9f, 0.45f, -d * 0.5f), new Vector3(2.2f, 0.9f, 0.08f), bamboo);
+        PrimitiveKit.Box("FenceFrontR", t, new Vector3(1.9f, 0.45f, -d * 0.5f), new Vector3(2.2f, 0.9f, 0.08f), bamboo);
+
+        // Small roosting house at the back of the pen
+        foreach (float x in new[] { -1.2f, 1.2f })
+        foreach (float z in new[] { 1.2f, 2.2f })
+            PrimitiveKit.Cylinder("Post", t, new Vector3(x, 0.45f, z), new Vector3(0.1f, 0.45f, 0.1f), dark, collider: false);
+        PrimitiveKit.Box("Roost", t, new Vector3(0f, 1f, 1.7f), new Vector3(2.6f, 0.8f, 1.2f), bamboo);
+        PrimitiveKit.Box("RoofFront", t, new Vector3(0f, 1.65f, 1.35f), new Vector3(3f, 0.08f, 0.9f), thatch, new Vector3(-35f, 0f, 0f), collider: false);
+        PrimitiveKit.Box("RoofBack", t, new Vector3(0f, 1.65f, 2.05f), new Vector3(3f, 0.08f, 0.9f), thatch, new Vector3(35f, 0f, 0f), collider: false);
+        PrimitiveKit.Box("FeedTray", t, new Vector3(-1.8f, 0.08f, -0.8f), new Vector3(1f, 0.12f, 0.35f), dark, collider: false);
+
+        // The player's chickens wander here (pen area in front of the roost)
+        var pen = PrimitiveKit.Group("Pen", t, new Vector3(0f, 0f, -0.6f));
+        pen.AddComponent<ChickenPen>().Configure(new Vector2(w - 0.8f, d - 2.4f));
+
+        var gate = new GameObject("CoopGateZone");
+        gate.transform.SetParent(t, false);
+        gate.transform.localPosition = new Vector3(0f, 1f, -d * 0.5f - 0.6f);
+        var box = gate.AddComponent<BoxCollider>();
+        box.isTrigger = true;
+        box.size = new Vector3(2f, 2f, 1.6f);
+        gate.AddComponent<WindowSpot>().Configure(WindowSpot.Window.Coop);
+
+        Places.Sign(t, new Vector3(-2.4f, 0f, -d * 0.5f - 0.6f), "เล้าไก่\nยืนหน้าประตูเพื่อดูแลไก่", 0f);
+        return coop;
+    }
+
     // ── SAO office (อบต. — องค์การบริหารส่วนตำบล) ───────────────────────────────
     public static GameObject SaoOffice(Transform parent, Vector3 position, string name)
     {

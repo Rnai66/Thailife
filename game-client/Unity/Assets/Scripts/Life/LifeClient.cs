@@ -8,11 +8,29 @@ using UnityEngine;
 public class LifeClient : MonoBehaviour
 {
     [Serializable]
+    public class Food
+    {
+        public string id;
+        public string name;
+        public int count;   // in the bag
+        public int energy;  // restored when eaten
+    }
+
+    [Serializable]
     public class State
     {
         public int energy;
         public int max_energy = 100;
         public bool sleeping;
+        public Food[] foods;
+        public string ate;
+        public int gained;
+    }
+
+    [Serializable]
+    private class EatRequest
+    {
+        public string food;
     }
 
     private const float PassiveRegenPerSec = 1f / 60f;
@@ -87,16 +105,20 @@ public class LifeClient : MonoBehaviour
 
     public Task<State> SleepAsync() => CallAsync("life_sleep");
     public Task<State> WakeAsync() => CallAsync("life_wake");
+    public Task<State> EatAsync(string foodId) => CallAsync("life_eat", JsonUtility.ToJson(new EatRequest { food = foodId }));
+
+    // Re-read the bag after buying food at a shop
+    public void Refresh() => _ = RefreshQuietly();
 
     // Other systems (farm, fishing) report the energy the server returned with their result
     public void Apply(int energy, int maxEnergy, bool sleeping)
     {
-        Set(new State { energy = energy, max_energy = maxEnergy, sleeping = sleeping });
+        Set(new State { energy = energy, max_energy = maxEnergy, sleeping = sleeping, foods = Current?.foods });
     }
 
-    private async Task<State> CallAsync(string rpc)
+    private async Task<State> CallAsync(string rpc, string payload = "{}")
     {
-        var result = await connection.Client.RpcAsync(connection.Session, rpc, "{}");
+        var result = await connection.Client.RpcAsync(connection.Session, rpc, payload);
         var state = JsonUtility.FromJson<State>(result.Payload);
         Set(state);
         return state;

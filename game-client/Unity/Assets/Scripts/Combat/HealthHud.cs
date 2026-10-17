@@ -111,7 +111,7 @@ public class HealthHud : MonoBehaviour
 
     private void Build()
     {
-        var canvasGo = new GameObject("HealthHud", typeof(Canvas), typeof(CanvasScaler));
+        var canvasGo = new GameObject("HealthHud", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
         var canvas = canvasGo.GetComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         canvas.sortingOrder = 20;
@@ -203,6 +203,13 @@ public class HealthHud : MonoBehaviour
         energyLabel.rectTransform.anchorMax = Vector2.one;
         energyLabel.rectTransform.offsetMin = energyLabel.rectTransform.offsetMax = Vector2.zero;
         energyLabel.color = new Color(0.15f, 0.1f, 0.05f);
+
+        // "กิน" opens the food bag (left of the energy bar)
+        var eat = UiKit.Button(canvasGo.transform, "กิน", Vector2.zero, new Vector2(110f, 48f), new Color(1f, 0.8f, 0.3f), FoodUI.Toggle, 28);
+        var eatRect = (RectTransform)eat.transform;
+        eatRect.anchorMin = eatRect.anchorMax = new Vector2(1f, 1f);
+        eatRect.pivot = new Vector2(1f, 1f);
+        eatRect.anchoredPosition = new Vector2(-535f, -143f);
 
         var ko = CreateText("KO", canvasGo.transform, font, 160, TextAnchor.MiddleCenter);
         ko.text = "KO!";

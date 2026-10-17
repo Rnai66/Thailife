@@ -60,6 +60,8 @@ public static class Places
 
         BigTree(t, new Vector3(-9f, 0f, 9f), "BodhiTree_ต้นโพธิ์", 1.4f);
 
+        TempleFair(t);
+
         // Low white boundary wall with a gate in the front (-Z)
         PrimitiveKit.Box("WallBack", t, new Vector3(0f, 0.5f, 14f), new Vector3(30f, 1f, 0.3f), white);
         PrimitiveKit.Box("WallL", t, new Vector3(-15f, 0.5f, 0f), new Vector3(0.3f, 1f, 28f), white);
@@ -69,6 +71,46 @@ public static class Places
         Gate(t, new Vector3(0f, 0f, -14f), name, white, gold, new Color(0.6f, 0.1f, 0.1f));
 
         return temple;
+    }
+
+    // Temple fair (งานวัด) corner: chicken beauty contest stage + a couple of fair stalls.
+    // The contest only runs during the monthly fair (server-side schedule).
+    private static void TempleFair(Transform temple)
+    {
+        var fair = PrimitiveKit.Group("TempleFair_งานวัด", temple, new Vector3(8f, 0f, -7f));
+        var t = fair.transform;
+        var red = PrimitiveKit.Mat("CornerRed", new Color(0.85f, 0.15f, 0.15f));
+        var banner = PrimitiveKit.Mat("SignYellow", new Color(1f, 0.85f, 0.15f));
+        var wood = PrimitiveKit.Mat("WoodPlank", Wood);
+        var pink = PrimitiveKit.Mat("FlowerPink", new Color(1f, 0.45f, 0.7f));
+        var blue = PrimitiveKit.Mat("BusStopBlue", new Color(0.2f, 0.4f, 0.75f));
+
+        // Contest stage (เวทีประกวดไก่สวย)
+        PrimitiveKit.Box("ContestStage", t, new Vector3(0f, 0.2f, 0f), new Vector3(3.6f, 0.4f, 3f), red);
+        foreach (float x in new[] { -1.7f, 1.7f })
+            PrimitiveKit.Cylinder("BannerPole", t, new Vector3(x, 1.6f, 1.4f), new Vector3(0.08f, 1.6f, 0.08f), wood, collider: false);
+        PrimitiveKit.Box("Banner", t, new Vector3(0f, 2.9f, 1.4f), new Vector3(3.6f, 0.6f, 0.06f), banner, collider: false);
+        PrimitiveKit.Label("ประกวดไก่สวย", t, new Vector3(0f, 2.9f, 1.36f), 0.06f, new Color(0.7f, 0.1f, 0.1f));
+
+        var contest = new GameObject("ContestZone");
+        contest.transform.SetParent(t, false);
+        contest.transform.localPosition = new Vector3(0f, 1f, -2.3f);
+        var box = contest.AddComponent<BoxCollider>();
+        box.isTrigger = true;
+        box.size = new Vector3(3.6f, 2f, 1.6f);
+        contest.AddComponent<WindowSpot>().Configure(WindowSpot.Window.Contest);
+        Sign(t, new Vector3(-2.6f, 0f, -2.2f), "ประกวดไก่สวย\nงานวัด เดือนละครั้ง", 0f);
+
+        // Fair stalls (ซุ้มงานวัด) with striped roofs
+        for (int i = 0; i < 2; i++)
+        {
+            // left of the gate path so the way to the ordination hall stays clear
+            var stall = PrimitiveKit.Group("FairStall", t, new Vector3(-13.5f - i * 3.5f, 0f, -2f));
+            PrimitiveKit.Box("Counter", stall.transform, new Vector3(0f, 0.45f, 0f), new Vector3(2.6f, 0.9f, 0.8f), wood);
+            foreach (float x in new[] { -1.2f, 1.2f })
+                PrimitiveKit.Cylinder("Pole", stall.transform, new Vector3(x, 1.2f, 0.3f), new Vector3(0.06f, 1.2f, 0.06f), wood, collider: false);
+            PrimitiveKit.Box("Roof", stall.transform, new Vector3(0f, 2.4f, 0f), new Vector3(3f, 0.08f, 1.6f), i == 0 ? pink : blue, collider: false);
+        }
     }
 
     // ── School (โรงเรียน) ───────────────────────────────────────────────────────

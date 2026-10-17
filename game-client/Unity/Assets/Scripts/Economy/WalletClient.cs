@@ -25,6 +25,7 @@ public class WalletClient : MonoBehaviour
         public int price;
         public bool owned;
         public string have;   // e.g. "มีอยู่ 2 ถุง", "ยุ้งจุ 200 กก."
+        public bool consumable; // can buy many (seeds, feed, chickens); otherwise one only
     }
 
     [Serializable]
@@ -40,6 +41,20 @@ public class WalletClient : MonoBehaviour
         public bool camp_member;
         public CatalogItem[] catalog;
         public string bought;
+        public int spent;
+    }
+
+    [Serializable]
+    private class CartLine
+    {
+        public string item;
+        public int qty;
+    }
+
+    [Serializable]
+    private class CartRequest
+    {
+        public CartLine[] items;
     }
 
     [Serializable]
@@ -112,6 +127,16 @@ public class WalletClient : MonoBehaviour
     // The server checks the price and balance; throws ApiResponseException if refused
     public async Task<Snapshot> BuyAsync(string itemId) =>
         Apply(await CallAsync("shop_buy", JsonUtility.ToJson(new BuyRequest { item = itemId })));
+
+    // Pays for the whole cart at once; the server validates every line first and either
+    // grants everything or nothing. Throws ApiResponseException with the reason when refused.
+    public async Task<Snapshot> CheckoutAsync(System.Collections.Generic.IDictionary<string, int> cart)
+    {
+        var lines = new System.Collections.Generic.List<CartLine>();
+        foreach (var kv in cart)
+            if (kv.Value > 0) lines.Add(new CartLine { item = kv.Key, qty = kv.Value });
+        return Apply(await CallAsync("shop_checkout", JsonUtility.ToJson(new CartRequest { items = lines.ToArray() })));
+    }
 
     private async Task<Snapshot> CallAsync(string rpc, string payload = "{}")
     {

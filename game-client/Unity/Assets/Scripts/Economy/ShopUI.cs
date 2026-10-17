@@ -1,12 +1,14 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
 using Nakama;
 using UnityEngine;
 using UnityEngine.UI;
 
 // Shop window. Prices, money and ownership come from the server (economy.lua).
-//   "community" (ร้านค้าชุมชน): sell all fish + buy fishing rods
+//   "community" (ร้านค้าชุมชน): sell all produce + buy seeds, feed, chickens, rods, barn space
 //   "camp" (ค่ายมวย front desk): buy the camp membership
+// Buying works like a cart: pick quantities, then pay once (shop_checkout validates the whole cart).
 // Built at runtime; one instance per scene.
 public class ShopUI : MonoBehaviour
 {
@@ -23,10 +25,17 @@ public class ShopUI : MonoBehaviour
     private Font font;
     private bool busy;
 
+    private readonly Dictionary<string, int> cart = new Dictionary<string, int>();
+    private WalletClient.Snapshot last;
+    private Text cartText;
+    private Button payButton;
+    private Button clearButton;
+
     public static void Show(string shop = "community")
     {
         if (instance == null)
             instance = new GameObject("ShopUI").AddComponent<ShopUI>();
+        if (instance.shopId != shop) instance.cart.Clear();
         instance.shopId = shop;
         instance.panel.SetActive(true);
         instance.Refresh();
@@ -62,7 +71,7 @@ public class ShopUI : MonoBehaviour
         Render(wallet.Current, "กำลังโหลด...");
         try
         {
-            Render(await wallet.RefreshAsync(), null);
+            Render(await wallet.RefreshAsync(), "");
         }
         catch (Exception e)
         {
@@ -92,36 +101,68 @@ public class ShopUI : MonoBehaviour
         busy = false;
     }
 
-    private async void Buy(WalletClient.CatalogItem item)
+    // ── Cart ────────────────────────────────────────────────────────────────────
+    private int InCart(string id) => cart.TryGetValue(id, out int n) ? n : 0;
+
+    private void ChangeQty(WalletClient.CatalogItem item, int delta)
+    {
+        int max = item.consumable ? 99 : 1;
+        int qty = Mathf.Clamp(InCart(item.id) + delta, 0, max);
+        if (qty == 0) cart.Remove(item.id); else cart[item.id] = qty;
+        Render(last, null);
+    }
+
+    private int CartTotal()
+    {
+        int total = 0;
+        if (last?.catalog == null) return 0;
+        foreach (var item in last.catalog) total += item.price * InCart(item.id);
+        return total;
+    }
+
+    private async void Checkout()
     {
         var wallet = WalletClient.Instance;
-        if (busy || wallet == null || !wallet.IsOnline) return;
+        if (busy || wallet == null || !wallet.IsOnline || cart.Count == 0) return;
 
         busy = true;
         try
         {
-            var result = await wallet.BuyAsync(item.id);
-            Render(result, $"ซื้อ{item.name}แล้ว!");
+            var result = await wallet.CheckoutAsync(cart);
+            cart.Clear();
+            Render(result, $"จ่ายเงิน {result.spent:N0} บาท เรียบร้อย ได้ของครบแล้ว!");
             FarmClient.Instance?.Refresh(); // seeds / barn size changed
-            FloatAbovePlayer($"-{item.price} ฿", new Color(1f, 0.6f, 0.3f));
+            CoopClient.Instance?.Refresh(); // chickens / feed changed
+            LifeClient.Instance?.Refresh(); // food in the bag
+            FloatAbovePlayer($"-{result.spent} ฿", new Color(1f, 0.6f, 0.3f));
         }
         catch (ApiResponseException e)
         {
-            string why = e.Message.Contains("not enough") ? $"เงินไม่พอ ต้องมี {item.price} บาท"
-                : e.Message.Contains("already") ? "มีอยู่แล้ว" : "ซื้อไม่สำเร็จ";
-            Render(wallet.Current, why);
+            string why = e.Message.Contains("not enough") ? "เงินไม่พอจ่ายทั้งตะกร้า — ลดจำนวนลงก่อน"
+                : e.Message.Contains("coop full") ? "ไก่เกินเล้า (เล้าจุ 8 ตัว) — ลดจำนวนไก่ในตะกร้า"
+                : e.Message.Contains("barn max") ? "ขยายยุ้งได้สูงสุด 500 กก. — ลดจำนวนในตะกร้า"
+                : e.Message.Contains("already") ? "มีของบางชิ้นอยู่แล้ว — เอาออกจากตะกร้า"
+                : "จ่ายเงินไม่สำเร็จ";
+            Render(last, why);
         }
         catch (Exception e)
         {
-            Render(wallet.Current, "ซื้อไม่สำเร็จ ลองใหม่");
+            Render(last, "จ่ายเงินไม่สำเร็จ ลองใหม่");
             Debug.LogWarning($"[Shop] {e.Message}");
         }
         busy = false;
     }
 
+    private void ClearCart()
+    {
+        cart.Clear();
+        Render(last, "ล้างตะกร้าแล้ว");
+    }
+
     private void Render(WalletClient.Snapshot snapshot, string message)
     {
-        titleText.text = IsCommunity ? "ร้านค้าชุมชน" : "ค่ายมวย — โต๊ะรับสมัคร";
+        last = snapshot;
+        titleText.text = IsCommunity ? "ร้านค้าชุมชน" : shopId == "city_food" ? "ร้านอาหารในเมือง — ข้าวมันไก่ · กาแฟ" : "ค่ายมวย — โต๊ะรับสมัคร";
         balanceText.text = snapshot != null
             ? $"เงินของคุณ: {snapshot.baht:N0} บาท" + (IsCommunity && !string.IsNullOrEmpty(snapshot.rod_name) ? $"   ·   ใช้{snapshot.rod_name}" : "")
             : "";
@@ -145,36 +186,70 @@ public class ShopUI : MonoBehaviour
 
         // Items for sale in this shop
         foreach (Transform child in itemList) Destroy(child.gameObject);
-        float y = 0f;
+        int index = 0;
         if (snapshot?.catalog != null)
         {
             foreach (var item in snapshot.catalog)
             {
                 if (item.shop != shopId) continue;
-                AddItemRow(item, y, snapshot.baht);
-                y -= 106f;
+                AddItemRow(item, index++, snapshot.baht);
             }
         }
 
-        messageText.text = message ?? "";
+        // Cart summary and pay button
+        var summary = new StringBuilder();
+        int count = 0;
+        if (snapshot?.catalog != null)
+            foreach (var item in snapshot.catalog)
+            {
+                int n = InCart(item.id);
+                if (n == 0) continue;
+                summary.Append(count++ == 0 ? "" : ", ").Append(n > 1 ? $"{item.name} ×{n}" : item.name);
+            }
+        int total = CartTotal();
+        bool affordable = snapshot != null && total <= snapshot.baht;
+        cartText.text = count == 0 ? "ตะกร้า: ว่าง — กด + เพื่อเลือกของ"
+            : $"ตะกร้า: {summary} · รวม {total:N0} บาท" + (affordable ? "" : " (เงินไม่พอ)");
+        cartText.color = affordable ? new Color(0.3f, 0.15f, 0.05f) : new Color(0.75f, 0.15f, 0.1f);
+        payButton.interactable = !busy && count > 0 && affordable;
+        clearButton.interactable = !busy && count > 0;
+
+        if (message != null) messageText.text = message;
     }
 
-    private void AddItemRow(WalletClient.CatalogItem item, float y, int baht)
+    // Three columns, up to four rows
+    private void AddItemRow(WalletClient.CatalogItem item, int index, int baht)
     {
         var row = MakeRect("Item", itemList, new Color(1f, 1f, 1f, 0.6f));
-        row.anchoredPosition = new Vector2(0f, y);
-        row.sizeDelta = new Vector2(900f, 98f);
+        row.anchoredPosition = new Vector2((index % 3 - 1) * 480f, -(index / 3) * 112f);
+        row.sizeDelta = new Vector2(465f, 100f);
 
-        var title = MakeLabel(row, 32, $"{item.name} — {item.price} บาท", new Vector2(-150f, 20f), new Vector2(560f, 44f), new Color(0.3f, 0.15f, 0.05f));
+        var title = MakeLabel(row, 28, $"{item.name} — {item.price}฿", new Vector2(-75f, 22f), new Vector2(300f, 44f), new Color(0.3f, 0.15f, 0.05f));
         title.alignment = TextAnchor.MiddleLeft;
         string detail = string.IsNullOrEmpty(item.have) ? item.desc : $"{item.desc} · {item.have}";
-        var desc = MakeLabel(row, 26, detail, new Vector2(-150f, -22f), new Vector2(560f, 40f), new Color(0.35f, 0.3f, 0.25f));
+        var desc = MakeLabel(row, 20, detail, new Vector2(-75f, -22f), new Vector2(300f, 44f), new Color(0.35f, 0.3f, 0.25f));
         desc.alignment = TextAnchor.MiddleLeft;
 
-        string label = item.owned ? "มีแล้ว" : baht >= item.price ? "ซื้อ" : "เงินไม่พอ";
-        var button = MakeButton(row, label, new Vector2(330f, 0f), new Vector2(220f, 80f),
-            item.owned ? new Color(0.7f, 0.85f, 0.7f) : new Color(0.45f, 0.75f, 1f), () => Buy(item));
-        button.interactable = !item.owned && baht >= item.price && !busy;
+        int qty = InCart(item.id);
+        if (item.owned)
+        {
+            MakeButton(row, "มีแล้ว", new Vector2(160f, 0f), new Vector2(130f, 76f), new Color(0.7f, 0.85f, 0.7f), () => { }).interactable = false;
+        }
+        else if (!item.consumable)
+        {
+            // One-only item: toggle in/out of the cart
+            MakeButton(row, qty > 0 ? "ในตะกร้า" : "ใส่ตะกร้า", new Vector2(160f, 0f), new Vector2(130f, 76f),
+                qty > 0 ? new Color(1f, 0.8f, 0.3f) : new Color(0.45f, 0.75f, 1f), () => ChangeQty(item, qty > 0 ? -1 : 1));
+        }
+        else
+        {
+            // - qty +
+            MakeButton(row, "-", new Vector2(110f, 0f), new Vector2(50f, 70f), new Color(0.9f, 0.75f, 0.7f), () => ChangeQty(item, -1)).interactable = qty > 0;
+            var count = MakeLabel(row, 30, qty.ToString(), new Vector2(160f, 0f), new Vector2(46f, 60f), new Color(0.3f, 0.15f, 0.05f));
+            count.fontStyle = FontStyle.Bold;
+            MakeButton(row, "+", new Vector2(210f, 0f), new Vector2(50f, 70f), new Color(0.45f, 0.75f, 1f), () => ChangeQty(item, 1));
+        }
+        if (qty > 0) row.GetComponent<Image>().color = new Color(1f, 0.93f, 0.6f, 0.9f); // highlight items in the cart
     }
 
     private void FloatAbovePlayer(string text, Color color)
@@ -206,18 +281,22 @@ public class ShopUI : MonoBehaviour
         backdrop.offsetMin = backdrop.offsetMax = Vector2.zero;
 
         var card = MakeRect("Card", panel.transform, new Color(0.98f, 0.95f, 0.86f));
-        card.sizeDelta = new Vector2(1000f, 1000f);
+        card.sizeDelta = new Vector2(1500f, 1000f);
 
         titleText = MakeLabel(card, 52, "", new Vector2(0f, 445f), new Vector2(940f, 70f), brown);
         balanceText = MakeLabel(card, 34, "", new Vector2(0f, 385f), new Vector2(940f, 50f), new Color(0.1f, 0.45f, 0.2f));
-        basketText = MakeLabel(card, 28, "", new Vector2(-130f, 310f), new Vector2(680f, 90f), brown);
-        sellButton = MakeButton(card, "ขายทั้งหมด", new Vector2(340f, 310f), new Vector2(260f, 84f), new Color(1f, 0.8f, 0.3f), SellAll);
+        basketText = MakeLabel(card, 28, "", new Vector2(-170f, 310f), new Vector2(1060f, 90f), brown);
+        sellButton = MakeButton(card, "ขายทั้งหมด", new Vector2(560f, 310f), new Vector2(280f, 84f), new Color(1f, 0.8f, 0.3f), SellAll);
 
         itemList = new GameObject("Items", typeof(RectTransform)).GetComponent<RectTransform>();
         itemList.SetParent(card, false);
         itemList.anchoredPosition = new Vector2(0f, 205f);
 
-        messageText = MakeLabel(card, 34, "", new Vector2(0f, -375f), new Vector2(940f, 56f), new Color(0.6f, 0.2f, 0.05f));
+        cartText = MakeLabel(card, 28, "", new Vector2(-230f, -290f), new Vector2(980f, 70f), new Color(0.3f, 0.15f, 0.05f));
+        payButton = MakeButton(card, "จ่ายเงิน", new Vector2(420f, -290f), new Vector2(220f, 80f), new Color(0.45f, 0.85f, 0.45f), Checkout);
+        clearButton = MakeButton(card, "ล้าง", new Vector2(620f, -290f), new Vector2(140f, 80f), new Color(0.9f, 0.75f, 0.7f), ClearCart);
+
+        messageText = MakeLabel(card, 34, "", new Vector2(0f, -375f), new Vector2(1400f, 56f), new Color(0.6f, 0.2f, 0.05f));
         MakeButton(card, "ปิด", new Vector2(0f, -445f), new Vector2(300f, 80f), new Color(0.9f, 0.45f, 0.4f), Hide);
     }
 

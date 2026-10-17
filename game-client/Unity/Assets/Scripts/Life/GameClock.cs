@@ -1,7 +1,8 @@
 using System;
 
-// Shared game clock: 1 real second = 1 game minute, one game day = 24 real minutes.
-// Computed from UTC time, so every player (and the server) agrees on the time of day.
+// Shared game clock: 1 real second = 1 game minute, one game day = 24 real minutes,
+// one game month = 30 game days = 12 real hours. Computed from UTC time, so every player
+// (and the server, see life_core.lua) agrees on the time of day and the calendar.
 public static class GameClock
 {
     public const int MinutesPerDay = 24 * 60;
@@ -11,7 +12,19 @@ public static class GameClock
 
     private static double TotalGameMinutes => (DateTime.UtcNow - Epoch).TotalSeconds;
 
-    public static int Day => 1 + (int)(TotalGameMinutes / MinutesPerDay);
+    public const int DaysPerMonth = 30;
+    public const int FairDays = 2;   // temple fair (งานวัด) on days 1-2 of every month
+
+    private static readonly string[] MonthsTh =
+        { "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค." };
+
+    private static int Day0 => (int)(TotalGameMinutes / MinutesPerDay);
+
+    public static int Day => Day0 + 1;
+    public static int DayOfMonth => Day0 % DaysPerMonth + 1;
+    public static string MonthTh => MonthsTh[(Day0 / DaysPerMonth) % 12];
+
+    public static bool IsFair => DayOfMonth <= FairDays;
 
     // 0..1440
     public static float MinuteOfDay => (float)(TotalGameMinutes % MinutesPerDay);
@@ -28,5 +41,6 @@ public static class GameClock
         Hour < 17 ? "บ่าย" :
         Hour < 19 ? "เย็น" : "กลางคืน";
 
-    public static string Display => $"วันที่ {Day} · {Hour:00}:{Minute:00} ({PeriodTh})";
+    public static string Display =>
+        $"{DayOfMonth} {MonthTh} · {Hour:00}:{Minute:00} ({PeriodTh})" + (IsFair ? " · งานวัด!" : "");
 }

@@ -26,6 +26,18 @@ M.RICE = {
 }
 M.RICE_ORDER = { "khao_niao", "hommali" }
 
+-- Food & drinks (ของกิน): bought into the bag, eaten any time to restore energy
+M.FOODS = {
+  soda        = { name = "น้ำอัดลม",         energy = 8 },
+  iced_coffee = { name = "กาแฟเย็น",         energy = 15 },
+  moo_ping    = { name = "ข้าวเหนียวหมูปิ้ง", energy = 20 },
+  som_tam     = { name = "ส้มตำ",            energy = 25 },
+  thai_tea    = { name = "ชาไทย",            energy = 18 },
+  coffee      = { name = "กาแฟสด",           energy = 25 },
+  khao_man_gai = { name = "ข้าวมันไก่",       energy = 35 },
+}
+M.FOOD_ORDER = { "soda", "iced_coffee", "moo_ping", "som_tam", "thai_tea", "coffee", "khao_man_gai" }
+
 -- Rice barn (ยุ้งข้าว): harvested rice is stored here; full barn = can't harvest
 M.BARN_START = 100
 M.BARN_STEP = 100
@@ -34,8 +46,20 @@ M.BARN_MAX = 500
 -- Things for sale. shop = where the client shows it (the server sells it anywhere).
 -- consumable items can be bought again and again.
 M.CATALOG = {
+  -- Village community shop snacks
+  { id = "food_soda",         shop = "community", price = 15, name = "น้ำอัดลม",          desc = "พลังงาน +8",  food = "soda",        consumable = true },
+  { id = "food_iced_coffee",  shop = "community", price = 25, name = "กาแฟเย็น",          desc = "พลังงาน +15", food = "iced_coffee", consumable = true },
+  { id = "food_moo_ping",     shop = "community", price = 30, name = "ข้าวเหนียวหมูปิ้ง",  desc = "พลังงาน +20", food = "moo_ping",    consumable = true },
+  { id = "food_som_tam",      shop = "community", price = 40, name = "ส้มตำ",             desc = "พลังงาน +25", food = "som_tam",     consumable = true },
+  -- City restaurants (ร้านข้าวมันไก่ / ร้านกาแฟ)
+  { id = "food_thai_tea",     shop = "city_food", price = 35, name = "ชาไทย",             desc = "พลังงาน +18", food = "thai_tea",    consumable = true },
+  { id = "food_coffee",       shop = "city_food", price = 45, name = "กาแฟสด",            desc = "พลังงาน +25", food = "coffee",      consumable = true },
+  { id = "food_khao_man_gai", shop = "city_food", price = 50, name = "ข้าวมันไก่",         desc = "พลังงาน +35", food = "khao_man_gai", consumable = true },
   { id = "seed_khao_niao",  shop = "community", price = 20,  name = "พันธุ์ข้าวเหนียว กข6 (1 ถุง)", desc = "ปลูกได้ 1 แปลง · โต 12 นาที · ขาย 12 บาท/กก.", seed = "khao_niao", consumable = true },
   { id = "seed_hommali",    shop = "community", price = 30,  name = "พันธุ์ข้าวหอมมะลิ 105 (1 ถุง)", desc = "ปลูกได้ 1 แปลง · โต 16 นาที · ขาย 18 บาท/กก.", seed = "hommali", consumable = true },
+  { id = "chicken_feed",    shop = "community", price = 15,  name = "อาหารไก่ (1 ถุง)", desc = "ให้อาหารเล้า 1 ครั้ง อิ่ม 1 วันในเกม (แม่ไก่ถึงจะออกไข่)", feed = true, consumable = true },
+  { id = "chicken_hen",     shop = "community", price = 120, name = "แม่ไก่พื้นเมือง", desc = "ออกไข่เมื่อได้กินอาหาร · ค่าความสวยสุ่ม", chicken = "hen", consumable = true },
+  { id = "chicken_rooster", shop = "community", price = 180, name = "พ่อไก่พื้นเมือง", desc = "มีพ่อไก่ในเล้า ไข่จะเป็นไข่มีเชื้อ ฟักได้", chicken = "rooster", consumable = true },
   { id = "barn_upgrade",    shop = "community", price = 300, name = "ขยายยุ้งข้าว +100 กก.", desc = "เก็บข้าวได้มากขึ้น (สูงสุด 500 กก.)", barn = true, consumable = true },
   { id = "rod_fiber",       shop = "community", price = 150, name = "เบ็ดไฟเบอร์", desc = "ปลากินเร็วขึ้น ปลาหายากบ่อยขึ้น ตัวใหญ่ขึ้น 15%", rod = "fiber" },
   { id = "rod_carbon",      shop = "community", price = 400, name = "เบ็ดคาร์บอน", desc = "ปลากินเร็วสุด ปลาช่อน/ปลาดุกบ่อย ตัวใหญ่ขึ้น 30%", rod = "carbon" },
@@ -55,6 +79,9 @@ function M.read_items(user_id)
   items.seeds = items.seeds or {}
   for _, v in ipairs(M.RICE_ORDER) do items.seeds[v] = items.seeds[v] or 0 end
   items.barn_capacity = items.barn_capacity or M.BARN_START
+  items.feed = items.feed or 0
+  items.food = items.food or {}
+  for _, f in ipairs(M.FOOD_ORDER) do items.food[f] = items.food[f] or 0 end
   return items
 end
 

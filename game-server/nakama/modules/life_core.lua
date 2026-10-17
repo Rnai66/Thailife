@@ -14,6 +14,30 @@ M.SLEEP_REGEN_PER_SEC = 3     -- real seconds while sleeping
 
 M.COST = { plow = 10, plant = 10, water = 5, harvest = 10, cast = 3 }
 
+-- Calendar (same epoch as the client's GameClock): 1 game day = 24 real minutes,
+-- 1 game month = 30 game days = 12 real hours.
+M.EPOCH_MS = 1767225600000   -- 2026-01-01T00:00:00Z
+M.DAY_MS = 24 * 60 * 1000
+M.MONTH_DAYS = 30
+
+function M.game_day(now)   -- 1-based
+  return math.floor((now - M.EPOCH_MS) / M.DAY_MS) + 1
+end
+
+-- Temple fair (งานวัด): days 1-2 of every game month.
+-- Returns open, fair_id (month number), ends_in_ms, next_in_ms
+M.FAIR_DAYS = 2
+function M.fair(now, always_open)
+  local day0 = math.floor((now - M.EPOCH_MS) / M.DAY_MS)        -- 0-based game day
+  local month = math.floor(day0 / M.MONTH_DAYS)
+  local month_start = M.EPOCH_MS + month * M.MONTH_DAYS * M.DAY_MS
+  local fair_end = month_start + M.FAIR_DAYS * M.DAY_MS
+  local next_start = month_start + M.MONTH_DAYS * M.DAY_MS
+  if always_open then return true, month, M.DAY_MS, next_start - now end
+  if now < fair_end then return true, month, fair_end - now, next_start - now end
+  return false, month, 0, next_start - now
+end
+
 local LIFE = { collection = "life", key = "state" }
 local GRPC_FAILED_PRECONDITION = 9
 
@@ -53,6 +77,13 @@ function M.spend(user_id, amount)
   if s.sleep_ms then error({ "sleeping", GRPC_FAILED_PRECONDITION }) end
   if s.energy < amount then error({ "not enough energy", GRPC_FAILED_PRECONDITION }) end
   s.energy = s.energy - amount
+  write(user_id, s)
+  return s
+end
+
+function M.add_energy(user_id, amount)
+  local s = settle(read(user_id), nk.time())
+  s.energy = math.min(M.MAX_ENERGY, s.energy + amount)
   write(user_id, s)
   return s
 end

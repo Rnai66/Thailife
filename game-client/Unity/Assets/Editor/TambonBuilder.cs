@@ -41,6 +41,10 @@ public static class TambonBuilder
         Places2.ClockTower(root, new Vector3(0f, 0f, 14f));
         Places2.Shophouses(root, new Vector3(-20f, 0f, 2f), 0f, 5, new[] { "ร้านทอง", "ร้านขายยา", "", "ร้านข้าวมันไก่", "ร้านโทรศัพท์" });
         Places2.Shophouses(root, new Vector3(22f, 0f, 2f), 0f, 4, new[] { "ร้านกาแฟ", "", "ร้านตัดผม", "ร้านเครื่องเขียน" });
+        // Walk up to ร้านข้าวมันไก่ (left row, 4th unit) or ร้านกาแฟ (right row, 1st unit) to buy food
+        FoodCounter(root, new Vector3(-15.5f, 0f, -4.4f));
+        FoodCounter(root, new Vector3(15.25f, 0f, -4.4f));
+
         Places.BoxingCamp(root, new Vector3(0f, 0f, 34f), "ค่ายมวยเมืองหนองบัว");
 
         // Cross street up to the camp, past the clock tower
@@ -87,6 +91,17 @@ public static class TambonBuilder
         PrimitiveKit.Box("Road", root, new Vector3(0f, 0.02f, -8f), new Vector3(length, 0.04f, 4f), asphalt);
         for (float x = -length * 0.5f + 2f; x <= length * 0.5f - 2f; x += 4f)
             PrimitiveKit.Box("Dash", root, new Vector3(x, 0.045f, -8f), new Vector3(1.6f, 0.01f, 0.15f), paint, collider: false);
+    }
+
+    private static void FoodCounter(Transform parent, Vector3 position)
+    {
+        var zone = new GameObject("FoodCounterZone");
+        zone.transform.SetParent(parent, false);
+        zone.transform.localPosition = position + Vector3.up;
+        var box = zone.AddComponent<BoxCollider>();
+        box.isTrigger = true;
+        box.size = new Vector3(3.6f, 2f, 2f);
+        zone.AddComponent<ShopCounter>().Configure("city_food");
     }
 
     private static void Lane(Transform parent, float x, float z0, float z1)
