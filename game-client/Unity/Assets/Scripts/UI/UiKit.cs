@@ -90,6 +90,70 @@ public static class UiKit
         return rt;
     }
 
+    // ── Premium look: rounded panels, circles, soft shadows, press feedback ───────
+    private static Sprite rounded, circle;
+
+    // 9-sliced rounded rectangle (corner radius ~20 canvas units), generated once in code
+    public static Sprite RoundedSprite => rounded != null ? rounded : rounded = MakeRounded(64, 20);
+    public static Sprite CircleSprite => circle != null ? circle : circle = MakeRounded(64, 32, sliced: false);
+
+    private static Sprite MakeRounded(int size, int radius, bool sliced = true)
+    {
+        var tex = new Texture2D(size, size, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Bilinear };
+        var pixels = new Color32[size * size];
+        for (int y = 0; y < size; y++)
+        for (int x = 0; x < size; x++)
+        {
+            // distance outside the rounded corner, anti-aliased over one pixel
+            float cx = Mathf.Clamp(x + 0.5f, radius, size - radius);
+            float cy = Mathf.Clamp(y + 0.5f, radius, size - radius);
+            float d = Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), new Vector2(cx, cy)) - radius;
+            byte a = (byte)(Mathf.Clamp01(0.5f - d) * 255);
+            pixels[y * size + x] = new Color32(255, 255, 255, a);
+        }
+        tex.SetPixels32(pixels);
+        tex.Apply();
+        var border = sliced ? new Vector4(radius + 2, radius + 2, radius + 2, radius + 2) : Vector4.zero;
+        return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f, 0, SpriteMeshType.FullRect, border);
+    }
+
+    public static RectTransform Panel(string name, Transform parent, Color color, Vector2 position, Vector2 size, bool shadow = false)
+    {
+        var rt = Rect(name, parent, color);
+        var image = rt.GetComponent<Image>();
+        image.sprite = RoundedSprite;
+        image.type = Image.Type.Sliced;
+        rt.anchoredPosition = position;
+        rt.sizeDelta = size;
+        if (shadow)
+        {
+            var s = rt.gameObject.AddComponent<Shadow>();
+            s.effectColor = new Color(0f, 0f, 0f, 0.18f);
+            s.effectDistance = new Vector2(0f, -4f);
+        }
+        return rt;
+    }
+
+    public static Button RoundButton(Transform parent, string text, Vector2 position, Vector2 size, Color color, Color textColor, UnityAction onClick, int fontSize = 32, bool circle = false)
+    {
+        var rt = circle ? Rect("Button", parent, color) : Panel("Button", parent, color, position, size);
+        if (circle)
+        {
+            rt.GetComponent<Image>().sprite = CircleSprite;
+            rt.anchoredPosition = position;
+            rt.sizeDelta = size;
+        }
+        var button = rt.gameObject.AddComponent<UnityEngine.UI.Button>();
+        button.onClick.AddListener(onClick);
+        var colors = button.colors;
+        colors.disabledColor = new Color(0.75f, 0.75f, 0.75f, 0.6f);
+        button.colors = colors;
+        rt.gameObject.AddComponent<PressScale>();
+        var label = Label(rt, fontSize, text, Vector2.zero, size - new Vector2(12f, 6f), textColor);
+        label.fontStyle = FontStyle.Bold;
+        return button;
+    }
+
     public static void FloatAbovePlayer(string text, Color color)
     {
         var player = Object.FindAnyObjectByType<PlayerController>();
