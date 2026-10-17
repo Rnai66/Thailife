@@ -16,14 +16,15 @@ public class MusicUI : MonoBehaviour
     private const float PerfectWindow = 0.08f;
     private const float GoodWindow = 0.16f;
     private const float LaneWidth = 220f;
-    private const float TopY = 330f, HitY = -200f;
+    private const float TopY = 290f, HitY = -180f;
 
     private static MusicUI instance;
 
     private string venueId;
     private GameObject backdrop;
     private RectTransform card;
-    private Text titleText, infoText, messageText;
+    private Text titleText, subtitleText, infoText, statusText, messageText;
+    private Image statusPill;
     private RectTransform instrumentList;
     private Button startButton;
 
@@ -37,7 +38,7 @@ public class MusicUI : MonoBehaviour
     private bool playing, busy;
     private PlayerController frozenPlayer;
 
-    private static readonly Color[] LaneColors = { new Color(1f, 0.5f, 0.5f), new Color(1f, 0.85f, 0.35f), new Color(0.5f, 0.75f, 1f) };
+    private static readonly Color[] LaneColors = { new Color32(0xE8, 0x7A, 0x5D, 0xFF), UiKit.Gold, new Color32(0x6F, 0xA8, 0xDC, 0xFF) };
 
     public static void Show(string venue)
     {
@@ -56,14 +57,26 @@ public class MusicUI : MonoBehaviour
 
     private void Awake()
     {
-        card = UiKit.Window(transform, "MusicCanvas", new Vector2(1500f, 960f), 55, out backdrop);
-        titleText = UiKit.Label(card, 50, "", new Vector2(0f, 420f), new Vector2(1400f, 70f), UiKit.Brown);
-        infoText = UiKit.Label(card, 28, "", new Vector2(0f, 330f), new Vector2(1400f, 110f), UiKit.Green);
-        UiKit.Label(card, 30, "เลือกเครื่องดนตรี (ซื้อเพิ่มได้ที่ร้านเครื่องดนตรีในเมือง)", new Vector2(0f, 245f), new Vector2(1400f, 44f), UiKit.Brown);
-        instrumentList = UiKit.Container(card, new Vector2(0f, 170f));
-        startButton = UiKit.Button(card, "เริ่มเล่น (พลังงาน 10)", new Vector2(0f, -120f), new Vector2(520f, 100f), new Color(0.45f, 0.85f, 0.45f), StartPerformance, 40);
-        messageText = UiKit.Label(card, 32, "", new Vector2(0f, -260f), new Vector2(1400f, 140f), new Color(0.6f, 0.2f, 0.05f));
-        UiKit.Button(card, "ปิด", new Vector2(0f, -420f), new Vector2(280f, 74f), new Color(0.9f, 0.45f, 0.4f), Hide);
+        card = UiKit.PremiumWindow(transform, "MusicCanvas", new Vector2(1500f, 1000f), 55, "ด",
+            out backdrop, out titleText, out subtitleText, Hide, out _);
+        titleText.text = "เวทีดนตรี";
+        songText = subtitleText;
+
+        // Musician level + venue details
+        var info = UiKit.Panel("Info", card, Color.white, new Vector2(0f, 300f), new Vector2(1380f, 190f), shadow: true);
+        info.gameObject.AddComponent<Outline>().effectColor = UiKit.CardBorder;
+        infoText = UiKit.Label(info, 26, "", new Vector2(-130f, 20f), new Vector2(1080f, 130f), UiKit.Ink, TextAnchor.MiddleLeft);
+        var pill = UiKit.Panel("Status", info, UiKit.OkTint, new Vector2(0f, -62f), new Vector2(1320f, 48f));
+        statusPill = pill.GetComponent<Image>();
+        statusText = UiKit.Label(pill, 24, "", Vector2.zero, new Vector2(1300f, 44f), UiKit.OkGreen);
+        statusText.fontStyle = FontStyle.Bold;
+
+        UiKit.Label(card, 28, "เลือกเครื่องดนตรี", new Vector2(-490f, 165f), new Vector2(400f, 44f), UiKit.Ink, TextAnchor.MiddleLeft).fontStyle = FontStyle.Bold;
+        UiKit.Label(card, 22, "ซื้อเพิ่มได้ที่ร้านเครื่องดนตรีในเมือง", new Vector2(390f, 165f), new Vector2(600f, 40f), UiKit.Muted, TextAnchor.MiddleRight);
+        instrumentList = UiKit.Container(card, new Vector2(0f, 85f));
+        startButton = UiKit.RoundButton(card, "เริ่มเล่น (พลังงาน 10)", new Vector2(0f, -200f), new Vector2(600f, 100f), UiKit.Gold, UiKit.GoldInk, StartPerformance, 36);
+        messageText = UiKit.Label(card, 28, "", new Vector2(0f, -330f), new Vector2(1300f, 110f), UiKit.Ink);
+        messageText.fontStyle = FontStyle.Bold;
 
         BuildGame();
         backdrop.SetActive(false);
@@ -100,35 +113,50 @@ public class MusicUI : MonoBehaviour
         {
             titleText.text = "เวทีดนตรี";
             infoText.text = "ต้องออนไลน์ก่อนถึงจะเล่นดนตรีได้";
+            statusText.text = "ออฟไลน์";
+            statusText.color = UiKit.Danger;
+            statusPill.color = UiKit.DangerTint;
             startButton.interactable = false;
             return;
         }
 
         var s = music.Current;
         var v = music.GetVenue(venueId);
-        titleText.text = $"เวทีดนตรี · {v?.name ?? venueId}";
+        titleText.text = "เวทีดนตรี";
+        subtitleText.text = v?.name ?? venueId;
         string bonus = v == null ? "" : v.bonus == "folk" ? "เครื่องดนตรีพื้นบ้าน +20%" : v.bonus == "modern" ? "เครื่องดนตรีสากล +20%" : "ทุกเครื่องดนตรี +20%";
-        string status = v == null ? "" : !v.unlocked ? $"ต้องเป็นนักดนตรี Lv {v.level} ขึ้นไป"
+        bool ready = v != null && v.unlocked && v.open && !v.played_today;
+        statusText.text = v == null ? "" : !v.unlocked ? $"ต้องเป็นนักดนตรี Lv {v.level} ขึ้นไป"
             : !v.open ? $"ยังไม่เปิด — เปิด{v.when}"
             : v.played_today ? "คืนนี้เล่นที่ร้านนี้แล้ว — แวะไปร้านอื่น หรือมาใหม่พรุ่งนี้"
             : "เปิดอยู่ เล่นได้เลย!";
-        infoText.text = $"นักดนตรี Lv {s.level} · XP {s.xp}/{s.xp_to_next} · เล่นมาแล้ว {s.performances} ครั้ง\n"
-                        + (v == null ? "" : $"ทิปพื้นฐาน {v.@base} บาท · {bonus} · {v.when}\n{status}");
+        statusText.color = ready ? UiKit.OkGreen : UiKit.Danger;
+        statusPill.color = ready ? UiKit.OkTint : UiKit.DangerTint;
+        infoText.text = $"<b>นักดนตรี Lv {s.level}</b> · XP {s.xp}/{s.xp_to_next} · เล่นมาแล้ว {s.performances} ครั้ง\n"
+                        + (v == null ? "" : $"ทิปพื้นฐาน {v.@base} บาท · {bonus} · {v.when}");
 
         int i = 0;
         if (s.instruments != null)
-        {
             foreach (var inst in s.instruments)
-            {
-                var item = inst;
-                Color color = item.equipped ? new Color(1f, 0.8f, 0.3f) : item.owned ? new Color(1f, 1f, 1f, 0.85f) : new Color(0.8f, 0.8f, 0.8f, 0.6f);
-                string label = item.owned ? $"{item.name}\n{(item.folk ? "พื้นบ้าน" : "สากล")} x{item.mult:0.00}" : $"{item.name}\n(ยังไม่มี)";
-                var b = UiKit.Button(instrumentList, label, new Vector2((i % 4 - 1.5f) * 340f, -(i / 4) * 110f), new Vector2(320f, 96f), color, () => Equip(item), 28);
-                b.interactable = item.owned && !item.equipped && !busy;
-                i++;
-            }
-        }
+                AddInstrumentCard(inst, i++);
         startButton.interactable = !busy && v != null && v.unlocked && v.open && !v.played_today;
+    }
+
+    // Four cards per row, two rows (8 instruments)
+    private void AddInstrumentCard(MusicClient.Instrument item, int index)
+    {
+        var pos = new Vector2((index % 4 - 1.5f) * 345f, -(index / 4) * 115f);
+        var c = UiKit.Panel("Instrument", instrumentList, item.equipped ? (Color)new Color32(0xFF, 0xF6, 0xDF, 0xFF) : Color.white, pos, new Vector2(330f, 102f), shadow: true);
+        c.gameObject.AddComponent<Outline>().effectColor = item.equipped ? UiKit.Gold : UiKit.CardBorder;
+        UiKit.Label(c, 26, item.name, new Vector2(-55f, 20f), new Vector2(200f, 40f), item.owned ? UiKit.Ink : UiKit.Muted, TextAnchor.MiddleLeft).fontStyle = FontStyle.Bold;
+        UiKit.Label(c, 20, item.owned ? $"{(item.folk ? "พื้นบ้าน" : "สากล")} x{item.mult:0.00}" : "ยังไม่มี", new Vector2(-55f, -22f), new Vector2(200f, 34f), UiKit.Muted, TextAnchor.MiddleLeft);
+        if (item.equipped)
+            UiKit.PillLabel(c, "ใช้อยู่", new Vector2(100f, 0f), new Vector2(100f, 44f), UiKit.Gold, UiKit.GoldInk, 22);
+        else
+        {
+            var b = UiKit.RoundButton(c, "ใช้", new Vector2(100f, 0f), new Vector2(100f, 56f), UiKit.Pill, UiKit.Price, () => Equip(item), 24);
+            b.interactable = item.owned && !busy;
+        }
     }
 
     private async void Equip(MusicClient.Instrument inst)
@@ -181,6 +209,8 @@ public class MusicUI : MonoBehaviour
         {
             var rect = UiKit.Rect("Note", game, LaneColors[Mathf.Clamp(note.lane - 1, 0, 2)]);
             rect.sizeDelta = new Vector2(LaneWidth - 30f, 40f);
+            rect.GetComponent<Image>().sprite = UiKit.RoundedSprite;
+            rect.GetComponent<Image>().type = Image.Type.Sliced;
             rect.gameObject.SetActive(false);
             notes.Add((note, rect, false));
         }
@@ -255,7 +285,7 @@ public class MusicUI : MonoBehaviour
         else if (quality == 1) { good++; combo++; }
         else { miss++; combo = 0; }
         judgeText.text = combo >= 5 ? $"{text}  คอมโบ {combo}" : text;
-        judgeText.color = quality == 2 ? new Color(1f, 0.85f, 0.2f) : quality == 1 ? new Color(0.5f, 0.9f, 0.5f) : new Color(1f, 0.4f, 0.4f);
+        judgeText.color = quality == 2 ? UiKit.Price : quality == 1 ? UiKit.PayGreen : UiKit.Danger;
         UpdateScore();
     }
 
@@ -305,17 +335,17 @@ public class MusicUI : MonoBehaviour
     {
         game = UiKit.Container(card, Vector2.zero);
         game.sizeDelta = card.sizeDelta;
-        songText = UiKit.Label(game, 34, "", new Vector2(0f, 430f), new Vector2(1400f, 50f), UiKit.Brown);
-        scoreText = UiKit.Label(game, 30, "", new Vector2(0f, 385f), new Vector2(1400f, 44f), UiKit.Green);
-        judgeText = UiKit.Label(game, 48, "", new Vector2(520f, 0f), new Vector2(400f, 80f), UiKit.Brown);
+        scoreText = UiKit.Label(game, 28, "", new Vector2(0f, 370f), new Vector2(1300f, 44f), UiKit.Price);
+        scoreText.fontStyle = FontStyle.Bold;
+        judgeText = UiKit.Label(game, 48, "", new Vector2(520f, 0f), new Vector2(400f, 80f), UiKit.Ink);
+        judgeText.fontStyle = FontStyle.Bold;
 
         for (int lane = 1; lane <= 3; lane++)
         {
-            var track = UiKit.Rect("Lane", game, new Color(0f, 0f, 0f, 0.08f));
-            track.anchoredPosition = new Vector2((lane - 2) * LaneWidth, 65f);
-            track.sizeDelta = new Vector2(LaneWidth - 10f, 560f);
+            var track = UiKit.Panel("Lane", game, Color.white, new Vector2((lane - 2) * LaneWidth, 55f), new Vector2(LaneWidth - 10f, 540f));
+            track.gameObject.AddComponent<Outline>().effectColor = UiKit.CardBorder;
         }
-        var line = UiKit.Rect("HitLine", game, new Color(0.3f, 0.15f, 0.05f));
+        var line = UiKit.Rect("HitLine", game, UiKit.Teak);
         line.anchoredPosition = new Vector2(0f, HitY);
         line.sizeDelta = new Vector2(LaneWidth * 3f, 8f);
 
@@ -324,7 +354,7 @@ public class MusicUI : MonoBehaviour
         for (int lane = 1; lane <= 3; lane++)
         {
             int l = lane;
-            var b = UiKit.Button(game, keys[lane - 1], new Vector2((lane - 2) * LaneWidth, -330f), new Vector2(LaneWidth - 20f, 150f), LaneColors[lane - 1], () => PressLane(l), 48);
+            var b = UiKit.RoundButton(game, keys[lane - 1], new Vector2((lane - 2) * LaneWidth, -310f), new Vector2(LaneWidth - 20f, 150f), LaneColors[lane - 1], UiKit.Ink, () => PressLane(l), 48);
             // Fire on press, not release, so timing feels right
             var trigger = b.gameObject.AddComponent<UnityEngine.EventSystems.EventTrigger>();
             var down = new UnityEngine.EventSystems.EventTrigger.Entry { eventID = UnityEngine.EventSystems.EventTriggerType.PointerDown };

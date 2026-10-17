@@ -24,6 +24,7 @@ public class NameUI : MonoBehaviour
         instance.closeButton.gameObject.SetActive(!firstTime);
         instance.input.text = ProfileClient.Instance?.DisplayName ?? "";
         instance.messageText.text = $"ภาษาไทยหรืออังกฤษ 2-{MaxChars} ตัวอักษร · คนอื่นจะเห็นชื่อนี้บนหัว";
+        instance.messageText.color = UiKit.Muted;
         instance.backdrop.SetActive(true);
         instance.SetPlayerFrozen(true); // typing W/A/S/D or J/K/L must not move or punch
         instance.input.ActivateInputField();
@@ -31,17 +32,20 @@ public class NameUI : MonoBehaviour
 
     private void Awake()
     {
-        var card = UiKit.Window(transform, "NameCanvas", new Vector2(1000f, 640f), 80, out backdrop);
-        titleText = UiKit.Label(card, 46, "", new Vector2(0f, 220f), new Vector2(900f, 130f), UiKit.Brown);
+        var body = UiKit.PremiumWindow(transform, "NameCanvas", new Vector2(1100f, 700f), 80, "ช",
+            out backdrop, out var header, out var sub, null, out _);
+        header.text = "ชื่อตัวละคร";
+        sub.text = "บ้านคอโค หมู่ 1";
+        titleText = UiKit.Label(body, 40, "", new Vector2(0f, 170f), new Vector2(980f, 110f), UiKit.Ink);
+        titleText.fontStyle = FontStyle.Bold;
 
         // Text input (legacy InputField opens the phone keyboard, Thai input included)
-        var field = UiKit.Rect("NameInput", card, Color.white);
-        field.anchoredPosition = new Vector2(0f, 60f);
-        field.sizeDelta = new Vector2(700f, 100f);
-        var text = UiKit.Label(field, 44, "", Vector2.zero, new Vector2(660f, 90f), UiKit.Brown, TextAnchor.MiddleLeft);
+        var field = UiKit.Panel("NameInput", body, Color.white, new Vector2(0f, 40f), new Vector2(760f, 110f), shadow: true);
+        field.gameObject.AddComponent<Outline>().effectColor = UiKit.Gold;
+        var text = UiKit.Label(field, 44, "", Vector2.zero, new Vector2(700f, 96f), UiKit.Ink, TextAnchor.MiddleLeft);
         text.supportRichText = false;
         text.resizeTextForBestFit = false;
-        var placeholder = UiKit.Label(field, 40, "พิมพ์ชื่อตรงนี้", Vector2.zero, new Vector2(660f, 90f), new Color(0.6f, 0.55f, 0.5f), TextAnchor.MiddleLeft);
+        var placeholder = UiKit.Label(field, 40, "พิมพ์ชื่อตรงนี้", Vector2.zero, new Vector2(700f, 96f), UiKit.Muted, TextAnchor.MiddleLeft);
         placeholder.fontStyle = FontStyle.Italic;
         input = field.gameObject.AddComponent<InputField>();
         input.textComponent = text;
@@ -49,9 +53,9 @@ public class NameUI : MonoBehaviour
         input.characterLimit = MaxChars;
         input.lineType = InputField.LineType.SingleLine;
 
-        messageText = UiKit.Label(card, 28, "", new Vector2(0f, -50f), new Vector2(900f, 80f), new Color(0.45f, 0.35f, 0.25f));
-        UiKit.Button(card, "ตกลง", new Vector2(-150f, -200f), new Vector2(260f, 90f), new Color(0.45f, 0.85f, 0.45f), Save, 40);
-        closeButton = UiKit.Button(card, "ยกเลิก", new Vector2(150f, -200f), new Vector2(260f, 90f), new Color(0.9f, 0.45f, 0.4f), Close, 40);
+        messageText = UiKit.Label(body, 26, "", new Vector2(0f, -55f), new Vector2(980f, 60f), UiKit.Muted);
+        UiKit.RoundButton(body, "ตกลง", new Vector2(-150f, -165f), new Vector2(270f, 90f), UiKit.PayGreen, Color.white, Save, 38);
+        closeButton = UiKit.RoundButton(body, "ยกเลิก", new Vector2(150f, -165f), new Vector2(270f, 90f), UiKit.Pill, UiKit.Danger, Close, 38);
         backdrop.SetActive(false);
     }
 
@@ -87,10 +91,12 @@ public class NameUI : MonoBehaviour
         catch (ApiResponseException)
         {
             messageText.text = $"ชื่อต้องยาว 2-{MaxChars} ตัวอักษร ลองใหม่อีกครั้ง";
+            messageText.color = UiKit.Danger;
         }
         catch (Exception e)
         {
             messageText.text = "บันทึกชื่อไม่สำเร็จ ลองใหม่";
+            messageText.color = UiKit.Danger;
             Debug.LogWarning($"[Profile] {e.Message}");
         }
         busy = false;

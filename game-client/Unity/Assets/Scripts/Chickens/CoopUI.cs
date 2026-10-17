@@ -3,20 +3,19 @@ using Nakama;
 using UnityEngine;
 using UnityEngine.UI;
 
-// Coop window (เล้าไก่): feed, sell eggs, hatch fertile eggs, see and sell chickens.
-// Built at runtime; opened by CoopSpot.
+// Coop window (เล้าไก่), premium layout: three status cards (feed, eggs, fertile eggs) with their
+// actions on top, then a card per chicken (feather colour, sex, beauty bar, sell price).
+// Built at runtime; opened by the coop gate (WindowSpot).
 public class CoopUI : MonoBehaviour
 {
     private static CoopUI instance;
 
     private GameObject backdrop;
-    private Text statusText;
-    private Text eggText;
-    private Text messageText;
-    private Button feedButton;
-    private Button sellEggsButton;
-    private Button hatchButton;
+    private Text titleText, subtitleText, toastText;
+    private Text feedValue, feedNote, eggValue, eggNote, fertileValue, fertileNote;
+    private Button feedButton, sellEggsButton, hatchButton;
     private RectTransform list;
+    private Coroutine toast;
     private bool busy;
     private float nextRender;
 
@@ -25,7 +24,6 @@ public class CoopUI : MonoBehaviour
         if (instance == null)
             instance = new GameObject("CoopUI").AddComponent<CoopUI>();
         instance.backdrop.SetActive(true);
-        instance.messageText.text = "";
         CoopClient.Instance?.Refresh();
         instance.Render(rebuildList: true);
     }
@@ -37,19 +35,17 @@ public class CoopUI : MonoBehaviour
 
     private void Awake()
     {
-        var card = UiKit.Window(transform, "CoopCanvas", new Vector2(1500f, 980f), 50, out backdrop);
+        var body = UiKit.PremiumWindow(transform, "CoopCanvas", new Vector2(1640f, 940f), 50, "ก",
+            out backdrop, out titleText, out subtitleText, Hide, out _);
+        titleText.text = "เล้าไก่";
 
-        UiKit.Label(card, 52, "เล้าไก่", new Vector2(0f, 440f), new Vector2(1400f, 70f), UiKit.Brown);
-        statusText = UiKit.Label(card, 30, "", new Vector2(0f, 380f), new Vector2(1400f, 46f), UiKit.Green);
-        eggText = UiKit.Label(card, 30, "", new Vector2(0f, 330f), new Vector2(1400f, 46f), UiKit.Brown);
+        feedButton = StatusCard(body, -540f, "อาหารไก่", out feedValue, out feedNote, "ให้อาหาร", UiKit.Gold, UiKit.GoldInk, () => Act("feed"));
+        sellEggsButton = StatusCard(body, 0f, "ไข่ไก่", out eggValue, out eggNote, "ขายไข่ทั้งหมด", UiKit.PayGreen, Color.white, () => Act("sell_eggs"));
+        hatchButton = StatusCard(body, 540f, "ไข่มีเชื้อ (ไข่แม่พันธุ์)", out fertileValue, out fertileNote, "ฟักไข่ 1 ฟอง", new Color32(0x37, 0x8A, 0xDD, 0xFF), Color.white, () => Act("hatch"));
 
-        feedButton = UiKit.Button(card, "ให้อาหาร", new Vector2(-420f, 260f), new Vector2(380f, 80f), new Color(1f, 0.8f, 0.3f), () => Act("feed"));
-        sellEggsButton = UiKit.Button(card, "ขายไข่", new Vector2(0f, 260f), new Vector2(380f, 80f), new Color(1f, 0.8f, 0.3f), () => Act("sell_eggs"));
-        hatchButton = UiKit.Button(card, "ฟักไข่มีเชื้อ", new Vector2(420f, 260f), new Vector2(380f, 80f), new Color(0.6f, 0.85f, 1f), () => Act("hatch"));
-
-        list = UiKit.Container(card, new Vector2(0f, 150f));
-        messageText = UiKit.Label(card, 32, "", new Vector2(0f, -380f), new Vector2(1400f, 50f), new Color(0.6f, 0.2f, 0.05f));
-        UiKit.Button(card, "ปิด", new Vector2(0f, -445f), new Vector2(300f, 70f), new Color(0.9f, 0.45f, 0.4f), Hide);
+        UiKit.Label(body, 30, "ไก่ในเล้า", new Vector2(-640f, 165f), new Vector2(300f, 44f), UiKit.Ink, TextAnchor.MiddleLeft).fontStyle = FontStyle.Bold;
+        list = UiKit.Container(body, new Vector2(0f, 0f));
+        toastText = UiKit.ToastBar(body, new Vector2(0f, -340f), 760f);
 
         backdrop.SetActive(false);
         if (CoopClient.Instance != null) CoopClient.Instance.Changed += _ => Render(rebuildList: true);
@@ -60,9 +56,21 @@ public class CoopUI : MonoBehaviour
         if (instance == this) instance = null;
     }
 
+    private static Button StatusCard(RectTransform body, float x, string title, out Text value, out Text note,
+        string action, Color buttonColor, Color buttonInk, UnityEngine.Events.UnityAction onClick)
+    {
+        var card = UiKit.Panel("Status", body, Color.white, new Vector2(x, 285f), new Vector2(510f, 190f), shadow: true);
+        card.gameObject.AddComponent<Outline>().effectColor = UiKit.CardBorder;
+        UiKit.Label(card, 24, title, new Vector2(-75f, 62f), new Vector2(340f, 36f), UiKit.Muted, TextAnchor.MiddleLeft);
+        value = UiKit.Label(card, 40, "", new Vector2(-75f, 18f), new Vector2(340f, 56f), UiKit.Ink, TextAnchor.MiddleLeft);
+        value.fontStyle = FontStyle.Bold;
+        note = UiKit.Label(card, 22, "", new Vector2(-75f, -30f), new Vector2(340f, 40f), UiKit.Muted, TextAnchor.MiddleLeft);
+        return UiKit.RoundButton(card, action, new Vector2(150f, -58f), new Vector2(190f, 60f), buttonColor, buttonInk, onClick, 26);
+    }
+
     private void Update()
     {
-        // Countdowns tick every second (the list is only rebuilt when the data changes,
+        // Countdowns tick every second (the chicken cards are only rebuilt when the data changes,
         // so buttons don't get replaced under the player's finger)
         if (backdrop.activeSelf && Time.time >= nextRender) Render(rebuildList: false);
     }
@@ -73,8 +81,9 @@ public class CoopUI : MonoBehaviour
         var coop = CoopClient.Instance;
         if (coop == null || !coop.IsOnline)
         {
-            statusText.text = "ต้องออนไลน์ก่อนถึงจะดูเล้าได้";
-            eggText.text = "";
+            subtitleText.text = "ต้องออนไลน์ก่อนถึงจะดูเล้าได้";
+            feedValue.text = eggValue.text = fertileValue.text = "-";
+            feedNote.text = eggNote.text = fertileNote.text = "";
             UiKit.Clear(list);
             feedButton.interactable = sellEggsButton.interactable = hatchButton.interactable = false;
             return;
@@ -83,51 +92,73 @@ public class CoopUI : MonoBehaviour
         var s = coop.Current;
         float fed = s.fed_for_s - coop.Age;
         int count = (s.chickens?.Length ?? 0) + (s.hatching_s?.Length ?? 0);
-        statusText.text = $"ไก่ {count}/{s.capacity} ตัว · อาหารไก่ {s.feed_bags} ถุง · "
-                          + (fed > 0 ? $"อิ่มอีก {CoopClient.Countdown(fed)} (แม่ไก่ออกไข่อยู่)" : "หิว! ให้อาหารแม่ไก่ถึงจะออกไข่");
+        subtitleText.text = $"ไก่ {count}/{s.capacity} ตัว · บ้านคอโค หมู่ 1";
 
+        feedValue.text = fed > 0 ? $"อิ่มอีก {CoopClient.Countdown(fed)}" : "หิว!";
+        feedValue.color = fed > 0 ? UiKit.OkGreen : UiKit.Danger;
+        feedNote.text = $"มีอาหารไก่ {s.feed_bags} ถุง" + (fed > 0 ? " · แม่ไก่ออกไข่อยู่" : " · ให้อาหารแม่ไก่ถึงจะออกไข่");
+
+        eggValue.text = $"{s.eggs} ฟอง";
+        int eggTotal = s.eggs * s.egg_price + s.fertile_eggs * s.fertile_egg_price;
+        eggNote.text = $"ฟองละ {s.egg_price}฿ · ขายรวมไข่มีเชื้อได้ {eggTotal:N0}฿";
+
+        fertileValue.text = $"{s.fertile_eggs} ฟอง";
         string hatching = "";
         if (s.hatching_s != null && s.hatching_s.Length > 0)
         {
             var times = new System.Collections.Generic.List<string>();
             foreach (int t in s.hatching_s) times.Add(CoopClient.Countdown(t - coop.Age));
-            hatching = $" · กำลังฟัก {s.hatching_s.Length} ฟอง ({string.Join(", ", times)})";
+            hatching = $" · กำลังฟัก {string.Join(", ", times)}";
         }
-        eggText.text = $"ไข่ไก่ {s.eggs} ฟอง ({s.egg_price}฿) · ไข่มีเชื้อ {s.fertile_eggs} ฟอง ({s.fertile_egg_price}฿){hatching}";
+        fertileNote.text = $"ฟองละ {s.fertile_egg_price}฿ (ตามความสวยพ่อแม่){hatching}";
 
         feedButton.interactable = !busy && s.feed_bags > 0;
         sellEggsButton.interactable = !busy && s.eggs + s.fertile_eggs > 0;
         hatchButton.interactable = !busy && s.fertile_eggs > 0 && count < s.capacity;
 
-        // Chickens in two columns
         if (!rebuildList) return;
         UiKit.Clear(list);
         if (s.chickens == null || s.chickens.Length == 0)
         {
-            UiKit.Label(list, 32, "ยังไม่มีไก่ — ซื้อแม่ไก่/พ่อไก่ และอาหารไก่ที่ร้านค้าชุมชน", Vector2.zero, new Vector2(1300f, 60f), UiKit.Brown);
+            UiKit.Label(list, 30, "ยังไม่มีไก่ — ซื้อแม่ไก่ พ่อไก่ และอาหารไก่ได้ที่ร้านค้าชุมชน (แท็บเลี้ยงไก่)",
+                new Vector2(0f, 20f), new Vector2(1400f, 60f), UiKit.Muted);
             return;
         }
         for (int i = 0; i < s.chickens.Length; i++)
-            AddChickenRow(s.chickens[i], i, coop.Age);
+            AddChickenCard(s.chickens[i], i, coop.Age);
     }
 
-    private void AddChickenRow(CoopClient.Chicken c, int index, float age)
+    // Four cards per row, two rows (the coop holds 8)
+    private void AddChickenCard(CoopClient.Chicken c, int index, float age)
     {
-        float x = index % 2 == 0 ? -360f : 360f;
-        float y = -(index / 2) * 112f;
-        var row = UiKit.Rect("Chicken", list, new Color(1f, 1f, 1f, 0.6f));
-        row.anchoredPosition = new Vector2(x, y);
-        row.sizeDelta = new Vector2(700f, 100f);
+        float x = -585f + (index % 4) * 390f;
+        float y = 75f - (index / 4) * 175f;
+        var card = UiKit.Panel("Chicken", list, Color.white, new Vector2(x, y), new Vector2(370f, 160f), shadow: true);
+        card.gameObject.AddComponent<Outline>().effectColor = UiKit.CardBorder;
 
-        var swatch = UiKit.Rect("Feather", row, CoopClient.FeatherColor(c.color));
-        swatch.anchoredPosition = new Vector2(-310f, 0f);
-        swatch.sizeDelta = new Vector2(60f, 60f);
+        // Feather colour disc
+        var disc = UiKit.Rect("Feather", card, CoopClient.FeatherColor(c.color));
+        disc.GetComponent<Image>().sprite = UiKit.CircleSprite;
+        disc.anchoredPosition = new Vector2(-135f, 25f);
+        disc.sizeDelta = new Vector2(76f, 76f);
+        disc.gameObject.AddComponent<Outline>().effectColor = UiKit.CardBorder;
 
-        string stage = c.adult ? CoopClient.SexTh(c) : $"ลูกไก่ (โตใน {CoopClient.Countdown(c.grown_in_s - age)})";
-        UiKit.Label(row, 30, $"{c.name} · {stage}", new Vector2(-40f, 20f), new Vector2(460f, 44f), UiKit.Brown, TextAnchor.MiddleLeft);
-        UiKit.Label(row, 26, $"สี{c.color} · ความสวย {c.beauty}", new Vector2(-40f, -22f), new Vector2(460f, 40f), new Color(0.35f, 0.3f, 0.25f), TextAnchor.MiddleLeft);
+        var name = UiKit.Label(card, 26, c.name, new Vector2(30f, 50f), new Vector2(240f, 36f), UiKit.Ink, TextAnchor.MiddleLeft);
+        name.fontStyle = FontStyle.Bold;
+        string stage = c.adult ? CoopClient.SexTh(c) : $"ลูกไก่ · โตใน {CoopClient.Countdown(c.grown_in_s - age)}";
+        UiKit.PillLabel(card, stage, new Vector2(30f, 12f), new Vector2(240f, 34f),
+            c.sex == "rooster" ? UiKit.DangerTint : UiKit.Pill, c.sex == "rooster" ? UiKit.Danger : UiKit.Price, 20).alignment = TextAnchor.MiddleCenter;
+        UiKit.Label(card, 20, $"สี{c.color}", new Vector2(-110f, -30f), new Vector2(150f, 30f), UiKit.Muted);
 
-        var sell = UiKit.Button(row, $"ขาย {c.price}฿", new Vector2(270f, 0f), new Vector2(150f, 76f), new Color(1f, 0.7f, 0.5f), () => Act("sell_chicken", c.id), 28);
+        // Beauty bar
+        UiKit.Label(card, 20, $"ความสวย {c.beauty}", new Vector2(30f, -24f), new Vector2(240f, 28f), UiKit.Muted, TextAnchor.MiddleLeft);
+        var track = UiKit.Panel("BeautyTrack", card, new Color32(0xF1, 0xEF, 0xE8, 0xFF), new Vector2(30f, -46f), new Vector2(240f, 12f));
+        var fill = UiKit.Panel("BeautyFill", track, UiKit.Gold, Vector2.zero, new Vector2(240f * Mathf.Clamp01(c.beauty / 100f), 12f));
+        fill.anchorMin = fill.anchorMax = new Vector2(0f, 0.5f);
+        fill.pivot = new Vector2(0f, 0.5f);
+
+        var sell = UiKit.RoundButton(card, $"ขาย {c.price:N0}฿", new Vector2(100f, -60f), new Vector2(150f, 44f),
+            UiKit.Pill, UiKit.Price, () => Act("sell_chicken", c.id), 22);
         sell.interactable = !busy;
     }
 
@@ -141,25 +172,27 @@ public class CoopUI : MonoBehaviour
             var r = await coop.ActAsync(action, chicken);
             switch (action)
             {
-                case "feed": messageText.text = "ให้อาหารแล้ว แม่ไก่จะออกไข่เรื่อยๆ"; break;
-                case "sell_eggs": messageText.text = $"ขายไข่ {r.sold} ฟอง ได้ {r.earned} บาท"; UiKit.FloatAbovePlayer($"+{r.earned} ฿", new Color(1f, 0.85f, 0.2f)); break;
-                case "hatch": messageText.text = "เริ่มฟักไข่แล้ว ลูกไก่จะได้ความสวยจากพ่อแม่"; break;
-                case "sell_chicken": messageText.text = $"ขาย{r.sold_name} ได้ {r.earned} บาท"; UiKit.FloatAbovePlayer($"+{r.earned} ฿", new Color(1f, 0.85f, 0.2f)); break;
+                case "feed": Notify("ให้อาหารแล้ว แม่ไก่จะออกไข่เรื่อยๆ", UiKit.PayGreen); break;
+                case "sell_eggs": Notify($"ขายไข่ {r.sold} ฟอง ได้ {r.earned:N0} บาท", UiKit.PayGreen); UiKit.FloatAbovePlayer($"+{r.earned} ฿", new Color(1f, 0.85f, 0.2f)); break;
+                case "hatch": Notify("เริ่มฟักไข่แล้ว ลูกไก่จะได้ความสวยจากพ่อแม่", UiKit.PayGreen); break;
+                case "sell_chicken": Notify($"ขาย{r.sold_name} ได้ {r.earned:N0} บาท", UiKit.PayGreen); UiKit.FloatAbovePlayer($"+{r.earned} ฿", new Color(1f, 0.85f, 0.2f)); break;
             }
         }
         catch (ApiResponseException e)
         {
-            messageText.text = e.Message.Contains("energy") ? "พลังงานไม่พอ — ไปนอนพักที่ชานบ้านก่อน"
+            Notify(e.Message.Contains("energy") ? "พลังงานไม่พอ — กินอะไรหน่อย หรือไปนอนพักที่ชานบ้าน"
                 : e.Message.Contains("feed") ? "ไม่มีอาหารไก่ — ซื้อที่ร้านค้าชุมชน"
                 : e.Message.Contains("full") ? "เล้าเต็มแล้ว (8 ตัว)"
-                : e.Message.Contains("sleeping") ? "กำลังนอนอยู่" : "ทำไม่ได้ตอนนี้";
+                : e.Message.Contains("sleeping") ? "กำลังนอนอยู่" : "ทำไม่ได้ตอนนี้", UiKit.Danger);
         }
         catch (Exception e)
         {
-            messageText.text = "เกิดข้อผิดพลาด ลองใหม่";
+            Notify("เกิดข้อผิดพลาด ลองใหม่", UiKit.Danger);
             Debug.LogWarning($"[Coop] {e.Message}");
         }
         busy = false;
         Render(rebuildList: true);
     }
+
+    private void Notify(string message, Color color) => toast = UiKit.Toast(this, toastText, message, color, toast);
 }
