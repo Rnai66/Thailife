@@ -18,6 +18,8 @@ public class HealthHud : MonoBehaviour
     private Text moneyLabel;
     private WalletClient wallet;
     private Text clockLabel;
+    private Text nameLabel;
+    private ProfileClient profile;
     private RectTransform energyFill;
     private Text energyLabel;
 
@@ -35,6 +37,7 @@ public class HealthHud : MonoBehaviour
         if (career != null) career.StatsChanged -= RefreshCareer;
         if (fishing != null) fishing.InventoryChanged -= RefreshFish;
         if (wallet != null) wallet.Changed -= RefreshMoney;
+        if (profile != null) profile.NameChanged -= RefreshName;
     }
 
     private void Start()
@@ -52,6 +55,15 @@ public class HealthHud : MonoBehaviour
         wallet = WalletClient.Instance;
         if (wallet != null) wallet.Changed += RefreshMoney;
         RefreshMoney(wallet != null ? wallet.Current : null);
+
+        profile = ProfileClient.Instance;
+        if (profile != null) profile.NameChanged += RefreshName;
+        RefreshName(profile != null ? profile.DisplayName : null);
+    }
+
+    private void RefreshName(string name)
+    {
+        nameLabel.text = string.IsNullOrWhiteSpace(name) ? "ตั้งชื่อ" : $"{name}  (แตะเพื่อเปลี่ยน)";
     }
 
     // Clock and energy change continuously; refresh a few times a second
@@ -63,6 +75,7 @@ public class HealthHud : MonoBehaviour
         nextTick = Time.time + 0.25f;
 
         clockLabel.text = GameClock.Display;
+        if (career == null || career.Current == null) RefreshCareer(null, null); // keep the offline reason current
 
         var life = LifeClient.Instance;
         bool online = life != null && life.IsOnline;
@@ -88,7 +101,9 @@ public class HealthHud : MonoBehaviour
     {
         if (stats == null)
         {
-            careerLabel.text = "อาชีพนักมวย: ออฟไลน์";
+            var conn = FindAnyObjectByType<NakamaConnection>();
+            string why = conn != null && !string.IsNullOrEmpty(conn.LastError) ? $" — {conn.LastError}" : "";
+            careerLabel.text = $"ออฟไลน์{why} (ลองต่อใหม่ทุก 10 วิ)";
             xpFill.anchorMax = new Vector2(0f, 1f);
             return;
         }
@@ -120,7 +135,7 @@ public class HealthHud : MonoBehaviour
         scaler.referenceResolution = new Vector2(1920f, 1080f);
         scaler.matchWidthOrHeight = 0.5f;
 
-        var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        var font = ThaiFont.Font;
 
         // Bar background, inset from the top-left corner (clear of the notch in landscape)
         var background = CreateRect("HealthBar", canvasGo.transform, new Color(0f, 0f, 0f, 0.5f));
@@ -203,6 +218,16 @@ public class HealthHud : MonoBehaviour
         energyLabel.rectTransform.anchorMax = Vector2.one;
         energyLabel.rectTransform.offsetMin = energyLabel.rectTransform.offsetMax = Vector2.zero;
         energyLabel.color = new Color(0.15f, 0.1f, 0.05f);
+
+        // Character name above the health bar; tap to rename
+        var nameButton = UiKit.Button(canvasGo.transform, "", Vector2.zero, new Vector2(520f, 40f), new Color(0f, 0f, 0f, 0.35f), () => NameUI.Show(firstTime: false), 26);
+        var nameRect = (RectTransform)nameButton.transform;
+        nameRect.anchorMin = nameRect.anchorMax = new Vector2(0f, 1f);
+        nameRect.pivot = new Vector2(0f, 1f);
+        nameRect.anchoredPosition = new Vector2(120f, -6f);
+        nameLabel = nameButton.GetComponentInChildren<Text>();
+        nameLabel.color = Color.white;
+        nameLabel.alignment = TextAnchor.MiddleLeft;
 
         // "กิน" opens the food bag (left of the energy bar)
         var eat = UiKit.Button(canvasGo.transform, "กิน", Vector2.zero, new Vector2(110f, 48f), new Color(1f, 0.8f, 0.3f), FoodUI.Toggle, 28);

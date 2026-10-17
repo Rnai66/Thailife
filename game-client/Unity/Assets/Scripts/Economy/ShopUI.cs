@@ -275,7 +275,7 @@ public class ShopUI : MonoBehaviour
         scaler.referenceResolution = new Vector2(1920f, 1080f);
         scaler.matchWidthOrHeight = 0.5f;
 
-        font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        font = ThaiFont.Font;
         var brown = new Color(0.3f, 0.15f, 0.05f);
 
         panel = MakeRect("Backdrop", canvasGo.transform, new Color(0f, 0f, 0f, 0.55f)).gameObject;

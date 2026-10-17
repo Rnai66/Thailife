@@ -30,6 +30,9 @@
 - [x] ของกินเติมพลังงาน: ร้านค้าชุมชน + ร้านข้าวมันไก่/ร้านกาแฟในเมือง, กระเป๋าอาหาร กดปุ่ม "กิน" บน HUD (life_eat)
 - [x] นักดนตรี: 8 เครื่องดนตรี (พิณ แคน ซอ ระนาด กีต้าร์ กลอง เบส คีย์บอร์ด), เกมกดตามจังหวะ 3 ช่อง, ทิป + XP (music.lua) · เวที: ศาลากลางหมู่บ้าน, งานวัด, อีเวนต์ตำบล (Lv5), อีเวนต์เมือง (Lv8), ย่านผับ เพื่อชีวิต/บลูส์/อินดี้ (Lv10, 19:00-03:00, ร้านละครั้งต่อวัน) · ทดสอบผับ: `PUBS_ALWAYS_OPEN=true`
 - [x] เปลี่ยนชื่อสถานที่ หนองบัว → คอโค
+- [x] ชื่อตัวละคร (profile.lua → display name, ตั้งครั้งแรกที่เข้าเกม, แตะชื่อบน HUD เพื่อเปลี่ยน) แสดงบนหัวผู้เล่นอื่น
+- [x] iPhone: font ไทย Sarabun (OFL) แทน font ระบบ, ต่อเซิร์ฟเวอร์ผ่าน .local → แปลงเป็น IPv4 ก่อนเปิด WebSocket, ต่อใหม่อัตโนมัติ, HUD แสดงสาเหตุที่ออฟไลน์
+- ดู log จาก iPhone (Development build): `xcrun devicectl device copy from --device <UDID> --domain-type appDataContainer --domain-identifier com.rnai66.thailife --source Documents/game.log --destination game.log`
 - [x] Multiplayer ขั้น 1: Unity เชื่อมต่อ Nakama local (Docker) ได้ — device auth + realtime socket (16 ต.ค. 2026)
 - [x] Multiplayer ขั้น 2: เห็นผู้เล่นอื่นและซิงก์ตำแหน่ง (relayed match "thaivillage", ทดสอบ Editor + Mac build) (16 ต.ค. 2026)
 

@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public static class UiKit
 {
     private static Font font;
-    public static Font Font => font != null ? font : font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+    public static Font Font => font != null ? font : font = ThaiFont.Font;
 
     public static readonly Color Paper = new Color(0.98f, 0.95f, 0.86f);
     public static readonly Color Brown = new Color(0.3f, 0.15f, 0.05f);

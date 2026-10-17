@@ -17,6 +17,12 @@ public static class IOSBuild
     [MenuItem("Thai Life/Build iOS (Xcode project)")]
     private static void Build()
     {
+        if (EditorApplication.isCompiling || EditorApplication.isUpdating)
+        {
+            EditorUtility.DisplayDialog("Build iOS", "Unity กำลังคอมไพล์สคริปต์อยู่ — รอสักครู่ให้เสร็จ แล้วกด Build iOS อีกครั้ง", "OK");
+            return;
+        }
+
         if (!UnityEditor.SceneManagement.EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
 
         if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.iOS &&

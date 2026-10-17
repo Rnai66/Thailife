@@ -198,7 +198,7 @@ public class FishingUI : MonoBehaviour
         scaler.matchWidthOrHeight = 0.5f;
         root = canvasGo;
 
-        var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        var font = ThaiFont.Font;
 
         // Big round button above the A/B/C/D diamond
         var buttonGo = new GameObject("FishButton", typeof(RectTransform), typeof(Image), typeof(Button));

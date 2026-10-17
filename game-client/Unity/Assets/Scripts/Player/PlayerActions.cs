@@ -119,6 +119,8 @@ public class PlayerActions : MonoBehaviour
 
     private void ReadKeyboardAndGamepad()
     {
+        if (!controller.InputEnabled) return; // typing a name, sleeping, playing music, knocked out
+
         bool jump = false, punch = false, kick = false, blockHeld = false;
 
 #if ENABLE_INPUT_SYSTEM

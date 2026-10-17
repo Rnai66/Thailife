@@ -11,6 +11,9 @@ public class NakamaConfig : ScriptableObject
     [Tooltip("Heroic Cloud: the host shown on your project's page, without https://")]
     public string host = "";
 
+    [Tooltip("Tried in order when 'host' can't be reached (e.g. the Mac's LAN IP for iPhones that can't resolve .local names)")]
+    public string[] fallbackHosts = new string[0];
+
     [Tooltip("443 for Heroic Cloud, 7350 for a local server")]
     public int port = 443;
 

@@ -239,8 +239,18 @@ public class MatchSync : MonoBehaviour
 
         var remote = RemotePlayer.Create(presence, localPlayer, this);
         remotes[presence.SessionId] = remote;
+        LookUpName(remote);
         Debug.Log($"[Match] {presence.Username} joined");
         return remote;
+    }
+
+    // Show the character name (stored server-side) instead of the random username
+    private async void LookUpName(RemotePlayer remote)
+    {
+        var profile = GetComponent<ProfileClient>();
+        if (profile == null) return;
+        string name = await profile.GetNameAsync(remote.UserId, remote.Presence.Username);
+        if (remote != null) remote.SetDisplayName(name);
     }
 
     // Presence events can arrive before CreateMatchAsync returns (match.Self unknown yet),

@@ -15,7 +15,7 @@ public class FloatingText : MonoBehaviour
         var go = new GameObject("FloatingText");
         go.transform.position = position;
 
-        var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        var font = ThaiFont.Font;
         var mesh = go.AddComponent<TextMesh>();
         mesh.font = font;
         go.GetComponent<MeshRenderer>().sharedMaterial = font.material;

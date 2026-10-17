@@ -16,6 +16,7 @@ public class RemotePlayer : MonoBehaviour, IHittable
     private int health = -1;
 
     public IUserPresence Presence { get; private set; }
+    public string DisplayName { get; private set; }
     public string UserId => Presence.UserId;
     public bool IsKnockedOut => health == 0;
 
@@ -36,6 +37,7 @@ public class RemotePlayer : MonoBehaviour, IHittable
         go.AddComponent<ActionFeedback>();
         var remote = go.AddComponent<RemotePlayer>();
         remote.Presence = presence;
+        remote.DisplayName = presence.Username; // replaced by the character name once looked up
         remote.owner = owner;
         remote.nameLabel = AddNameLabel(go.transform, presence.Username);
         go.SetActive(false); // hidden until the first position arrives
@@ -75,7 +77,19 @@ public class RemotePlayer : MonoBehaviour, IHittable
         }
 
         health = value;
-        nameLabel.text = $"{Presence.Username}\nHP {value}";
+        RefreshLabel();
+    }
+
+    public void SetDisplayName(string name)
+    {
+        DisplayName = name;
+        gameObject.name = $"Remote_{name}";
+        RefreshLabel();
+    }
+
+    private void RefreshLabel()
+    {
+        nameLabel.text = health >= 0 ? $"{DisplayName}\nHP {health}" : DisplayName;
     }
 
     private void Update()
@@ -103,7 +117,7 @@ public class RemotePlayer : MonoBehaviour, IHittable
         label.transform.localPosition = new Vector3(0f, 1.4f, 0f);
 
         var text = label.AddComponent<TextMesh>();
-        var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        var font = ThaiFont.Font;
         text.font = font;
         label.GetComponent<MeshRenderer>().sharedMaterial = font.material;
         text.text = username;

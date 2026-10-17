@@ -48,7 +48,7 @@ public class TravelMenu : MonoBehaviour
         scaler.referenceResolution = new Vector2(1920f, 1080f);
         scaler.matchWidthOrHeight = 0.5f;
 
-        var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        var font = ThaiFont.Font;
 
         // Dim full-screen backdrop (also blocks the joystick while the map is open)
         panel = CreateImage("Backdrop", canvasGo.transform, new Color(0f, 0f, 0f, 0.55f)).gameObject;
