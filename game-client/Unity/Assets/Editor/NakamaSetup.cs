@@ -47,6 +47,8 @@ public static class NakamaSetup
             Undo.AddComponent<CoopClient>(connection.gameObject);
         if (connection.GetComponent<MusicClient>() == null)
             Undo.AddComponent<MusicClient>(connection.gameObject);
+        if (connection.GetComponent<QuestClient>() == null)
+            Undo.AddComponent<QuestClient>(connection.gameObject);
         if (connection.GetComponent<ProfileClient>() == null)
             Undo.AddComponent<ProfileClient>(connection.gameObject);
 

@@ -7,6 +7,7 @@
 local nk = require("nakama")
 local data = require("shop_data")
 local chickens = require("chicken_core")
+local quest = require("quest_core")
 
 local INVENTORY = { collection = "inventory", key = "fish" }
 
@@ -98,6 +99,7 @@ local function rpc_sell_fish(context, payload)
       { collection = INVENTORY.collection, key = INVENTORY.key, user_id = user_id, value = inv, permission_read = 1, permission_write = 0 },
       { collection = data.CROPS.collection, key = data.CROPS.key, user_id = user_id, value = crops, permission_read = 1, permission_write = 0 },
     })
+    quest.progress(user_id, "sell_produce", 1)
   end
 
   return view(user_id, inv, { sold = sold, earned = value })
@@ -171,6 +173,7 @@ local function checkout(user_id, lines)
   end
   data.write_items(user_id, items)
   if new_chickens > 0 then chickens.write(user_id, coop) end
+  quest.progress(user_id, "shop", 1)
   return total, #cart
 end
 

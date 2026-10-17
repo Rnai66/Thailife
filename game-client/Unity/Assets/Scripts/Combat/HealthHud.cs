@@ -67,6 +67,8 @@ public class HealthHud : MonoBehaviour
     }
 
     // Clock and energy change continuously; refresh a few times a second
+    private Image questImage;
+    private Text questLabel;
     private float nextTick;
 
     private void Update()
@@ -82,6 +84,16 @@ public class HealthHud : MonoBehaviour
         float energy = online ? life.Energy : 0f;
         float max = online ? life.Current.max_energy : 100f;
         energyFill.anchorMax = new Vector2(Mathf.Clamp01(energy / max), 1f);
+        var q = QuestClient.Instance;
+        if (q != null && q.IsOnline)
+        {
+            bool reward = q.HasReward;
+            questLabel.text = reward ? "ภารกิจ: กดรับรางวัล!" : $"ภารกิจวันนี้ {q.DoneCount}/{q.Current.quests?.Length ?? 0}";
+            questImage.color = reward ? UiKit.Gold : UiKit.Teak;
+            questLabel.color = reward ? UiKit.GoldInk : UiKit.GoldText;
+        }
+        else questLabel.text = "ภารกิจวันนี้";
+
         energyLabel.text = online ? $"พลังงาน {energy:0}/{max:0}" + (life.IsSleeping ? " (นอนอยู่)" : "") : "พลังงาน —";
     }
 
@@ -235,6 +247,15 @@ public class HealthHud : MonoBehaviour
         eatRect.anchorMin = eatRect.anchorMax = new Vector2(1f, 1f);
         eatRect.pivot = new Vector2(1f, 1f);
         eatRect.anchoredPosition = new Vector2(-535f, -143f);
+
+        // "ภารกิจ" opens the daily quests (under the energy bar)
+        var quests = UiKit.RoundButton(canvasGo.transform, "ภารกิจวันนี้", Vector2.zero, new Vector2(400f, 52f), UiKit.Teak, UiKit.GoldText, QuestUI.Toggle, 26);
+        var questRect = (RectTransform)quests.transform;
+        questRect.anchorMin = questRect.anchorMax = new Vector2(1f, 1f);
+        questRect.pivot = new Vector2(1f, 1f);
+        questRect.anchoredPosition = new Vector2(-120f, -196f);
+        questImage = quests.GetComponent<Image>();
+        questLabel = quests.GetComponentInChildren<Text>();
 
         var ko = CreateText("KO", canvasGo.transform, font, 160, TextAnchor.MiddleCenter);
         ko.text = "KO!";

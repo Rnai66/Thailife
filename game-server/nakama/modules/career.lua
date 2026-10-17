@@ -8,6 +8,7 @@
 
 local nk = require("nakama")
 local data = require("shop_data")
+local quest = require("quest_core")
 
 local COLLECTION = "career"
 local KEY = "stats"
@@ -106,6 +107,7 @@ local function rpc_train(context, payload)
   end
 
   write_stats(context.user_id, stats)
+  quest.progress(context.user_id, "train", accepted)
   return view(stats, accepted)
 end
 

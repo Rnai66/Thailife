@@ -7,6 +7,7 @@
 local nk = require("nakama")
 local life = require("life_core")
 local data = require("shop_data")
+local quest = require("quest_core")
 
 local GRPC_INVALID_ARGUMENT = 3
 local GRPC_FAILED_PRECONDITION = 9
@@ -51,5 +52,6 @@ nk.register_rpc(function(context, payload)
   items.food[req.food] = items.food[req.food] - 1
   data.write_items(user_id, items)
   local state = life.add_energy(user_id, food.energy)
+  quest.progress(user_id, "eat", 1)
   return view(user_id, state, { ate = food.name, gained = math.floor(state.energy - before) })
 end, "life_eat")

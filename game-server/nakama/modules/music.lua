@@ -9,6 +9,7 @@
 local nk = require("nakama")
 local life = require("life_core")
 local data = require("shop_data")
+local quest = require("quest_core")
 
 local STATS = { collection = "music", key = "stats" }
 local CURRENCY = "baht"
@@ -204,6 +205,7 @@ local function rpc_finish(context, payload)
   end
   if s.level >= MAX_LEVEL then s.xp = 0 end
   write_stats(user_id, s)
+  quest.progress(user_id, "music", 1)
 
   return view(user_id, s, context.env, {
     tips = tips, accuracy = math.floor(accuracy * 100 + 0.5), gained_xp = gained, leveled_up = leveled,

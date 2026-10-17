@@ -10,6 +10,7 @@ local nk = require("nakama")
 local core = require("chicken_core")
 local life = require("life_core")
 local data = require("shop_data")
+local quest = require("quest_core")
 
 local CURRENCY = "baht"
 local EGG_PRICE = 6
@@ -92,6 +93,7 @@ local function rpc_act(context, payload)
     items.feed = items.feed - 1
     data.write_items(user_id, items)
     coop.fed_until_ms = math.max(coop.fed_until_ms, now) + core.FEED_MS
+    quest.progress(user_id, "feed", 1)
 
   elseif action == "sell_eggs" then
     local total = coop.eggs * EGG_PRICE + coop.fertile_eggs * core.fertile_egg_price(coop, now)
@@ -100,6 +102,7 @@ local function rpc_act(context, payload)
     pay(user_id, total, "sell_eggs")
     extra.earned = total
     extra.sold = coop.eggs + coop.fertile_eggs
+    quest.progress(user_id, "sell_eggs", extra.sold)
     coop.eggs, coop.fertile_eggs = 0, 0
 
   elseif action == "hatch" then

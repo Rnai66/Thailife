@@ -8,6 +8,7 @@
 local nk = require("nakama")
 local life = require("life_core")
 local data = require("shop_data")
+local quest = require("quest_core")
 
 local FARM = { collection = "farm", key = "plots" }
 local PLOTS = 6
@@ -106,6 +107,7 @@ local function rpc_act(context, payload)
     items.seeds[variety] = items.seeds[variety] - 1
     data.write_items(user_id, items)
     p = { state = "planted", variety = variety, planted_ms = nk.time(), watered = false }
+    quest.progress(user_id, "plant", 1)
 
   elseif action == "water" then
     if stage ~= "growing" then error({ "nothing growing", GRPC_FAILED_PRECONDITION }) end
@@ -132,6 +134,7 @@ local function rpc_act(context, payload)
     data.write_barn(user_id, crops)
     extra.harvested_kg = kg
     extra.harvested_name = rice.name
+    quest.progress(user_id, "harvest", 1)
     p = { state = "empty" }
 
   else

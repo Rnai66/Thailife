@@ -65,6 +65,9 @@ public class LifeClient : MonoBehaviour
         Instance = this;
         connection = GetComponent<NakamaConnection>();
 
+        // Daily quests ride along with the life systems (no scene setup needed)
+        if (GetComponent<QuestClient>() == null) gameObject.AddComponent<QuestClient>();
+
         // Every location scene gets a day/night sun without extra setup
         foreach (var light in FindObjectsByType<Light>(FindObjectsSortMode.None))
             if (light.type == LightType.Directional && light.GetComponent<DayNightCycle>() == null)

@@ -7,6 +7,7 @@
 local nk = require("nakama")
 local data = require("shop_data")
 local life = require("life_core")
+local quest = require("quest_core")
 
 local STATE = { collection = "fishing", key = "state" }
 local INVENTORY = { collection = "inventory", key = "fish" }
@@ -103,6 +104,7 @@ local function rpc_reel(context, payload)
     inv.biggest_name = fish.name
   end
   write(context.user_id, INVENTORY, inv)
+  quest.progress(context.user_id, "fish", 1)
 
   return nk.json_encode({ caught = true, fish_id = fish.id, fish_name = fish.name, kg = kg, inventory = inventory_view(inv) })
 end
