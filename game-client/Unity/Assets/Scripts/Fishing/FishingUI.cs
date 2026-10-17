@@ -106,7 +106,8 @@ public class FishingUI : MonoBehaviour
         catch (Exception e)
         {
             RemoveBobber();
-            SetState(State.Idle, "ตกปลาไม่สำเร็จ ลองใหม่");
+            SetState(State.Idle, e.Message.Contains("energy") ? "พลังงานไม่พอ — ไปนอนพักที่ชานบ้านก่อน"
+                : e.Message.Contains("sleeping") ? "กำลังนอนอยู่" : "ตกปลาไม่สำเร็จ ลองใหม่");
             Debug.LogWarning($"[Fishing] {e.Message}");
         }
     }

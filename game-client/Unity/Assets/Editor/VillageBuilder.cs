@@ -73,6 +73,9 @@ public static class VillageBuilder
         BuildSpiritHouse(v, new Vector3(2.8f, 0f, 3.2f));
         BuildShop(v, new Vector3(-7f, 0f, -12f), yaw: 180f);
 
+        // Rice barn next to the house (harvests are stored here)
+        Places2.Granary(v, new Vector3(1.5f, 0f, 11f), 0f);
+
         // Home yard training (tier 1: banana trees)
         Places.BananaTree(v, new Vector3(-3f, 0f, -2.5f), trainable: true);
         Places.BananaTree(v, new Vector3(-4.8f, 0f, -0.8f), trainable: true);
@@ -184,6 +187,17 @@ public static class VillageBuilder
             float z = -4.2f - depth * (steps - 1 - i) - depth * 0.5f;
             PrimitiveKit.Box("Step", t, new Vector3(2.4f, h * 0.5f, z), new Vector3(1.2f, h, depth), darkWood);
         }
+
+        // Sleeping mat (เสื่อ) on the porch: lie down to restore energy
+        PrimitiveKit.Box("SleepingMat", t, new Vector3(-1.6f, 2.62f, -3.4f), new Vector3(1.4f, 0.03f, 2f),
+            PrimitiveKit.Mat("Mat", new Color(0.85f, 0.7f, 0.4f)), collider: false);
+        var bed = new GameObject("SleepZone");
+        bed.transform.SetParent(t, false);
+        bed.transform.localPosition = new Vector3(-1.6f, 3.6f, -3.4f);
+        var bedZone = bed.AddComponent<BoxCollider>();
+        bedZone.isTrigger = true;
+        bedZone.size = new Vector3(2f, 2f, 1.6f);
+        bed.AddComponent<SleepSpot>();
 
         // Porch railing (gap left for the stairs)
         PrimitiveKit.Box("Rail", t, new Vector3(-0.7f, 3.35f, -4.15f), new Vector3(4.6f, 0.08f, 0.08f), darkWood);

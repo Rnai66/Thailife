@@ -80,8 +80,9 @@ public class ShopUI : MonoBehaviour
         try
         {
             var result = await wallet.SellAllFishAsync();
-            Render(result, result.sold > 0 ? $"ขายปลา {result.sold} ตัว ได้ {result.earned} บาท" : "ไม่มีปลาให้ขาย ไปตกที่คลองในตำบลก่อนนะ");
+            Render(result, result.earned > 0 ? $"ขายผลผลิตได้ {result.earned} บาท" : "ยังไม่มีอะไรให้ขาย — ตกปลาที่คลองในตำบล หรือทำนาที่โคก หนอง นา");
             if (result.earned > 0) FloatAbovePlayer($"+{result.earned} ฿", new Color(1f, 0.85f, 0.2f));
+            FarmClient.Instance?.Refresh(); // the barn is empty now
         }
         catch (Exception e)
         {
@@ -101,6 +102,7 @@ public class ShopUI : MonoBehaviour
         {
             var result = await wallet.BuyAsync(item.id);
             Render(result, $"ซื้อ{item.name}แล้ว!");
+            FarmClient.Instance?.Refresh(); // seeds / barn size changed
             FloatAbovePlayer($"-{item.price} ฿", new Color(1f, 0.6f, 0.3f));
         }
         catch (ApiResponseException e)
@@ -136,7 +138,7 @@ public class ShopUI : MonoBehaviour
             }
         }
         basketText.text = !IsCommunity ? "" :
-            fishCount > 0 ? $"รับซื้อปลา: {lines}= {snapshot.total_value:N0} บาท" : "รับซื้อปลา: ยังไม่มีปลาในข้อง (ตกได้ที่คลองในตำบล)";
+            fishCount > 0 ? $"รับซื้อ: {lines}= {snapshot.total_value:N0} บาท" : "รับซื้อปลาและข้าวเปลือก: ยังไม่มีของให้ขาย";
         basketText.gameObject.SetActive(IsCommunity);
         sellButton.gameObject.SetActive(IsCommunity);
         sellButton.interactable = !busy && fishCount > 0;
@@ -150,7 +152,7 @@ public class ShopUI : MonoBehaviour
             {
                 if (item.shop != shopId) continue;
                 AddItemRow(item, y, snapshot.baht);
-                y -= 130f;
+                y -= 106f;
             }
         }
 
@@ -161,15 +163,16 @@ public class ShopUI : MonoBehaviour
     {
         var row = MakeRect("Item", itemList, new Color(1f, 1f, 1f, 0.6f));
         row.anchoredPosition = new Vector2(0f, y);
-        row.sizeDelta = new Vector2(900f, 115f);
+        row.sizeDelta = new Vector2(900f, 98f);
 
-        var title = MakeLabel(row, 36, $"{item.name} — {item.price} บาท", new Vector2(-150f, 22f), new Vector2(560f, 50f), new Color(0.3f, 0.15f, 0.05f));
+        var title = MakeLabel(row, 32, $"{item.name} — {item.price} บาท", new Vector2(-150f, 20f), new Vector2(560f, 44f), new Color(0.3f, 0.15f, 0.05f));
         title.alignment = TextAnchor.MiddleLeft;
-        var desc = MakeLabel(row, 26, item.desc, new Vector2(-150f, -25f), new Vector2(560f, 44f), new Color(0.35f, 0.3f, 0.25f));
+        string detail = string.IsNullOrEmpty(item.have) ? item.desc : $"{item.desc} · {item.have}";
+        var desc = MakeLabel(row, 26, detail, new Vector2(-150f, -22f), new Vector2(560f, 40f), new Color(0.35f, 0.3f, 0.25f));
         desc.alignment = TextAnchor.MiddleLeft;
 
         string label = item.owned ? "มีแล้ว" : baht >= item.price ? "ซื้อ" : "เงินไม่พอ";
-        var button = MakeButton(row, label, new Vector2(330f, 0f), new Vector2(220f, 90f),
+        var button = MakeButton(row, label, new Vector2(330f, 0f), new Vector2(220f, 80f),
             item.owned ? new Color(0.7f, 0.85f, 0.7f) : new Color(0.45f, 0.75f, 1f), () => Buy(item));
         button.interactable = !item.owned && baht >= item.price && !busy;
     }
@@ -203,19 +206,19 @@ public class ShopUI : MonoBehaviour
         backdrop.offsetMin = backdrop.offsetMax = Vector2.zero;
 
         var card = MakeRect("Card", panel.transform, new Color(0.98f, 0.95f, 0.86f));
-        card.sizeDelta = new Vector2(1000f, 900f);
+        card.sizeDelta = new Vector2(1000f, 1000f);
 
-        titleText = MakeLabel(card, 52, "", new Vector2(0f, 390f), new Vector2(940f, 80f), brown);
-        balanceText = MakeLabel(card, 36, "", new Vector2(0f, 320f), new Vector2(940f, 56f), new Color(0.1f, 0.45f, 0.2f));
-        basketText = MakeLabel(card, 30, "", new Vector2(-130f, 235f), new Vector2(680f, 90f), brown);
-        sellButton = MakeButton(card, "ขายปลาทั้งหมด", new Vector2(340f, 235f), new Vector2(260f, 90f), new Color(1f, 0.8f, 0.3f), SellAll);
+        titleText = MakeLabel(card, 52, "", new Vector2(0f, 445f), new Vector2(940f, 70f), brown);
+        balanceText = MakeLabel(card, 34, "", new Vector2(0f, 385f), new Vector2(940f, 50f), new Color(0.1f, 0.45f, 0.2f));
+        basketText = MakeLabel(card, 28, "", new Vector2(-130f, 310f), new Vector2(680f, 90f), brown);
+        sellButton = MakeButton(card, "ขายทั้งหมด", new Vector2(340f, 310f), new Vector2(260f, 84f), new Color(1f, 0.8f, 0.3f), SellAll);
 
         itemList = new GameObject("Items", typeof(RectTransform)).GetComponent<RectTransform>();
         itemList.SetParent(card, false);
-        itemList.anchoredPosition = new Vector2(0f, 90f);
+        itemList.anchoredPosition = new Vector2(0f, 205f);
 
-        messageText = MakeLabel(card, 36, "", new Vector2(0f, -290f), new Vector2(940f, 60f), new Color(0.6f, 0.2f, 0.05f));
-        MakeButton(card, "ปิด", new Vector2(0f, -380f), new Vector2(300f, 90f), new Color(0.9f, 0.45f, 0.4f), Hide);
+        messageText = MakeLabel(card, 34, "", new Vector2(0f, -375f), new Vector2(940f, 56f), new Color(0.6f, 0.2f, 0.05f));
+        MakeButton(card, "ปิด", new Vector2(0f, -445f), new Vector2(300f, 80f), new Color(0.9f, 0.45f, 0.4f), Hide);
     }
 
     private static RectTransform MakeRect(string name, Transform parent, Color color)

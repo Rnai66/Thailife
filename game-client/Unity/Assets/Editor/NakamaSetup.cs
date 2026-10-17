@@ -39,6 +39,10 @@ public static class NakamaSetup
             Undo.AddComponent<FishingClient>(connection.gameObject);
         if (connection.GetComponent<WalletClient>() == null)
             Undo.AddComponent<WalletClient>(connection.gameObject);
+        if (connection.GetComponent<LifeClient>() == null)
+            Undo.AddComponent<LifeClient>(connection.gameObject);
+        if (connection.GetComponent<FarmClient>() == null)
+            Undo.AddComponent<FarmClient>(connection.gameObject);
 
         // Keep sending/receiving while the window is not focused (two windows side by side)
         PlayerSettings.runInBackground = true;

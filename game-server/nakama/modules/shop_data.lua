@@ -17,8 +17,26 @@ M.RODS = {
              weights = { tilapia = 25, barb = 20, snakehead = 30, catfish = 25 } },
 }
 
+-- Rice varieties (พันธุ์ข้าว): seeds are bought at the shop, one bag plants one plot.
+M.RICE = {
+  khao_niao = { name = "ข้าวเหนียว กข6",    seed_price = 20, grow_ms = 12 * 60 * 1000, price_per_kg = 12,
+                yield_watered = { 10, 14 }, yield_dry = { 5, 7 } },
+  hommali   = { name = "ข้าวหอมมะลิ 105", seed_price = 30, grow_ms = 16 * 60 * 1000, price_per_kg = 18,
+                yield_watered = { 9, 12 },  yield_dry = { 4, 6 } },
+}
+M.RICE_ORDER = { "khao_niao", "hommali" }
+
+-- Rice barn (ยุ้งข้าว): harvested rice is stored here; full barn = can't harvest
+M.BARN_START = 100
+M.BARN_STEP = 100
+M.BARN_MAX = 500
+
 -- Things for sale. shop = where the client shows it (the server sells it anywhere).
+-- consumable items can be bought again and again.
 M.CATALOG = {
+  { id = "seed_khao_niao",  shop = "community", price = 20,  name = "พันธุ์ข้าวเหนียว กข6 (1 ถุง)", desc = "ปลูกได้ 1 แปลง · โต 12 นาที · ขาย 12 บาท/กก.", seed = "khao_niao", consumable = true },
+  { id = "seed_hommali",    shop = "community", price = 30,  name = "พันธุ์ข้าวหอมมะลิ 105 (1 ถุง)", desc = "ปลูกได้ 1 แปลง · โต 16 นาที · ขาย 18 บาท/กก.", seed = "hommali", consumable = true },
+  { id = "barn_upgrade",    shop = "community", price = 300, name = "ขยายยุ้งข้าว +100 กก.", desc = "เก็บข้าวได้มากขึ้น (สูงสุด 500 กก.)", barn = true, consumable = true },
   { id = "rod_fiber",       shop = "community", price = 150, name = "เบ็ดไฟเบอร์", desc = "ปลากินเร็วขึ้น ปลาหายากบ่อยขึ้น ตัวใหญ่ขึ้น 15%", rod = "fiber" },
   { id = "rod_carbon",      shop = "community", price = 400, name = "เบ็ดคาร์บอน", desc = "ปลากินเร็วสุด ปลาช่อน/ปลาดุกบ่อย ตัวใหญ่ขึ้น 30%", rod = "carbon" },
   { id = "camp_membership", shop = "camp",      price = 300, name = "สมาชิกค่ายมวย", desc = "ปลดล็อกการซ้อมกระสอบหนักในค่าย (ต้อง Lv 6 ด้วย)" },
@@ -26,14 +44,44 @@ M.CATALOG = {
 
 local nk = require("nakama")
 
--- Owned items: { rods = { bamboo = true, ... }, rod = "bamboo", camp_member = false }
+-- Owned items: { rods = { bamboo = true, ... }, rod = "bamboo", camp_member = false,
+--                 seeds = { khao_niao = n, hommali = n }, barn_capacity = kg }
 function M.read_items(user_id)
   local objects = nk.storage_read({ { collection = M.ITEMS.collection, key = M.ITEMS.key, user_id = user_id } })
   local items = (#objects > 0) and objects[1].value or {}
   items.rods = items.rods or { bamboo = true }
   items.rod = items.rod or "bamboo"
   items.camp_member = items.camp_member or false
+  items.seeds = items.seeds or {}
+  for _, v in ipairs(M.RICE_ORDER) do items.seeds[v] = items.seeds[v] or 0 end
+  items.barn_capacity = items.barn_capacity or M.BARN_START
   return items
+end
+
+-- Rice in the barn: { khao_niao = kg, hommali = kg } (older saves had a single rice_kg)
+M.CROPS = { collection = "inventory", key = "crops" }
+
+function M.read_barn(user_id)
+  local objects = nk.storage_read({ { collection = M.CROPS.collection, key = M.CROPS.key, user_id = user_id } })
+  local crops = (#objects > 0) and objects[1].value or {}
+  crops.rice = crops.rice or {}
+  if crops.rice_kg and crops.rice_kg > 0 then
+    crops.rice.khao_niao = (crops.rice.khao_niao or 0) + crops.rice_kg
+  end
+  crops.rice_kg = nil
+  local total = 0
+  for _, v in ipairs(M.RICE_ORDER) do
+    crops.rice[v] = crops.rice[v] or 0
+    total = total + crops.rice[v]
+  end
+  return crops, total
+end
+
+function M.write_barn(user_id, crops)
+  nk.storage_write({ {
+    collection = M.CROPS.collection, key = M.CROPS.key, user_id = user_id, value = crops,
+    permission_read = 1, permission_write = 0,
+  } })
 end
 
 function M.write_items(user_id, items)
@@ -44,6 +92,8 @@ function M.write_items(user_id, items)
 end
 
 function M.owns(items, entry)
+  if entry.barn then return items.barn_capacity >= M.BARN_MAX end -- "owned" = maxed out
+  if entry.consumable then return false end
   if entry.rod then return items.rods[entry.rod] == true end
   if entry.id == "camp_membership" then return items.camp_member == true end
   return false

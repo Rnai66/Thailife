@@ -17,6 +17,9 @@ public class HealthHud : MonoBehaviour
     private FishingClient fishing;
     private Text moneyLabel;
     private WalletClient wallet;
+    private Text clockLabel;
+    private RectTransform energyFill;
+    private Text energyLabel;
 
     private void Awake()
     {
@@ -49,6 +52,24 @@ public class HealthHud : MonoBehaviour
         wallet = WalletClient.Instance;
         if (wallet != null) wallet.Changed += RefreshMoney;
         RefreshMoney(wallet != null ? wallet.Current : null);
+    }
+
+    // Clock and energy change continuously; refresh a few times a second
+    private float nextTick;
+
+    private void Update()
+    {
+        if (Time.time < nextTick) return;
+        nextTick = Time.time + 0.25f;
+
+        clockLabel.text = GameClock.Display;
+
+        var life = LifeClient.Instance;
+        bool online = life != null && life.IsOnline;
+        float energy = online ? life.Energy : 0f;
+        float max = online ? life.Current.max_energy : 100f;
+        energyFill.anchorMax = new Vector2(Mathf.Clamp01(energy / max), 1f);
+        energyLabel.text = online ? $"พลังงาน {energy:0}/{max:0}" + (life.IsSleeping ? " (นอนอยู่)" : "") : "พลังงาน —";
     }
 
     private void RefreshMoney(WalletClient.Snapshot snapshot)
@@ -157,6 +178,31 @@ public class HealthHud : MonoBehaviour
         moneyRect.sizeDelta = new Vector2(500f, 50f);
         moneyLabel.color = new Color(1f, 0.85f, 0.2f);
         moneyLabel.gameObject.AddComponent<Shadow>();
+
+        // Game clock and energy bar under the money (top-right)
+        clockLabel = CreateText("Clock", canvasGo.transform, font, 30, TextAnchor.MiddleRight);
+        var clockRect = clockLabel.rectTransform;
+        clockRect.anchorMin = clockRect.anchorMax = new Vector2(1f, 1f);
+        clockRect.pivot = new Vector2(1f, 1f);
+        clockRect.anchoredPosition = new Vector2(-120f, -100f);
+        clockRect.sizeDelta = new Vector2(600f, 44f);
+        clockLabel.gameObject.AddComponent<Shadow>();
+
+        var energyBg = CreateRect("EnergyBar", canvasGo.transform, new Color(0f, 0f, 0f, 0.5f));
+        energyBg.anchorMin = energyBg.anchorMax = new Vector2(1f, 1f);
+        energyBg.pivot = new Vector2(1f, 1f);
+        energyBg.anchoredPosition = new Vector2(-120f, -150f);
+        energyBg.sizeDelta = new Vector2(400f, 34f);
+        energyFill = CreateRect("Fill", energyBg, new Color(1f, 0.8f, 0.2f));
+        energyFill.anchorMin = Vector2.zero;
+        energyFill.anchorMax = Vector2.one;
+        energyFill.offsetMin = new Vector2(3f, 3f);
+        energyFill.offsetMax = new Vector2(-3f, -3f);
+        energyLabel = CreateText("EnergyLabel", energyBg, font, 24, TextAnchor.MiddleCenter);
+        energyLabel.rectTransform.anchorMin = Vector2.zero;
+        energyLabel.rectTransform.anchorMax = Vector2.one;
+        energyLabel.rectTransform.offsetMin = energyLabel.rectTransform.offsetMax = Vector2.zero;
+        energyLabel.color = new Color(0.15f, 0.1f, 0.05f);
 
         var ko = CreateText("KO", canvasGo.transform, font, 160, TextAnchor.MiddleCenter);
         ko.text = "KO!";

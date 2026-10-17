@@ -159,11 +159,20 @@ public static class Places
         var thatch = PrimitiveKit.Mat("Thatch", new Color(0.75f, 0.62f, 0.35f));
         var wood = PrimitiveKit.Mat("DarkWood", DarkWood);
 
-        // นา: 3x2 rice paddies separated by low dikes (0.25 m — walkable)
+        // นา: 3x2 rice paddies separated by low dikes (0.25 m — walkable); each is a farm plot (ids 1..6)
+        int plotId = 0;
         foreach (float x in new[] { -16f, -8f, 0f })
         foreach (float z in new[] { -4f, 3.5f })
         {
             PrimitiveKit.Box("Paddy", t, new Vector3(x, 0.015f, z), new Vector3(7.6f, 0.03f, 7.1f), rice, collider: false);
+
+            var plotZone = new GameObject($"FarmPlot_{++plotId}");
+            plotZone.transform.SetParent(t, false);
+            plotZone.transform.localPosition = new Vector3(x, 1f, z);
+            var trigger = plotZone.AddComponent<BoxCollider>();
+            trigger.isTrigger = true;
+            trigger.size = new Vector3(7.2f, 2f, 6.7f);
+            plotZone.AddComponent<FarmPlot>().Configure(plotId, new Vector2(7.2f, 6.7f));
             PrimitiveKit.Box("DikeN", t, new Vector3(x, 0.12f, z + 3.65f), new Vector3(8f, 0.25f, 0.3f), dike);
             PrimitiveKit.Box("DikeS", t, new Vector3(x, 0.12f, z - 3.65f), new Vector3(8f, 0.25f, 0.3f), dike);
             PrimitiveKit.Box("DikeW", t, new Vector3(x - 3.85f, 0.12f, z), new Vector3(0.3f, 0.25f, 7.6f), dike);
@@ -193,7 +202,7 @@ public static class Places
         PrimitiveKit.Box("RoofFront", hut.transform, new Vector3(0f, 2.75f, -0.75f), new Vector3(3.4f, 0.12f, 1.9f), thatch, new Vector3(-35f, 0f, 0f), collider: false);
         PrimitiveKit.Box("RoofBack", hut.transform, new Vector3(0f, 2.75f, 0.75f), new Vector3(3.4f, 0.12f, 1.9f), thatch, new Vector3(35f, 0f, 0f), collider: false);
 
-        Sign(t, new Vector3(2f, 0f, 14f), "โคก หนอง นา", 180f);
+        Sign(t, new Vector3(2f, 0f, 14f), "โคก หนอง นา\nเดินเข้าแปลงเพื่อทำนา", 180f);
         return farm;
     }
 

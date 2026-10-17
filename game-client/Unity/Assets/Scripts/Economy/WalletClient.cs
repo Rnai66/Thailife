@@ -24,6 +24,7 @@ public class WalletClient : MonoBehaviour
         public string desc;
         public int price;
         public bool owned;
+        public string have;   // e.g. "มีอยู่ 2 ถุง", "ยุ้งจุ 200 กก."
     }
 
     [Serializable]

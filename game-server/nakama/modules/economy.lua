@@ -8,6 +8,7 @@ local nk = require("nakama")
 local data = require("shop_data")
 
 local INVENTORY = { collection = "inventory", key = "fish" }
+
 local CURRENCY = "baht"
 
 -- Buy prices at the community shop (ร้านค้าชุมชน), baht per fish
@@ -28,8 +29,8 @@ local function balance(user_id)
   return (account.wallet and account.wallet[CURRENCY]) or 0
 end
 
--- Basket contents as a list the client can parse, plus what it would sell for
-local function basket(inv)
+-- Everything sellable (fish + rice from the barn) as a list the client can parse, plus its value
+local function basket(inv, crops)
   local counts = inv.counts or {}
   local list, value = {}, 0
   for _, f in ipairs(FISH_PRICES) do
@@ -37,20 +38,30 @@ local function basket(inv)
     table.insert(list, { id = f.id, name = f.name, count = n, price = f.price })
     value = value + n * f.price
   end
+  for _, v in ipairs(data.RICE_ORDER) do
+    local r = data.RICE[v]
+    local kg = crops.rice[v] or 0
+    table.insert(list, { id = "rice_" .. v, name = r.name .. " (กก.)", count = kg, price = r.price_per_kg })
+    value = value + kg * r.price_per_kg
+  end
   return list, value
 end
 
 local function catalog(items)
   local list = {}
   for _, entry in ipairs(data.CATALOG) do
+    local have = ""
+    if entry.seed then have = "มีอยู่ " .. items.seeds[entry.seed] .. " ถุง" end
+    if entry.barn then have = "ยุ้งจุ " .. items.barn_capacity .. " กก." end
     table.insert(list, { id = entry.id, shop = entry.shop, name = entry.name, desc = entry.desc,
-                         price = entry.price, owned = data.owns(items, entry) })
+                         price = entry.price, owned = data.owns(items, entry), have = have })
   end
   return list
 end
 
 local function view(user_id, inv, extra)
-  local list, value = basket(inv)
+  local crops = data.read_barn(user_id)
+  local list, value = basket(inv, crops)
   local items = data.read_items(user_id)
   local result = {
     baht = balance(user_id), fish = list, total_value = value,
@@ -68,18 +79,20 @@ end
 local function rpc_sell_fish(context, payload)
   local user_id = context.user_id
   local inv = read_inventory(user_id)
-  local _, value = basket(inv)
-  local sold = inv.total or 0
+  local crops, rice_kg = data.read_barn(user_id)
+  local _, value = basket(inv, crops)
+  local sold = (inv.total or 0) + rice_kg
 
   if value > 0 then
-    -- Pay first, then empty the basket (keep the biggest-fish record)
-    nk.wallet_update(user_id, { [CURRENCY] = value }, { reason = "sell_fish", fish = sold }, true)
+    -- Pay first, then empty the fish basket and the rice barn (keep the biggest-fish record)
+    nk.wallet_update(user_id, { [CURRENCY] = value }, { reason = "sell_produce", fish = inv.total or 0, rice_kg = rice_kg }, true)
     inv.counts = {}
     inv.total = 0
-    nk.storage_write({ {
-      collection = INVENTORY.collection, key = INVENTORY.key, user_id = user_id, value = inv,
-      permission_read = 1, permission_write = 0,
-    } })
+    for _, v in ipairs(data.RICE_ORDER) do crops.rice[v] = 0 end
+    nk.storage_write({
+      { collection = INVENTORY.collection, key = INVENTORY.key, user_id = user_id, value = inv, permission_read = 1, permission_write = 0 },
+      { collection = data.CROPS.collection, key = data.CROPS.key, user_id = user_id, value = crops, permission_read = 1, permission_write = 0 },
+    })
   end
 
   return view(user_id, inv, { sold = sold, earned = value })
@@ -108,6 +121,10 @@ local function rpc_buy(context, payload)
   if entry.rod then
     items.rods[entry.rod] = true
     items.rod = entry.rod -- equip the new rod
+  elseif entry.seed then
+    items.seeds[entry.seed] = (items.seeds[entry.seed] or 0) + 1
+  elseif entry.barn then
+    items.barn_capacity = math.min(data.BARN_MAX, items.barn_capacity + data.BARN_STEP)
   elseif entry.id == "camp_membership" then
     items.camp_member = true
   end

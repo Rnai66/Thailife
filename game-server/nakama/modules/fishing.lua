@@ -6,6 +6,7 @@
 
 local nk = require("nakama")
 local data = require("shop_data")
+local life = require("life_core")
 
 local STATE = { collection = "fishing", key = "state" }
 local INVENTORY = { collection = "inventory", key = "fish" }
@@ -66,6 +67,7 @@ local function rpc_cast(context, payload)
     error({ "casting too fast", GRPC_RESOURCE_EXHAUSTED })
   end
 
+  life.spend(context.user_id, life.COST.cast)
   local rod = equipped_rod(context.user_id)
   local bite_in = math.random(rod.bite_min or MIN_BITE_MS, rod.bite_max or MAX_BITE_MS)
   write(context.user_id, STATE, { cast_ms = now, bite_ms = now + bite_in })

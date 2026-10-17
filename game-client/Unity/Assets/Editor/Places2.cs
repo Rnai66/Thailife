@@ -48,6 +48,43 @@ public static class Places2
         return hall;
     }
 
+    // ── Rice barn (ยุ้งข้าว): small raised wooden storehouse; stand in front to see the stock ──
+    public static GameObject Granary(Transform parent, Vector3 position, float yaw)
+    {
+        var barn = PrimitiveKit.Group("Granary_ยุ้งข้าว", parent, position, yaw);
+        var t = barn.transform;
+        var dark = PrimitiveKit.Mat("DarkWood", DarkWood);
+        var wood = PrimitiveKit.Mat("WoodPlank", Wood);
+        var thatch = PrimitiveKit.Mat("Thatch", new Color(0.75f, 0.62f, 0.35f));
+        var rice = PrimitiveKit.Mat("BananaFruit", new Color(0.85f, 0.75f, 0.35f));
+
+        // Raised on posts (keeps rice dry and away from rats)
+        foreach (float x in new[] { -1.4f, 1.4f })
+        foreach (float z in new[] { -1.4f, 1.4f })
+            PrimitiveKit.Cylinder("Post", t, new Vector3(x, 0.6f, z), new Vector3(0.2f, 0.6f, 0.2f), dark);
+        PrimitiveKit.Box("Floor", t, new Vector3(0f, 1.25f, 0f), new Vector3(3.4f, 0.12f, 3.4f), dark);
+        PrimitiveKit.Box("Walls", t, new Vector3(0f, 2.2f, 0f), new Vector3(3f, 1.8f, 3f), wood);
+        PrimitiveKit.Box("Door", t, new Vector3(0f, 2.1f, -1.52f), new Vector3(0.9f, 1.4f, 0.04f), dark, collider: false);
+        PrimitiveKit.Box("RoofFront", t, new Vector3(0f, 3.55f, -0.95f), new Vector3(3.8f, 0.12f, 2.4f), thatch, new Vector3(-38f, 0f, 0f), collider: false);
+        PrimitiveKit.Box("RoofBack", t, new Vector3(0f, 3.55f, 0.95f), new Vector3(3.8f, 0.12f, 2.4f), thatch, new Vector3(38f, 0f, 0f), collider: false);
+        // Ladder and rice sacks in front
+        for (int i = 0; i < 4; i++)
+            PrimitiveKit.Box("LadderRung", t, new Vector3(0f, 0.3f + i * 0.28f, -1.9f + i * 0.08f), new Vector3(0.8f, 0.05f, 0.08f), dark, collider: false);
+        PrimitiveKit.Sphere("RiceSack", t, new Vector3(1.2f, 0.3f, -2.1f), new Vector3(0.6f, 0.6f, 0.5f), rice);
+        PrimitiveKit.Sphere("RiceSack", t, new Vector3(1.7f, 0.28f, -1.9f), new Vector3(0.55f, 0.55f, 0.45f), rice);
+
+        var zone = new GameObject("GranaryZone");
+        zone.transform.SetParent(t, false);
+        zone.transform.localPosition = new Vector3(0f, 1f, -2.6f);
+        var box = zone.AddComponent<BoxCollider>();
+        box.isTrigger = true;
+        box.size = new Vector3(3f, 2f, 1.8f);
+        zone.AddComponent<GranarySpot>();
+
+        Places.Sign(t, new Vector3(-2.2f, 0f, -2.4f), "ยุ้งข้าว\nเกี่ยวแล้วเก็บที่นี่", 0f);
+        return barn;
+    }
+
     // ── SAO office (อบต. — องค์การบริหารส่วนตำบล) ───────────────────────────────
     public static GameObject SaoOffice(Transform parent, Vector3 position, string name)
     {
