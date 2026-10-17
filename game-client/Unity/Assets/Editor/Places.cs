@@ -72,9 +72,9 @@ public static class Places
     }
 
     // ── School (โรงเรียน) ───────────────────────────────────────────────────────
-    public static GameObject School(Transform parent, Vector3 position, string name)
+    public static GameObject School(Transform parent, Vector3 position, string name, float yaw = 0f)
     {
-        var school = PrimitiveKit.Group("School_โรงเรียน", parent, position);
+        var school = PrimitiveKit.Group("School_โรงเรียน", parent, position, yaw);
         var t = school.transform;
         var cream = PrimitiveKit.Mat("SchoolCream", new Color(0.95f, 0.88f, 0.7f));
         var roof = PrimitiveKit.Mat("RoofRed", new Color(0.62f, 0.18f, 0.12f));

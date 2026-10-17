@@ -102,6 +102,9 @@ public class TravelMenu : MonoBehaviour
         label.color = color;
         label.text = text;
         label.raycastTarget = false;
+        label.resizeTextForBestFit = true; // long place names shrink instead of clipping
+        label.resizeTextMinSize = 20;
+        label.resizeTextMaxSize = size;
         return label;
     }
 

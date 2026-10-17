@@ -35,6 +35,8 @@ public static class NakamaSetup
             Undo.AddComponent<MatchSync>(connection.gameObject);
         if (connection.GetComponent<CareerClient>() == null)
             Undo.AddComponent<CareerClient>(connection.gameObject);
+        if (connection.GetComponent<FishingClient>() == null)
+            Undo.AddComponent<FishingClient>(connection.gameObject);
 
         // Keep sending/receiving while the window is not focused (two windows side by side)
         PlayerSettings.runInBackground = true;

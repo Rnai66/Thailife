@@ -18,7 +18,8 @@ public static class RepairScene
 
         NakamaSetup.Setup();
         MobileControlsSetup.EnsureMobileControls();
-        VillageBuilder.EnsureVillage();
+        if (EditorSceneManager.GetActiveScene().name == "ThaiVillage")
+            VillageBuilder.EnsureVillage();
 
         EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
         Debug.Log("[ThaiLife] Scene repaired. Save (Cmd+S) and press Play.");

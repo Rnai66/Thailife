@@ -13,6 +13,8 @@ public class HealthHud : MonoBehaviour
     private RectTransform xpFill;
     private Text careerLabel;
     private CareerClient career;
+    private Text fishLabel;
+    private FishingClient fishing;
 
     private void Awake()
     {
@@ -26,6 +28,7 @@ public class HealthHud : MonoBehaviour
     {
         combat.HealthChanged -= Refresh;
         if (career != null) career.StatsChanged -= RefreshCareer;
+        if (fishing != null) fishing.InventoryChanged -= RefreshFish;
     }
 
     private void Start()
@@ -35,6 +38,17 @@ public class HealthHud : MonoBehaviour
         career = CareerClient.Instance;
         if (career != null) career.StatsChanged += RefreshCareer;
         RefreshCareer(null, career != null ? career.Current : null);
+
+        fishing = FishingClient.Instance;
+        if (fishing != null) fishing.InventoryChanged += RefreshFish;
+        RefreshFish(fishing != null ? fishing.Current : null);
+    }
+
+    private void RefreshFish(FishingClient.Inventory inventory)
+    {
+        fishLabel.text = inventory == null || inventory.total == 0
+            ? ""
+            : $"ปลาที่จับได้ {inventory.total} ตัว · ใหญ่สุด {inventory.biggest_name} {inventory.biggest_kg:0.00} กก.";
     }
 
     private void RefreshCareer(CareerClient.Stats previous, CareerClient.Stats stats)
@@ -114,6 +128,14 @@ public class HealthHud : MonoBehaviour
         careerRect.anchoredPosition = new Vector2(120f, -120f);
         careerRect.sizeDelta = new Vector2(900f, 44f);
         careerLabel.gameObject.AddComponent<Shadow>();
+
+        fishLabel = CreateText("Fish", canvasGo.transform, font, 26, TextAnchor.MiddleLeft);
+        var fishRect = fishLabel.rectTransform;
+        fishRect.anchorMin = fishRect.anchorMax = new Vector2(0f, 1f);
+        fishRect.pivot = new Vector2(0f, 1f);
+        fishRect.anchoredPosition = new Vector2(120f, -162f);
+        fishRect.sizeDelta = new Vector2(900f, 40f);
+        fishLabel.gameObject.AddComponent<Shadow>();
 
         var ko = CreateText("KO", canvasGo.transform, font, 160, TextAnchor.MiddleCenter);
         ko.text = "KO!";

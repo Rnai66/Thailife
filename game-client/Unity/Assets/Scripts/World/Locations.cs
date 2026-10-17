@@ -6,8 +6,7 @@ public enum LocationLevel
 {
     Village,      // หมู่บ้าน
     Subdistrict,  // ตำบล
-    District,     // อำเภอ
-    Province,     // จังหวัด
+    City,         // เมือง (อำเภอ/จังหวัด)
 }
 
 // One travel destination. Each is its own scene with its own online match.
@@ -28,17 +27,15 @@ public static class Locations
     public static readonly IReadOnlyList<Location> All = new List<Location>
     {
         new Location { Id = "village_nongbua", NameTh = "บ้านหนองบัว หมู่ 1", Level = LocationLevel.Village, Scene = "ThaiVillage", SpawnId = "busstop" },
-        new Location { Id = "tambon_nongbua", NameTh = "ตำบลหนองบัว · ค่ายมวย", Level = LocationLevel.Subdistrict, Scene = "Tambon", SpawnId = "busstop" },
-        new Location { Id = "amphoe", NameTh = "อำเภอ (เร็วๆ นี้)", Level = LocationLevel.District },
-        new Location { Id = "changwat", NameTh = "จังหวัด (เร็วๆ นี้)", Level = LocationLevel.Province },
+        new Location { Id = "tambon_nongbua", NameTh = "ตำบลหนองบัว · อบต. รพ.สต. โรงเรียน คลองตกปลา", Level = LocationLevel.Subdistrict, Scene = "Tambon", SpawnId = "busstop" },
+        new Location { Id = "city", NameTh = "ตัวเมือง · ค่ายมวย หอนาฬิกา", Level = LocationLevel.City, Scene = "City", SpawnId = "busstop" },
     };
 
     public static string LevelNameTh(LocationLevel level) => level switch
     {
         LocationLevel.Village => "หมู่บ้าน",
         LocationLevel.Subdistrict => "ตำบล",
-        LocationLevel.District => "อำเภอ",
-        _ => "จังหวัด",
+        _ => "เมือง",
     };
 
     public static Location Current

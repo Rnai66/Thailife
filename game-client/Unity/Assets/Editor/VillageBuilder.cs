@@ -5,8 +5,8 @@ using UnityEngine;
 // Menu: Thai Life > Build Thai Village
 // Lays out the home village (หมู่บ้าน, GDD section 3.1) from primitives under one "Village" object.
 // Everything here is walkable: home (stilt house, spirit house, banana trees for training tier 1),
-// grocery shop, temple (วัด), school, health station (รพ.สต.), Kok Nong Na farm and a songthaew stop
-// that travels to the sub-district (ตำบล) scene where the boxing camp is.
+// community shop (ร้านค้าชุมชน), temple (วัด), village hall (ศาลากลางหมู่บ้าน), Kok Nong Na farm and a
+// songthaew stop to the sub-district (ตำบล) and the city (เมือง, where the boxing camp is).
 // Re-running replaces the Village object; other scene objects are kept.
 public static class VillageBuilder
 {
@@ -28,12 +28,23 @@ public static class VillageBuilder
         if (GameObject.Find(RootName) == null) Build();
     }
 
-    private static void Build()
+    private static void Build() => Build(ask: true);
+
+    internal static void Build(bool ask)
     {
+        // The village belongs only in ThaiVillage.unity (not in the tambon/city scenes)
+        var active = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+        if (active.name != "ThaiVillage")
+        {
+            EditorUtility.DisplayDialog("Thai Village",
+                $"ตอนนี้เปิดฉาก \"{active.name}\" อยู่ — ผังหมู่บ้านต้องสร้างในฉาก ThaiVillage\n\nเปิด Assets/Scenes/ThaiVillage ก่อน แล้วค่อยกดเมนูนี้", "OK");
+            return;
+        }
+
         var existing = GameObject.Find(RootName);
         if (existing != null)
         {
-            if (!EditorUtility.DisplayDialog("Thai Village", "มี Village อยู่แล้ว ต้องการสร้างใหม่ทับหรือไม่?", "สร้างใหม่", "ยกเลิก"))
+            if (ask && !EditorUtility.DisplayDialog("Thai Village", "มี Village อยู่แล้ว ต้องการสร้างใหม่ทับหรือไม่?", "สร้างใหม่", "ยกเลิก"))
                 return;
             Undo.DestroyObjectImmediate(existing);
         }
@@ -72,21 +83,22 @@ public static class VillageBuilder
         // Places around the village, each reached by a dirt lane from the main road
         Places.Temple(v, new Vector3(-32f, 0f, 21f), "วัดหนองบัว");
         Lane(v, -32f, -6f, 7f);
-        Places.School(v, new Vector3(28f, 0f, 22f), "โรงเรียนบ้านหนองบัว");
-        Lane(v, 28f, -6f, 9f);
-        Places.HealthStation(v, new Vector3(30f, 0f, -24f), 180f, "รพ.สต.หนองบัว");
-        Lane(v, 30f, -17.5f, -10f);
+        Places2.VillageHall(v, new Vector3(28f, 0f, 16f), "ศาลากลางบ้านหนองบัว");
+        Lane(v, 28f, -6f, 11.5f);
         Places.KokNongNa(v, new Vector3(-12f, 0f, -36f));
         Lane(v, -12f, -21f, -10f);
 
         // Songthaew stop on the south side of the road, facing it
         Places.BusStop(v, new Vector3(14f, 0f, -11.5f), 180f);
-        Places.Sign(v, new Vector3(17f, 0f, -11f), "ไปตำบล / ค่ายมวย\n(ยืนใต้ป้ายรถ)", 180f);
+        Places.Sign(v, new Vector3(17f, 0f, -11f), "ไปตำบล / เมือง\n(ยืนใต้ป้ายรถ)", 180f);
 
         foreach (var pos in new[] { new Vector3(-18f, 0f, -2f), new Vector3(16f, 0f, -3f), new Vector3(-6f, 0f, 16f), new Vector3(3f, 0f, 15f),
                      new Vector3(-48f, 0f, -20f), new Vector3(48f, 0f, 2f), new Vector3(-20f, 0f, 42f), new Vector3(10f, 0f, 45f), new Vector3(45f, 0f, -45f) })
             Places.ShadeTree(v, pos);
 
+        // Every location scene needs its own Network and controls
+        NakamaSetup.Setup();
+        MobileControlsSetup.EnsureMobileControls();
         EnsureCareerWiring();
 
         EditorSceneManager.MarkSceneDirty(root.scene);
@@ -244,7 +256,7 @@ public static class VillageBuilder
             PrimitiveKit.Box("Awning", t, new Vector3(-2.4f + i * 0.8f, 2.7f, -2.7f), new Vector3(0.8f, 0.06f, 1.6f), i % 2 == 0 ? red : white, new Vector3(-14f, 0f, 0f), collider: false);
 
         PrimitiveKit.Box("SignBoard", t, new Vector3(0f, 3.65f, -2.05f), new Vector3(4.2f, 0.8f, 0.1f), sign, collider: false);
-        PrimitiveKit.Label("ร้านค้า", t, new Vector3(0f, 3.65f, -2.12f), 0.09f, new Color(0.7f, 0.1f, 0.1f));
+        PrimitiveKit.Label("ร้านค้าชุมชน", t, new Vector3(0f, 3.65f, -2.12f), 0.09f, new Color(0.7f, 0.1f, 0.1f));
     }
 
     // Dirt lane along Z at x, from z0 to z1 (decoration only)

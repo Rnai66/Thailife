@@ -16,6 +16,10 @@
 - [x] ระบบชกมวย v1: ต่อย 10 / เตะ 18 / ป้องกันลด 80%, กระเด็น, HP 100, KO 3 วิ แล้วฟื้น, ซิงก์ผ่านเน็ต, กระสอบทราย (16 ต.ค. 2026)
 - [x] อาชีพนักมวย v1: XP/เลเวลบนเซิร์ฟเวอร์ (career.lua, กันโกง), ซ้อม 3 ระดับ ต้นกล้วย Lv1 → กระสอบ Lv3 → ค่ายมวย Lv6, ฉายา, ดาเมจ/HP ตามเลเวล (16 ต.ค. 2026)
 - [x] หมู่บ้านไทยจาก primitive: บ้านไม้ใต้ถุนสูง, ศาลพระภูมิ, ร้านโชห่วย, ถนน, ต้นกล้วย, ค่ายมวย
+- [x] แผนที่ 3 ระดับ เดินทางด้วยป้ายรถสองแถว (แต่ละที่ = ฉาก + ห้องออนไลน์ของตัวเอง):
+  - หมู่บ้าน: บ้าน, ศาลพระภูมิ, ร้านค้าชุมชน, วัด, ศาลากลางหมู่บ้าน + หอกระจายข่าว, โคก หนอง นา
+  - ตำบล: อบต., รพ.สต., โรงเรียน, สวนสาธารณะ, คลองตกปลา (fishing.lua — เซิร์ฟเวอร์สุ่มเวลาและชนิดปลา)
+  - เมือง: หอนาฬิกา, ตึกแถว, ค่ายมวย (ซ้อมระดับ 3)
 - [x] Multiplayer ขั้น 1: Unity เชื่อมต่อ Nakama local (Docker) ได้ — device auth + realtime socket (16 ต.ค. 2026)
 - [x] Multiplayer ขั้น 2: เห็นผู้เล่นอื่นและซิงก์ตำแหน่ง (relayed match "thaivillage", ทดสอบ Editor + Mac build) (16 ต.ค. 2026)
 
@@ -56,14 +60,14 @@ tools/, tests/         (ภายหลัง)
 | ต่อย | C (ซ้าย) | J | West (□) |
 | ป้องกัน (ค้าง) | D (บน) | L | North (△) |
 
-ถ้าฉากขาดอะไรไป: เมนู **Thai Life → Repair Scene** (เติมเฉพาะส่วนที่หาย ไม่ลบอะไร) · ตั้งค่า UI: **Thai Life → Add Mobile Controls** · กระสอบทรายซ้อม: **Thai Life → Add Punching Bag**
+สร้าง/อัปเดตทุกฉาก: **Thai Life → Build Whole World** · ถ้าฉากขาดอะไรไป: เมนู **Thai Life → Repair Scene** (เติมเฉพาะส่วนที่หาย ไม่ลบอะไร) · ตั้งค่า UI: **Thai Life → Add Mobile Controls** · กระสอบทรายซ้อม: **Thai Life → Add Punching Bag**
 
 ## Multiplayer (Nakama)
 
 - Server ระหว่างพัฒนา: **Nakama บนเครื่องตัวเองผ่าน Docker** (ฟรี) — `game-server/docker-compose.yml`
   - เริ่ม: `cd game-server && docker compose up -d` · หยุด: `docker compose down`
   - Admin console: http://127.0.0.1:7351
-  - Unity config: scheme `http`, host `127.0.0.1` (iPhone ใช้ IP ของ Mac ในวง Wi-Fi), port `7350`, server key ตาม `.env` (ค่าเริ่มต้น `defaultkey`)
+  - Unity config: scheme `http`, host `Chanas-MacBook-Pro.local` (ชื่อเครื่อง — ไม่เปลี่ยนตาม IP), port `7350`, server key ตาม `.env` (ค่าเริ่มต้น `defaultkey`)
 - ทดสอบ 2 คนบน Mac: เมนู **Thai Life → Build & Run Mac Test Client** แล้วกด Play ใน Editor (Editor = profile `editor`, build = `-profile mac2`)
 - Heroic Cloud (org `rnaisys`): Development deployment ราคา $420/เดือน — ยังไม่ใช้จนกว่าจะเปิดให้คนนอกเล่น
 - SDK: `com.heroiclabs.nakama-unity` v3.22.1 (ติดตั้งผ่าน Packages/manifest.json)
