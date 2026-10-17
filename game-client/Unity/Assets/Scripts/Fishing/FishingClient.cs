@@ -92,7 +92,8 @@ public class FishingClient : MonoBehaviour
         return reel;
     }
 
-    private void SetInventory(Inventory inventory)
+    // Also used by WalletClient after selling fish at the shop
+    public void SetInventory(Inventory inventory)
     {
         if (inventory == null) return;
         Current = inventory;

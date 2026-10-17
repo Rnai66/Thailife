@@ -15,6 +15,8 @@ public class HealthHud : MonoBehaviour
     private CareerClient career;
     private Text fishLabel;
     private FishingClient fishing;
+    private Text moneyLabel;
+    private WalletClient wallet;
 
     private void Awake()
     {
@@ -29,6 +31,7 @@ public class HealthHud : MonoBehaviour
         combat.HealthChanged -= Refresh;
         if (career != null) career.StatsChanged -= RefreshCareer;
         if (fishing != null) fishing.InventoryChanged -= RefreshFish;
+        if (wallet != null) wallet.Changed -= RefreshMoney;
     }
 
     private void Start()
@@ -42,13 +45,22 @@ public class HealthHud : MonoBehaviour
         fishing = FishingClient.Instance;
         if (fishing != null) fishing.InventoryChanged += RefreshFish;
         RefreshFish(fishing != null ? fishing.Current : null);
+
+        wallet = WalletClient.Instance;
+        if (wallet != null) wallet.Changed += RefreshMoney;
+        RefreshMoney(wallet != null ? wallet.Current : null);
+    }
+
+    private void RefreshMoney(WalletClient.Snapshot snapshot)
+    {
+        moneyLabel.text = snapshot == null ? "" : $"เงิน {snapshot.baht:N0} บาท";
     }
 
     private void RefreshFish(FishingClient.Inventory inventory)
     {
         fishLabel.text = inventory == null || inventory.total == 0
             ? ""
-            : $"ปลาที่จับได้ {inventory.total} ตัว · ใหญ่สุด {inventory.biggest_name} {inventory.biggest_kg:0.00} กก.";
+            : $"ปลาในข้อง {inventory.total} ตัว · ใหญ่สุด {inventory.biggest_name} {inventory.biggest_kg:0.00} กก.";
     }
 
     private void RefreshCareer(CareerClient.Stats previous, CareerClient.Stats stats)
@@ -136,6 +148,15 @@ public class HealthHud : MonoBehaviour
         fishRect.anchoredPosition = new Vector2(120f, -162f);
         fishRect.sizeDelta = new Vector2(900f, 40f);
         fishLabel.gameObject.AddComponent<Shadow>();
+
+        moneyLabel = CreateText("Money", canvasGo.transform, font, 34, TextAnchor.MiddleRight);
+        var moneyRect = moneyLabel.rectTransform;
+        moneyRect.anchorMin = moneyRect.anchorMax = new Vector2(1f, 1f);
+        moneyRect.pivot = new Vector2(1f, 1f);
+        moneyRect.anchoredPosition = new Vector2(-120f, -50f);
+        moneyRect.sizeDelta = new Vector2(500f, 50f);
+        moneyLabel.color = new Color(1f, 0.85f, 0.2f);
+        moneyLabel.gameObject.AddComponent<Shadow>();
 
         var ko = CreateText("KO", canvasGo.transform, font, 160, TextAnchor.MiddleCenter);
         ko.text = "KO!";
