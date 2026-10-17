@@ -5,6 +5,7 @@
 -- The client only shows the bobber and asks; it can't choose the fish or skip the wait.
 
 local nk = require("nakama")
+local data = require("shop_data")
 
 local STATE = { collection = "fishing", key = "state" }
 local INVENTORY = { collection = "inventory", key = "fish" }
@@ -41,15 +42,21 @@ local function inventory_view(inv)
   return { total = inv.total or 0, counts = inv.counts or {}, biggest_kg = inv.biggest_kg or 0, biggest_name = inv.biggest_name or "" }
 end
 
-local function roll_fish()
+-- Pick a fish using the equipped rod's weights (falls back to the base weights)
+local function roll_fish(rod)
+  local weights = (rod and rod.weights) or {}
   local total = 0
-  for _, f in ipairs(FISH) do total = total + f.weight end
+  for _, f in ipairs(FISH) do total = total + (weights[f.id] or f.weight) end
   local r = math.random() * total
   for _, f in ipairs(FISH) do
-    r = r - f.weight
+    r = r - (weights[f.id] or f.weight)
     if r <= 0 then return f end
   end
   return FISH[#FISH]
+end
+
+local function equipped_rod(user_id)
+  return data.RODS[data.read_items(user_id).rod] or data.RODS.bamboo
 end
 
 local function rpc_cast(context, payload)
@@ -59,7 +66,8 @@ local function rpc_cast(context, payload)
     error({ "casting too fast", GRPC_RESOURCE_EXHAUSTED })
   end
 
-  local bite_in = math.random(MIN_BITE_MS, MAX_BITE_MS)
+  local rod = equipped_rod(context.user_id)
+  local bite_in = math.random(rod.bite_min or MIN_BITE_MS, rod.bite_max or MAX_BITE_MS)
   write(context.user_id, STATE, { cast_ms = now, bite_ms = now + bite_in })
   return nk.json_encode({ bite_in_ms = bite_in })
 end
@@ -80,8 +88,10 @@ local function rpc_reel(context, payload)
     return nk.json_encode({ caught = false, reason = "late", inventory = inventory_view(inv) })
   end
 
-  local fish = roll_fish()
-  local kg = math.floor((fish.min_kg + math.random() * (fish.max_kg - fish.min_kg)) * 100 + 0.5) / 100
+  local rod = equipped_rod(context.user_id)
+  local fish = roll_fish(rod)
+  local kg = (fish.min_kg + math.random() * (fish.max_kg - fish.min_kg)) * (rod.size or 1)
+  kg = math.floor(kg * 100 + 0.5) / 100
 
   inv.counts = inv.counts or {}
   inv.counts[fish.id] = (inv.counts[fish.id] or 0) + 1

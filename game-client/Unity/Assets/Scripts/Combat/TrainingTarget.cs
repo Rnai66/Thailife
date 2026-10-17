@@ -43,6 +43,14 @@ public class TrainingTarget : MonoBehaviour, IHittable
             return;
         }
 
+        // Camp bags also need a paid membership (bought at the camp's front desk)
+        var wallet = WalletClient.Instance;
+        if (targetId == "camp" && (wallet == null || !wallet.IsCampMember))
+        {
+            FloatingText.Spawn(at, "สมัครสมาชิกค่ายก่อน", LockedColor);
+            return;
+        }
+
         career.RecordHit(targetId);
         FloatingText.Spawn(at, $"+{xpPerHit} XP", XpColor);
     }

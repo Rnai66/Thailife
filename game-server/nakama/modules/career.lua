@@ -7,6 +7,7 @@
 --   career_train payload {"target":"banana","hits":N} -> stats (+ "accepted" hits)
 
 local nk = require("nakama")
+local data = require("shop_data")
 
 local COLLECTION = "career"
 local KEY = "stats"
@@ -16,7 +17,7 @@ local MAX_LEVEL = 20
 local TARGETS = {
   banana = { xp = 2, level = 1 },
   bag    = { xp = 4, level = 3 },
-  camp   = { xp = 7, level = 6 },
+  camp   = { xp = 7, level = 6, membership = true },
 }
 
 -- Token bucket: attacks have a ~0.35 s cooldown, so ~3 hits/s is the honest maximum.
@@ -77,6 +78,9 @@ local function rpc_train(context, payload)
   local stats = read_stats(context.user_id)
   if stats.level < target.level then
     error({ "training target locked until level " .. target.level, GRPC_FAILED_PRECONDITION })
+  end
+  if target.membership and not data.read_items(context.user_id).camp_member then
+    error({ "boxing camp membership required", GRPC_FAILED_PRECONDITION })
   end
 
   -- Refill the bucket for the time since the last report, then spend it on the reported hits

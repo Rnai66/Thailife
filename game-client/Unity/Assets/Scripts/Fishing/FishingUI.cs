@@ -31,7 +31,8 @@ public class FishingUI : MonoBehaviour
         if (instance == null)
             instance = new GameObject("FishingUI").AddComponent<FishingUI>();
         instance.spot = fishingSpot;
-        instance.SetState(State.Idle, "ยืนริมคลองแล้ว กด ตกปลา (F)");
+        string rod = WalletClient.Instance != null ? WalletClient.Instance.RodName : null;
+        instance.SetState(State.Idle, $"ยืนริมคลองแล้ว กด ตกปลา (F){(string.IsNullOrEmpty(rod) ? "" : $" · ใช้{rod}")}");
         instance.root.SetActive(true);
     }
 

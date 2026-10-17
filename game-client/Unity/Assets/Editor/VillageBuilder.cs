@@ -256,7 +256,7 @@ public static class VillageBuilder
             PrimitiveKit.Box("Awning", t, new Vector3(-2.4f + i * 0.8f, 2.7f, -2.7f), new Vector3(0.8f, 0.06f, 1.6f), i % 2 == 0 ? red : white, new Vector3(-14f, 0f, 0f), collider: false);
 
         PrimitiveKit.Box("SignBoard", t, new Vector3(0f, 3.65f, -2.05f), new Vector3(4.2f, 0.8f, 0.1f), sign, collider: false);
-        // Walk up to the counter to open the shop (sell fish for baht)
+        // Walk up to the counter to open the shop (sell fish, buy rods)
         var counterZone = new GameObject("ShopCounterZone");
         counterZone.transform.SetParent(t, false);
         counterZone.transform.localPosition = new Vector3(0f, 1f, -3f);
@@ -264,7 +264,7 @@ public static class VillageBuilder
         zone.isTrigger = true;
         zone.size = new Vector3(4f, 2f, 1.8f);
         counterZone.AddComponent<ShopCounter>();
-        Places.Sign(t, new Vector3(2.9f, 0f, -2.8f), "รับซื้อปลา\nเดินมาที่หน้าร้าน", 0f);
+        Places.Sign(t, new Vector3(2.9f, 0f, -2.8f), "รับซื้อปลา · ขายเบ็ด\nเดินมาที่หน้าร้าน", 0f);
 
         PrimitiveKit.Label("ร้านค้าชุมชน", t, new Vector3(0f, 3.65f, -2.12f), 0.09f, new Color(0.7f, 0.1f, 0.1f));
     }

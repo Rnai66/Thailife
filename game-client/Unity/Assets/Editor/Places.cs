@@ -282,6 +282,17 @@ public static class Places
         TrainingSetup.BuildBag("Training_CampBag", t, new Vector3(4.8f, 0f, 1.5f), "camp", 6, 7, new Color(0.1f, 0.2f, 0.55f));
 
         PrimitiveKit.Box("Bench", t, new Vector3(-4.1f, 0.225f, 0f), new Vector3(0.6f, 0.45f, 2.4f), wood);
+
+        // Front desk (โต๊ะรับสมัคร): walk up to it to buy the camp membership
+        PrimitiveKit.Box("FrontDesk", t, new Vector3(-6.2f, 0.5f, -5f), new Vector3(2.2f, 1f, 0.7f), wood);
+        var desk = new GameObject("FrontDeskZone");
+        desk.transform.SetParent(t, false);
+        desk.transform.localPosition = new Vector3(-6.2f, 1f, -6.4f);
+        var zone = desk.AddComponent<BoxCollider>();
+        zone.isTrigger = true;
+        zone.size = new Vector3(2.6f, 2f, 1.8f);
+        desk.AddComponent<ShopCounter>().Configure("camp");
+        Sign(t, new Vector3(-8.2f, 0f, -5.6f), "สมัครสมาชิกค่าย\n300 บาท", 0f);
         return camp;
     }
 
