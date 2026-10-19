@@ -108,6 +108,12 @@ public static class VillageBuilder
             Places.ShadeTree(v, pos);
 
         DressNature(v);
+        Seaside.CowFarm(v, new Vector3(6f, 0f, 32f)); // ฟาร์มวัว north of the home
+
+        // Villagers out and about in the daytime, monks' alms round at dawn (from the temple along the road)
+        Npcs.Crowd(v, new Vector3(2f, 0f, -3f), new Vector2(22f, 4f), 3, "", 7, 19, Npcs.VillageTalk);
+        Npcs.Crowd(v, new Vector3(-12f, 0f, -32f), new Vector2(14f, 4f), 2, "", 6, 17, Npcs.VillageTalk);
+        Npcs.AlmsRound(v, new Vector3(-32f, 0f, -4.6f), new Vector3(24f, 0f, -4.6f), 3);
 
         // Power line along the north side of the road, lamps over the road, wires to the house and shop
         var poles = StreetFurniture.PoleLine(v, new[]
@@ -251,14 +257,18 @@ public static class VillageBuilder
         PrimitiveKit.Box("FinialR", t, new Vector3(3.35f, 7.55f, 0f), new Vector3(0.1f, 0.7f, 0.1f), roof, new Vector3(0f, 0f, -20f), collider: false);
 
         // Stairs up to the porch (rise 0.26 m: within the CharacterController step offset)
+        var stairWood = PrimitiveKit.Mat("StairWood", new Color(0.66f, 0.47f, 0.28f)); // lighter than the house so the steps read
         const int steps = 10;
         const float rise = 0.26f, depth = 0.35f;
         for (int i = 0; i < steps; i++)
         {
             float h = rise * (i + 1);
             float z = -4.2f - depth * (steps - 1 - i) - depth * 0.5f;
-            PrimitiveKit.Box("Step", t, new Vector3(2.4f, h * 0.5f, z), new Vector3(1.2f, h, depth), darkWood);
+            PrimitiveKit.Box("Step", t, new Vector3(2.4f, h * 0.5f, z), new Vector3(1.2f, h, depth), stairWood);
         }
+        // Lights for the stairs: a bulb under the eave at the top, a lamp post at the bottom
+        StreetFurniture.HangingLight(t, new Vector3(2.4f, 4.4f, -4.2f));
+        StreetFurniture.LampPost(t, new Vector3(3.5f, 0f, -7.9f));
 
         // Sleeping mat (เสื่อ) on the porch: lie down to restore energy
         PrimitiveKit.Box("SleepingMat", t, new Vector3(-1.6f, 2.62f, -3.4f), new Vector3(1.4f, 0.03f, 2f),

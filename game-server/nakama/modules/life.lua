@@ -1,6 +1,7 @@
 -- Daily life RPCs (energy, sleep, food). Rules live in life_core.lua.
 --   life_get    {}               -> {energy, max_energy, sleeping, foods:[{id,name,count,energy}]}
---   life_sleep  {}               -> start sleeping (energy regenerates fast; actions are blocked)
+--   life_sleep  {"spot": id?}    -> start sleeping (energy regenerates fast; actions are blocked);
+--                                   paid spots (beach chairs) charge their rent first
 --   life_wake   {}               -> stop sleeping
 --   life_eat    {"food": id}     -> eat one food from the bag, energy goes up (capped at max)
 
@@ -29,8 +30,28 @@ nk.register_rpc(function(context, payload)
   return view(context.user_id, life.state(context.user_id))
 end, "life_get")
 
+-- Rest spots you pay for (rent per rest)
+local PAID_SPOTS = {
+  beach_chair = { price = 40, name = "เช่าเก้าอี้ชายหาด" },
+}
+
 nk.register_rpc(function(context, payload)
-  return view(context.user_id, life.set_sleeping(context.user_id, true))
+  local user_id = context.user_id
+  local ok, req = pcall(nk.json_decode, payload or "")
+  if not ok or type(req) ~= "table" then req = {} end
+  local spot = PAID_SPOTS[req.spot or ""]
+  local extra
+  if spot then
+    local state = life.state(user_id)
+    if state.sleep_ms then error({ "already sleeping", GRPC_FAILED_PRECONDITION }) end
+    local account = nk.account_get_id(user_id)
+    local w = account.wallet or {}
+    if type(w) == "string" then w = nk.json_decode(w) end
+    if (w[data.CURRENCY] or 0) < spot.price then error({ "not enough baht", GRPC_FAILED_PRECONDITION }) end
+    nk.wallet_update(user_id, { [data.CURRENCY] = -spot.price }, { reason = "rest_rent", spot = req.spot }, true)
+    extra = { paid = spot.price }
+  end
+  return view(user_id, life.set_sleeping(user_id, true), extra)
 end, "life_sleep")
 
 nk.register_rpc(function(context, payload)

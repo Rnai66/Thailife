@@ -6,10 +6,17 @@ using UnityEngine;
 public class FishingSpot : MonoBehaviour
 {
     [SerializeField] private Transform bobberPoint;
+    [SerializeField] private string water = "fresh"; // "sea" at the beach pier: sea fish (ปลาทะเล)
+
+    public string Water => water;
 
     public Vector3 BobberPosition => bobberPoint != null ? bobberPoint.position : transform.position + transform.forward * 2f;
 
-    public void Configure(Transform bobber) => bobberPoint = bobber;
+    public void Configure(Transform bobber, string waterKind = "fresh")
+    {
+        bobberPoint = bobber;
+        water = waterKind;
+    }
 
     private void Reset() => GetComponent<Collider>().isTrigger = true;
 

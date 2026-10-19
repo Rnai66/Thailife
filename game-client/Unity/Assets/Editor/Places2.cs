@@ -227,6 +227,17 @@ public static class Places2
 
         // Flagpoles: national flag in front
         ThaiFlag(t, new Vector3(-6f, 0f, -9f));
+
+        // Desk for the อบต. cow project: every villager gets one cow (โครงการวัวให้ชาวบ้าน)
+        var cowDesk = new GameObject("CowProjectDesk");
+        cowDesk.transform.SetParent(t, false);
+        cowDesk.transform.localPosition = new Vector3(4.6f, 1f, -6.2f);
+        var deskZone = cowDesk.AddComponent<BoxCollider>();
+        deskZone.isTrigger = true;
+        deskZone.size = new Vector3(2.4f, 2f, 2f);
+        cowDesk.AddComponent<RanchCounter>().Configure("sao");
+        PrimitiveKit.Box("CowDesk", t, new Vector3(4.6f, 0.45f, -5.4f), new Vector3(1.8f, 0.9f, 0.7f), PrimitiveKit.Mat("WoodPlank", new Color(0.6f, 0.4f, 0.22f)));
+        Places.Sign(t, new Vector3(6.2f, 0f, -6.6f), "รับวัวฟรี 1 ตัว\nโครงการ อบต.", 0f);
         return office;
     }
 

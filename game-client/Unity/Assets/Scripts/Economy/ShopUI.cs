@@ -105,6 +105,12 @@ public class ShopUI : MonoBehaviour
                 list.Add(new Category { Name = "ของกิน", Tile = new Color32(0xFA, 0xEC, 0xE7, 0xFF), TileInk = new Color32(0x99, 0x3C, 0x1D, 0xFF), Has = id => id.StartsWith("food_") });
                 list.Add(new Category { Name = "ของถูก", Tile = new Color32(0xF1, 0xEF, 0xE8, 0xFF), TileInk = new Color32(0x5F, 0x5E, 0x5A, 0xFF), Has = id => id.StartsWith("flea_") });
                 break;
+            case "noodle":
+                list.Add(new Category { Name = "ก๋วยเตี๋ยว", Tile = new Color32(0xFA, 0xEC, 0xE7, 0xFF), TileInk = new Color32(0x99, 0x3C, 0x1D, 0xFF), Has = id => id.StartsWith("food_") });
+                break;
+            case "beach":
+                list.Add(new Category { Name = "อาหารทะเล", Tile = new Color32(0xE6, 0xF1, 0xFB, 0xFF), TileInk = new Color32(0x18, 0x5F, 0xA5, 0xFF), Has = id => id.StartsWith("food_") });
+                break;
             case "city_food":
                 list.Add(new Category { Name = "อาหาร", Tile = new Color32(0xFA, 0xEE, 0xDA, 0xFF), TileInk = new Color32(0x85, 0x4F, 0x0B, 0xFF), Has = id => id.StartsWith("food_") });
                 break;
@@ -177,6 +183,7 @@ public class ShopUI : MonoBehaviour
             cart.Clear();
             Render(result);
             Toast($"ซื้อเรียบร้อย จ่าย {result.spent:N0} บาท", PayGreen);
+            GameAudio.Play("coins");
             FarmClient.Instance?.Refresh();  // seeds / barn size
             CoopClient.Instance?.Refresh();  // chickens / feed
             LifeClient.Instance?.Refresh();  // food in the bag
@@ -237,6 +244,8 @@ public class ShopUI : MonoBehaviour
         titleText.text = shopId == "community" ? "ร้านค้าชุมชน"
             : shopId == "market" ? "ตลาดสดเทศบาล"
             : shopId == "flea" ? "ตลาดนัด"
+            : shopId == "noodle" ? "ร้านก๋วยเตี๋ยว"
+            : shopId == "beach" ? "ร้านอาหารริมทะเล"
             : shopId == "city_food" ? "ร้านอาหารในเมือง"
             : shopId == "music" ? "ร้านเครื่องดนตรี"
             : "ค่ายมวย · โต๊ะรับสมัคร";

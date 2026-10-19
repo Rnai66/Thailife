@@ -43,27 +43,94 @@ M.FESTIVALS = {
   { id = "phapa_2",       name = "งานทอดผ้าป่าสามัคคี",         month = 12, day = 8,  days = 2, scale = "small" },
 }
 
--- Returns open, fair_id (this year's edition), ends_in_ms, next_in_ms, festival (current or next)
+-- Monthly events (งานประจำเดือน) so there's always something coming: every month one in the
+-- village (at the temple ground), one at the tambon and one in the city, names rotating.
+-- National events (ระดับประเทศ): beach concerts (คอนเสิร์ตริมทะเล) three times a year.
+local MONTHLY = {
+  { scale = "village", day = 2,  days = 2, names = { "งานรื่นเริงหมู่บ้าน", "ตลาดนัดคนเดินหมู่บ้าน", "งานบุญข้าวใหม่",
+                                                   "งานกีฬาสีหมู่บ้าน", "งานลานวัฒนธรรมหมู่บ้าน", "งานบุญกลางบ้าน" } },
+  { scale = "small",   day = 17, days = 2, names = { "งานกาชาดตำบล", "งานของดีตำบล", "เทศกาลผลไม้ตำบล",
+                                                   "งานแข่งเรือตำบล", "งานมหกรรมสินค้าชุมชน", "งานวันเด็กตำบล" } },
+  { scale = "big",     day = 25, days = 2, names = { "เทศกาลอาหารในเมือง", "งานแสดงสินค้า OTOP", "เทศกาลดอกไม้ในเมือง",
+                                                   "งานมหกรรมของดีจังหวัด", "งานกาชาดจังหวัด", "เทศกาลแสงสีในเมือง" } },
+}
+M.NATIONAL = {
+  { id = "beach_fest",   name = "เทศกาลดนตรีริมหาด",          month = 3,  day = 20, days = 3, scale = "beach", kind = "national" },
+  { id = "summer_conc",  name = "คอนเสิร์ตฤดูร้อนริมทะเล",       month = 8,  day = 21, days = 3, scale = "beach", kind = "national" },
+  { id = "countdown",    name = "คอนเสิร์ตเคาท์ดาวน์ริมหาด",       month = 12, day = 27, days = 3, scale = "beach", kind = "national" },
+}
+
+-- Every event in a game year, ordered by start day: { id, name, start (day of year, 0-based), days, scale, kind, temple }
+local function build_events()
+  local list, taken = {}, {}
+  local function add(e)
+    for d = e.start, e.start + e.days - 1 do taken[d] = true end
+    table.insert(list, e)
+  end
+  local function free(start, days)
+    for d = start, start + days - 1 do if taken[d] then return false end end
+    return true
+  end
+  for _, f in ipairs(M.FESTIVALS) do
+    add({ id = f.id, name = f.name, start = (f.month - 1) * 30 + (f.day - 1), days = f.days, scale = f.scale,
+          kind = "tradition", temple = true })
+  end
+  for _, f in ipairs(M.NATIONAL) do
+    add({ id = f.id, name = f.name, start = (f.month - 1) * 30 + (f.day - 1), days = f.days, scale = f.scale, kind = "national" })
+  end
+  for month = 1, 12 do
+    for _, m in ipairs(MONTHLY) do
+      local start = (month - 1) * 30 + (m.day - 1)
+      if free(start, m.days) then -- a tradition or a concert that month takes the slot
+        add({ id = m.scale .. "_" .. month, name = m.names[(month - 1) % #m.names + 1], start = start, days = m.days,
+              scale = m.scale, kind = "monthly" })
+      end
+    end
+  end
+  table.sort(list, function(a, b) return a.start < b.start end)
+  return list
+end
+M.EVENTS = build_events()
+
+-- Returns open, fair_id (this year's edition), ends_in_ms, next_in_ms, event (current or next)
 function M.fair(now, always_open)
   local t_days = (now - M.EPOCH_MS) / M.DAY_MS           -- game days since the epoch (fractional)
   local day0 = math.floor(t_days)
   local year = math.floor(day0 / M.YEAR_DAYS)
   local doy = day0 % M.YEAR_DAYS
   local next_f, next_in
-  for i, f in ipairs(M.FESTIVALS) do
-    local start = (f.month - 1) * 30 + (f.day - 1)
-    if doy >= start and doy < start + f.days then
-      local ends = (year * M.YEAR_DAYS + start + f.days - t_days) * M.DAY_MS
+  for i, f in ipairs(M.EVENTS) do
+    if doy >= f.start and doy < f.start + f.days then
+      local ends = (year * M.YEAR_DAYS + f.start + f.days - t_days) * M.DAY_MS
       local id = year * 100 + i
       return true, id, ends, 0, f
     end
-    local ahead = start - doy
+    local ahead = f.start - doy
     if ahead <= 0 then ahead = ahead + M.YEAR_DAYS end
     if next_in == nil or ahead < next_in then next_in, next_f = ahead, f end
   end
   local next_ms = (next_in - (t_days - day0)) * M.DAY_MS
-  if always_open then return true, year * 100 + 99, M.DAY_MS, next_ms, { id = "test", name = "งานอีเวนต์ (โหมดทดสอบ)", scale = "both" } end
+  if always_open then return true, year * 100 + 99, M.DAY_MS, next_ms, { id = "test", name = "งานอีเวนต์ (โหมดทดสอบ)", scale = "both", kind = "test", temple = true } end
   return false, year * 100 + 98, 0, next_ms, next_f
+end
+
+-- The next `count` events from now (the current one first if it's on), for the calendar
+function M.upcoming(now, count)
+  local t_days = (now - M.EPOCH_MS) / M.DAY_MS
+  local day0 = math.floor(t_days)
+  local year = math.floor(day0 / M.YEAR_DAYS)
+  local out = {}
+  for y = year, year + 1 do
+    for _, f in ipairs(M.EVENTS) do
+      local s = y * M.YEAR_DAYS + f.start
+      if s + f.days > t_days then
+        table.insert(out, { event = f, start_day = s, open = s <= t_days,
+                            in_ms = math.max(0, (s - t_days) * M.DAY_MS), ends_ms = (s + f.days - t_days) * M.DAY_MS })
+        if #out >= count then return out end
+      end
+    end
+  end
+  return out
 end
 
 local LIFE = { collection = "life", key = "state" }

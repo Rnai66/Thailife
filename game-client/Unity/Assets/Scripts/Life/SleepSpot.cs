@@ -10,6 +10,8 @@ public class SleepSpot : MonoBehaviour
     [SerializeField] private string place = "เสื่อบนชานบ้าน";
     [SerializeField] private string action = "นอนพัก";
     [SerializeField] private Transform bed;
+    [SerializeField] private string paidSpot = "";  // e.g. "beach_chair": rent paid to the server per rest
+    [SerializeField] private int price;
 
     private PlayerController sleeper;
     private Vector3 standPosition;
@@ -21,6 +23,13 @@ public class SleepSpot : MonoBehaviour
         place = placeName;
         action = actionLabel;
         bed = bedPoint;
+    }
+
+    // A rest spot you pay for each time (beach chairs); the server charges the price
+    public void ConfigurePaid(string spotId, int rent)
+    {
+        paidSpot = spotId;
+        price = rent;
     }
 
     private void Reset() => GetComponent<Collider>().isTrigger = true;
@@ -52,7 +61,9 @@ public class SleepSpot : MonoBehaviour
     {
         var life = LifeClient.Instance;
         string energy = life != null && life.IsOnline ? $"พลังงาน {life.Energy:0}/{life.Current.max_energy}" : "ต้องออนไลน์ก่อน";
-        ContextButton.Show(this, action, $"{place} · {energy} · นอนแล้วฟื้นเร็ว", () => Sleep(player));
+        string label = price > 0 ? $"{action} ({price} บาท)" : action;
+        string cost = price > 0 ? $"ค่าเช่า {price} บาท · " : "";
+        ContextButton.Show(this, label, $"{place} · {cost}{energy} · นอนแล้วฟื้นเร็ว", () => Sleep(player));
     }
 
     private async void Sleep(PlayerController player)
@@ -62,7 +73,13 @@ public class SleepSpot : MonoBehaviour
         busy = true;
         try
         {
-            await life.SleepAsync();
+            await life.SleepAsync(string.IsNullOrEmpty(paidSpot) ? null : paidSpot);
+            if (price > 0)
+            {
+                UiKit.FloatAbovePlayer($"-{price} ฿", new Color(1f, 0.6f, 0.3f));
+                GameAudio.Play("coins");
+                if (WalletClient.Instance != null) _ = WalletClient.Instance.RefreshAsync();
+            }
             sleeper = player;
             player.InputEnabled = false;
             standPosition = player.transform.position;
@@ -77,6 +94,8 @@ public class SleepSpot : MonoBehaviour
         catch (Exception e)
         {
             Debug.LogWarning($"[Life] Sleep failed: {e.Message}");
+            if (e.Message.Contains("not enough baht"))
+                ContextButton.Show(this, action, $"เงินไม่พอจ่ายค่าเช่า {price} บาท", () => Sleep(player));
         }
         busy = false;
     }

@@ -31,6 +31,12 @@ public class LifeClient : MonoBehaviour
     }
 
     [Serializable]
+    private class SleepRequest
+    {
+        public string spot;
+    }
+
+    [Serializable]
     private class HealRequest
     {
         public string place;
@@ -82,6 +88,7 @@ public class LifeClient : MonoBehaviour
         if (GetComponent<BoxingClient>() == null) gameObject.AddComponent<BoxingClient>();
         if (GetComponent<FestivalClient>() == null) gameObject.AddComponent<FestivalClient>();
         if (GetComponent<BankClient>() == null) gameObject.AddComponent<BankClient>();
+        if (GetComponent<RanchClient>() == null) gameObject.AddComponent<RanchClient>();
 
         // Every location scene gets a day/night sun without extra setup
         foreach (var light in FindObjectsByType<Light>(FindObjectsSortMode.None))
@@ -121,7 +128,9 @@ public class LifeClient : MonoBehaviour
         catch (Exception) { /* next poll will retry */ }
     }
 
-    public Task<State> SleepAsync() => CallAsync("life_sleep");
+    // spot: a paid rest spot ("beach_chair"), or null for your own / free places
+    public Task<State> SleepAsync(string spot = null) =>
+        CallAsync("life_sleep", spot == null ? "{}" : JsonUtility.ToJson(new SleepRequest { spot = spot }));
     public Task<State> WakeAsync() => CallAsync("life_wake");
     // place: "station" (รพ.สต.) or "hospital" (โรงพยาบาล)
     public Task<State> HealAsync(string place) => CallAsync("life_heal", JsonUtility.ToJson(new HealRequest { place = place }));

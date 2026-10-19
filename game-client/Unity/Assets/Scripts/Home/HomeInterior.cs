@@ -26,6 +26,10 @@ public class HomeInterior : MonoBehaviour
     private Material wallMaterial;
     private bool frozen; // DecorateUI is carrying a piece: don't rebuild under it
     private HouseClient house;
+    private GameObject bulb;
+    private Material bulbMaterial;
+    private Light ceilingLight;
+    private float nextLightCheck;
 
     public static void Setup()
     {
@@ -69,12 +73,32 @@ public class HomeInterior : MonoBehaviour
         Room.SetParent(transform, false);
         Room.localPosition = new Vector3(0f, FloorY, 0f);
 
-        // Ceiling light: warm glow inside the room at night
-        var ceiling = new GameObject("CeilingLight");
-        ceiling.transform.SetParent(transform, false);
-        ceiling.transform.localPosition = new Vector3(0f, WallTop - 0.2f, 0f);
-        ceiling.AddComponent<Light>().enabled = false;
-        ceiling.AddComponent<StreetLamp>().Configure(StreetLamp.Kind.Hanging);
+        // Ceiling bulb (หลอดไฟ) on a cord: lights the room whenever you're inside, and at night
+        var cord = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+        cord.name = "BulbCord";
+        Destroy(cord.GetComponent<Collider>());
+        cord.transform.SetParent(transform, false);
+        cord.transform.localPosition = new Vector3(0f, WallTop - 0.25f, 0f);
+        cord.transform.localScale = new Vector3(0.02f, 0.25f, 0.02f);
+        cord.GetComponent<Renderer>().sharedMaterial = new Material(Shader) { color = new Color(0.1f, 0.1f, 0.1f) };
+        bulb = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        bulb.name = "CeilingBulb";
+        Destroy(bulb.GetComponent<Collider>());
+        bulb.transform.SetParent(transform, false);
+        bulb.transform.localPosition = new Vector3(0f, WallTop - 0.6f, 0f);
+        bulb.transform.localScale = Vector3.one * 0.18f;
+        bulbMaterial = new Material(Shader) { color = new Color(1f, 0.95f, 0.8f) };
+        bulbMaterial.EnableKeyword("_EMISSION");
+        bulb.GetComponent<Renderer>().sharedMaterial = bulbMaterial;
+        var lightGo = new GameObject("CeilingLight");
+        lightGo.transform.SetParent(transform, false);
+        lightGo.transform.localPosition = new Vector3(0f, WallTop - 0.75f, 0f);
+        ceilingLight = lightGo.AddComponent<Light>();
+        ceilingLight.type = LightType.Point;
+        ceilingLight.range = 6f;
+        ceilingLight.intensity = 4f;
+        ceilingLight.color = new Color(1f, 0.86f, 0.62f);
+        ceilingLight.shadows = LightShadows.None;
 
         var zone = new GameObject("RoomZone");
         zone.transform.SetParent(transform, false);
@@ -91,6 +115,15 @@ public class HomeInterior : MonoBehaviour
         if (house == null) return;
         house.Changed += OnHouseChanged;
         if (house.Current != null) Rebuild(house.Current);
+    }
+
+    private void Update()
+    {
+        if (ceilingLight == null || Time.time < nextLightCheck) return;
+        nextLightCheck = Time.time + 0.5f;
+        bool on = PlayerInside || RenderSettings.ambientIntensity < 0.8f;
+        ceilingLight.enabled = on;
+        bulbMaterial.SetColor("_EmissionColor", on ? new Color(1f, 0.85f, 0.55f) * 3f : Color.black);
     }
 
     private void OnDestroy()

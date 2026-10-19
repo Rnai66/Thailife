@@ -87,7 +87,7 @@ public class FishingUI : MonoBehaviour
             {
                 case State.Idle:
                     SetState(State.Casting, "เหวี่ยงเบ็ด...");
-                    float biteIn = await client.CastAsync();
+                    float biteIn = await client.CastAsync(spot.Water);
                     if (spot == null) return; // walked away meanwhile
                     biteTime = Time.time + biteIn;
                     SpawnBobber();

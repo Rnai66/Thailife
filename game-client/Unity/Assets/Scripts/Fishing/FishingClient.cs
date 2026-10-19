@@ -78,9 +78,10 @@ public class FishingClient : MonoBehaviour
     }
 
     // Returns seconds until the bite, or a negative number if the cast failed.
-    public async Task<float> CastAsync()
+    // water: "fresh" (canal, pond) or "sea" (the beach pier)
+    public async Task<float> CastAsync(string water = "fresh")
     {
-        var result = await connection.Client.RpcAsync(connection.Session, "fishing_cast", "{}");
+        var result = await connection.Client.RpcAsync(connection.Session, "fishing_cast", $"{{\"water\":\"{water}\"}}");
         return JsonUtility.FromJson<CastResult>(result.Payload).bite_in_ms / 1000f;
     }
 

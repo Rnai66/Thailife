@@ -8,6 +8,7 @@ public class ShopCounter : MonoBehaviour
     [SerializeField] private string shopId = "community";
 
     public void Configure(string id) => shopId = id;
+    public string ShopId => shopId;
 
     private void Reset() => GetComponent<Collider>().isTrigger = true;
 

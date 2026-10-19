@@ -46,6 +46,7 @@ public static class Places
         PrimitiveKit.Box("FairPath", t, new Vector3(-22.5f, 0.012f, -14f), new Vector3(2f, 0.02f, 22f), dirt, collider: false);
         StreetFurniture.LampPost(t, new Vector3(-19.5f, 0f, -12f));
         TempleFairLights(t);
+        Npcs.Crowd(t, new Vector3(-6f, 0f, -20.5f), new Vector2(38f, 5f), 10, "any", 0, 24, Npcs.FairTalk);
 
         // Low white boundary wall with a gate in the front (-Z)
         PrimitiveKit.Box("WallBack", t, new Vector3(0f, 0.5f, 14f), new Vector3(30f, 1f, 0.3f), white);
@@ -452,6 +453,7 @@ public static class Places
         PrimitiveKit.Box("Bench", t, new Vector3(0f, 0.45f, 0.35f), new Vector3(2.8f, 0.1f, 0.45f), wood, collider: false);
         PrimitiveKit.Box("SignBoard", t, new Vector3(0f, 2.95f, -0.3f), new Vector3(3f, 0.6f, 0.08f), sign, collider: false);
         PrimitiveKit.Label("ป้ายรถสองแถว", t, new Vector3(0f, 2.95f, -0.36f), 0.06f, new Color(0.2f, 0.1f, 0.05f));
+        StreetFurniture.HangingLight(t, new Vector3(0f, 2.4f, 0.1f)); // bulb under the shelter roof
 
         // Trigger under the roof opens the travel map
         var zone = new GameObject("TravelZone");

@@ -13,6 +13,10 @@ public class FestivalClient : MonoBehaviour
         public string name;
         public string date;
         public string where;
+        public string kind;    // งานประเพณี | งานประจำเดือน | ระดับประเทศ
+        public string scale;
+        public bool open;
+        public int in_s, ends_s;
     }
 
     [Serializable]
@@ -20,7 +24,9 @@ public class FestivalClient : MonoBehaviour
     {
         public bool open;
         public string name;
-        public string scale;   // "big" | "small" | "both" (test mode)
+        public string scale;   // "big" (city) | "small" (tambon) | "village" | "beach" | "both" (test mode)
+        public string kind;    // "tradition" | "monthly" | "national"
+        public bool temple;    // traditional festivals are also held at the village temple
         public string where;
         public int ends_in_s;
         public int next_in_s;
@@ -45,12 +51,14 @@ public class FestivalClient : MonoBehaviour
     public bool IsOpen => Current != null && Current.open;
     public event Action<State> Changed;
 
-    // Is the fair on at a venue of this size right now?
+    // Is an event on at this venue right now? "any" = the village temple ground: every traditional
+    // festival plus the village's monthly events.
     public bool OpenFor(string venueScale) =>
-        IsOpen && (venueScale == "any" || Current.scale == "both" || Current.scale == venueScale);
+        IsOpen && (Current.scale == "both" || Current.scale == venueScale
+                   || (venueScale == "any" && (Current.temple || Current.scale == "village")));
 
     private NakamaConnection connection;
-    private float nextPoll;
+    private float nextPoll, refreshedAt;
 
     private void Awake()
     {
@@ -70,6 +78,11 @@ public class FestivalClient : MonoBehaviour
         _ = Refresh();
     }
 
+    // Real seconds since the last answer (the calendar's countdowns are relative to it)
+    public float SecondsSinceRefresh => Time.realtimeSinceStartup - refreshedAt;
+
+    public Task RefreshAsync() => connection != null && connection.IsConnected ? Refresh() : Task.CompletedTask;
+
     private async Task Refresh()
     {
         try { await CallAsync("festival_get"); }
@@ -83,6 +96,7 @@ public class FestivalClient : MonoBehaviour
         var result = await connection.Client.RpcAsync(connection.Session, rpc, payload);
         var state = JsonUtility.FromJson<State>(result.Payload);
         Current = state;
+        refreshedAt = Time.realtimeSinceStartup;
         Changed?.Invoke(state);
         return state;
     }

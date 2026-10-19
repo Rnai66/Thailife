@@ -38,14 +38,6 @@ public static class GameClock
         Hour < 17 ? "บ่าย" :
         Hour < 19 ? "เย็น" : "กลางคืน";
 
-    // The festival (งานประเพณี) on today, from the server's calendar (festival.lua)
-    public static string Display
-    {
-        get
-        {
-            var f = FestivalClient.Instance;
-            string festival = f != null && f.IsOpen ? $" · {f.Current.name} ({f.Current.where})" : "";
-            return $"{DayOfMonth} {MonthTh} · {Hour:00}:{Minute:00} ({PeriodTh})" + festival;
-        }
-    }
+    // Date and time for the HUD (the event on today is shown on the HUD menu button and in the calendar)
+    public static string Display => $"{DayOfMonth} {MonthTh} · {Hour:00}:{Minute:00} ({PeriodTh})";
 }

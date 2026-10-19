@@ -38,6 +38,9 @@ public static class FestivalGrounds
             Carousel(attractions, new Vector3(8.5f, 0f, -6.5f));
         }
 
+        // Fair-goers wandering the middle of the ground (only during the festival)
+        Npcs.Crowd(t, new Vector3(-0.5f, 0f, -1f), new Vector2(7f, 20f), big ? 14 : 8, big ? "big" : "small", 0, 24, Npcs.FairTalk);
+
         // ประดับไฟ: bulbs around the edge, bunting and lanterns at the arch
         var corners = new[] { new Vector3(-13f, 0f, -13f), new Vector3(13f, 0f, -13f), new Vector3(13f, 0f, 13f), new Vector3(-13f, 0f, 13f) };
         foreach (var c in corners) FairLights.Pole(attractions, c);

@@ -7,6 +7,7 @@ public enum LocationLevel
     Village,      // หมู่บ้าน
     Subdistrict,  // ตำบล
     City,         // เมือง (อำเภอ/จังหวัด)
+    Beach,        // ทะเล (ท่องเที่ยว)
 }
 
 // One travel destination. Each is its own scene with its own online match.
@@ -29,12 +30,14 @@ public static class Locations
         new Location { Id = "village_khoko", NameTh = "หมู่บ้าน", Level = LocationLevel.Village, Scene = "ThaiVillage", SpawnId = "busstop" },
         new Location { Id = "tambon_khoko", NameTh = "ตำบล · อบต. รพ.สต. โรงเรียน คลองตกปลา", Level = LocationLevel.Subdistrict, Scene = "Tambon", SpawnId = "busstop" },
         new Location { Id = "city", NameTh = "ตัวเมือง · ค่ายมวย หอนาฬิกา", Level = LocationLevel.City, Scene = "City", SpawnId = "busstop" },
+        new Location { Id = "beach", NameTh = "ทะเล · ชายหาด ท่าเรือประมง ตกปลาทะเล", Level = LocationLevel.Beach, Scene = "Beach", SpawnId = "busstop" },
     };
 
     public static string LevelNameTh(LocationLevel level) => level switch
     {
         LocationLevel.Village => "หมู่บ้าน",
         LocationLevel.Subdistrict => "ตำบล",
+        LocationLevel.Beach => "ท่องเที่ยว",
         _ => "เมือง",
     };
 

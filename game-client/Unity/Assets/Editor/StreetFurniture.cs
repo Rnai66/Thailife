@@ -124,6 +124,14 @@ public static class StreetFurniture
         AddLight(go, new Vector3(0f, -0.1f, 0f), StreetLamp.Kind.Hanging);
     }
 
+    // Orange bulb (หลอดไฟสีส้ม) for the cow pen, lit at night
+    public static void OrangeLight(Transform parent, Vector3 position)
+    {
+        var go = PrimitiveKit.Group("OrangeLight", parent, position);
+        PrimitiveKit.Sphere("Bulb", go.transform, Vector3.zero, Vector3.one * 0.22f, PrimitiveKit.Glow("BulbOrange", new Color(1f, 0.55f, 0.15f), 4f, 0.5f));
+        AddLight(go, new Vector3(0f, -0.1f, 0f), StreetLamp.Kind.Orange);
+    }
+
     // Stage light over a boxing ring: always on, so fights are bright even under a roof
     public static void RingLight(Transform parent, Vector3 position)
     {

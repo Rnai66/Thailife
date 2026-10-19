@@ -96,16 +96,34 @@ local function read(user_id)
   return r
 end
 
+local WHERE = {
+  village = "หมู่บ้าน (ลานวัด)", small = "ตำบล", big = "เมือง", beach = "ริมทะเล", both = "ทุกที่",
+}
+local KIND = { tradition = "งานประเพณี", monthly = "งานประจำเดือน", national = "ระดับประเทศ", test = "ทดสอบ" }
+
+local function where_of(f)
+  if f.kind == "tradition" then return (f.scale == "big" and "เมือง" or "ตำบล") .. " + วัดในหมู่บ้าน" end
+  return WHERE[f.scale] or ""
+end
+
 local function view(env, extra)
-  local open, fair_id, ends_in, next_in, f = life.fair(nk.time(), fair_always_open(env))
+  local now = nk.time()
+  local open, fair_id, ends_in, next_in, f = life.fair(now, fair_always_open(env))
   local calendar = {}
-  for _, x in ipairs(life.FESTIVALS) do
-    table.insert(calendar, { name = x.name, date = x.day .. "-" .. (x.day + x.days - 1) .. " " .. MONTHS[x.month],
-                             where = x.scale == "big" and "เมือง" or "ตำบล" })
+  for _, u in ipairs(life.upcoming(now, 12)) do
+    local x = u.event
+    local month = math.floor(x.start / 30) + 1
+    local day = x.start % 30 + 1
+    table.insert(calendar, {
+      name = x.name, date = day .. "-" .. (day + x.days - 1) .. " " .. MONTHS[month],
+      where = where_of(x), kind = KIND[x.kind] or "", scale = x.scale, open = u.open,
+      in_s = math.floor(u.in_ms / 1000), ends_s = math.floor(u.ends_ms / 1000),
+    })
   end
   local result = {
     open = open, name = f and f.name or "", id = fair_id, scale = f and f.scale or "",
-    where = f and (f.scale == "big" and "ในเมือง" or f.scale == "small" and "ที่ตำบล" or "ตำบลและเมือง") or "",
+    kind = f and f.kind or "", temple = f and f.temple or false,
+    where = f and where_of(f) or "",
     ends_in_s = math.floor((ends_in or 0) / 1000), next_in_s = math.floor((next_in or 0) / 1000),
     calendar = calendar,
   }
@@ -126,7 +144,7 @@ nk.register_rpc(function(context, payload)
   local open, fair_id, _, _, f = life.fair(nk.time(), fair_always_open(context.env))
   if not open then error({ "no festival today", GRPC_FAILED_PRECONDITION }) end
   -- The ferris wheel, carousel and bingo only come to the big city festivals
-  if g.big and f.scale == "small" then error({ "big festivals only", GRPC_FAILED_PRECONDITION }) end
+  if g.big and f.scale ~= "big" and f.scale ~= "both" then error({ "big festivals only", GRPC_FAILED_PRECONDITION }) end
 
   local r = read(user_id)
   local key = req.game .. ":" .. fair_id

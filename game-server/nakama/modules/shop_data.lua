@@ -44,9 +44,17 @@ M.FOODS = {
   fried_chicken = { name = "ไก่ทอด",           energy = 24 },
   bubble_tea   = { name = "ชานมไข่มุก",        energy = 18 },
   mango_sticky = { name = "ข้าวเหนียวมะม่วง",    energy = 28 },
+  -- City noodle shop (ร้านก๋วยเตี๋ยว) and the beach (ทะเล)
+  noodle_boat  = { name = "ก๋วยเตี๋ยวเรือ",       energy = 26 },
+  noodle_tomyum = { name = "ก๋วยเตี๋ยวต้มยำ",     energy = 30 },
+  kao_lao      = { name = "เกาเหลาหมูตุ๋น",       energy = 34 },
+  grilled_squid = { name = "ปลาหมึกย่าง",        energy = 22 },
+  coconut      = { name = "มะพร้าวน้ำหอม",       energy = 16 },
+  seafood_rice = { name = "ข้าวผัดทะเล",         energy = 36 },
 }
 M.FOOD_ORDER = { "soda", "iced_coffee", "moo_ping", "som_tam", "thai_tea", "coffee", "khao_man_gai",
-                 "jok", "fruit", "pad_thai", "look_chin", "fried_chicken", "bubble_tea", "mango_sticky" }
+                 "jok", "fruit", "pad_thai", "look_chin", "fried_chicken", "bubble_tea", "mango_sticky",
+                 "noodle_boat", "noodle_tomyum", "kao_lao", "grilled_squid", "coconut", "seafood_rice" }
 
 -- Markets keep game-clock hours: the fresh market in the morning, the ตลาดนัด in the evening
 M.MARKETS = {
@@ -132,6 +140,12 @@ for _, e in ipairs({
   { id = "food_pad_thai",      shop = "market", price = 45, name = "ผัดไทย",          desc = "พลังงาน +32", food = "pad_thai" },
   { id = "market_seed_hommali", shop = "market", price = 25, name = "พันธุ์ข้าวหอมมะลิ (ราคาตลาด)", desc = "ถูกกว่าร้านค้าชุมชน", seed = "hommali" },
   { id = "market_feed",        shop = "market", price = 12, name = "อาหารไก่ (ราคาตลาด)", desc = "ถูกกว่าร้านค้าชุมชน", feed = true },
+  { id = "food_noodle_boat",   shop = "noodle", price = 40, name = "ก๋วยเตี๋ยวเรือ",     desc = "พลังงาน +26", food = "noodle_boat" },
+  { id = "food_noodle_tomyum", shop = "noodle", price = 50, name = "ก๋วยเตี๋ยวต้มยำ",   desc = "พลังงาน +30", food = "noodle_tomyum" },
+  { id = "food_kao_lao",       shop = "noodle", price = 60, name = "เกาเหลาหมูตุ๋น",     desc = "พลังงาน +34", food = "kao_lao" },
+  { id = "food_grilled_squid", shop = "beach",  price = 45, name = "ปลาหมึกย่าง",       desc = "พลังงาน +22", food = "grilled_squid" },
+  { id = "food_coconut",       shop = "beach",  price = 35, name = "มะพร้าวน้ำหอม",     desc = "พลังงาน +16", food = "coconut" },
+  { id = "food_seafood_rice",  shop = "beach",  price = 70, name = "ข้าวผัดทะเล",       desc = "พลังงาน +36", food = "seafood_rice" },
   { id = "food_look_chin",     shop = "flea", price = 15, name = "ลูกชิ้นปิ้ง",        desc = "พลังงาน +10", food = "look_chin" },
   { id = "food_fried_chicken", shop = "flea", price = 35, name = "ไก่ทอด",           desc = "พลังงาน +24", food = "fried_chicken" },
   { id = "food_bubble_tea",    shop = "flea", price = 30, name = "ชานมไข่มุก",        desc = "พลังงาน +18", food = "bubble_tea" },

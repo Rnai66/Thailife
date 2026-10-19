@@ -10,6 +10,8 @@ public class FestivalGate : MonoBehaviour
     private GameObject attractions;
     private float nextCheck;
 
+    public string Scale => scale;
+
     public void Configure(string venueScale, TextMesh bannerText)
     {
         scale = venueScale;

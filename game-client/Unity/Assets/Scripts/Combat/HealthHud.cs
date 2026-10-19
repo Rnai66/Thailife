@@ -77,6 +77,11 @@ public class HealthHud : MonoBehaviour
         nextTick = Time.time + 0.25f;
 
         clockLabel.text = GameClock.Display;
+        var fest = FestivalClient.Instance;
+        bool eventOn = fest != null && fest.IsOpen;
+        menuLabel.text = eventOn ? "เมนู · มีงานวันนี้!" : (menuRow.gameObject.activeSelf ? "ปิดเมนู" : "เมนู");
+        menuImage.color = eventOn ? new Color(1f, 0.85f, 0.45f) : Color.white;   // golden when an event is on
+        calendarImage.color = eventOn ? new Color(1f, 0.85f, 0.45f) : Color.white;
         if (career == null || career.Current == null) RefreshCareer(null, null); // keep the offline reason current
 
         var life = LifeClient.Instance;
@@ -198,30 +203,35 @@ public class HealthHud : MonoBehaviour
         fishRect.sizeDelta = new Vector2(900f, 40f);
         UiKit.Cartoon(fishLabel, 2f);
 
-        moneyLabel = CreateText("Money", canvasGo.transform, font, 34, TextAnchor.MiddleRight);
+        // ── Right column (top-right), one tidy stack: money, clock, energy (+ กิน), quests, menu ──
+        const float Right = -120f, Column = 420f;
+
+        moneyLabel = CreateText("Money", canvasGo.transform, font, 32, TextAnchor.MiddleRight);
         var moneyRect = moneyLabel.rectTransform;
         moneyRect.anchorMin = moneyRect.anchorMax = new Vector2(1f, 1f);
         moneyRect.pivot = new Vector2(1f, 1f);
-        moneyRect.anchoredPosition = new Vector2(-120f, -50f);
-        moneyRect.sizeDelta = new Vector2(500f, 50f);
+        moneyRect.anchoredPosition = new Vector2(Right, -12f);
+        moneyRect.sizeDelta = new Vector2(Column, 48f);
         moneyLabel.color = new Color(1f, 0.85f, 0.2f);
+        moneyLabel.horizontalOverflow = HorizontalWrapMode.Overflow;
         UiKit.Cartoon(moneyLabel, 3f);
 
-        // Game clock and energy bar under the money (top-right)
-        clockLabel = CreateText("Clock", canvasGo.transform, font, 30, TextAnchor.MiddleRight);
+        // Date and time only; the event on today is shown on the menu button and in the calendar
+        clockLabel = CreateText("Clock", canvasGo.transform, font, 24, TextAnchor.MiddleRight);
         var clockRect = clockLabel.rectTransform;
         clockRect.anchorMin = clockRect.anchorMax = new Vector2(1f, 1f);
         clockRect.pivot = new Vector2(1f, 1f);
-        clockRect.anchoredPosition = new Vector2(-120f, -100f);
-        clockRect.sizeDelta = new Vector2(600f, 44f);
+        clockRect.anchoredPosition = new Vector2(Right, -60f);
+        clockRect.sizeDelta = new Vector2(Column, 38f);
+        clockLabel.horizontalOverflow = HorizontalWrapMode.Overflow;
         UiKit.Cartoon(clockLabel, 2.5f);
 
         var energyBg = CreateRect("EnergyBar", canvasGo.transform, new Color(0f, 0f, 0f, 0.5f));
         Frame(energyBg);
         energyBg.anchorMin = energyBg.anchorMax = new Vector2(1f, 1f);
         energyBg.pivot = new Vector2(1f, 1f);
-        energyBg.anchoredPosition = new Vector2(-120f, -150f);
-        energyBg.sizeDelta = new Vector2(400f, 34f);
+        energyBg.anchoredPosition = new Vector2(Right, -104f);
+        energyBg.sizeDelta = new Vector2(Column, 36f);
         energyFill = CreateRect("Fill", energyBg, new Color(1f, 0.8f, 0.2f));
         energyFill.anchorMin = Vector2.zero;
         energyFill.anchorMax = Vector2.one;
@@ -243,27 +253,35 @@ public class HealthHud : MonoBehaviour
         nameLabel.alignment = TextAnchor.MiddleLeft;
 
         // "กิน" opens the food bag (left of the energy bar)
-        var eat = UiKit.WoodButton(canvasGo.transform, "กิน", Vector2.zero, new Vector2(120f, 54f), FoodUI.Toggle, 28);
-        var eatRect = (RectTransform)eat.transform;
-        eatRect.anchorMin = eatRect.anchorMax = new Vector2(1f, 1f);
-        eatRect.pivot = new Vector2(1f, 1f);
-        eatRect.anchoredPosition = new Vector2(-535f, -143f);
+        var eat = UiKit.WoodButton(canvasGo.transform, "กิน", Vector2.zero, new Vector2(110f, 50f), FoodUI.Toggle, 26, flowers: false);
+        Pin(eat, new Vector2(Right - Column - 12f, -97f));
 
-        // "ภารกิจ" opens the daily quests (under the energy bar)
-        var quests = UiKit.WoodButton(canvasGo.transform, "ภารกิจวันนี้", Vector2.zero, new Vector2(420f, 60f), QuestUI.Toggle, 26);
-        var questRect = (RectTransform)quests.transform;
-        questRect.anchorMin = questRect.anchorMax = new Vector2(1f, 1f);
-        questRect.pivot = new Vector2(1f, 1f);
-        questRect.anchoredPosition = new Vector2(-120f, -196f);
+        // "ภารกิจวันนี้" opens the daily quests
+        var quests = UiKit.WoodButton(canvasGo.transform, "ภารกิจวันนี้", Vector2.zero, new Vector2(Column, 54f), QuestUI.Toggle, 26);
+        Pin(quests, new Vector2(Right, -150f));
         questImage = quests.GetComponent<Image>();
         questLabel = quests.GetComponentInChildren<Text>();
 
-        // "ทักทาย": ไหว้, โบกมือ and preset phrases
-        var greet = UiKit.WoodButton(canvasGo.transform, "ทักทาย", Vector2.zero, new Vector2(420f, 60f), EmoteUI.Toggle, 26);
-        var greetRect = (RectTransform)greet.transform;
-        greetRect.anchorMin = greetRect.anchorMax = new Vector2(1f, 1f);
-        greetRect.pivot = new Vector2(1f, 1f);
-        greetRect.anchoredPosition = new Vector2(-120f, -266f);
+        // "เมนู" folds the less-used buttons away: ทักทาย, ปฏิทินงาน, เสียง (one row when open)
+        var menu = UiKit.WoodButton(canvasGo.transform, "เมนู", Vector2.zero, new Vector2(Column, 50f), ToggleMenu, 24, flowers: false);
+        Pin(menu, new Vector2(Right, -212f));
+        menuImage = menu.GetComponent<Image>();
+        menuLabel = menu.GetComponentInChildren<Text>();
+
+        menuRow = new GameObject("MenuRow", typeof(RectTransform)).transform as RectTransform;
+        menuRow.SetParent(canvasGo.transform, false);
+        menuRow.anchorMin = menuRow.anchorMax = new Vector2(1f, 1f);
+        menuRow.pivot = new Vector2(1f, 1f);
+        menuRow.anchoredPosition = new Vector2(Right, -270f);
+        menuRow.sizeDelta = new Vector2(Column, 54f);
+        var greet = UiKit.WoodButton(menuRow, "ทักทาย", Vector2.zero, new Vector2(134f, 54f), () => { EmoteUI.Toggle(); ToggleMenu(); }, 24, flowers: false);
+        Pin(greet, new Vector2(-286f, 0f));
+        var calendar = UiKit.WoodButton(menuRow, "ปฏิทินงาน", Vector2.zero, new Vector2(146f, 54f), () => { EventCalendarUI.Toggle(); ToggleMenu(); }, 22, flowers: false);
+        Pin(calendar, new Vector2(-136f, 0f));
+        calendarImage = calendar.GetComponent<Image>();
+        var sound = UiKit.WoodButton(menuRow, "เสียง", Vector2.zero, new Vector2(130f, 54f), () => { SoundUI.Toggle(); ToggleMenu(); }, 24, flowers: false);
+        Pin(sound, new Vector2(0f, 0f));
+        menuRow.gameObject.SetActive(false);
 
         var ko = CreateText("KO", canvasGo.transform, font, 160, TextAnchor.MiddleCenter);
         ko.text = "KO!";
@@ -272,6 +290,21 @@ public class HealthHud : MonoBehaviour
         ko.rectTransform.sizeDelta = new Vector2(800f, 240f);
         koBanner = ko.gameObject;
         koBanner.SetActive(false);
+    }
+
+    private RectTransform menuRow;
+    private Image menuImage, calendarImage;
+    private Text menuLabel;
+
+    private void ToggleMenu() => menuRow.gameObject.SetActive(!menuRow.gameObject.activeSelf);
+
+    // Anchor a button by its top-right corner to the top-right of its parent
+    private static void Pin(Component button, Vector2 position)
+    {
+        var rt = (RectTransform)button.transform;
+        rt.anchorMin = rt.anchorMax = new Vector2(1f, 1f);
+        rt.pivot = new Vector2(1f, 1f);
+        rt.anchoredPosition = position;
     }
 
     // Bars sit in a rounded dark-wood track with a gold edge (game-art style)

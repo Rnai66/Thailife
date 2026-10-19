@@ -15,6 +15,23 @@ public static class TambonBuilder
     [MenuItem("Thai Life/Build City Scene (เมือง)")]
     private static void BuildCityFromMenu() => BuildCity(ask: true);
 
+    [MenuItem("Thai Life/Build Beach Scene (ทะเล)")]
+    private static void BuildBeachFromMenu() => BuildBeach(ask: true);
+
+    // ทะเล: beach, longtail boats, fishing pier with sea fishing, umbrellas to rest under
+    internal static void BuildBeach(bool ask) => BuildLocation("Assets/Scenes/Beach.unity", "Beach", 10f, ask, root =>
+    {
+        Seaside.Beach(root);
+        ShopZone(root, new Vector3(-40f, 0f, 2.8f), "beach");
+        ShopZone(root, new Vector3(-28f, 0f, -13f), "beach");      // ร้านอาหารทะเลสด
+        ShopZone(root, new Vector3(-18.5f, 0f, -13.2f), "community"); // ร้านสะดวกซื้อ: sell your sea fish, buy rods
+        ShopZone(root, new Vector3(9.8f, 0f, -13f), "noodle");        // ก๋วยเตี๋ยว ส้มตำ
+        ShopZone(root, new Vector3(26f, 0f, -13f), "beach");        // ร้านอาหารริมหาด
+        Places.BusStop(root, new Vector3(16f, 0f, -11.5f), 180f);
+        Places.Sign(root, new Vector3(19f, 0f, -11f), "ไปหมู่บ้าน / ตำบล / เมือง\n(ยืนใต้ป้ายรถ)", 180f);
+        StreetFurniture.PoleLine(root, new[] { new Vector3(-40f, 0f, -10.6f), new Vector3(-12f, 0f, -10.6f), new Vector3(24f, 0f, -10.6f), new Vector3(46f, 0f, -10.6f) }, 180f, lamps: true);
+    });
+
     internal static void BuildTambon(bool ask) => BuildLocation("Assets/Scenes/Tambon.unity", "Tambon", 10f, ask, root =>
     {
         // ตำบล: SAO office, health station, school, public park, canal with fishing
@@ -25,6 +42,8 @@ public static class TambonBuilder
         Places2.Park(root, new Vector3(2f, 0f, 14f), "สวนสาธารณะ");
         Places2.Canal(root, new Vector3(0f, 0f, 34f), 100f, new[] { -18f, -6f, 8f, 20f });
         Lane(root, 2f, -6f, 4f);
+
+        Npcs.Crowd(root, new Vector3(2f, 0f, 14f), new Vector2(14f, 14f), 4, "", 7, 19, Npcs.VillageTalk); // park
 
         // Fairground for the small festivals (งานวัดเล็ก: มาฆบูชา วิสาขบูชา เข้าพรรษา ผ้าป่า)
         FestivalGrounds.Build(root, new Vector3(-36f, 0f, -30f), 180f, big: false);
@@ -132,6 +151,14 @@ public static class TambonBuilder
 
         foreach (var pos in new[] { new Vector3(-8f, 0f, -16f), new Vector3(8f, 0f, -16f), new Vector3(-40f, 0f, 20f), new Vector3(40f, 0f, 22f) })
             Places.ShadeTree(root, pos);
+
+        Npcs.Crowd(root, new Vector3(0f, 0f, -4.4f), new Vector2(76f, 1.2f), 6, "", 6, 22, Npcs.CityTalk);   // pavement along the shops
+        Npcs.Crowd(root, new Vector3(0f, 0f, 22f), new Vector2(10f, 6f), 3, "", 7, 21, Npcs.CityTalk);       // by the clock tower
+
+        // Noodle shop (ร้านก๋วยเตี๋ยว) by the fresh market, skytrain (รถไฟฟ้า) over the main road
+        Seaside.NoodleShop(root, new Vector3(36f, 0f, 20f), 180f);
+        ShopZone(root, new Vector3(36f, 0f, 18.2f), "noodle");
+        Seaside.SkyTrainLine(root);
 
         // Hospital, hotel, police station and pawn shop (north row); district office and อบจ. (south of the road)
         CityCivic.Build(root);

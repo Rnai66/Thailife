@@ -45,6 +45,9 @@ public static class Markets
             PrimitiveKit.Sphere("Bulb", t, new Vector3(x, h - 0.6f, row * 2.6f), Vector3.one * 0.22f, bulb);
         }
 
+        // Shoppers in the aisle during market hours
+        Npcs.Crowd(t, Vector3.zero, new Vector2(11f, 2f), 6, "", 5, 13, Npcs.MarketTalk);
+
         // Entrance sign over the aisle, readable from both sides
         PrimitiveKit.Box("SignPostL", t, new Vector3(-2.2f, 2.3f, -d * 0.5f - 0.2f), new Vector3(0.15f, 4.6f, 0.15f), steel);
         PrimitiveKit.Box("SignPostR", t, new Vector3(2.2f, 2.3f, -d * 0.5f - 0.2f), new Vector3(0.15f, 4.6f, 0.15f), steel);
@@ -87,6 +90,9 @@ public static class Markets
             vendor.transform.localPosition = new Vector3(0f, 0f, -0.95f); // behind the table, facing the aisle (+Z)
             vendor.AddComponent<MarketVendor>().Configure(look++);
         }
+
+        // Evening shoppers
+        Npcs.Crowd(t, new Vector3(0f, 0f, 0.2f), new Vector2(2.6f, 10f), 7, "", 16, 22, Npcs.MarketTalk);
 
         // String lights zig-zagging over the aisle
         for (int i = 0; i < 4; i++)

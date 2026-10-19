@@ -88,6 +88,7 @@ public class KokaiUI : MonoBehaviour
                 wanted[hit] = null;
             }
             resultText.text = $"เรียกตัวที่ {i + 1}: {letter}";
+            GameAudio.Play("bell", null, hit >= 0 ? 0.9f : 0.5f);
             yield return new WaitForSeconds(CallInterval);
         }
 

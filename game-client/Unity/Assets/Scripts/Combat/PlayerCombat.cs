@@ -96,12 +96,14 @@ public class PlayerCombat : MonoBehaviour
                 Direction = direction.normalized,
             }, transform);
         }
+        GameAudio.Play(struck.Count > 0 ? (kick ? "punch_heavy" : "punch") : "whoosh", point, struck.Count > 0 ? 1f : 0.5f);
     }
 
     // A hit from another player landed on us.
     public void ApplyHit(HitInfo hit)
     {
         if (IsKnockedOut) return;
+        GameAudio.Play("punch", transform.position + Vector3.up * 1.4f);
 
         int damage = Mathf.Min(hit.Damage, HitInfo.MaxDamageFor(hit.Attack));
         if (damage <= 0) return;

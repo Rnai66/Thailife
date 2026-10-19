@@ -34,7 +34,7 @@ public static class CityCivic
     }
 
     // A building block: walls, window grid, door, entrance canopy, steps and a name board
-    private static Transform Block(Transform root, Vector3 position, float yaw, string name, float width, float depth, int floors,
+    internal static Transform Block(Transform root, Vector3 position, float yaw, string name, float width, float depth, int floors,
         Color wall, Color trim, Color sign, Color signText, string objectName)
     {
         var b = PrimitiveKit.Group(objectName, root, position, yaw).transform;

@@ -102,6 +102,7 @@ public static class UiKit
     {
         t.font = ThaiFont.Display;     // Mitr: rounded cartoon lettering
         t.fontStyle = FontStyle.Normal;
+        t.verticalOverflow = VerticalWrapMode.Overflow; // Mitr's lines are taller than Sarabun's: never let uGUI drop the line
         var o = t.gameObject.AddComponent<Outline>();
         o.effectColor = WoodEdge;
         o.effectDistance = new Vector2(outline, -outline);
@@ -391,6 +392,7 @@ public static class UiKit
         rt.gameObject.AddComponent<PressScale>();
         var label = Label(rt, fontSize, text, Vector2.zero, size - new Vector2(12f, 6f), textColor);
         label.font = ThaiFont.Display; // rounded Mitr on every button
+        label.verticalOverflow = VerticalWrapMode.Overflow;
         return button;
     }
 

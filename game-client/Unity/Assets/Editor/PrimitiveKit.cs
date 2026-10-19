@@ -51,6 +51,35 @@ public static class PrimitiveKit
         return material;
     }
 
+    // See-through additive light (stage light beams, lasers): URP Unlit, transparent, blended "One One"
+    // so overlapping beams add up and the bloom makes them shine. Saved as an asset so the shader
+    // variant ships in the iOS build.
+    public static Material Beam(string name, Color color)
+    {
+        string path = $"{MaterialFolder}/{name}.mat";
+        var material = AssetDatabase.LoadAssetAtPath<Material>(path);
+        if (material == null)
+        {
+            material = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
+            AssetDatabase.CreateAsset(material, path);
+        }
+        material.SetFloat("_Surface", 1f);      // transparent
+        material.SetFloat("_Blend", 2f);        // additive
+        material.SetFloat("_SrcBlend", (float)BlendMode.One);
+        material.SetFloat("_DstBlend", (float)BlendMode.One);
+        material.SetFloat("_SrcBlendAlpha", (float)BlendMode.One);
+        material.SetFloat("_DstBlendAlpha", (float)BlendMode.One);
+        material.SetFloat("_ZWrite", 0f);
+        material.SetFloat("_Cull", (float)CullMode.Off);
+        material.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+        material.renderQueue = (int)RenderQueue.Transparent;
+        material.SetOverrideTag("RenderType", "Transparent");
+        material.SetColor("_BaseColor", color);
+        material.enableInstancing = true;
+        EditorUtility.SetDirty(material);
+        return material;
+    }
+
     // Light bulbs, neon and lanterns: emissive, so the bloom makes them glow at night
     // bodyShade < 1 darkens the surface so the emitted light reads as a light source, not paint
     public static Material Glow(string name, Color color, float intensity = 2f, float bodyShade = 1f)
