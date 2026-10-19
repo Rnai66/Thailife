@@ -57,6 +57,7 @@ local function catalog(items, coop_count)
     if entry.barn then have = "ยุ้งจุ " .. items.barn_capacity .. " กก." end
     if entry.feed then have = "มีอยู่ " .. items.feed .. " ถุง" end
     if entry.food then have = "ในกระเป๋า " .. items.food[entry.food] end
+    if entry.furniture then have = "มีอยู่ " .. (items.furniture[entry.furniture] or 0) .. " ชิ้น" end
     if entry.chicken then have = "ในเล้า " .. coop_count .. "/" .. chickens.CAPACITY .. " ตัว" end
     table.insert(list, { id = entry.id, shop = entry.shop, name = entry.name, desc = entry.desc,
                          price = entry.price, owned = data.owns(items, entry), have = have,
@@ -159,6 +160,8 @@ local function checkout(user_id, lines)
       items.instrument = entry.instrument -- play the new instrument
     elseif entry.seed then
       items.seeds[entry.seed] = (items.seeds[entry.seed] or 0) + qty
+    elseif entry.furniture then
+      items.furniture[entry.furniture] = (items.furniture[entry.furniture] or 0) + qty
     elseif entry.feed then
       items.feed = items.feed + qty
     elseif entry.food then

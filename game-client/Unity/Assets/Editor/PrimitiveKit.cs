@@ -20,6 +20,19 @@ public static class PrimitiveKit
         return material;
     }
 
+    // Same, but (re)applies a surface finish every build: smoothness 0 = matte, 1 = glossy;
+    // metallic for gold leaf. GPU instancing on so many copies stay cheap on phones.
+    public static Material Mat(string name, Color color, float smoothness, float metallic = 0f)
+    {
+        var material = Mat(name, color);
+        material.color = color;
+        if (material.HasProperty("_Smoothness")) material.SetFloat("_Smoothness", smoothness);
+        if (material.HasProperty("_Metallic")) material.SetFloat("_Metallic", metallic);
+        material.enableInstancing = true;
+        EditorUtility.SetDirty(material);
+        return material;
+    }
+
     public static GameObject Box(string name, Transform parent, Vector3 localPosition, Vector3 scale, Material material, Vector3 euler = default, bool collider = true) =>
         Create(PrimitiveType.Cube, name, parent, localPosition, scale, material, euler, collider);
 

@@ -67,6 +67,7 @@ public class LifeClient : MonoBehaviour
 
         // Daily quests ride along with the life systems (no scene setup needed)
         if (GetComponent<QuestClient>() == null) gameObject.AddComponent<QuestClient>();
+        if (GetComponent<HouseClient>() == null) gameObject.AddComponent<HouseClient>();
 
         // Every location scene gets a day/night sun without extra setup
         foreach (var light in FindObjectsByType<Light>(FindObjectsSortMode.None))

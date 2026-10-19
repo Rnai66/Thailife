@@ -16,37 +16,14 @@ public static class Places
     {
         var temple = PrimitiveKit.Group("Temple_วัด", parent, position);
         var t = temple.transform;
-        var white = PrimitiveKit.Mat("TempleWhite", TempleWhite);
-        var gold = PrimitiveKit.Mat("Gold", Gold);
-        var orange = PrimitiveKit.Mat("TempleOrange", TempleOrange);
-        var green = PrimitiveKit.Mat("TempleGreen", TempleGreen);
+        var white = PrimitiveKit.Mat("TempleWhite", TempleWhite, 0.35f);
+        var gold = PrimitiveKit.Mat("Gold", Gold, 0.7f, 0.85f);
+        var orange = PrimitiveKit.Mat("TempleOrange", TempleOrange, 0.6f);
+        var green = PrimitiveKit.Mat("TempleGreen", TempleGreen, 0.6f);
         var wood = PrimitiveKit.Mat("WoodPlank", Wood);
 
-        // Ordination hall (โบสถ์): raised base, white walls, two-tier roof with ridge along Z
-        var hall = PrimitiveKit.Group("Ubosot_โบสถ์", t, new Vector3(0f, 0f, 3f));
-        var h = hall.transform;
-        PrimitiveKit.Box("Base", h, new Vector3(0f, 0.3f, 0f), new Vector3(10f, 0.6f, 16f), white);
-        PrimitiveKit.Box("Step", h, new Vector3(0f, 0.15f, -8.5f), new Vector3(4f, 0.3f, 1f), white);
-        PrimitiveKit.Box("Walls", h, new Vector3(0f, 2.6f, 0f), new Vector3(8f, 4f, 14f), white);
-        PrimitiveKit.Box("Door", h, new Vector3(0f, 2f, -7.03f), new Vector3(1.6f, 2.8f, 0.05f), gold, collider: false);
-        PrimitiveKit.Box("Pediment", h, new Vector3(0f, 6.4f, -7.08f), new Vector3(3f, 3f, 0.08f), gold, new Vector3(0f, 0f, 45f), collider: false);
-        PrimitiveKit.Box("RoofL", h, new Vector3(-2.15f, 6.4f, 0f), new Vector3(5.6f, 0.15f, 15.6f), orange, new Vector3(0f, 0f, 40f));
-        PrimitiveKit.Box("RoofR", h, new Vector3(2.15f, 6.4f, 0f), new Vector3(5.6f, 0.15f, 15.6f), orange, new Vector3(0f, 0f, -40f));
-        PrimitiveKit.Box("UpperRoofL", h, new Vector3(-1.3f, 7.6f, 0f), new Vector3(3.4f, 0.15f, 12f), green, new Vector3(0f, 0f, 40f), collider: false);
-        PrimitiveKit.Box("UpperRoofR", h, new Vector3(1.3f, 7.6f, 0f), new Vector3(3.4f, 0.15f, 12f), green, new Vector3(0f, 0f, -40f), collider: false);
-        PrimitiveKit.Box("ChofaFront", h, new Vector3(0f, 9.1f, -6.1f), new Vector3(0.12f, 1.1f, 0.12f), gold, new Vector3(-25f, 0f, 0f), collider: false);
-        PrimitiveKit.Box("ChofaBack", h, new Vector3(0f, 9.1f, 6.1f), new Vector3(0.12f, 1.1f, 0.12f), gold, new Vector3(25f, 0f, 0f), collider: false);
-
-        // Stupa (เจดีย์)
-        var chedi = PrimitiveKit.Group("Chedi_เจดีย์", t, new Vector3(9f, 0f, 9f));
-        var c = chedi.transform;
-        PrimitiveKit.Box("Base1", c, new Vector3(0f, 0.3f, 0f), new Vector3(4f, 0.6f, 4f), white);
-        PrimitiveKit.Box("Base2", c, new Vector3(0f, 0.9f, 0f), new Vector3(3f, 0.6f, 3f), white);
-        PrimitiveKit.Cylinder("Drum", c, new Vector3(0f, 1.6f, 0f), new Vector3(2.2f, 0.4f, 2.2f), white);
-        PrimitiveKit.Sphere("Bell", c, new Vector3(0f, 3f, 0f), new Vector3(2.6f, 2.6f, 2.6f), white, collider: false);
-        PrimitiveKit.Cylinder("Harmika", c, new Vector3(0f, 4.4f, 0f), new Vector3(0.7f, 0.3f, 0.7f), gold, collider: false);
-        PrimitiveKit.Cylinder("Spire", c, new Vector3(0f, 5.6f, 0f), new Vector3(0.35f, 1f, 0.35f), gold, collider: false);
-        PrimitiveKit.Cylinder("Tip", c, new Vector3(0f, 7f, 0f), new Vector3(0.1f, 0.5f, 0.1f), gold, collider: false);
+        Ubosot(t, new Vector3(0f, 0f, 3f), white, gold, orange, green);
+        Chedi(t, new Vector3(9f, 0f, 9f), white, gold);
 
         // Open pavilion (ศาลา)
         var sala = PrimitiveKit.Group("Sala_ศาลา", t, new Vector3(-9f, 0f, -3f));
@@ -71,6 +48,143 @@ public static class Places
         Gate(t, new Vector3(0f, 0f, -14f), name, white, gold, new Color(0.6f, 0.1f, 0.1f));
 
         return temple;
+    }
+
+    // Ordination hall (โบสถ์): stepped white plinth, colonnade, gold-framed doors and windows,
+    // and a three-section Thai roof (ridge along Z) with gold gables, bai raka fins and chofa horns.
+    private static void Ubosot(Transform parent, Vector3 position, Material white, Material gold, Material orange, Material green)
+    {
+        var hall = PrimitiveKit.Group("Ubosot_โบสถ์", parent, position);
+        var h = hall.transform;
+        var lacquer = PrimitiveKit.Mat("TempleLacquer", new Color(0.45f, 0.07f, 0.06f), 0.6f);
+        const float wallTop = 4.3f, pitch = 40f, halfWidth = 4.6f;
+
+        // Plinth and front stairs
+        PrimitiveKit.Box("Plinth1", h, new Vector3(0f, 0.175f, 0f), new Vector3(11.4f, 0.35f, 17.4f), white);
+        PrimitiveKit.Box("Plinth2", h, new Vector3(0f, 0.525f, 0f), new Vector3(10.6f, 0.35f, 16.6f), white);
+        for (int i = 0; i < 3; i++)
+            PrimitiveKit.Box("Stair", h, new Vector3(0f, 0.12f + i * 0.23f, -8.95f + i * 0.3f), new Vector3(3.6f, 0.24f + i * 0.23f, 0.6f), white);
+        // Naga balustrades (นาคราวบันได) along the stairs
+        foreach (float x in new[] { -1.95f, 1.95f })
+        {
+            var naga = MeshKit.Curve(new Vector3(x, 0.3f, -9.6f), new Vector3(x, 0.4f, -8.6f), new Vector3(x, 1.2f, -8.1f), 8);
+            MeshKit.Place("Naga", h, MeshKit.Sweep("NagaRail", naga, MeshKit.Taper(8, 0.22f, 0.14f), 8), gold, Vector3.zero);
+            MeshKit.Place("NagaHead", h, MeshKit.Blob("NagaHead", 5, 0.1f, 1), gold, new Vector3(x, 0.55f, -9.75f), default, new Vector3(0.45f, 0.6f, 0.5f));
+        }
+
+        // Walls with gold-framed windows and the lacquered main door
+        PrimitiveKit.Box("Walls", h, new Vector3(0f, 2.5f, 0f), new Vector3(8f, 3.6f, 14f), white);
+        PrimitiveKit.Box("DoorFrame", h, new Vector3(0f, 2.2f, -7.02f), new Vector3(2.2f, 3f, 0.06f), gold, collider: false);
+        PrimitiveKit.Box("Door", h, new Vector3(0f, 2.15f, -7.06f), new Vector3(1.8f, 2.7f, 0.04f), lacquer, collider: false);
+        PrimitiveKit.Box("DoorSeam", h, new Vector3(0f, 2.15f, -7.09f), new Vector3(0.05f, 2.7f, 0.02f), gold, collider: false);
+        for (int i = 0; i < 4; i++)
+        {
+            float z = -4.8f + i * 3.2f;
+            foreach (float side in new[] { -1f, 1f })
+            {
+                PrimitiveKit.Box("WindowFrame", h, new Vector3(side * 4.02f, 2.6f, z), new Vector3(0.06f, 1.9f, 1.15f), gold, collider: false);
+                PrimitiveKit.Box("Window", h, new Vector3(side * 4.05f, 2.6f, z), new Vector3(0.04f, 1.65f, 0.9f), lacquer, collider: false);
+            }
+        }
+
+        // Colonnade (เสาระเบียง) with lotus capitals
+        var column = MeshKit.Lathe("TempleColumn", new[]
+        {
+            new Vector2(0.3f, 0f), new Vector2(0.26f, 0.15f), new Vector2(0.22f, 0.3f), new Vector2(0.2f, 3.1f),
+            new Vector2(0.28f, 3.3f), new Vector2(0.34f, 3.5f), new Vector2(0.3f, 3.6f),
+        }, 12);
+        for (int i = 0; i < 6; i++)
+        {
+            float z = -7.2f + i * 2.88f;
+            foreach (float x in new[] { -4.9f, 4.9f })
+            {
+                var c = MeshKit.Place("Column", h, column, white, new Vector3(x, 0.7f, z));
+                MeshKit.Place("Capital", c.transform, MeshKit.Lathe("ColumnCapital", new[]
+                {
+                    new Vector2(0.24f, 3.05f), new Vector2(0.33f, 3.25f), new Vector2(0.36f, 3.45f), new Vector2(0.31f, 3.62f),
+                }, 12, false, false), gold, Vector3.zero);
+            }
+        }
+
+        // Lower skirt roof (ปีกนก) over the colonnade
+        float skirtSlope = 1.9f;
+        foreach (float side in new[] { -1f, 1f })
+        {
+            PrimitiveKit.Box("SkirtRoof", h, new Vector3(side * 4.85f, 4.05f, 0f), new Vector3(skirtSlope, 0.14f, 15f), orange, new Vector3(0f, 0f, side * -22f));
+            PrimitiveKit.Box("SkirtTrim", h, new Vector3(side * 4.87f, 4.0f, 0f), new Vector3(skirtSlope + 0.1f, 0.1f, 15.2f), green, new Vector3(0f, 0f, side * -22f), collider: false);
+        }
+
+        // Main roof in three sections: the middle one highest, front and back a step lower
+        float slope = halfWidth / Mathf.Cos(pitch * Mathf.Deg2Rad);
+        float rise = Mathf.Tan(pitch * Mathf.Deg2Rad) * halfWidth;
+        RoofSection(h, 0f, 9f, wallTop, 0f, halfWidth, slope, rise, pitch, orange, green, gold);
+        RoofSection(h, -6.05f, 3.1f, wallTop - 0.45f, 0.45f, halfWidth, slope, rise, pitch, orange, green, gold, frontGable: true);
+        RoofSection(h, 6.05f, 3.1f, wallTop - 0.45f, 0.45f, halfWidth, slope, rise, pitch, orange, green, gold, backGable: true);
+    }
+
+    private static void RoofSection(Transform h, float z, float length, float baseY, float drop, float halfWidth, float slope, float rise,
+        float pitch, Material orange, Material green, Material gold, bool frontGable = false, bool backGable = false)
+    {
+        float cy = baseY + rise * 0.5f;
+        foreach (float side in new[] { -1f, 1f })
+        {
+            var roll = new Vector3(0f, 0f, side * -pitch);
+            PrimitiveKit.Box("Roof", h, new Vector3(side * halfWidth * 0.5f, cy, z), new Vector3(slope, 0.16f, length), orange, roll);
+            PrimitiveKit.Box("RoofTrim", h, new Vector3(side * halfWidth * 0.5f, cy - 0.06f, z), new Vector3(slope + 0.3f, 0.1f, length + 0.3f), green, roll, collider: false);
+        }
+        // Gold ridge
+        PrimitiveKit.Box("Ridge", h, new Vector3(0f, baseY + rise + 0.05f, z), new Vector3(0.22f, 0.18f, length + 0.1f), gold, collider: false);
+
+        foreach (bool front in new[] { true, false })
+        {
+            if (front ? !frontGable : !backGable) continue; // only the outer ends get a gable
+            float gz = z + (front ? -length * 0.5f : length * 0.5f);
+            float yaw = front ? 0f : 180f;
+            var gable = PrimitiveKit.Group(front ? "GableFront" : "GableBack", h, new Vector3(0f, baseY, gz), yaw);
+            var g = gable.transform;
+            // Gold pediment (หน้าบัน) filling the triangle under the roof
+            MeshKit.Place("Pediment", g, MeshKit.Gable("Pediment", halfWidth * 1.8f, rise * 0.9f, 0.12f), gold, new Vector3(0f, 0.05f, 0.02f));
+            // Bai raka fins along both sloping edges, chofa horn at the top, hang hong at the eaves
+            foreach (float side in new[] { -1f, 1f })
+            {
+                MeshKit.Place("BaiRaka", g, MeshKit.Fins("BaiRaka", slope * 0.95f, 14, 0.35f, 0.04f), gold,
+                    new Vector3(side * halfWidth * 0.5f, rise * 0.5f + 0.12f, -0.12f), new Vector3(0f, 0f, side * -pitch));
+                var hook = MeshKit.Curve(Vector3.zero, new Vector3(side * 0.35f, 0.05f, 0f), new Vector3(side * 0.45f, 0.5f, 0f), 7);
+                MeshKit.Place("HangHong", g, MeshKit.Sweep(side < 0 ? "HangHongL" : "HangHongR", hook, MeshKit.Taper(7, 0.07f, 0.02f), 6), gold,
+                    new Vector3(side * (halfWidth + 0.1f), -0.05f, -0.12f));
+            }
+            var horn = MeshKit.Curve(Vector3.zero, new Vector3(0f, 0.9f, -0.1f), new Vector3(0f, 1.2f, -0.75f), 9);
+            MeshKit.Place("Chofa", g, MeshKit.Sweep("Chofa", horn, new[] { 0.1f, 0.095f, 0.09f, 0.085f, 0.08f, 0.075f, 0.065f, 0.05f, 0.02f }, 8), gold,
+                new Vector3(0f, rise + 0.1f, -0.1f));
+        }
+    }
+
+    // Bell-shaped chedi: square stepped bases, a smooth white bell and a gold ringed spire
+    private static void Chedi(Transform parent, Vector3 position, Material white, Material gold)
+    {
+        var chedi = PrimitiveKit.Group("Chedi_เจดีย์", parent, position);
+        var c = chedi.transform;
+        PrimitiveKit.Box("Base1", c, new Vector3(0f, 0.25f, 0f), new Vector3(4.4f, 0.5f, 4.4f), white);
+        PrimitiveKit.Box("Base2", c, new Vector3(0f, 0.7f, 0f), new Vector3(3.6f, 0.4f, 3.6f), white);
+        PrimitiveKit.Box("Base3", c, new Vector3(0f, 1.05f, 0f), new Vector3(2.9f, 0.3f, 2.9f), white);
+        MeshKit.Place("Bell", c, MeshKit.Lathe("ChediBell", new[]
+        {
+            new Vector2(1.35f, 0f), new Vector2(1.35f, 0.18f), new Vector2(1.2f, 0.2f), new Vector2(1.2f, 0.38f),
+            new Vector2(1.05f, 0.4f), new Vector2(1.05f, 0.55f), new Vector2(1.18f, 0.7f), new Vector2(1.28f, 1.05f),
+            new Vector2(1.25f, 1.5f), new Vector2(1.12f, 1.9f), new Vector2(0.9f, 2.25f), new Vector2(0.62f, 2.5f),
+            new Vector2(0.45f, 2.6f), new Vector2(0.45f, 2.8f),
+        }, 32), white, new Vector3(0f, 1.2f, 0f));
+        var col = chedi.AddComponent<CapsuleCollider>();
+        col.center = new Vector3(0f, 2.4f, 0f);
+        col.height = 2.8f;
+        col.radius = 1.3f;
+        MeshKit.Place("Spire", c, MeshKit.Lathe("ChediSpire", new[]
+        {
+            new Vector2(0.5f, 0f), new Vector2(0.5f, 0.25f), new Vector2(0.36f, 0.3f), new Vector2(0.36f, 0.45f),
+            new Vector2(0.3f, 0.5f), new Vector2(0.33f, 0.62f), new Vector2(0.26f, 0.7f), new Vector2(0.29f, 0.82f),
+            new Vector2(0.22f, 0.9f), new Vector2(0.24f, 1.02f), new Vector2(0.17f, 1.1f), new Vector2(0.12f, 1.8f),
+            new Vector2(0.07f, 2.5f), new Vector2(0.03f, 3f), new Vector2(0f, 3.2f),
+        }, 20), gold, new Vector3(0f, 4f, 0f));
     }
 
     // Temple fair (งานวัด) corner: chicken beauty contest stage + a couple of fair stalls.
@@ -357,32 +471,99 @@ public static class Places
         if (trainable)
             tree.AddComponent<TrainingTarget>().Configure("banana", 1, 2);
 
-        var trunkMat = PrimitiveKit.Mat("BananaTrunk", new Color(0.5f, 0.58f, 0.25f));
-        var leafMat = PrimitiveKit.Mat("BananaLeaf", new Color(0.3f, 0.7f, 0.2f));
-        var fruitMat = PrimitiveKit.Mat("BananaFruit", new Color(0.75f, 0.8f, 0.2f));
+        var trunkMat = PrimitiveKit.Mat("BananaTrunk", new Color(0.52f, 0.6f, 0.3f), 0.25f);
+        var leafMat = PrimitiveKit.Mat("BananaLeaf", new Color(0.32f, 0.66f, 0.2f), 0.35f);
+        var youngLeafMat = PrimitiveKit.Mat("BananaLeafYoung", new Color(0.5f, 0.78f, 0.28f), 0.35f);
+        var fruitMat = PrimitiveKit.Mat("BananaFruit", new Color(0.62f, 0.75f, 0.2f), 0.4f);
+        var flowerMat = PrimitiveKit.Mat("BananaFlower", new Color(0.5f, 0.12f, 0.2f), 0.45f);
 
         // Pivot at the base so the trunk bends when kicked; trunk must be the first child (PunchingBag.IsRooted)
         var pivot = PrimitiveKit.Group("Pivot", tree.transform, Vector3.zero);
         if (trainable) pivot.AddComponent<PunchingBag>();
 
-        PrimitiveKit.Cylinder("Trunk", pivot.transform, new Vector3(0f, 1.2f, 0f), new Vector3(0.35f, 1.2f, 0.35f), trunkMat);
-        for (int i = 0; i < 6; i++)
+        var trunk = MeshKit.Place("Trunk", pivot.transform, MeshKit.Lathe("BananaTrunk", new[]
         {
-            var holder = PrimitiveKit.Group("LeafHolder", pivot.transform, new Vector3(0f, 2.35f, 0f), i * 60f + 15f);
-            PrimitiveKit.Box("Leaf", holder.transform, new Vector3(0f, 0.15f, 0.8f), new Vector3(0.4f, 0.04f, 1.8f), leafMat, new Vector3(20f, 0f, 0f), collider: false);
+            new Vector2(0.24f, 0f), new Vector2(0.21f, 0.15f), new Vector2(0.19f, 0.6f), new Vector2(0.17f, 1.3f),
+            new Vector2(0.15f, 1.9f), new Vector2(0.13f, 2.3f), new Vector2(0.1f, 2.45f),
+        }, 14), trunkMat, new Vector3(0f, 0.01f, 0f)); // above the pivot: PunchingBag.IsRooted
+        var collider = trunk.AddComponent<CapsuleCollider>();
+        collider.center = new Vector3(0f, 1.2f, 0f);
+        collider.height = 2.4f;
+        collider.radius = 0.2f;
+
+        // Big arching leaves all around, a couple of young upright ones in the middle
+        var leaf = MeshKit.Leaf("BananaLeaf", 2.3f, 0.75f, 0.55f, 1.5f);
+        var young = MeshKit.Leaf("BananaLeafYoung", 1.6f, 0.45f, 0.9f, 0.4f);
+        for (int i = 0; i < 8; i++)
+            MeshKit.Place("Leaf", pivot.transform, leaf, leafMat, new Vector3(0f, 2.3f + (i % 2) * 0.12f, 0f),
+                new Vector3(-28f - (i % 3) * 6f, i * 45f + (i % 2) * 17f, (i % 3 - 1) * 8f));
+        MeshKit.Place("YoungLeaf", pivot.transform, young, youngLeafMat, new Vector3(0f, 2.4f, 0f), new Vector3(-62f, 30f, 0f));
+        MeshKit.Place("YoungLeaf", pivot.transform, young, youngLeafMat, new Vector3(0f, 2.4f, 0f), new Vector3(-55f, 200f, 0f));
+
+        // Hanging bunch (เครือกล้วย) with the purple banana flower (หัวปลี) at the end
+        var stalkPath = MeshKit.Curve(new Vector3(0.1f, 2.3f, 0.1f), new Vector3(0.55f, 2.4f, 0.55f), new Vector3(0.55f, 1.35f, 0.55f), 8);
+        MeshKit.Place("Stalk", pivot.transform, MeshKit.Sweep("BananaStalk", stalkPath, MeshKit.Taper(8, 0.05f, 0.035f), 6), trunkMat, Vector3.zero);
+        var banana = MeshKit.Sweep("Banana", MeshKit.Curve(Vector3.zero, new Vector3(0.12f, 0.08f, 0f), new Vector3(0.18f, 0.24f, 0f), 6),
+            new[] { 0.02f, 0.035f, 0.04f, 0.04f, 0.032f, 0.012f }, 6);
+        for (int hand = 0; hand < 3; hand++)
+        for (int k = 0; k < 6; k++)
+        {
+            float yaw = k * 60f + hand * 25f;
+            Vector3 at = new Vector3(0.55f, 1.95f - hand * 0.17f, 0.55f) + Quaternion.Euler(0f, yaw, 0f) * new Vector3(0.05f, 0f, 0f);
+            MeshKit.Place("Banana", pivot.transform, banana, fruitMat, at, new Vector3(0f, yaw, 0f));
         }
-        PrimitiveKit.Sphere("Bunch", pivot.transform, new Vector3(0.25f, 1.95f, 0.1f), new Vector3(0.3f, 0.5f, 0.3f), fruitMat);
+        MeshKit.Place("BananaFlower", pivot.transform, MeshKit.Lathe("BananaFlower", new[]
+        {
+            new Vector2(0.02f, 0.3f), new Vector2(0.07f, 0.22f), new Vector2(0.1f, 0.1f), new Vector2(0.06f, 0f), new Vector2(0f, -0.05f),
+        }, 10), flowerMat, new Vector3(0.55f, 1.05f, 0.55f));
         return tree;
     }
 
     public static GameObject ShadeTree(Transform parent, Vector3 position, float size = 1f) =>
         BigTree(parent, position, "ShadeTree", size);
 
+    // Broad tropical shade tree: flared trunk, three limbs and a faceted canopy of leaf clusters
     private static GameObject BigTree(Transform parent, Vector3 position, string name, float size)
     {
         var tree = PrimitiveKit.Group(name, parent, position);
-        PrimitiveKit.Cylinder("Trunk", tree.transform, new Vector3(0f, 1.4f * size, 0f), new Vector3(0.45f, 1.4f, 0.45f) * size, PrimitiveKit.Mat("Bark", new Color(0.4f, 0.26f, 0.13f)));
-        PrimitiveKit.Sphere("Canopy", tree.transform, new Vector3(0f, 3.6f * size, 0f), new Vector3(3.2f, 2.6f, 3.2f) * size, PrimitiveKit.Mat("Leaves", new Color(0.18f, 0.5f, 0.2f)));
+        var t = tree.transform;
+        var bark = PrimitiveKit.Mat("Bark", new Color(0.36f, 0.24f, 0.14f), 0.15f);
+        var leaves = PrimitiveKit.Mat("Leaves", new Color(0.17f, 0.46f, 0.2f), 0.2f);
+        var leavesLight = PrimitiveKit.Mat("LeavesLight", new Color(0.3f, 0.58f, 0.22f), 0.2f);
+        var leavesDark = PrimitiveKit.Mat("LeavesDark", new Color(0.11f, 0.36f, 0.17f), 0.2f);
+
+        MeshKit.Place("Trunk", t, MeshKit.Lathe("TreeTrunk", new[]
+        {
+            new Vector2(0.55f, 0f), new Vector2(0.38f, 0.15f), new Vector2(0.3f, 0.6f), new Vector2(0.26f, 1.6f),
+            new Vector2(0.22f, 2.4f), new Vector2(0.17f, 2.9f),
+        }, 12), bark, Vector3.zero, default, Vector3.one * size);
+        var collider = tree.AddComponent<CapsuleCollider>();
+        collider.center = new Vector3(0f, 1.4f * size, 0f);
+        collider.height = 2.8f * size;
+        collider.radius = 0.3f * size;
+
+        for (int i = 0; i < 3; i++)
+        {
+            float yaw = i * 120f + 20f;
+            Vector3 dir = Quaternion.Euler(0f, yaw, 0f) * Vector3.forward;
+            var limb = MeshKit.Curve(new Vector3(0f, 2.2f, 0f), new Vector3(0f, 3f, 0f) + dir * 0.4f, new Vector3(0f, 3.5f, 0f) + dir * 1.3f, 6);
+            MeshKit.Place("Limb", t, MeshKit.Sweep("TreeLimb", limb, MeshKit.Taper(6, 0.16f, 0.07f), 6), bark, Vector3.zero, default, Vector3.one * size);
+        }
+
+        // Leaf clusters: a dome of faceted blobs in three greens
+        var spots = new[]
+        {
+            new Vector4(0f, 4.3f, 0f, 2.6f), new Vector4(1.3f, 3.8f, 0.4f, 2f), new Vector4(-1.2f, 3.9f, 0.6f, 2.1f),
+            new Vector4(0.3f, 3.7f, -1.3f, 2f), new Vector4(-0.6f, 3.5f, -0.9f, 1.7f), new Vector4(0.9f, 4.6f, -0.5f, 1.6f),
+            new Vector4(-0.5f, 4.8f, 0.5f, 1.5f),
+        };
+        var mats = new[] { leaves, leavesLight, leavesDark };
+        for (int i = 0; i < spots.Length; i++)
+        {
+            var sp = spots[i];
+            MeshKit.Place("Leaves", t, MeshKit.Blob("Canopy" + (i % 4), 11 + i % 4, 0.22f, 1), mats[i % 3],
+                new Vector3(sp.x, sp.y, sp.z) * size, new Vector3(0f, i * 47f, 0f), new Vector3(1f, 0.8f, 1f) * (sp.w * size));
+        }
         return tree;
     }
 

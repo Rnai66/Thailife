@@ -51,6 +51,28 @@ M.INSTRUMENTS = {
 }
 M.INSTRUMENT_ORDER = { "pin", "khaen", "so", "ranat", "guitar", "drums", "bass", "keyboard" }
 
+-- Furniture (เฟอร์นิเจอร์) for decorating your stilt house: bought at the community shop,
+-- placed in the room with house.lua. The client builds each piece's look from its id.
+M.FURNITURE = {
+  mat      = { name = "เสื่อ",          price = 80,   desc = "เสื่อกก ปูนั่งเล่นกลางบ้าน" },
+  pillow   = { name = "หมอนข้าง",       price = 120,  desc = "หมอนข้างนุ่มๆ ไว้กอดนอน" },
+  plant    = { name = "กระถางต้นไม้",    price = 150,  desc = "เพิ่มความเขียวในบ้าน" },
+  chair    = { name = "เก้าอี้ไม้",       price = 180,  desc = "เก้าอี้ไม้สัก" },
+  lamp     = { name = "โคมไฟ",          price = 220,  desc = "โคมไฟตั้งพื้น" },
+  low_table = { name = "โต๊ะเตี้ย",      price = 250,  desc = "โต๊ะนั่งพื้น กินข้าวกับครอบครัว" },
+  rug      = { name = "พรมผืนใหญ่",      price = 300,  desc = "พรมลายไทยสีแดง" },
+  radio    = { name = "วิทยุ",           price = 300,  desc = "ฟังเพลงลูกทุ่ง" },
+  fan      = { name = "พัดลม",          price = 350,  desc = "พัดลมตั้งพื้น คลายร้อน" },
+  table    = { name = "โต๊ะไม้",         price = 400,  desc = "โต๊ะไม้สูง" },
+  shelf    = { name = "ชั้นวางของ",      price = 450,  desc = "ชั้นไม้ 3 ชั้น" },
+  wardrobe = { name = "ตู้เสื้อผ้า",       price = 700,  desc = "ตู้ไม้บานคู่" },
+  bed      = { name = "เตียงนอน",       price = 900,  desc = "เตียงไม้พร้อมฟูก" },
+  tv       = { name = "โทรทัศน์",        price = 1500, desc = "ทีวีจอแบนพร้อมตู้วาง" },
+  fridge   = { name = "ตู้เย็น",          price = 1800, desc = "ตู้เย็น 2 ประตู" },
+}
+M.FURNITURE_ORDER = { "mat", "pillow", "plant", "chair", "lamp", "low_table", "rug", "radio", "fan",
+                      "table", "shelf", "wardrobe", "bed", "tv", "fridge" }
+
 -- Rice barn (ยุ้งข้าว): harvested rice is stored here; full barn = can't harvest
 M.BARN_START = 100
 M.BARN_STEP = 100
@@ -87,6 +109,12 @@ M.CATALOG = {
   { id = "camp_membership", shop = "camp",      price = 300, name = "สมาชิกค่ายมวย", desc = "ปลดล็อกการซ้อมกระสอบหนักในค่าย (ต้อง Lv 6 ด้วย)" },
 }
 
+for _, id in ipairs(M.FURNITURE_ORDER) do
+  local f = M.FURNITURE[id]
+  table.insert(M.CATALOG, { id = "furn_" .. id, shop = "community", price = f.price, name = f.name,
+                            desc = f.desc, furniture = id, consumable = true })
+end
+
 local nk = require("nakama")
 
 -- Owned items: { rods = { bamboo = true, ... }, rod = "bamboo", camp_member = false,
@@ -103,6 +131,7 @@ function M.read_items(user_id)
   items.feed = items.feed or 0
   items.instruments = items.instruments or { pin = true }   -- everyone starts with a พิณ
   items.instrument = items.instrument or "pin"
+  items.furniture = items.furniture or {}   -- id -> how many owned (placed or stored)
   items.food = items.food or {}
   for _, f in ipairs(M.FOOD_ORDER) do items.food[f] = items.food[f] or 0 end
   return items

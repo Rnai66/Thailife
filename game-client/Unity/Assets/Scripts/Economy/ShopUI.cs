@@ -89,6 +89,7 @@ public class ShopUI : MonoBehaviour
                 list.Add(new Category { Name = "ของกิน", Tile = new Color32(0xFA, 0xEE, 0xDA, 0xFF), TileInk = new Color32(0x85, 0x4F, 0x0B, 0xFF), Has = id => id.StartsWith("food_") });
                 list.Add(new Category { Name = "ทำนา", Tile = new Color32(0xEA, 0xF3, 0xDE, 0xFF), TileInk = new Color32(0x3B, 0x6D, 0x11, 0xFF), Has = id => id.StartsWith("seed_") || id == "barn_upgrade" });
                 list.Add(new Category { Name = "เลี้ยงไก่", Tile = new Color32(0xFA, 0xEC, 0xE7, 0xFF), TileInk = new Color32(0x99, 0x3C, 0x1D, 0xFF), Has = id => id.StartsWith("chicken_") });
+                list.Add(new Category { Name = "แต่งบ้าน", Tile = new Color32(0xF1, 0xEF, 0xE8, 0xFF), TileInk = new Color32(0x5F, 0x5E, 0x5A, 0xFF), Has = id => id.StartsWith("furn_") });
                 list.Add(new Category { Name = "ตกปลา", Tile = new Color32(0xE6, 0xF1, 0xFB, 0xFF), TileInk = new Color32(0x18, 0x5F, 0xA5, 0xFF), Has = id => id.StartsWith("rod_") });
                 break;
             case "music":
@@ -170,6 +171,7 @@ public class ShopUI : MonoBehaviour
             FarmClient.Instance?.Refresh();  // seeds / barn size
             CoopClient.Instance?.Refresh();  // chickens / feed
             LifeClient.Instance?.Refresh();  // food in the bag
+            HouseClient.Instance?.Refresh(); // furniture in storage
             if (MusicClient.Instance != null) _ = MusicClient.Instance.RefreshAsync(); // instruments
             UiKit.FloatAbovePlayer($"-{result.spent} ฿", new Color(1f, 0.6f, 0.3f));
         }
