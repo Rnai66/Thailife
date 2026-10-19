@@ -12,12 +12,30 @@ public static class PrimitiveKit
     {
         string path = $"{MaterialFolder}/{name}.mat";
         var existing = AssetDatabase.LoadAssetAtPath<Material>(path);
-        if (existing != null) return existing;
+        if (existing != null) return Finish(name, existing);
 
         bool urp = GraphicsSettings.defaultRenderPipeline != null;
         var material = new Material(Shader.Find(urp ? "Universal Render Pipeline/Lit" : "Standard")) { color = color };
         AssetDatabase.CreateAsset(material, path);
-        return material;
+        return Finish(name, material);
+    }
+
+    // Surface finish guessed from the material's name: gold and metal shine, glass/water/neon
+    // are glossy, glazed tiles and lacquer have a sheen, everything else is a soft matte
+    private static Material Finish(string name, Material m)
+    {
+        string n = name.ToLowerInvariant();
+        float smooth = 0.22f, metal = 0f;
+        if (n.Contains("gold") || n.Contains("brass")) { smooth = 0.7f; metal = 0.85f; }
+        else if (n.Contains("metal") || n.Contains("steel") || n.Contains("zinc") || n.Contains("tin") || n.Contains("chrome")) { smooth = 0.55f; metal = 0.6f; }
+        else if (n.Contains("glass") || n.Contains("window") || n.Contains("water") || n.Contains("neon") || n.Contains("screen")) smooth = 0.85f;
+        else if (n.Contains("roof") || n.Contains("tile") || n.Contains("lacquer") || n.Contains("paint") || n.Contains("temple")) smooth = 0.55f;
+        else if (n.Contains("asphalt") || n.Contains("dirt") || n.Contains("grass") || n.Contains("soil") || n.Contains("mud")) smooth = 0.08f;
+        if (m.HasProperty("_Smoothness")) m.SetFloat("_Smoothness", smooth);
+        if (m.HasProperty("_Metallic")) m.SetFloat("_Metallic", metal);
+        m.enableInstancing = true;
+        EditorUtility.SetDirty(m);
+        return m;
     }
 
     // Same, but (re)applies a surface finish every build: smoothness 0 = matte, 1 = glossy;
@@ -52,6 +70,13 @@ public static class PrimitiveKit
         go.transform.localRotation = Quaternion.Euler(euler);
         go.transform.localScale = scale;
         go.GetComponent<Renderer>().sharedMaterial = material;
+        // Boxes get bevelled edges (size baked into the mesh, the collider keeps the box size)
+        if (type == PrimitiveType.Cube && MeshKit.TryChamferBox(scale, out var chamfered))
+        {
+            go.GetComponent<MeshFilter>().sharedMesh = chamfered;
+            go.transform.localScale = Vector3.one;
+            go.GetComponent<BoxCollider>().size = scale;
+        }
         if (!collider) Object.DestroyImmediate(go.GetComponent<Collider>());
         return go;
     }

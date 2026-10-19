@@ -574,7 +574,9 @@ public static class Places
         var board = PrimitiveKit.Mat("SignBoard", new Color(0.95f, 0.92f, 0.8f));
         PrimitiveKit.Box("Post", sign.transform, new Vector3(0f, 0.6f, 0f), new Vector3(0.1f, 1.2f, 0.1f), wood);
         PrimitiveKit.Box("Board", sign.transform, new Vector3(0f, 1.35f, 0f), new Vector3(1.6f, 0.7f, 0.06f), board, collider: false);
+        // Text on both faces, so it never reads mirrored from behind
         PrimitiveKit.Label(text, sign.transform, new Vector3(0f, 1.35f, -0.04f), 0.035f, new Color(0.25f, 0.15f, 0.05f));
+        PrimitiveKit.Label(text, sign.transform, new Vector3(0f, 1.35f, 0.04f), 0.035f, new Color(0.25f, 0.15f, 0.05f), 180f);
         return sign;
     }
 
@@ -586,5 +588,6 @@ public static class Places
         PrimitiveKit.Box("PillarR", gate.transform, new Vector3(2.2f, 1.6f, 0f), new Vector3(0.5f, 3.2f, 0.5f), pillar);
         PrimitiveKit.Box("Beam", gate.transform, new Vector3(0f, 3.5f, 0f), new Vector3(5.4f, 0.8f, 0.3f), beam, collider: false);
         PrimitiveKit.Label(name, gate.transform, new Vector3(0f, 3.5f, -0.17f), 0.065f, textColor);
+        PrimitiveKit.Label(name, gate.transform, new Vector3(0f, 3.5f, 0.17f), 0.065f, textColor, 180f);
     }
 }

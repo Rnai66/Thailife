@@ -344,6 +344,8 @@ public static class Places2
         var shutter = PrimitiveKit.Mat("RollShutter", new Color(0.6f, 0.62f, 0.64f));
         var awning = PrimitiveKit.Mat("BusStopBlue", new Color(0.2f, 0.4f, 0.75f));
         var signMat = PrimitiveKit.Mat("SignYellow", new Color(1f, 0.85f, 0.15f));
+        var trim = PrimitiveKit.Mat("FacadeTrim", new Color(0.97f, 0.96f, 0.92f));
+        var rail = PrimitiveKit.Mat("RailMetal", new Color(0.2f, 0.22f, 0.24f));
         const float unitWidth = 4.5f;
 
         for (int i = 0; i < units; i++)
@@ -353,7 +355,20 @@ public static class Places2
             PrimitiveKit.Box("Unit", t, new Vector3(x, 4.5f, 0f), new Vector3(unitWidth - 0.1f, 9f, 10f), facade);
             PrimitiveKit.Box("Shutter", t, new Vector3(x, 1.4f, -5.03f), new Vector3(3.6f, 2.8f, 0.05f), shutter, collider: false);
             for (int floor = 1; floor < 3; floor++)
-                PrimitiveKit.Box("Window", t, new Vector3(x, 1.6f + floor * 3f, -5.03f), new Vector3(2.8f, 1.4f, 0.05f), window, collider: false);
+            {
+                float wy = 1.6f + floor * 3f;
+                PrimitiveKit.Box("WindowFrame", t, new Vector3(x, wy, -5.04f), new Vector3(3f, 1.6f, 0.06f), trim, collider: false);
+                PrimitiveKit.Box("Window", t, new Vector3(x, wy, -5.08f), new Vector3(2.7f, 1.3f, 0.05f), window, collider: false);
+                PrimitiveKit.Box("WindowSill", t, new Vector3(x, wy - 0.85f, -5.15f), new Vector3(3.1f, 0.1f, 0.3f), trim, collider: false);
+            }
+            // Second-floor balcony with a rail, a cornice and parapet on top, pilasters between units
+            PrimitiveKit.Box("Balcony", t, new Vector3(x, 3.55f, -5.45f), new Vector3(unitWidth - 0.3f, 0.15f, 0.9f), trim, collider: false);
+            PrimitiveKit.Box("BalconyRail", t, new Vector3(x, 4.1f, -5.85f), new Vector3(unitWidth - 0.3f, 0.08f, 0.08f), rail, collider: false);
+            for (int k = 0; k < 5; k++)
+                PrimitiveKit.Box("Baluster", t, new Vector3(x - 1.8f + k * 0.9f, 3.85f, -5.85f), new Vector3(0.06f, 0.5f, 0.06f), rail, collider: false);
+            PrimitiveKit.Box("Cornice", t, new Vector3(x, 9.1f, -0.1f), new Vector3(unitWidth, 0.3f, 10.5f), trim, collider: false);
+            PrimitiveKit.Box("Parapet", t, new Vector3(x, 9.5f, -5.05f), new Vector3(unitWidth - 0.1f, 0.6f, 0.2f), facade, collider: false);
+            PrimitiveKit.Box("Pilaster", t, new Vector3(x - unitWidth * 0.5f, 4.5f, -5.05f), new Vector3(0.3f, 9f, 0.25f), trim, collider: false);
             PrimitiveKit.Box("Awning", t, new Vector3(x, 3.1f, -5.8f), new Vector3(unitWidth - 0.2f, 0.08f, 1.6f), awning, new Vector3(-12f, 0f, 0f), collider: false);
             if (signs != null && i < signs.Length && !string.IsNullOrEmpty(signs[i]))
             {

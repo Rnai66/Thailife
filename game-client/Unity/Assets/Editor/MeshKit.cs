@@ -64,6 +64,96 @@ public static class MeshKit
         return Save(key, mesh);
     }
 
+    // ── Chamfered box: a box whose edges are bevelled, so they catch the light ──
+    // The size is baked into the mesh (the object keeps scale 1, its BoxCollider gets the size).
+    public static bool TryChamferBox(Vector3 size, out Mesh mesh)
+    {
+        mesh = null;
+        float min = Mathf.Min(size.x, Mathf.Min(size.y, size.z));
+        if (min < 0.04f) return false; // paper-thin pieces stay plain
+        float c = Mathf.Min(0.05f, min * 0.2f);
+        string key = $"Boxes/Box_{size.x:0.###}_{size.y:0.###}_{size.z:0.###}";
+        if (boxCache.TryGetValue(key, out mesh) && mesh != null) return true;
+        mesh = AssetDatabase.LoadAssetAtPath<Mesh>($"{Folder}/{key}.asset");
+        if (mesh == null)
+        {
+            if (!AssetDatabase.IsValidFolder("Assets/Art")) AssetDatabase.CreateFolder("Assets", "Art");
+            if (!AssetDatabase.IsValidFolder(Folder)) AssetDatabase.CreateFolder("Assets/Art", "Meshes");
+            if (!AssetDatabase.IsValidFolder(Folder + "/Boxes")) AssetDatabase.CreateFolder(Folder, "Boxes");
+            mesh = BuildChamferBox(key, size * 0.5f, c);
+        }
+        boxCache[key] = mesh;
+        return true;
+    }
+
+    private static readonly Dictionary<string, Mesh> boxCache = new Dictionary<string, Mesh>();
+
+    private static Mesh BuildChamferBox(string key, Vector3 h, float c)
+    {
+        // Each corner splits into three points, one pushed out along each axis
+        Vector3 P(int sx, int sy, int sz, int axis)
+        {
+            var p = new Vector3(sx * (h.x - c), sy * (h.y - c), sz * (h.z - c));
+            if (axis == 0) p.x = sx * h.x; else if (axis == 1) p.y = sy * h.y; else p.z = sz * h.z;
+            return p;
+        }
+        int[] S(int axis, int sa, int sb, int sc)
+        {
+            // signs for (x, y, z) given the sign along `axis` and the other two in order
+            var r = new int[3];
+            r[axis] = sa; r[(axis + 1) % 3] = sb; r[(axis + 2) % 3] = sc;
+            return r;
+        }
+        var v = new List<Vector3>();
+        var t = new List<int>();
+        void Poly(params Vector3[] pts)
+        {
+            Vector3 centroid = Vector3.zero;
+            foreach (var q in pts) centroid += q;
+            centroid /= pts.Length;
+            for (int i = 1; i < pts.Length - 1; i++)
+            {
+                Vector3 a = pts[0], b = pts[i], d = pts[i + 1];
+                if (Vector3.Dot(Vector3.Cross(b - a, d - a), centroid) < 0f) (b, d) = (d, b); // face outward
+                int n = v.Count;
+                v.Add(a); v.Add(b); v.Add(d);
+                t.Add(n); t.Add(n + 1); t.Add(n + 2);
+            }
+        }
+        int[][] ring = { new[] { -1, -1 }, new[] { -1, 1 }, new[] { 1, 1 }, new[] { 1, -1 } };
+        for (int axis = 0; axis < 3; axis++)
+        {
+            int b = (axis + 1) % 3, d = (axis + 2) % 3;
+            foreach (int sa in new[] { -1, 1 })
+            {
+                // Flat face
+                var face = new Vector3[4];
+                for (int k = 0; k < 4; k++) { var sg = S(axis, sa, ring[k][0], ring[k][1]); face[k] = P(sg[0], sg[1], sg[2], axis); }
+                Poly(face);
+            }
+            // Chamfer strips along edges parallel to `axis`
+            foreach (int sb in new[] { -1, 1 })
+            foreach (int sd in new[] { -1, 1 })
+            {
+                var lo = S(axis, -1, sb, sd);
+                var hi = S(axis, 1, sb, sd);
+                Poly(P(lo[0], lo[1], lo[2], b), P(lo[0], lo[1], lo[2], d), P(hi[0], hi[1], hi[2], d), P(hi[0], hi[1], hi[2], b));
+            }
+        }
+        // Corner triangles
+        foreach (int sx in new[] { -1, 1 })
+        foreach (int sy in new[] { -1, 1 })
+        foreach (int sz in new[] { -1, 1 })
+            Poly(P(sx, sy, sz, 0), P(sx, sy, sz, 1), P(sx, sy, sz, 2));
+
+        var mesh = new Mesh();
+        mesh.SetVertices(v);
+        mesh.SetTriangles(t, 0);
+        mesh.RecalculateNormals();
+        mesh.RecalculateBounds();
+        return Save(key, mesh);
+    }
+
     // ── Lathe: revolve a (radius, height) profile around Y ─────────────────────
     public static Mesh Lathe(string key, Vector2[] profile, int segments = 24, bool capTop = true, bool capBottom = true)
     {

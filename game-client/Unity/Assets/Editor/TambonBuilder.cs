@@ -33,6 +33,27 @@ public static class TambonBuilder
 
         foreach (var pos in new[] { new Vector3(-40f, 0f, -20f), new Vector3(40f, 0f, -22f), new Vector3(-42f, 0f, 20f), new Vector3(42f, 0f, 24f), new Vector3(14f, 0f, -30f) })
             Places.ShadeTree(root, pos);
+
+        // Palms along the road and the canal bank, shrubs by the buildings, grass everywhere else
+        var palms = new[]
+        {
+            new Vector3(-36f, 0f, -4.5f), new Vector3(-12f, 0f, -12.5f), new Vector3(6f, 0f, -4.5f), new Vector3(30f, 0f, -12.5f),
+            new Vector3(-30f, 0f, 27f), new Vector3(-12f, 0f, 26.5f), new Vector3(14f, 0f, 26.5f), new Vector3(32f, 0f, 27f),
+        };
+        for (int i = 0; i < palms.Length; i++) Nature.CoconutPalm(root, palms[i], 0.9f + (i % 3) * 0.12f, i);
+        var bushes = new[]
+        {
+            new Vector3(-30f, 0f, 2f), new Vector3(-18f, 0f, 2f), new Vector3(18f, 0f, 2f), new Vector3(30f, 0f, 2f),
+            new Vector3(-16f, 0f, -16f), new Vector3(-4f, 0f, -16f), new Vector3(-6f, 0f, 8f), new Vector3(10f, 0f, 8f),
+        };
+        for (int i = 0; i < bushes.Length; i++) Nature.Bush(root, bushes[i], 1f + (i % 2) * 0.3f, i + 20, flowers: i % 2 == 0);
+        Nature.GrassField(root, Vector3.zero, new Vector2(96f, 96f), 1800, 13,
+            new Vector4(-50f, -10.6f, 50f, -5.4f),   // road
+            new Vector4(-50f, 27.5f, 50f, 41f),      // canal
+            new Vector4(-35f, 0f, -13f, 20f),        // SAO office
+            new Vector4(13f, 0f, 35f, 18f),          // health station
+            new Vector4(-26f, -42f, 6f, -15f),       // school
+            new Vector4(-11.3f, -15f, -8.7f, -10f), new Vector4(0.7f, -6f, 3.3f, 4f));
     });
 
     internal static void BuildCity(bool ask) => BuildLocation("Assets/Scenes/City.unity", "City", 10f, ask, root =>
@@ -66,6 +87,23 @@ public static class TambonBuilder
 
         foreach (var pos in new[] { new Vector3(-8f, 0f, -16f), new Vector3(8f, 0f, -16f), new Vector3(-40f, 0f, 20f), new Vector3(40f, 0f, 22f) })
             Places.ShadeTree(root, pos);
+
+        // Paved town centre with street palms in planters along both streets
+        PrimitiveKit.Box("Pavement", root, new Vector3(0f, 0.008f, 19f), new Vector3(96f, 0.012f, 49f),
+            PrimitiveKit.Mat("Pavement", new Color(0.72f, 0.7f, 0.66f)), collider: false);
+        var planter = PrimitiveKit.Mat("Planter", new Color(0.82f, 0.8f, 0.76f));
+        var streetPalms = new[]
+        {
+            new Vector3(-34f, 0f, -4.6f), new Vector3(-6f, 0f, -4.6f), new Vector3(6f, 0f, -4.6f), new Vector3(36f, 0f, -4.6f),
+            new Vector3(-4.2f, 0f, 6f), new Vector3(4.2f, 0f, 6f), new Vector3(-4.2f, 0f, 20f), new Vector3(4.2f, 0f, 20f),
+        };
+        for (int i = 0; i < streetPalms.Length; i++)
+        {
+            PrimitiveKit.Box("Planter", root, streetPalms[i] + new Vector3(0f, 0.25f, 0f), new Vector3(1.2f, 0.5f, 1.2f), planter);
+            Nature.CoconutPalm(root, streetPalms[i] + new Vector3(0f, 0.5f, 0f), 0.85f + (i % 3) * 0.1f, i + 3);
+        }
+        foreach (var pos in new[] { new Vector3(-10f, 0f, 30f), new Vector3(10f, 0f, 30f), new Vector3(-30f, 0f, 14f), new Vector3(34f, 0f, 16f) })
+            Nature.Bush(root, pos, 1.2f, (int)(pos.x + pos.z), flowers: true);
     });
 
     private static void BuildLocation(string scenePath, string rootName, float groundScale, bool ask, Action<Transform> content)
