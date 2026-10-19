@@ -51,6 +51,17 @@ public static class PrimitiveKit
         return material;
     }
 
+    // Light bulbs, neon and lanterns: emissive, so the bloom makes them glow at night
+    public static Material Glow(string name, Color color, float intensity = 2f)
+    {
+        var material = Mat(name, color);
+        material.EnableKeyword("_EMISSION");
+        material.SetColor("_EmissionColor", color * intensity);
+        material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
+        EditorUtility.SetDirty(material);
+        return material;
+    }
+
     public static GameObject Box(string name, Transform parent, Vector3 localPosition, Vector3 scale, Material material, Vector3 euler = default, bool collider = true) =>
         Create(PrimitiveType.Cube, name, parent, localPosition, scale, material, euler, collider);
 
@@ -109,6 +120,7 @@ public static class PrimitiveKit
         mesh.anchor = TextAnchor.MiddleCenter;
         mesh.alignment = TextAlignment.Center;
         mesh.color = color;
+        go.AddComponent<ReadableText>(); // turns round instead of reading mirrored from behind
         return mesh;
     }
 }

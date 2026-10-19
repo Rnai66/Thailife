@@ -29,6 +29,9 @@ public static class MeshKit
         if (!AssetDatabase.IsValidFolder("Assets/Art")) AssetDatabase.CreateFolder("Assets", "Art");
         if (!AssetDatabase.IsValidFolder(Folder)) AssetDatabase.CreateFolder("Assets/Art", "Meshes");
         string path = $"{Folder}/{key}.asset";
+        int slash = key.LastIndexOf('/');
+        if (slash > 0 && !AssetDatabase.IsValidFolder($"{Folder}/{key.Substring(0, slash)}"))
+            AssetDatabase.CreateFolder(Folder, key.Substring(0, slash));
         var existing = AssetDatabase.LoadAssetAtPath<Mesh>(path);
         if (existing != null)
         {
@@ -36,7 +39,7 @@ public static class MeshKit
             Object.DestroyImmediate(mesh);
             return existing;
         }
-        mesh.name = key;
+        mesh.name = key.Substring(key.LastIndexOf('/') + 1);
         AssetDatabase.CreateAsset(mesh, path);
         return mesh;
     }

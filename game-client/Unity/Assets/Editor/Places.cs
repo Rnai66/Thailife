@@ -361,6 +361,22 @@ public static class Places
         PrimitiveKit.Box("RoofFront", hut.transform, new Vector3(0f, 2.75f, -0.75f), new Vector3(3.4f, 0.12f, 1.9f), thatch, new Vector3(-35f, 0f, 0f), collider: false);
         PrimitiveKit.Box("RoofBack", hut.transform, new Vector3(0f, 2.75f, 0.75f), new Vector3(3.4f, 0.12f, 1.9f), thatch, new Vector3(35f, 0f, 0f), collider: false);
 
+        // Rest on the hut (พักผ่อนที่เถียงนา): mat, bolster, a little ladder, and the rest spot
+        PrimitiveKit.Box("Mat", hut.transform, new Vector3(0f, 1.11f, 0.1f), new Vector3(1.2f, 0.02f, 1.9f), PrimitiveKit.Mat("Mat", new Color(0.85f, 0.7f, 0.4f)), collider: false);
+        PrimitiveKit.Cylinder("Bolster", hut.transform, new Vector3(0f, 1.2f, 0.95f), new Vector3(0.2f, 0.45f, 0.2f), PrimitiveKit.Mat("Bolster", new Color(0.96f, 0.93f, 0.85f)), new Vector3(0f, 0f, 90f), collider: false);
+        PrimitiveKit.Box("LadderStep", hut.transform, new Vector3(0f, 0.35f, -1.5f), new Vector3(1f, 0.08f, 0.35f), wood, collider: false);
+        PrimitiveKit.Box("LadderStep", hut.transform, new Vector3(0f, 0.7f, -1.3f), new Vector3(1f, 0.08f, 0.35f), wood, collider: false);
+        var bed = new GameObject("RestPoint");
+        bed.transform.SetParent(hut.transform, false);
+        bed.transform.localPosition = new Vector3(0f, 1.3f, 0.1f); // lying body just above the mat
+        var rest = new GameObject("RestZone");
+        rest.transform.SetParent(hut.transform, false);
+        rest.transform.localPosition = new Vector3(0f, 1f, -1.6f);
+        var restZone = rest.AddComponent<BoxCollider>();
+        restZone.isTrigger = true;
+        restZone.size = new Vector3(3f, 2f, 1.6f);
+        rest.AddComponent<SleepSpot>().Configure("เถียงนาโคกหนองนา", "พักผ่อน", bed.transform);
+
         Sign(t, new Vector3(2f, 0f, 14f), "โคก หนอง นา\nเดินเข้าแปลงเพื่อทำนา", 180f);
         return farm;
     }
@@ -574,9 +590,7 @@ public static class Places
         var board = PrimitiveKit.Mat("SignBoard", new Color(0.95f, 0.92f, 0.8f));
         PrimitiveKit.Box("Post", sign.transform, new Vector3(0f, 0.6f, 0f), new Vector3(0.1f, 1.2f, 0.1f), wood);
         PrimitiveKit.Box("Board", sign.transform, new Vector3(0f, 1.35f, 0f), new Vector3(1.6f, 0.7f, 0.06f), board, collider: false);
-        // Text on both faces, so it never reads mirrored from behind
         PrimitiveKit.Label(text, sign.transform, new Vector3(0f, 1.35f, -0.04f), 0.035f, new Color(0.25f, 0.15f, 0.05f));
-        PrimitiveKit.Label(text, sign.transform, new Vector3(0f, 1.35f, 0.04f), 0.035f, new Color(0.25f, 0.15f, 0.05f), 180f);
         return sign;
     }
 
@@ -588,6 +602,5 @@ public static class Places
         PrimitiveKit.Box("PillarR", gate.transform, new Vector3(2.2f, 1.6f, 0f), new Vector3(0.5f, 3.2f, 0.5f), pillar);
         PrimitiveKit.Box("Beam", gate.transform, new Vector3(0f, 3.5f, 0f), new Vector3(5.4f, 0.8f, 0.3f), beam, collider: false);
         PrimitiveKit.Label(name, gate.transform, new Vector3(0f, 3.5f, -0.17f), 0.065f, textColor);
-        PrimitiveKit.Label(name, gate.transform, new Vector3(0f, 3.5f, 0.17f), 0.065f, textColor, 180f);
     }
 }

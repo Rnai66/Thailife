@@ -26,6 +26,11 @@ public static class TambonBuilder
         Places2.Canal(root, new Vector3(0f, 0f, 34f), 100f, new[] { -18f, -6f, 8f, 20f });
         Lane(root, 2f, -6f, 4f);
 
+        // ตลาดนัด south of the road, entrance facing it (evening market, 16:00-22:00)
+        Markets.FleaMarket(root, new Vector3(28f, 0f, -28f), "ตลาดนัดคอโค", "16:00-22:00", 180f);
+        ShopZone(root, new Vector3(28f, 0f, -28f), "flea");
+        Lane(root, 28f, -21f, -10f);
+
         Places.BusStop(root, new Vector3(16f, 0f, -11.5f), 180f);
         Places.Sign(root, new Vector3(19f, 0f, -11f), "ไปหมู่บ้าน / เมือง\n(ยืนใต้ป้ายรถ)", 180f);
         Places.Sign(root, new Vector3(-3f, 0f, -4.5f), "ตำบลคอโค", 0f);
@@ -33,6 +38,29 @@ public static class TambonBuilder
 
         foreach (var pos in new[] { new Vector3(-40f, 0f, -20f), new Vector3(40f, 0f, -22f), new Vector3(-42f, 0f, 20f), new Vector3(42f, 0f, 24f), new Vector3(14f, 0f, -30f) })
             Places.ShadeTree(root, pos);
+
+        // Power line with street lamps along the north side of the road
+        StreetFurniture.PoleLine(root, new[]
+        {
+            new Vector3(-40f, 0f, -5.5f), new Vector3(-12f, 0f, -5.5f), new Vector3(16f, 0f, -5.5f), new Vector3(44f, 0f, -5.5f),
+        }, 0f, lamps: true);
+        // One lamp at the ตลาดนัด entrance, bulbs along its aisle
+        StreetFurniture.PoleLine(root, new[] { new Vector3(30.2f, 0f, -20.5f) }, 90f, lamps: true);
+        StreetFurniture.HangingLight(root, new Vector3(28f, 2.5f, -25f));
+        StreetFurniture.HangingLight(root, new Vector3(28f, 2.5f, -31f));
+
+        // Lamp posts at the SAO office, health station, school and around the park
+        foreach (var p in new[]
+        {
+            new Vector3(-27.5f, 0f, 3.2f), new Vector3(-20.5f, 0f, 3.2f),
+            new Vector3(19.5f, 0f, 4f), new Vector3(28.5f, 0f, 4f),
+            new Vector3(-15f, 0f, -23.5f), new Vector3(-5f, 0f, -23.5f),
+            new Vector3(-4.4f, 0f, 7.6f), new Vector3(8.4f, 0f, 7.6f), new Vector3(-4.4f, 0f, 20.4f), new Vector3(8.4f, 0f, 20.4f),
+        })
+            StreetFurniture.LampPost(root, p);
+        // Solar lamps along the canal bank by the fishing spots, facing the water
+        foreach (float x in new[] { -16f, -4f, 10f, 22f })
+            StreetFurniture.SolarLamp(root, new Vector3(x, 0f, 29.3f), 180f);
 
         // Palms along the road and the canal bank, shrubs by the buildings, grass everywhere else
         var palms = new[]
@@ -53,6 +81,7 @@ public static class TambonBuilder
             new Vector4(-35f, 0f, -13f, 20f),        // SAO office
             new Vector4(13f, 0f, 35f, 18f),          // health station
             new Vector4(-26f, -42f, 6f, -15f),       // school
+            new Vector4(21f, -36f, 35f, -10f),       // ตลาดนัด and its lane
             new Vector4(-11.3f, -15f, -8.7f, -10f), new Vector4(0.7f, -6f, 3.3f, 4f));
     });
 
@@ -77,6 +106,11 @@ public static class TambonBuilder
 
         Places.BoxingCamp(root, new Vector3(0f, 0f, 34f), "ค่ายมวยเมืองคอโค");
 
+        // ตลาดสดเทศบาล east of the clock tower (morning market, 05:00-13:00)
+        Markets.FreshMarket(root, new Vector3(39f, 0f, 11f), "ตลาดสดเทศบาล", "05:00-13:00");
+        ShopZone(root, new Vector3(39f, 0f, 11f), "market");
+        Places.Sign(root, new Vector3(34f, 0f, 4.2f), "ตลาดสด →\nเปิด 05:00-13:00", 0f);
+
         // Cross street up to the camp, past the clock tower
         var asphalt = PrimitiveKit.Mat("Asphalt", new Color(0.22f, 0.22f, 0.24f));
         PrimitiveKit.Box("CrossStreet", root, new Vector3(0f, 0.02f, 12f), new Vector3(6f, 0.04f, 36f), asphalt);
@@ -87,6 +121,25 @@ public static class TambonBuilder
 
         foreach (var pos in new[] { new Vector3(-8f, 0f, -16f), new Vector3(8f, 0f, -16f), new Vector3(-40f, 0f, 20f), new Vector3(40f, 0f, 22f) })
             Places.ShadeTree(root, pos);
+
+        // Power line on the south side of the main road (the shop awnings fill the north side),
+        // and lamp posts along the street up to the boxing camp
+        StreetFurniture.PoleLine(root, new[]
+        {
+            new Vector3(-38f, 0f, -10.6f), new Vector3(-10f, 0f, -10.6f), new Vector3(18f, 0f, -10.6f), new Vector3(46f, 0f, -10.6f),
+        }, 180f, lamps: true);
+        StreetFurniture.PoleLine(root, new[] { new Vector3(-3.6f, 0f, 0.5f) }, -90f, lamps: true);
+        StreetFurniture.PoleLine(root, new[] { new Vector3(3.6f, 0f, 25.5f) }, 90f, lamps: true);
+
+        // Lamp posts at the boxing camp, the event stage and in front of each pub; bulbs in the market hall
+        foreach (var p in new[]
+        {
+            new Vector3(-6f, 0f, 28.5f), new Vector3(6f, 0f, 28.5f), new Vector3(13f, 0f, 18f),
+            new Vector3(-22f, 0f, 18.5f), new Vector3(-36f, 0f, 18.5f), new Vector3(26f, 0f, 20.5f),
+        })
+            StreetFurniture.LampPost(root, p);
+        StreetFurniture.HangingLight(root, new Vector3(35f, 3.6f, 11f));
+        StreetFurniture.HangingLight(root, new Vector3(43f, 3.6f, 11f));
 
         // Paved town centre with street palms in planters along both streets
         PrimitiveKit.Box("Pavement", root, new Vector3(0f, 0.008f, 19f), new Vector3(96f, 0.012f, 49f),
@@ -102,7 +155,7 @@ public static class TambonBuilder
             PrimitiveKit.Box("Planter", root, streetPalms[i] + new Vector3(0f, 0.25f, 0f), new Vector3(1.2f, 0.5f, 1.2f), planter);
             Nature.CoconutPalm(root, streetPalms[i] + new Vector3(0f, 0.5f, 0f), 0.85f + (i % 3) * 0.1f, i + 3);
         }
-        foreach (var pos in new[] { new Vector3(-10f, 0f, 30f), new Vector3(10f, 0f, 30f), new Vector3(-30f, 0f, 14f), new Vector3(34f, 0f, 16f) })
+        foreach (var pos in new[] { new Vector3(-10f, 0f, 30f), new Vector3(10f, 0f, 30f), new Vector3(-30f, 0f, 14f), new Vector3(-44f, 0f, 4f) })
             Nature.Bush(root, pos, 1.2f, (int)(pos.x + pos.z), flowers: true);
     });
 

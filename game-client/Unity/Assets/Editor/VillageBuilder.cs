@@ -109,6 +109,33 @@ public static class VillageBuilder
 
         DressNature(v);
 
+        // Power line along the north side of the road, lamps over the road, wires to the house and shop
+        var poles = StreetFurniture.PoleLine(v, new[]
+        {
+            new Vector3(-38f, 0f, -5.5f), new Vector3(-6f, 0f, -5.5f), new Vector3(10f, 0f, -5.5f), new Vector3(42f, 0f, -5.5f),
+        }, 0f, lamps: true);
+        StreetFurniture.ServiceDrop(v, poles[2], new Vector3(9.6f, 4.9f, 4.6f));   // stilt house eave
+        StreetFurniture.ServiceDrop(v, poles[1], new Vector3(-7f, 3.3f, -10f));    // community shop roof
+
+        // Lamp posts at every place, solar lamps along the Kok Nong Na paddies
+        foreach (var p in new[]
+        {
+            new Vector3(4.4f, 0f, 1.2f),                                      // home yard
+            new Vector3(-2.5f, 0f, 9f),                                       // rice barn & coop
+            new Vector3(-10.5f, 0f, -11f),                                    // community shop
+            new Vector3(-36f, 0f, 5.5f), new Vector3(-28f, 0f, 5.5f),         // temple gate
+            new Vector3(-35f, 0f, 13f), new Vector3(-29f, 0f, 13f),           // ubosot stairs
+            new Vector3(-26.5f, 0f, 27.5f),                                   // chedi
+            new Vector3(21.5f, 0f, 12.5f), new Vector3(34.5f, 0f, 12.5f),     // village hall
+        })
+            StreetFurniture.LampPost(v, p);
+        foreach (var p in new[]
+        {
+            new Vector3(-33.5f, 0f, -27.5f), new Vector3(-20f, 0f, -27.5f), new Vector3(-7f, 0f, -27.5f),
+            new Vector3(-33.5f, 0f, -45f), new Vector3(-7f, 0f, -45f),
+        })
+            StreetFurniture.SolarLamp(v, p, p.z < -36f ? 180f : 0f);
+
         // Every location scene needs its own Network and controls
         NakamaSetup.Setup();
         MobileControlsSetup.EnsureMobileControls();

@@ -28,6 +28,16 @@ public class WalletClient : MonoBehaviour
         public bool consumable; // can buy many (seeds, feed, chickens); otherwise one only
     }
 
+    // ตลาดสด / ตลาดนัด opening state (game clock)
+    [Serializable]
+    public class Market
+    {
+        public string id;
+        public string name;
+        public bool open;
+        public string hours;
+    }
+
     [Serializable]
     public class Snapshot
     {
@@ -40,6 +50,7 @@ public class WalletClient : MonoBehaviour
         public string rod_name;
         public bool camp_member;
         public CatalogItem[] catalog;
+        public Market[] markets;
         public string bought;
         public int spent;
     }

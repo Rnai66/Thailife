@@ -96,6 +96,14 @@ public class ShopUI : MonoBehaviour
                 list.Add(new Category { Name = "พื้นบ้าน", Tile = new Color32(0xFB, 0xEA, 0xF0, 0xFF), TileInk = new Color32(0x99, 0x35, 0x56, 0xFF), Has = id => id == "inst_khaen" || id == "inst_so" || id == "inst_ranat" });
                 list.Add(new Category { Name = "สากล", Tile = new Color32(0xEE, 0xED, 0xFE, 0xFF), TileInk = new Color32(0x3C, 0x34, 0x89, 0xFF), Has = id => id.StartsWith("inst_") && id != "inst_khaen" && id != "inst_so" && id != "inst_ranat" });
                 break;
+            case "market":
+                list.Add(new Category { Name = "ของกิน", Tile = new Color32(0xFA, 0xEE, 0xDA, 0xFF), TileInk = new Color32(0x85, 0x4F, 0x0B, 0xFF), Has = id => id.StartsWith("food_") });
+                list.Add(new Category { Name = "ราคาตลาด", Tile = new Color32(0xEA, 0xF3, 0xDE, 0xFF), TileInk = new Color32(0x3B, 0x6D, 0x11, 0xFF), Has = id => id.StartsWith("market_") });
+                break;
+            case "flea":
+                list.Add(new Category { Name = "ของกิน", Tile = new Color32(0xFA, 0xEC, 0xE7, 0xFF), TileInk = new Color32(0x99, 0x3C, 0x1D, 0xFF), Has = id => id.StartsWith("food_") });
+                list.Add(new Category { Name = "ของถูก", Tile = new Color32(0xF1, 0xEF, 0xE8, 0xFF), TileInk = new Color32(0x5F, 0x5E, 0x5A, 0xFF), Has = id => id.StartsWith("flea_") });
+                break;
             case "city_food":
                 list.Add(new Category { Name = "อาหาร", Tile = new Color32(0xFA, 0xEE, 0xDA, 0xFF), TileInk = new Color32(0x85, 0x4F, 0x0B, 0xFF), Has = id => id.StartsWith("food_") });
                 break;
@@ -106,7 +114,7 @@ public class ShopUI : MonoBehaviour
         return list;
     }
 
-    private bool HasSellTab => shopId == "community";
+    private bool HasSellTab => shopId == "community" || shopId == "market";
 
     // ── Server calls ────────────────────────────────────────────────────────────
     private async void Refresh()
@@ -181,6 +189,7 @@ public class ShopUI : MonoBehaviour
                 : e.Message.Contains("coop full") ? "ไก่เกินเล้า (เล้าจุ 8 ตัว)"
                 : e.Message.Contains("barn max") ? "ขยายยุ้งได้สูงสุด 500 กก."
                 : e.Message.Contains("already") ? "มีของบางชิ้นอยู่แล้ว — เอาออกจากตะกร้า"
+                : e.Message.Contains("market closed") ? $"ตลาดปิดแล้ว — เปิด {MarketOf(last)?.hours} น."
                 : "จ่ายเงินไม่สำเร็จ", Danger);
         }
         catch (Exception e)
@@ -193,6 +202,13 @@ public class ShopUI : MonoBehaviour
     }
 
     // ── Cart ────────────────────────────────────────────────────────────────────
+    private WalletClient.Market MarketOf(WalletClient.Snapshot snapshot)
+    {
+        if (snapshot?.markets != null)
+            foreach (var m in snapshot.markets) if (m.id == shopId) return m;
+        return null;
+    }
+
     private int InCart(string id) => cart.TryGetValue(id, out int n) ? n : 0;
 
     private void ChangeQty(WalletClient.CatalogItem item, int delta)
@@ -218,10 +234,14 @@ public class ShopUI : MonoBehaviour
         if (tab == null || (tab != SellTab && !categories.Exists(c => c.Name == tab))) tab = categories[0].Name;
 
         titleText.text = shopId == "community" ? "ร้านค้าชุมชน"
+            : shopId == "market" ? "ตลาดสดเทศบาล"
+            : shopId == "flea" ? "ตลาดนัดคอโค"
             : shopId == "city_food" ? "ร้านอาหารในเมือง"
             : shopId == "music" ? "ร้านเครื่องดนตรี"
             : "ค่ายมวย · โต๊ะรับสมัคร";
-        subtitleText.text = shopId == "community" ? "บ้านคอโค หมู่ 1" : "ตัวเมือง";
+        var market = MarketOf(snapshot);
+        subtitleText.text = market != null ? $"{(market.open ? "เปิดอยู่" : "ปิดอยู่")} · เปิด {market.hours} น."
+            : shopId == "community" ? "บ้านคอโค หมู่ 1" : "ตัวเมือง";
         balanceText.text = snapshot != null ? $"{snapshot.baht:N0} บาท" : "ออฟไลน์";
 
         RenderTabs(categories);

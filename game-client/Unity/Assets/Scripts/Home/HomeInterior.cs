@@ -69,6 +69,13 @@ public class HomeInterior : MonoBehaviour
         Room.SetParent(transform, false);
         Room.localPosition = new Vector3(0f, FloorY, 0f);
 
+        // Ceiling light: warm glow inside the room at night
+        var ceiling = new GameObject("CeilingLight");
+        ceiling.transform.SetParent(transform, false);
+        ceiling.transform.localPosition = new Vector3(0f, WallTop - 0.2f, 0f);
+        ceiling.AddComponent<Light>().enabled = false;
+        ceiling.AddComponent<StreetLamp>().Configure(StreetLamp.Kind.Hanging);
+
         var zone = new GameObject("RoomZone");
         zone.transform.SetParent(transform, false);
         zone.transform.localPosition = new Vector3(0f, FloorY + 1f, 0f);

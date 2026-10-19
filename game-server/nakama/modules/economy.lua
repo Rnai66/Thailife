@@ -7,6 +7,7 @@
 local nk = require("nakama")
 local data = require("shop_data")
 local chickens = require("chicken_core")
+local life = require("life_core")
 local quest = require("quest_core")
 
 local INVENTORY = { collection = "inventory", key = "fish" }
@@ -49,6 +50,27 @@ local function basket(inv, crops)
   return list, value
 end
 
+-- Market stalls only sell during their hours (game clock); MARKETS_ALWAYS_OPEN=true for testing
+local function market_open(shop, env)
+  local m = data.MARKETS[shop]
+  if m == nil then return true end
+  if env ~= nil and env.markets_always_open == "true" then return true end
+  local hour = (math.floor((nk.time() - life.EPOCH_MS) / 1000) % 1440) / 60  -- 1 real second = 1 game minute
+  return hour >= m.open and hour < m.close
+end
+
+local current_env -- the calling RPC's runtime env (for markets_always_open)
+
+local function markets_view(env)
+  local list = {}
+  for _, id in ipairs({ "market", "flea" }) do
+    local m = data.MARKETS[id]
+    table.insert(list, { id = id, name = m.name, open = market_open(id, env),
+                         hours = string.format("%02d:00-%02d:00", m.open, m.close) })
+  end
+  return list
+end
+
 local function catalog(items, coop_count)
   local list = {}
   for _, entry in ipairs(data.CATALOG) do
@@ -74,16 +96,19 @@ local function view(user_id, inv, extra)
     baht = balance(user_id), fish = list, total_value = value,
     rod = items.rod, rod_name = data.RODS[items.rod].name, camp_member = items.camp_member,
     catalog = catalog(items, chickens.count(chickens.read(user_id))),
+    markets = markets_view(current_env),
   }
   for k, v in pairs(extra or {}) do result[k] = v end
   return nk.json_encode(result)
 end
 
 local function rpc_get(context, payload)
+  current_env = context.env
   return view(context.user_id, read_inventory(context.user_id))
 end
 
 local function rpc_sell_fish(context, payload)
+  current_env = context.env
   local user_id = context.user_id
   local inv = read_inventory(user_id)
   local crops, rice_kg = data.read_barn(user_id)
@@ -120,7 +145,7 @@ end
 -- Validate a whole cart, then charge once and grant everything. If any line is invalid,
 -- nothing is bought and nothing is charged.
 --   lines: { { item = id, qty = n }, ... }
-local function checkout(user_id, lines)
+local function checkout(user_id, lines, env)
   if type(lines) ~= "table" or #lines == 0 then error({ "empty cart", GRPC_INVALID_ARGUMENT }) end
 
   local items = data.read_items(user_id)
@@ -132,6 +157,7 @@ local function checkout(user_id, lines)
   for _, line in ipairs(lines) do
     local entry = find_entry(line.item)
     if not entry then error({ "unknown item", GRPC_INVALID_ARGUMENT }) end
+    if not market_open(entry.shop, env) then error({ "market closed", GRPC_FAILED_PRECONDITION }) end
     local qty = math.floor(tonumber(line.qty) or 1)
     if qty < 1 or qty > MAX_QTY then error({ "bad quantity", GRPC_INVALID_ARGUMENT }) end
     if not entry.consumable then
@@ -182,17 +208,19 @@ end
 
 -- Single item (kept for older clients)
 local function rpc_buy(context, payload)
+  current_env = context.env
   local ok, req = pcall(nk.json_decode, payload or "")
   if not ok or type(req) ~= "table" then error({ "invalid payload", GRPC_INVALID_ARGUMENT }) end
-  checkout(context.user_id, { { item = req.item, qty = 1 } })
+  checkout(context.user_id, { { item = req.item, qty = 1 } }, context.env)
   return view(context.user_id, read_inventory(context.user_id), { bought = req.item })
 end
 
 -- Cart: {"items": [{"item": "seed_hommali", "qty": 3}, ...]}
 local function rpc_checkout(context, payload)
+  current_env = context.env
   local ok, req = pcall(nk.json_decode, payload or "")
   if not ok or type(req) ~= "table" then error({ "invalid payload", GRPC_INVALID_ARGUMENT }) end
-  local spent, lines = checkout(context.user_id, req.items)
+  local spent, lines = checkout(context.user_id, req.items, context.env)
   return view(context.user_id, read_inventory(context.user_id), { spent = spent, bought = tostring(lines) })
 end
 

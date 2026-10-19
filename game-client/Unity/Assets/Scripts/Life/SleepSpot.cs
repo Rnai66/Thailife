@@ -1,12 +1,27 @@
 using System;
 using UnityEngine;
 
-// Sleeping mat (เสื่อ) on the stilt-house porch: lie down to restore energy quickly.
+// A place to lie down and restore energy quickly: the mat (เสื่อ) on the stilt-house porch,
+// the rest hut (เถียงนา) at Kok Nong Na... With a `bed` point the player is moved onto it
+// (e.g. up on the hut floor) and back to where they stood when they wake up.
 [RequireComponent(typeof(Collider))]
 public class SleepSpot : MonoBehaviour
 {
+    [SerializeField] private string place = "เสื่อบนชานบ้าน";
+    [SerializeField] private string action = "นอนพัก";
+    [SerializeField] private Transform bed;
+
     private PlayerController sleeper;
+    private Vector3 standPosition;
+    private Quaternion standRotation;
     private bool busy;
+
+    public void Configure(string placeName, string actionLabel, Transform bedPoint)
+    {
+        place = placeName;
+        action = actionLabel;
+        bed = bedPoint;
+    }
 
     private void Reset() => GetComponent<Collider>().isTrigger = true;
 
@@ -37,7 +52,7 @@ public class SleepSpot : MonoBehaviour
     {
         var life = LifeClient.Instance;
         string energy = life != null && life.IsOnline ? $"พลังงาน {life.Energy:0}/{life.Current.max_energy}" : "ต้องออนไลน์ก่อน";
-        ContextButton.Show(this, "นอนพัก", $"เสื่อบนชานบ้าน · {energy} · นอนแล้วฟื้นเร็ว", () => Sleep(player));
+        ContextButton.Show(this, action, $"{place} · {energy} · นอนแล้วฟื้นเร็ว", () => Sleep(player));
     }
 
     private async void Sleep(PlayerController player)
@@ -50,6 +65,13 @@ public class SleepSpot : MonoBehaviour
             await life.SleepAsync();
             sleeper = player;
             player.InputEnabled = false;
+            standPosition = player.transform.position;
+            standRotation = player.transform.rotation;
+            if (bed != null)
+            {
+                player.Teleport(bed.position, bed.rotation);
+                player.enabled = false; // no gravity while lying on a raised floor
+            }
             player.transform.rotation = Quaternion.Euler(0f, player.transform.eulerAngles.y, 90f); // lie down
         }
         catch (Exception e)
@@ -68,7 +90,12 @@ public class SleepSpot : MonoBehaviour
         var player = sleeper;
         sleeper = null;
         player.InputEnabled = true;
-        player.transform.rotation = Quaternion.Euler(0f, player.transform.eulerAngles.y, 0f);
+        if (bed != null)
+        {
+            player.enabled = true;
+            player.Teleport(standPosition, standRotation); // climb back down
+        }
+        else player.transform.rotation = Quaternion.Euler(0f, player.transform.eulerAngles.y, 0f);
 
         try
         {
@@ -85,7 +112,11 @@ public class SleepSpot : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (sleeper != null) sleeper.InputEnabled = true;
+        if (sleeper != null)
+        {
+            sleeper.InputEnabled = true;
+            sleeper.enabled = true;
+        }
         ContextButton.Hide(this);
     }
 }

@@ -35,8 +35,24 @@ M.FOODS = {
   thai_tea    = { name = "ชาไทย",            energy = 18 },
   coffee      = { name = "กาแฟสด",           energy = 25 },
   khao_man_gai = { name = "ข้าวมันไก่",       energy = 35 },
+  -- City fresh market (ตลาดสด)
+  jok          = { name = "โจ๊กหมู",           energy = 22 },
+  fruit        = { name = "ผลไม้รวม",          energy = 12 },
+  pad_thai     = { name = "ผัดไทย",            energy = 32 },
+  -- Tambon evening market (ตลาดนัด)
+  look_chin    = { name = "ลูกชิ้นปิ้ง",        energy = 10 },
+  fried_chicken = { name = "ไก่ทอด",           energy = 24 },
+  bubble_tea   = { name = "ชานมไข่มุก",        energy = 18 },
+  mango_sticky = { name = "ข้าวเหนียวมะม่วง",    energy = 28 },
 }
-M.FOOD_ORDER = { "soda", "iced_coffee", "moo_ping", "som_tam", "thai_tea", "coffee", "khao_man_gai" }
+M.FOOD_ORDER = { "soda", "iced_coffee", "moo_ping", "som_tam", "thai_tea", "coffee", "khao_man_gai",
+                 "jok", "fruit", "pad_thai", "look_chin", "fried_chicken", "bubble_tea", "mango_sticky" }
+
+-- Markets keep game-clock hours: the fresh market in the morning, the ตลาดนัด in the evening
+M.MARKETS = {
+  market = { name = "ตลาดสดเทศบาล", open = 5,  close = 13 },
+  flea   = { name = "ตลาดนัดคอโค",  open = 16, close = 22 },
+}
 
 -- Musical instruments (เครื่องดนตรี): folk ones shine at village/temple venues, modern ones in the city
 M.INSTRUMENTS = {
@@ -108,6 +124,27 @@ M.CATALOG = {
   { id = "rod_carbon",      shop = "community", price = 400, name = "เบ็ดคาร์บอน", desc = "ปลากินเร็วสุด ปลาช่อน/ปลาดุกบ่อย ตัวใหญ่ขึ้น 30%", rod = "carbon" },
   { id = "camp_membership", shop = "camp",      price = 300, name = "สมาชิกค่ายมวย", desc = "ปลดล็อกการซ้อมกระสอบหนักในค่าย (ต้อง Lv 6 ด้วย)" },
 }
+
+-- Market stalls
+for _, e in ipairs({
+  { id = "food_jok",           shop = "market", price = 30, name = "โจ๊กหมู",         desc = "พลังงาน +22", food = "jok" },
+  { id = "food_fruit",         shop = "market", price = 20, name = "ผลไม้รวม",        desc = "พลังงาน +12 · มะม่วง สับปะรด แตงโม", food = "fruit" },
+  { id = "food_pad_thai",      shop = "market", price = 45, name = "ผัดไทย",          desc = "พลังงาน +32", food = "pad_thai" },
+  { id = "market_seed_hommali", shop = "market", price = 25, name = "พันธุ์ข้าวหอมมะลิ (ราคาตลาด)", desc = "ถูกกว่าร้านค้าชุมชน", seed = "hommali" },
+  { id = "market_feed",        shop = "market", price = 12, name = "อาหารไก่ (ราคาตลาด)", desc = "ถูกกว่าร้านค้าชุมชน", feed = true },
+  { id = "food_look_chin",     shop = "flea", price = 15, name = "ลูกชิ้นปิ้ง",        desc = "พลังงาน +10", food = "look_chin" },
+  { id = "food_fried_chicken", shop = "flea", price = 35, name = "ไก่ทอด",           desc = "พลังงาน +24", food = "fried_chicken" },
+  { id = "food_bubble_tea",    shop = "flea", price = 30, name = "ชานมไข่มุก",        desc = "พลังงาน +18", food = "bubble_tea" },
+  { id = "food_mango_sticky",  shop = "flea", price = 40, name = "ข้าวเหนียวมะม่วง",   desc = "พลังงาน +28", food = "mango_sticky" },
+  { id = "flea_furn_mat",      shop = "flea", price = 60,  name = "เสื่อ (ราคาตลาดนัด)",       desc = "ถูกกว่าร้านค้าชุมชน", furniture = "mat" },
+  { id = "flea_furn_pillow",   shop = "flea", price = 90,  name = "หมอนข้าง (ราคาตลาดนัด)",    desc = "ถูกกว่าร้านค้าชุมชน", furniture = "pillow" },
+  { id = "flea_furn_plant",    shop = "flea", price = 110, name = "กระถางต้นไม้ (ราคาตลาดนัด)", desc = "ถูกกว่าร้านค้าชุมชน", furniture = "plant" },
+  { id = "flea_furn_radio",    shop = "flea", price = 230, name = "วิทยุมือสอง",               desc = "ยังใช้ได้ดี", furniture = "radio" },
+  { id = "flea_furn_fan",      shop = "flea", price = 260, name = "พัดลมมือสอง",               desc = "ยังใช้ได้ดี", furniture = "fan" },
+}) do
+  e.consumable = true
+  table.insert(M.CATALOG, e)
+end
 
 for _, id in ipairs(M.FURNITURE_ORDER) do
   local f = M.FURNITURE[id]
