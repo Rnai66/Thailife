@@ -13,6 +13,8 @@ public class HealSpot : MonoBehaviour
 
     private bool busy;
 
+    public string Place => place;
+
     public void Configure(string clinic, string name, int cost)
     {
         place = clinic;

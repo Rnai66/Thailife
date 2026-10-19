@@ -16,7 +16,6 @@ public class PlayerCombat : MonoBehaviour
     [SerializeField] private float punchKnockback = 3f;
     [SerializeField] private float kickKnockback = 6f;
     [SerializeField] private float knockoutSeconds = 3f;
-    [SerializeField] private Vector3 respawnPoint = new Vector3(0f, 1f, 0f);
 
     public int MaxHealth => maxHealth;
     public int Health { get; private set; }
@@ -145,14 +144,18 @@ public class PlayerCombat : MonoBehaviour
 
         // Placeholder "lying down" until there is a knockdown animation
         transform.rotation = Quaternion.Euler(0f, transform.eulerAngles.y, 90f);
+        string clinic = KnockoutRecovery.NameOf(KnockoutRecovery.ClinicFor(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name));
+        UiKit.FloatAbovePlayer($"น็อค! กำลังส่งตัวไป{clinic}", new Color(1f, 0.45f, 0.35f));
 
         yield return new WaitForSeconds(knockoutSeconds);
 
-        controller.Teleport(respawnPoint, Quaternion.identity);
+        // Come round at the health station / hospital (may load another scene)
+        transform.rotation = Quaternion.Euler(0f, transform.eulerAngles.y, 0f);
         IsKnockedOut = false;
         controller.InputEnabled = true;
         if (actions != null) actions.RefreshBlock();
         SetHealth(maxHealth);
+        KnockoutRecovery.Go();
     }
 
     private void SetHealth(int value)
