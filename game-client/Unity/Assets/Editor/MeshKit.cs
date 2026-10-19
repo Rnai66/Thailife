@@ -41,6 +41,9 @@ public static class MeshKit
         return mesh;
     }
 
+    // Save a mesh built elsewhere (e.g. merged grass) under a key
+    public static Mesh SaveCombined(string key, Mesh mesh) => Save(key, mesh);
+
     private static Mesh Finish(string key, List<Vector3> v, List<int> t, List<Vector2> uv = null, bool flat = false)
     {
         var mesh = new Mesh();

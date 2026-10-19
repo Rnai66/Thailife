@@ -65,6 +65,13 @@ public static class VillageBuilder
         {
             Undo.RecordObject(ground.transform, "Resize Ground");
             ground.transform.localScale = new Vector3(12f, 1f, 12f);
+            var groundMat = ground.GetComponent<Renderer>().sharedMaterial;
+            if (groundMat != null)
+            {
+                Undo.RecordObject(groundMat, "Grass colour");
+                groundMat.color = new Color(0.36f, 0.56f, 0.24f); // lush tropical grass
+                if (groundMat.HasProperty("_Smoothness")) groundMat.SetFloat("_Smoothness", 0.05f);
+            }
         }
 
         var v = root.transform;
@@ -100,6 +107,8 @@ public static class VillageBuilder
                      new Vector3(-48f, 0f, -20f), new Vector3(48f, 0f, 2f), new Vector3(-20f, 0f, 42f), new Vector3(10f, 0f, 45f), new Vector3(45f, 0f, -45f) })
             Places.ShadeTree(v, pos);
 
+        DressNature(v);
+
         // Every location scene needs its own Network and controls
         NakamaSetup.Setup();
         MobileControlsSetup.EnsureMobileControls();
@@ -108,6 +117,42 @@ public static class VillageBuilder
         EditorSceneManager.MarkSceneDirty(root.scene);
         Selection.activeGameObject = root;
         Debug.Log("[ThaiLife] Thai village built. Save (Cmd+S) and press Play.");
+    }
+
+    // Coconut palms along the road, shrubs and bougainvillea around the homes and lanes,
+    // a few rocks, and grass tufts everywhere except roads, buildings and the paddies
+    private static void DressNature(Transform v)
+    {
+        var palms = new[]
+        {
+            new Vector3(-40f, 0f, -4f), new Vector3(-26f, 0f, -12.5f), new Vector3(-16f, 0f, -4.5f), new Vector3(-2f, 0f, -12.8f),
+            new Vector3(4f, 0f, -4.2f), new Vector3(22f, 0f, -12.6f), new Vector3(34f, 0f, -4.5f), new Vector3(44f, 0f, -12.5f),
+            new Vector3(14f, 0f, 6f), new Vector3(-10f, 0f, 6f), new Vector3(20f, 0f, 28f), new Vector3(-44f, 0f, 40f),
+        };
+        for (int i = 0; i < palms.Length; i++) Nature.CoconutPalm(v, palms[i], 0.9f + (i % 3) * 0.12f, i);
+
+        var bushes = new[]
+        {
+            new Vector3(0.2f, 0f, 2.2f), new Vector3(11.5f, 0f, 1f), new Vector3(5.2f, 0f, -3.8f), new Vector3(9f, 0f, -3.6f),
+            new Vector3(-8f, 0f, 3f), new Vector3(-1f, 0f, 7f), new Vector3(-34.5f, 0f, 5.5f), new Vector3(-29.5f, 0f, 5.5f),
+            new Vector3(25.5f, 0f, 6f), new Vector3(30.5f, 0f, 6f), new Vector3(-14f, 0f, -19f), new Vector3(-10f, 0f, -19f),
+            new Vector3(18f, 0f, 12f), new Vector3(-22f, 0f, 10f),
+        };
+        for (int i = 0; i < bushes.Length; i++) Nature.Bush(v, bushes[i], 0.9f + (i % 3) * 0.25f, i, flowers: i % 3 == 0);
+
+        var rocks = new[] { new Vector3(-6f, 0f, -20f), new Vector3(-17f, 0f, -22f), new Vector3(40f, 0f, 20f), new Vector3(-40f, 0f, 10f), new Vector3(15f, 0f, 30f) };
+        for (int i = 0; i < rocks.Length; i++) Nature.Rock(v, rocks[i], 0.8f + i % 2 * 0.5f, i);
+
+        Nature.GrassField(v, Vector3.zero, new Vector2(116f, 116f), 2600, 7,
+            new Vector4(-60f, -10.6f, 60f, -5.4f),     // road
+            new Vector4(-38.5f, 14.5f, -25.5f, 33.5f), // ubosot
+            new Vector4(-26.5f, 26.5f, -19.5f, 33.5f), // chedi
+            new Vector4(-42f, 13f, -36f, 21f),         // sala
+            new Vector4(20f, 8f, 36f, 24f),            // village hall
+            new Vector4(-32f, -56f, 8f, -20f),         // Kok Nong Na paddies and pond
+            new Vector4(-11f, -16.5f, -3f, -7f),       // shop
+            new Vector4(6f, -6f, 8f, 3f),              // lane to the house
+            new Vector4(-33.3f, -6f, -30.7f, 8f), new Vector4(26.7f, -6f, 29.3f, 12f), new Vector4(-13.3f, -21f, -10.7f, -10f));
     }
 
     // Career needs CareerClient on the Network object and a TrainingTarget on the punching bag
@@ -155,7 +200,6 @@ public static class VillageBuilder
         var wood = PrimitiveKit.Mat("WoodPlank", Wood);
         var roof = PrimitiveKit.Mat("RoofRed", RoofRed);
         var shutter = PrimitiveKit.Mat("Shutter", new Color(0.25f, 0.32f, 0.3f));
-        var clay = PrimitiveKit.Mat("ClayJar", new Color(0.45f, 0.25f, 0.12f));
 
         // Stilts (เสา) — open space underneath (ใต้ถุน)
         foreach (float x in new[] { -2.8f, 0f, 2.8f })
@@ -206,8 +250,26 @@ public static class VillageBuilder
             PrimitiveKit.Box("RailPost", t, new Vector3(x, 3f, -4.15f), new Vector3(0.08f, 0.8f, 0.08f), darkWood);
 
         // Water jars (โอ่งน้ำ) under the house
-        PrimitiveKit.Sphere("WaterJar", t, new Vector3(-2f, 0.45f, -1.4f), new Vector3(0.8f, 0.9f, 0.8f), clay, collider: true);
-        PrimitiveKit.Sphere("WaterJar", t, new Vector3(-1.1f, 0.4f, -1.7f), new Vector3(0.7f, 0.8f, 0.7f), clay, collider: true);
+        var jar = MeshKit.Lathe("WaterJar", new[]
+        {
+            new Vector2(0.2f, 0f), new Vector2(0.34f, 0.1f), new Vector2(0.44f, 0.35f), new Vector2(0.42f, 0.62f),
+            new Vector2(0.3f, 0.84f), new Vector2(0.22f, 0.9f), new Vector2(0.25f, 0.95f), new Vector2(0.21f, 0.97f),
+        }, 20, capTop: false);
+        var glazed = PrimitiveKit.Mat("ClayJar", new Color(0.42f, 0.24f, 0.12f), 0.7f);
+        foreach (var (pos, size) in new[] { (new Vector3(-2f, 0f, -1.4f), 1f), (new Vector3(-1.1f, 0f, -1.75f), 0.85f) })
+        {
+            var j = MeshKit.Place("WaterJar_โอ่งมังกร", t, jar, glazed, pos, default, Vector3.one * size);
+            var col = j.AddComponent<CapsuleCollider>();
+            col.center = new Vector3(0f, 0.45f, 0f);
+            col.height = 0.9f;
+            col.radius = 0.42f;
+        }
+
+        // Gable ends and ridge cap (names start with "Roof" so HomeInterior hides them when you're inside)
+        var gableEnd = MeshKit.Gable("StiltGable", 4.6f, 2.3f, 0.1f);
+        MeshKit.Place("RoofGableL", t, gableEnd, wood, new Vector3(-2.8f, 5f, 0f), new Vector3(0f, 90f, 0f));
+        MeshKit.Place("RoofGableR", t, gableEnd, wood, new Vector3(2.8f, 5f, 0f), new Vector3(0f, -90f, 0f));
+        PrimitiveKit.Box("RoofRidge", t, new Vector3(0f, 7.36f, 0f), new Vector3(6.9f, 0.16f, 0.28f), darkWood, collider: false);
     }
 
     private static void BuildSpiritHouse(Transform parent, Vector3 position)
