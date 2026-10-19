@@ -12,6 +12,7 @@ public class TrainingTarget : MonoBehaviour, IHittable
 
     private static readonly Color XpColor = new Color(0.4f, 0.9f, 1f);
     private static readonly Color LockedColor = new Color(0.75f, 0.75f, 0.75f);
+    private static readonly Color TiredColor = new Color(1f, 0.55f, 0.35f);
 
     public string TargetId => targetId;
     public int RequiredLevel => requiredLevel;
@@ -51,7 +52,22 @@ public class TrainingTarget : MonoBehaviour, IHittable
             return;
         }
 
+        // Training costs energy (พลังงาน): too tired or asleep = the hit doesn't count
+        var life = LifeClient.Instance;
+        float cost = CareerClient.EnergyPerHit(targetId);
+        if (life != null && life.IsInjured)
+        {
+            FloatingText.Spawn(at, "บาดเจ็บ! ไปรักษาก่อน", TiredColor);
+            return;
+        }
+        if (life != null && life.IsOnline && (life.IsSleeping || life.Energy < cost))
+        {
+            FloatingText.Spawn(at, "เหนื่อยแล้ว!", TiredColor);
+            return;
+        }
+
         career.RecordHit(targetId);
+        life?.PredictSpend(cost);
         FloatingText.Spawn(at, $"+{xpPerHit} XP", XpColor);
     }
 }

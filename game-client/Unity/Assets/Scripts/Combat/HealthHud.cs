@@ -94,7 +94,7 @@ public class HealthHud : MonoBehaviour
         }
         else questLabel.text = "ภารกิจวันนี้";
 
-        energyLabel.text = online ? $"พลังงาน {energy:0}/{max:0}" + (life.IsSleeping ? " (นอนอยู่)" : "") : "พลังงาน —";
+        energyLabel.text = online ? $"พลังงาน {energy:0}/{max:0}" + (life.IsSleeping ? " (นอนอยู่)" : life.IsInjured ? " · บาดเจ็บ!" : "") : "พลังงาน —";
     }
 
     private void RefreshMoney(WalletClient.Snapshot snapshot)

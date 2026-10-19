@@ -63,7 +63,7 @@ public class TravelMenu : MonoBehaviour
         UiKit.PillLabel(card, Locations.LevelNameTh(location.Level), new Vector2(0f, 125f), new Vector2(160f, 44f),
             here ? UiKit.OkTint : UiKit.Pill, here ? UiKit.OkGreen : UiKit.Price, 26);
 
-        // "ตำบลคอโค · อบต. รพ.สต. …" → name on top, places underneath
+        // "ตำบล · อบต. รพ.สต. …" → name on top, places underneath
         string name = location.NameTh, places = "";
         int dotIndex = name.IndexOf('·');
         if (dotIndex > 0)

@@ -23,6 +23,12 @@ public class PlayerController : MonoBehaviour
     // Lowered while blocking (PlayerActions)
     public float MoveSpeedMultiplier { get; set; } = 1f;
 
+    // Injured (บาดเจ็บ) after a knockout: slower until treated
+    public float InjurySlow { get; set; } = 1f;
+
+    // Owning a motorbike or car (bank.lua) makes getting around faster
+    public float VehicleBoost { get; set; } = 1f;
+
     public bool IsGrounded => controller != null && controller.isGrounded;
 
     // False while knocked out
@@ -88,7 +94,7 @@ public class PlayerController : MonoBehaviour
 
         verticalVelocity += gravity * Time.deltaTime;
 
-        Vector3 velocity = move * (moveSpeed * MoveSpeedMultiplier) + impulseVelocity;
+        Vector3 velocity = move * (moveSpeed * MoveSpeedMultiplier * InjurySlow * VehicleBoost) + impulseVelocity;
         velocity.y = verticalVelocity;
         impulseVelocity = Vector3.Lerp(impulseVelocity, Vector3.zero, 1f - Mathf.Exp(-8f * Time.deltaTime));
 

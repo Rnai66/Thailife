@@ -235,13 +235,13 @@ public class ShopUI : MonoBehaviour
 
         titleText.text = shopId == "community" ? "ร้านค้าชุมชน"
             : shopId == "market" ? "ตลาดสดเทศบาล"
-            : shopId == "flea" ? "ตลาดนัดคอโค"
+            : shopId == "flea" ? "ตลาดนัด"
             : shopId == "city_food" ? "ร้านอาหารในเมือง"
             : shopId == "music" ? "ร้านเครื่องดนตรี"
             : "ค่ายมวย · โต๊ะรับสมัคร";
         var market = MarketOf(snapshot);
         subtitleText.text = market != null ? $"{(market.open ? "เปิดอยู่" : "ปิดอยู่")} · เปิด {market.hours} น."
-            : shopId == "community" ? "บ้านคอโค หมู่ 1" : "ตัวเมือง";
+            : shopId == "community" ? "หมู่บ้าน" : "ตัวเมือง";
         balanceText.text = snapshot != null ? $"{snapshot.baht:N0} บาท" : "ออฟไลน์";
 
         RenderTabs(categories);

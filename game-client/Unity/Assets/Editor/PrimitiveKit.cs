@@ -52,9 +52,11 @@ public static class PrimitiveKit
     }
 
     // Light bulbs, neon and lanterns: emissive, so the bloom makes them glow at night
-    public static Material Glow(string name, Color color, float intensity = 2f)
+    // bodyShade < 1 darkens the surface so the emitted light reads as a light source, not paint
+    public static Material Glow(string name, Color color, float intensity = 2f, float bodyShade = 1f)
     {
         var material = Mat(name, color);
+        material.color = color * bodyShade;
         material.EnableKeyword("_EMISSION");
         material.SetColor("_EmissionColor", color * intensity);
         material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;

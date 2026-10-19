@@ -24,18 +24,46 @@ function M.game_day(now)   -- 1-based
   return math.floor((now - M.EPOCH_MS) / M.DAY_MS) + 1
 end
 
--- Temple fair (งานวัด): days 1-2 of every game month.
--- Returns open, fair_id (month number), ends_in_ms, next_in_ms
-M.FAIR_DAYS = 2
+-- Temple fair (งานวัด) = the traditional festivals (งานประเพณี) on the game calendar.
+-- The game year has 12 months of 30 days (1 game day = 24 real minutes, 1 year = 6 real days),
+-- month 1 = มกราคม, the same calendar the client shows. Every festival comes once a year.
+-- scale: "big" festivals are held in the city (with the ferris wheel, carousel, bingo),
+-- "small" ones in the tambon.
+M.YEAR_DAYS = 360
+M.FESTIVALS = {
+  { id = "temple_annual", name = "งานประจำปีวัด",            month = 1,  day = 10, days = 3, scale = "big" },
+  { id = "makha",         name = "งานวันมาฆบูชา",             month = 2,  day = 14, days = 2, scale = "small" },
+  { id = "phapa_1",       name = "งานทอดผ้าป่า",              month = 3,  day = 8,  days = 2, scale = "small" },
+  { id = "songkran",      name = "งานสงกรานต์",              month = 4,  day = 13, days = 3, scale = "big" },
+  { id = "visakha",       name = "งานวันวิสาขบูชา",            month = 5,  day = 14, days = 2, scale = "small" },
+  { id = "khao_phansa",   name = "งานวันเข้าพรรษา",            month = 7,  day = 14, days = 2, scale = "small" },
+  { id = "ok_phansa",     name = "งานวันออกพรรษา",            month = 10, day = 14, days = 2, scale = "big" },
+  { id = "kathin",        name = "งานทอดกฐิน",               month = 10, day = 21, days = 2, scale = "big" },
+  { id = "loy_krathong",  name = "งานลอยกระทง",              month = 11, day = 14, days = 2, scale = "big" },
+  { id = "phapa_2",       name = "งานทอดผ้าป่าสามัคคี",         month = 12, day = 8,  days = 2, scale = "small" },
+}
+
+-- Returns open, fair_id (this year's edition), ends_in_ms, next_in_ms, festival (current or next)
 function M.fair(now, always_open)
-  local day0 = math.floor((now - M.EPOCH_MS) / M.DAY_MS)        -- 0-based game day
-  local month = math.floor(day0 / M.MONTH_DAYS)
-  local month_start = M.EPOCH_MS + month * M.MONTH_DAYS * M.DAY_MS
-  local fair_end = month_start + M.FAIR_DAYS * M.DAY_MS
-  local next_start = month_start + M.MONTH_DAYS * M.DAY_MS
-  if always_open then return true, month, M.DAY_MS, next_start - now end
-  if now < fair_end then return true, month, fair_end - now, next_start - now end
-  return false, month, 0, next_start - now
+  local t_days = (now - M.EPOCH_MS) / M.DAY_MS           -- game days since the epoch (fractional)
+  local day0 = math.floor(t_days)
+  local year = math.floor(day0 / M.YEAR_DAYS)
+  local doy = day0 % M.YEAR_DAYS
+  local next_f, next_in
+  for i, f in ipairs(M.FESTIVALS) do
+    local start = (f.month - 1) * 30 + (f.day - 1)
+    if doy >= start and doy < start + f.days then
+      local ends = (year * M.YEAR_DAYS + start + f.days - t_days) * M.DAY_MS
+      local id = year * 100 + i
+      return true, id, ends, 0, f
+    end
+    local ahead = start - doy
+    if ahead <= 0 then ahead = ahead + M.YEAR_DAYS end
+    if next_in == nil or ahead < next_in then next_in, next_f = ahead, f end
+  end
+  local next_ms = (next_in - (t_days - day0)) * M.DAY_MS
+  if always_open then return true, year * 100 + 99, M.DAY_MS, next_ms, { id = "test", name = "งานอีเวนต์ (โหมดทดสอบ)", scale = "both" } end
+  return false, year * 100 + 98, 0, next_ms, next_f
 end
 
 local LIFE = { collection = "life", key = "state" }
@@ -95,8 +123,21 @@ function M.set_sleeping(user_id, sleeping)
   return s
 end
 
+-- Injury (บาดเจ็บ) after being knocked out in a fight: no training or fighting until treated
+-- at a health station (รพ.สต.) or the city hospital (โรงพยาบาล)
+function M.set_injured(user_id, injured)
+  local s = settle(read(user_id), nk.time())
+  s.injured = injured or nil
+  write(user_id, s)
+  return s
+end
+
+function M.injured(user_id)
+  return read(user_id).injured == true
+end
+
 function M.view(s)
-  return { energy = math.floor(s.energy), max_energy = M.MAX_ENERGY, sleeping = s.sleep_ms ~= nil }
+  return { energy = math.floor(s.energy), max_energy = M.MAX_ENERGY, sleeping = s.sleep_ms ~= nil, injured = s.injured == true }
 end
 
 return M

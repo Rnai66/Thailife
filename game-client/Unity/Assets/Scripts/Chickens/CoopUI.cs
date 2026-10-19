@@ -92,7 +92,7 @@ public class CoopUI : MonoBehaviour
         var s = coop.Current;
         float fed = s.fed_for_s - coop.Age;
         int count = (s.chickens?.Length ?? 0) + (s.hatching_s?.Length ?? 0);
-        subtitleText.text = $"ไก่ {count}/{s.capacity} ตัว · บ้านคอโค หมู่ 1";
+        subtitleText.text = $"ไก่ {count}/{s.capacity} ตัว · หมู่บ้าน";
 
         feedValue.text = fed > 0 ? $"อิ่มอีก {CoopClient.Countdown(fed)}" : "หิว!";
         feedValue.color = fed > 0 ? UiKit.OkGreen : UiKit.Danger;

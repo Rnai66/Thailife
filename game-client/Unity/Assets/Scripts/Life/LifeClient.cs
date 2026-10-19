@@ -22,9 +22,18 @@ public class LifeClient : MonoBehaviour
         public int energy;
         public int max_energy = 100;
         public bool sleeping;
+        public bool injured;     // บาดเจ็บ: knocked out in a fight, needs treatment
+        public string treated_at;
+        public int paid;
         public Food[] foods;
         public string ate;
         public int gained;
+    }
+
+    [Serializable]
+    private class HealRequest
+    {
+        public string place;
     }
 
     [Serializable]
@@ -42,6 +51,7 @@ public class LifeClient : MonoBehaviour
     public State Current { get; private set; }
     public bool IsOnline => connection != null && connection.IsConnected && Current != null;
     public bool IsSleeping => Current != null && Current.sleeping;
+    public bool IsInjured => Current != null && Current.injured;
 
     // Estimated energy right now (server value + regen since it arrived)
     public float Energy
@@ -50,7 +60,7 @@ public class LifeClient : MonoBehaviour
         {
             if (Current == null) return 0f;
             float rate = Current.sleeping ? SleepRegenPerSec : PassiveRegenPerSec;
-            return Mathf.Min(Current.max_energy, Current.energy + (Time.time - receivedAt) * rate);
+            return Mathf.Max(0f, Mathf.Min(Current.max_energy, Current.energy + (Time.time - receivedAt) * rate) - predictedSpend);
         }
     }
 
@@ -58,6 +68,7 @@ public class LifeClient : MonoBehaviour
 
     private NakamaConnection connection;
     private float receivedAt;
+    private float predictedSpend; // spent locally (training hits) but not confirmed by the server yet
     private float nextPoll;
 
     private void Awake()
@@ -68,6 +79,9 @@ public class LifeClient : MonoBehaviour
         // Daily quests ride along with the life systems (no scene setup needed)
         if (GetComponent<QuestClient>() == null) gameObject.AddComponent<QuestClient>();
         if (GetComponent<HouseClient>() == null) gameObject.AddComponent<HouseClient>();
+        if (GetComponent<BoxingClient>() == null) gameObject.AddComponent<BoxingClient>();
+        if (GetComponent<FestivalClient>() == null) gameObject.AddComponent<FestivalClient>();
+        if (GetComponent<BankClient>() == null) gameObject.AddComponent<BankClient>();
 
         // Every location scene gets a day/night sun without extra setup
         foreach (var light in FindObjectsByType<Light>(FindObjectsSortMode.None))
@@ -109,15 +123,21 @@ public class LifeClient : MonoBehaviour
 
     public Task<State> SleepAsync() => CallAsync("life_sleep");
     public Task<State> WakeAsync() => CallAsync("life_wake");
+    // place: "station" (รพ.สต.) or "hospital" (โรงพยาบาล)
+    public Task<State> HealAsync(string place) => CallAsync("life_heal", JsonUtility.ToJson(new HealRequest { place = place }));
+
     public Task<State> EatAsync(string foodId) => CallAsync("life_eat", JsonUtility.ToJson(new EatRequest { food = foodId }));
 
     // Re-read the bag after buying food at a shop
     public void Refresh() => _ = RefreshQuietly();
 
+    // Training spends energy hit by hit; show it on the bar now, the server confirms on its next report
+    public void PredictSpend(float amount) => predictedSpend += amount;
+
     // Other systems (farm, fishing) report the energy the server returned with their result
     public void Apply(int energy, int maxEnergy, bool sleeping)
     {
-        Set(new State { energy = energy, max_energy = maxEnergy, sleeping = sleeping, foods = Current?.foods });
+        Set(new State { energy = energy, max_energy = maxEnergy, sleeping = sleeping, injured = Current != null && Current.injured, foods = Current?.foods });
     }
 
     private async Task<State> CallAsync(string rpc, string payload = "{}")
@@ -132,6 +152,9 @@ public class LifeClient : MonoBehaviour
     {
         Current = state;
         receivedAt = Time.time;
+        predictedSpend = 0f;
+        var player = FindAnyObjectByType<PlayerController>();
+        if (player != null) player.InjurySlow = state.injured ? 0.6f : 1f; // limping until treated
         nextPoll = Time.time + PollInterval;
         Changed?.Invoke(state);
     }

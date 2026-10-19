@@ -6,7 +6,7 @@ using UnityEngine;
 // tuning them never needs the world rebuilt.
 public class StreetLamp : MonoBehaviour
 {
-    public enum Kind { PoleStreet, Post, Solar, Hanging }
+    public enum Kind { PoleStreet, Post, Solar, Hanging, Ring }
 
     [SerializeField] private Kind kind = Kind.PoleStreet;
 
@@ -34,6 +34,7 @@ public class StreetLamp : MonoBehaviour
             case Kind.Post:       Set(130f, 12f, 9f, new Color(1f, 0.85f, 0.6f)); break;
             case Kind.Solar:      Set(125f, 11f, 7f, new Color(0.85f, 0.92f, 1f)); break; // cool white LED
             case Kind.Hanging:    Set(140f, 9f, 5f, new Color(1f, 0.82f, 0.55f)); break;
+            case Kind.Ring:       Set(110f, 9f, 16f, new Color(1f, 0.96f, 0.88f)); break; // bright stage light
         }
     }
 
@@ -49,6 +50,7 @@ public class StreetLamp : MonoBehaviour
     private void Update()
     {
         if (lamp == null || Time.time < nextCheck) return;
+        if (kind == Kind.Ring) { lamp.enabled = true; nextCheck = float.MaxValue; return; } // rings are lit day and night
         nextCheck = Time.time + 1f + Random.value; // spread the checks out
         lamp.enabled = RenderSettings.ambientIntensity < 0.8f;
     }

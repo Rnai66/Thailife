@@ -17,26 +17,35 @@ public static class TambonBuilder
 
     internal static void BuildTambon(bool ask) => BuildLocation("Assets/Scenes/Tambon.unity", "Tambon", 10f, ask, root =>
     {
-        // ตำบลคอโค: SAO office, health station, school, public park, canal with fishing
-        Places2.SaoOffice(root, new Vector3(-24f, 0f, 10f), "อบต.คอโค");
-        Places.HealthStation(root, new Vector3(24f, 0f, 9f), 0f, "รพ.สต.คอโค");
-        Places.School(root, new Vector3(-10f, 0f, -28f), "โรงเรียนบ้านคอโค", 180f);
+        // ตำบล: SAO office, health station, school, public park, canal with fishing
+        Places2.SaoOffice(root, new Vector3(-24f, 0f, 10f), "อบต.");
+        Places.HealthStation(root, new Vector3(24f, 0f, 9f), 0f, "รพ.สต.");
+        Places.School(root, new Vector3(-10f, 0f, -28f), "โรงเรียน", 180f);
         Lane(root, -10f, -15f, -10f);
-        Places2.Park(root, new Vector3(2f, 0f, 14f), "สวนสาธารณะตำบลคอโค");
+        Places2.Park(root, new Vector3(2f, 0f, 14f), "สวนสาธารณะ");
         Places2.Canal(root, new Vector3(0f, 0f, 34f), 100f, new[] { -18f, -6f, 8f, 20f });
         Lane(root, 2f, -6f, 4f);
 
+        // Fairground for the small festivals (งานวัดเล็ก: มาฆบูชา วิสาขบูชา เข้าพรรษา ผ้าป่า)
+        FestivalGrounds.Build(root, new Vector3(-36f, 0f, -30f), 180f, big: false);
+        Lane(root, -36f, -17.5f, -10f);
+
+        // Tambon event boxing ring (เวทีมวยงานตำบล), entrance facing the road
+        Places.BoxingRing(root, new Vector3(38f, 0f, 18f), 0f, "เวทีมวยงานตำบล", "tambon");
+        StreetFurniture.LampPost(root, new Vector3(34.5f, 0f, 13.2f));
+        StreetFurniture.LampPost(root, new Vector3(41.5f, 0f, 13.2f));
+
         // ตลาดนัด south of the road, entrance facing it (evening market, 16:00-22:00)
-        Markets.FleaMarket(root, new Vector3(28f, 0f, -28f), "ตลาดนัดคอโค", "16:00-22:00", 180f);
+        Markets.FleaMarket(root, new Vector3(28f, 0f, -28f), "ตลาดนัด", "16:00-22:00", 180f);
         ShopZone(root, new Vector3(28f, 0f, -28f), "flea");
         Lane(root, 28f, -21f, -10f);
 
         Places.BusStop(root, new Vector3(16f, 0f, -11.5f), 180f);
         Places.Sign(root, new Vector3(19f, 0f, -11f), "ไปหมู่บ้าน / เมือง\n(ยืนใต้ป้ายรถ)", 180f);
-        Places.Sign(root, new Vector3(-3f, 0f, -4.5f), "ตำบลคอโค", 0f);
-        Places.Sign(root, new Vector3(8f, 0f, 27f), "คลองคอโค\nมีปลาให้ตก", 0f);
+        Places.Sign(root, new Vector3(-3f, 0f, -4.5f), "ตำบล", 0f);
+        Places.Sign(root, new Vector3(8f, 0f, 27f), "คลอง\nมีปลาให้ตก", 0f);
 
-        foreach (var pos in new[] { new Vector3(-40f, 0f, -20f), new Vector3(40f, 0f, -22f), new Vector3(-42f, 0f, 20f), new Vector3(42f, 0f, 24f), new Vector3(14f, 0f, -30f) })
+        foreach (var pos in new[] { new Vector3(-12f, 0f, -44f), new Vector3(40f, 0f, -22f), new Vector3(-42f, 0f, 20f), new Vector3(42f, 0f, 24f), new Vector3(14f, 0f, -30f) })
             Places.ShadeTree(root, pos);
 
         // Power line with street lamps along the north side of the road
@@ -82,6 +91,8 @@ public static class TambonBuilder
             new Vector4(13f, 0f, 35f, 18f),          // health station
             new Vector4(-26f, -42f, 6f, -15f),       // school
             new Vector4(21f, -36f, 35f, -10f),       // ตลาดนัด and its lane
+            new Vector4(34.5f, 13f, 41.5f, 21.5f),   // boxing ring
+            new Vector4(-49.5f, -43.5f, -22.5f, -10f), // fairground and its lane
             new Vector4(-11.3f, -15f, -8.7f, -10f), new Vector4(0.7f, -6f, 3.3f, 4f));
     });
 
@@ -104,7 +115,7 @@ public static class TambonBuilder
         Places2.Pub(root, new Vector3(26f, 0f, 24f), 0f, "pub_indie", "ผับอินดี้", new Color(0.18f, 0.12f, 0.25f), new Color(1f, 0.35f, 0.8f));
         Places.Sign(root, new Vector3(-16f, 0f, 16f), "ย่านผับ · เพื่อชีวิต บลูส์ อินดี้\nนักดนตรี Lv 10 · กลางคืน ร้านละครั้ง", 0f);
 
-        Places.BoxingCamp(root, new Vector3(0f, 0f, 34f), "ค่ายมวยเมืองคอโค");
+        Places.BoxingCamp(root, new Vector3(0f, 0f, 34f), "ค่ายมวย");
 
         // ตลาดสดเทศบาล east of the clock tower (morning market, 05:00-13:00)
         Markets.FreshMarket(root, new Vector3(39f, 0f, 11f), "ตลาดสดเทศบาล", "05:00-13:00");
@@ -121,6 +132,14 @@ public static class TambonBuilder
 
         foreach (var pos in new[] { new Vector3(-8f, 0f, -16f), new Vector3(8f, 0f, -16f), new Vector3(-40f, 0f, 20f), new Vector3(40f, 0f, 22f) })
             Places.ShadeTree(root, pos);
+
+        // Hospital, hotel, police station and pawn shop (north row); district office and อบจ. (south of the road)
+        CityCivic.Build(root);
+
+        // Fairground for the big festivals (งานใหญ่: งานประจำปีวัด สงกรานต์ ออกพรรษา กฐิน ลอยกระทง)
+        FestivalGrounds.Build(root, new Vector3(32f, 0f, -30f), 180f, big: true);
+        PrimitiveKit.Box("FairPath", root, new Vector3(32f, 0.01f, -13.5f), new Vector3(4f, 0.012f, 7f),
+            PrimitiveKit.Mat("Pavement", new Color(0.72f, 0.7f, 0.66f)), collider: false);
 
         // Power line on the south side of the main road (the shop awnings fill the north side),
         // and lamp posts along the street up to the boxing camp

@@ -13,7 +13,7 @@ local quest = require("quest_core")
 
 local STATS = { collection = "music", key = "stats" }
 local CURRENCY = "baht"
-local MAX_LEVEL = 20
+local MAX_LEVEL = 100
 local ENERGY_COST = 10
 local SONG_MS = 30000
 local LEAD_IN_MS = 2000
@@ -24,7 +24,7 @@ local GRPC_FAILED_PRECONDITION = 9
 -- Venues: base tips, required level, which instruments get +20%, when it's open
 local VENUES = {
   village_hall = { name = "ศาลากลางหมู่บ้าน", level = 1,  base = 40,  bonus = "folk" },
-  temple_fair  = { name = "งานวัดคอโค",    level = 1,  base = 120, bonus = "folk", fair = true },
+  temple_fair  = { name = "งานวัด",    level = 1,  base = 120, bonus = "folk", fair = true },
   tambon_event = { name = "เวทีอีเวนต์ตำบล",   level = 5,  base = 150, bonus = "any" },
   city_event   = { name = "เวทีอีเวนต์เมือง",   level = 8,  base = 220, bonus = "modern" },
   -- Pubs (ผับ) in the city, named by style: open 19:00-03:00, each one once per game day
@@ -91,7 +91,7 @@ local function view(user_id, s, env, extra)
     table.insert(venues, { id = id, name = v.name, level = v.level, base = v.base, bonus = v.bonus,
                            unlocked = s.level >= v.level, open = venue_open(v, now, env),
                            played_today = v.pub == true and (s.pub_days or {})[id] == life.game_day(now),
-                           when = v.fair and "งานวัด (วันที่ 1-2 ของเดือน)" or v.night and "กลางคืน 19:00-03:00 (ร้านละครั้งต่อวัน)" or "ทุกเวลา" })
+                           when = v.fair and "งานวัดตามประเพณี" or v.night and "กลางคืน 19:00-03:00 (ร้านละครั้งต่อวัน)" or "ทุกเวลา" })
   end
   local result = {
     level = s.level, xp = s.xp, xp_to_next = (s.level >= MAX_LEVEL) and 0 or xp_to_next(s.level),
@@ -190,7 +190,7 @@ local function rpc_finish(context, payload)
   local v = VENUES[session.venue]
   local items = data.read_items(user_id)
   local inst = data.INSTRUMENTS[items.instrument] or data.INSTRUMENTS.pin
-  local level_bonus = 1 + 0.03 * (s.level - 1)
+  local level_bonus = 1 + 0.03 * (math.min(s.level, 20) - 1) -- tips stop growing after Lv 20
   local tips = math.floor(v.base * accuracy * inst.mult * bonus_for(v, inst) * level_bonus + 0.5)
   if tips > 0 then nk.wallet_update(user_id, { [CURRENCY] = tips }, { reason = "music_tips", venue = session.venue }, true) end
 

@@ -42,9 +42,9 @@ public class ScenePolish : MonoBehaviour
         var profile = ScriptableObject.CreateInstance<VolumeProfile>();
         profile.Add<Tonemapping>(true).mode.Override(TonemappingMode.ACES);
         var bloom = profile.Add<Bloom>(true);
-        bloom.intensity.Override(0.35f);
-        bloom.threshold.Override(1.05f);
-        bloom.scatter.Override(0.65f);
+        bloom.intensity.Override(1.0f);   // lamps, festival bulbs and gold glow
+        bloom.threshold.Override(0.9f);
+        bloom.scatter.Override(0.75f);
         var color = profile.Add<ColorAdjustments>(true);
         color.postExposure.Override(0.3f);   // ACES darkens; bring the midtones back up
         color.contrast.Override(12f);

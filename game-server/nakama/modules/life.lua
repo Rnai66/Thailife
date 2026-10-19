@@ -55,3 +55,28 @@ nk.register_rpc(function(context, payload)
   quest.progress(user_id, "eat", 1)
   return view(user_id, state, { ate = food.name, gained = math.floor(state.energy - before) })
 end, "life_eat")
+
+-- Treatment (รักษาตัว): the health station is cheap, the hospital also restores full energy
+local CLINICS = {
+  station  = { name = "รพ.สต.",         price = 50 },
+  hospital = { name = "โรงพยาบาล",      price = 200, full_energy = true },
+}
+
+nk.register_rpc(function(context, payload)
+  local user_id = context.user_id
+  local ok, req = pcall(nk.json_decode, payload or "")
+  if not ok or type(req) ~= "table" then error({ "invalid payload", GRPC_INVALID_ARGUMENT }) end
+  local clinic = CLINICS[req.place or ""]
+  if not clinic then error({ "unknown clinic", GRPC_INVALID_ARGUMENT }) end
+  if not life.injured(user_id) then error({ "not injured", GRPC_FAILED_PRECONDITION }) end
+
+  local account = nk.account_get_id(user_id)
+  local wallet = account.wallet or {}
+  if type(wallet) == "string" then wallet = nk.json_decode(wallet) end
+  if (wallet[data.CURRENCY] or 0) < clinic.price then error({ "not enough baht", GRPC_FAILED_PRECONDITION }) end
+
+  nk.wallet_update(user_id, { [data.CURRENCY] = -clinic.price }, { reason = "treatment", place = req.place }, true)
+  local state = life.set_injured(user_id, false)
+  if clinic.full_energy then state = life.add_energy(user_id, life.MAX_ENERGY) end
+  return view(user_id, state, { treated_at = clinic.name, paid = clinic.price })
+end, "life_heal")

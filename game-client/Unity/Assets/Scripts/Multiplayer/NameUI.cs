@@ -20,7 +20,7 @@ public class NameUI : MonoBehaviour
     {
         if (instance == null)
             instance = new GameObject("NameUI").AddComponent<NameUI>();
-        instance.titleText.text = firstTime ? "ยินดีต้อนรับสู่บ้านคอโค!\nตั้งชื่อตัวละครของคุณ" : "เปลี่ยนชื่อตัวละคร";
+        instance.titleText.text = firstTime ? "ยินดีต้อนรับสู่หมู่บ้าน!\nตั้งชื่อตัวละครของคุณ" : "เปลี่ยนชื่อตัวละคร";
         instance.closeButton.gameObject.SetActive(!firstTime);
         instance.input.text = ProfileClient.Instance?.DisplayName ?? "";
         instance.messageText.text = $"ภาษาไทยหรืออังกฤษ 2-{MaxChars} ตัวอักษร · คนอื่นจะเห็นชื่อนี้บนหัว";
@@ -36,7 +36,7 @@ public class NameUI : MonoBehaviour
         var body = UiKit.PremiumWindow(transform, "NameCanvas", new Vector2(1100f, 880f), 80, "ช",
             out backdrop, out var header, out var sub, null, out _);
         header.text = "ชื่อตัวละคร";
-        sub.text = "บ้านคอโค หมู่ 1";
+        sub.text = "หมู่บ้าน";
         titleText = UiKit.Label(body, 40, "", new Vector2(0f, 270f), new Vector2(980f, 100f), UiKit.Ink);
         titleText.fontStyle = FontStyle.Bold;
 

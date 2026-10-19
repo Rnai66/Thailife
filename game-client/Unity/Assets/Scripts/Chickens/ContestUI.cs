@@ -42,7 +42,7 @@ public class ContestUI : MonoBehaviour
         var body = UiKit.PremiumWindow(transform, "ContestCanvas", new Vector2(1500f, 900f), 50, "ป",
             out backdrop, out titleText, out subtitleText, Hide, out _);
         titleText.text = "ประกวดไก่สวย";
-        subtitleText.text = "งานวัดคอโค · เดือนละครั้ง (วันที่ 1-2 ของเดือน)";
+        subtitleText.text = "งานวัดตามประเพณี · สงกรานต์ ออกพรรษา กฐิน ลอยกระทง ฯลฯ";
 
         // ── Left column: entrant, fair status, prizes, enter ──
         var entrant = UiKit.Panel("Entrant", body, Color.white, new Vector2(-370f, 230f), new Vector2(660f, 190f), shadow: true);
@@ -142,7 +142,7 @@ public class ContestUI : MonoBehaviour
         var s = coop.Current;
         bool canEnter = s.fair_open && !s.entered_this_fair;
         fairText.text = s.fair_open
-            ? (s.entered_this_fair ? "งานวัดนี้ส่งประกวดไปแล้ว — รองานเดือนหน้า" : $"งานวัดเปิดอยู่! เหลือเวลาอีก {CoopClient.Countdown(s.fair_ends_in_s - coop.Age)}")
+            ? (s.entered_this_fair ? "งานวัดนี้ส่งประกวดไปแล้ว — รองานวัดครั้งหน้า" : $"งานวัดเปิดอยู่! เหลือเวลาอีก {CoopClient.Countdown(s.fair_ends_in_s - coop.Age)}")
             : $"ยังไม่ถึงงานวัด — งานครั้งถัดไปในอีก {CoopClient.Countdown(s.next_fair_in_s - coop.Age)}";
         fairPill.color = canEnter ? UiKit.OkTint : (Color)new Color32(0xF1, 0xEF, 0xE8, 0xFF);
         fairText.color = canEnter ? UiKit.OkGreen : UiKit.Muted;

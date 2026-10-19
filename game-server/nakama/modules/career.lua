@@ -9,16 +9,18 @@
 local nk = require("nakama")
 local data = require("shop_data")
 local quest = require("quest_core")
+local life = require("life_core")
 
 local COLLECTION = "career"
 local KEY = "stats"
-local MAX_LEVEL = 20
+local MAX_LEVEL = 100
 
 -- Training tiers: banana tree (ต้นกล้วย) -> punching bag (กระสอบทราย) -> boxing camp (ค่ายมวย)
+-- energy = พลังงาน spent per hit (harder training is more tiring and worth more XP)
 local TARGETS = {
-  banana = { xp = 2, level = 1 },
-  bag    = { xp = 4, level = 3 },
-  camp   = { xp = 7, level = 6, membership = true },
+  banana = { xp = 2, level = 1, energy = 0.3 },
+  bag    = { xp = 4, level = 3, energy = 0.4 },
+  camp   = { xp = 7, level = 6, energy = 0.5, membership = true },
 }
 
 -- Token bucket: attacks have a ~0.35 s cooldown, so ~3 hits/s is the honest maximum.
@@ -51,14 +53,20 @@ local function write_stats(user_id, stats)
   } })
 end
 
-local function view(stats, accepted)
-  return nk.json_encode({
+local function view(stats, accepted, energy)
+  local result = {
     level = stats.level,
     xp = stats.xp,
     xp_to_next = (stats.level >= MAX_LEVEL) and 0 or xp_to_next(stats.level),
     total_hits = stats.total_hits,
     accepted = accepted or 0,
-  })
+  }
+  if energy then
+    result.energy = math.floor(energy.energy)
+    result.max_energy = life.MAX_ENERGY
+    result.tired = energy.tired
+  end
+  return nk.json_encode(result)
 end
 
 local function rpc_get(context, payload)
@@ -94,6 +102,16 @@ local function rpc_train(context, payload)
 
   local requested = math.max(0, math.floor(tonumber(req.hits) or 0))
   local accepted = math.min(requested, math.floor(stats.tokens))
+
+  -- Training is tiring: only the hits you still have energy for count
+  local body = life.state(context.user_id)
+  if body.sleep_ms then error({ "sleeping", GRPC_FAILED_PRECONDITION }) end
+  if body.injured then error({ "injured", GRPC_FAILED_PRECONDITION }) end
+  local affordable = math.floor(body.energy / target.energy)
+  local tired = accepted > affordable
+  accepted = math.min(accepted, affordable)
+  if accepted == 0 and requested > 0 then error({ "not enough energy", GRPC_FAILED_PRECONDITION }) end
+  if accepted > 0 then body = life.spend(context.user_id, accepted * target.energy) end
   stats.tokens = stats.tokens - accepted
 
   stats.total_hits = stats.total_hits + accepted
@@ -108,7 +126,7 @@ local function rpc_train(context, payload)
 
   write_stats(context.user_id, stats)
   quest.progress(context.user_id, "train", accepted)
-  return view(stats, accepted)
+  return view(stats, accepted, { energy = body.energy, tired = tired })
 end
 
 nk.register_rpc(rpc_get, "career_get")

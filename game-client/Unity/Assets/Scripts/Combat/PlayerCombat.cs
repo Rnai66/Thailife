@@ -28,6 +28,18 @@ public class PlayerCombat : MonoBehaviour
     // Raised whenever health changes (MatchSync broadcasts it, HealthHud shows it).
     public event Action<int> HealthChanged;
 
+    // In a ring fight (FightDirector): a knockout ends the fight instead of respawning you
+    public bool FightMode { get; set; }
+    public event Action FightKnockout;
+
+    public void RestoreFull()
+    {
+        IsKnockedOut = false;
+        controller.InputEnabled = true;
+        transform.rotation = Quaternion.Euler(0f, transform.eulerAngles.y, 0f);
+        SetHealth(maxHealth);
+    }
+
     private PlayerController controller;
     private PlayerActions actions;
     private readonly Collider[] overlap = new Collider[16];
@@ -51,8 +63,10 @@ public class PlayerCombat : MonoBehaviour
     public void ApplyCareerLevel(int level)
     {
         level = Mathf.Max(1, level);
-        DamageMultiplier = 1f + 0.05f * (level - 1);
-        maxHealth = baseMaxHealth + 5 * (level - 1);
+        // Fighting strength grows up to Lv 20; higher career levels are for prestige and unlocks
+        int combatLevel = Mathf.Min(level, 20);
+        DamageMultiplier = 1f + 0.05f * (combatLevel - 1);
+        maxHealth = baseMaxHealth + 5 * (combatLevel - 1);
         if (!IsKnockedOut) SetHealth(maxHealth);
     }
 
@@ -108,7 +122,17 @@ public class PlayerCombat : MonoBehaviour
 
         SetHealth(Health - damage);
         if (Health <= 0)
-            StartCoroutine(KnockOut());
+        {
+            if (FightMode)
+            {
+                IsKnockedOut = true;
+                controller.InputEnabled = false;
+                if (actions != null) actions.RefreshBlock();
+                transform.rotation = Quaternion.Euler(0f, transform.eulerAngles.y, 90f);
+                FightKnockout?.Invoke();
+            }
+            else StartCoroutine(KnockOut());
+        }
     }
 
     private IEnumerator KnockOut()

@@ -92,9 +92,9 @@ public static class VillageBuilder
             Places.BananaTree(v, pos, trainable: false);
 
         // Places around the village, each reached by a dirt lane from the main road
-        Places.Temple(v, new Vector3(-32f, 0f, 21f), "วัดคอโค");
+        Places.Temple(v, new Vector3(-32f, 0f, 21f), "วัด");
         Lane(v, -32f, -6f, 7f);
-        Places2.VillageHall(v, new Vector3(28f, 0f, 16f), "ศาลากลางบ้านคอโค");
+        Places2.VillageHall(v, new Vector3(28f, 0f, 16f), "ศาลากลางบ้าน");
         Lane(v, 28f, -6f, 11.5f);
         Places.KokNongNa(v, new Vector3(-12f, 0f, -36f));
         Lane(v, -12f, -21f, -10f);
@@ -152,7 +152,7 @@ public static class VillageBuilder
     {
         var palms = new[]
         {
-            new Vector3(-40f, 0f, -4f), new Vector3(-26f, 0f, -12.5f), new Vector3(-16f, 0f, -4.5f), new Vector3(-2f, 0f, -12.8f),
+            new Vector3(-52f, 0f, -1f), new Vector3(-26f, 0f, -12.5f), new Vector3(-16f, 0f, -4.5f), new Vector3(-2f, 0f, -12.8f),
             new Vector3(4f, 0f, -4.2f), new Vector3(22f, 0f, -12.6f), new Vector3(34f, 0f, -4.5f), new Vector3(44f, 0f, -12.5f),
             new Vector3(14f, 0f, 6f), new Vector3(-10f, 0f, 6f), new Vector3(20f, 0f, 28f), new Vector3(-44f, 0f, 40f),
         };
@@ -269,7 +269,11 @@ public static class VillageBuilder
         var bedZone = bed.AddComponent<BoxCollider>();
         bedZone.isTrigger = true;
         bedZone.size = new Vector3(2f, 2f, 1.6f);
-        bed.AddComponent<SleepSpot>();
+        var matPoint = new GameObject("RestPoint");
+        matPoint.transform.SetParent(t, false);
+        matPoint.transform.localPosition = new Vector3(-1.6f, 2.76f, -3.3f); // on the mat, lying along it
+        matPoint.transform.localRotation = Quaternion.Euler(0f, 90f, 0f);
+        bed.AddComponent<SleepSpot>().Configure("เสื่อบนชานบ้าน", "นอนพัก", matPoint.transform);
 
         // Porch railing (gap left for the stairs)
         PrimitiveKit.Box("Rail", t, new Vector3(-0.7f, 3.35f, -4.15f), new Vector3(4.6f, 0.08f, 0.08f), darkWood);

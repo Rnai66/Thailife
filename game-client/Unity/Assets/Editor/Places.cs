@@ -37,7 +37,15 @@ public static class Places
 
         BigTree(t, new Vector3(-9f, 0f, 9f), "BodhiTree_ต้นโพธิ์", 1.4f);
 
+        // Temple fair (งานวัด) outside the walls: contest + music stage and stalls in front of
+        // the temple either side of the gate path, the boxing ring along the west wall
         TempleFair(t);
+        BoxingRing(t, new Vector3(-22.5f, 0f, 2f), 0f, "เวทีมวยงานวัด", "fair");
+        var dirt = PrimitiveKit.Mat("Dirt", new Color(0.55f, 0.42f, 0.28f));
+        PrimitiveKit.Box("FairPath", t, new Vector3(-7.5f, 0.012f, -25.8f), new Vector3(40f, 0.02f, 2f), dirt, collider: false);
+        PrimitiveKit.Box("FairPath", t, new Vector3(-22.5f, 0.012f, -14f), new Vector3(2f, 0.02f, 22f), dirt, collider: false);
+        StreetFurniture.LampPost(t, new Vector3(-19.5f, 0f, -12f));
+        TempleFairLights(t);
 
         // Low white boundary wall with a gate in the front (-Z)
         PrimitiveKit.Box("WallBack", t, new Vector3(0f, 0.5f, 14f), new Vector3(30f, 1f, 0.3f), white);
@@ -50,9 +58,43 @@ public static class Places
         return temple;
     }
 
+    // ประดับไฟงานวัด: zig-zag bulb strings over the fair in front of the wall, bunting along the
+    // wall, lanterns on the gate and a ring of lights around the boxing ring. Up only during festivals.
+    private static void TempleFairLights(Transform t)
+    {
+        var deco = FairLights.Gated(t, "TempleFairLights", "any");
+        float[] xs = { -26f, -16f, 6f, 16f };
+        const float wallSide = -16.8f, roadSide = -27.2f, h = 4.4f;
+        foreach (float x in xs)
+        {
+            FairLights.Pole(deco, new Vector3(x, 0f, wallSide));
+            FairLights.Pole(deco, new Vector3(x, 0f, roadSide));
+        }
+        for (int i = 0; i < xs.Length - 1; i++)
+        {
+            FairLights.Festoon(deco, new Vector3(xs[i], h, wallSide), new Vector3(xs[i + 1], h, roadSide));
+            FairLights.Festoon(deco, new Vector3(xs[i], h, roadSide), new Vector3(xs[i + 1], h, wallSide));
+            if (i != 1) FairLights.Festoon(deco, new Vector3(xs[i], h, roadSide), new Vector3(xs[i + 1], h, roadSide), 0.35f);
+        }
+        for (int i = 0; i < xs.Length; i++)
+            FairLights.Lantern(deco, new Vector3(xs[i] + 0.2f, h - 0.2f, roadSide), i);
+
+        // Flags along the front wall, lanterns hanging from the gate beam
+        FairLights.Bunting(deco, new Vector3(-15f, 1.4f, -14.35f), new Vector3(-2.8f, 1.4f, -14.35f));
+        FairLights.Bunting(deco, new Vector3(2.8f, 1.4f, -14.35f), new Vector3(15f, 1.4f, -14.35f));
+        FairLights.Lantern(deco, new Vector3(-1.4f, 3.1f, -14.3f), 0);
+        FairLights.Lantern(deco, new Vector3(1.4f, 3.1f, -14.3f), 0);
+
+        // Around the boxing ring by the west wall
+        var corners = new[] { new Vector3(-27.3f, 0f, -4f), new Vector3(-17.7f, 0f, -4f), new Vector3(-17.7f, 0f, 8f), new Vector3(-27.3f, 0f, 8f) };
+        foreach (var c in corners) FairLights.Pole(deco, c);
+        for (int i = 0; i < 4; i++)
+            FairLights.Festoon(deco, corners[i] + Vector3.up * h, corners[(i + 1) % 4] + Vector3.up * h, 0.4f);
+    }
+
     // Ordination hall (โบสถ์): stepped white plinth, colonnade, gold-framed doors and windows,
     // and a three-section Thai roof (ridge along Z) with gold gables, bai raka fins and chofa horns.
-    private static void Ubosot(Transform parent, Vector3 position, Material white, Material gold, Material orange, Material green)
+    internal static void Ubosot(Transform parent, Vector3 position, Material white, Material gold, Material orange, Material green)
     {
         var hall = PrimitiveKit.Group("Ubosot_โบสถ์", parent, position);
         var h = hall.transform;
@@ -160,7 +202,7 @@ public static class Places
     }
 
     // Bell-shaped chedi: square stepped bases, a smooth white bell and a gold ringed spire
-    private static void Chedi(Transform parent, Vector3 position, Material white, Material gold)
+    internal static void Chedi(Transform parent, Vector3 position, Material white, Material gold)
     {
         var chedi = PrimitiveKit.Group("Chedi_เจดีย์", parent, position);
         var c = chedi.transform;
@@ -191,7 +233,7 @@ public static class Places
     // The contest only runs during the monthly fair (server-side schedule).
     private static void TempleFair(Transform temple)
     {
-        var fair = PrimitiveKit.Group("TempleFair_งานวัด", temple, new Vector3(8f, 0f, -7f));
+        var fair = PrimitiveKit.Group("TempleFair_งานวัด", temple, new Vector3(-10f, 0f, -22f)); // in front of the wall, left of the gate
         var t = fair.transform;
         var red = PrimitiveKit.Mat("CornerRed", new Color(0.85f, 0.15f, 0.15f));
         var banner = PrimitiveKit.Mat("SignYellow", new Color(1f, 0.85f, 0.15f));
@@ -213,20 +255,20 @@ public static class Places
         box.isTrigger = true;
         box.size = new Vector3(3.6f, 2f, 1.6f);
         contest.AddComponent<WindowSpot>().Configure(WindowSpot.Window.Contest);
-        Sign(t, new Vector3(-2.6f, 0f, -2.2f), "ประกวดไก่สวย\nงานวัด เดือนละครั้ง", 0f);
+        Sign(t, new Vector3(-2.6f, 0f, -2.2f), "ประกวดไก่สวย\nช่วงงานวัดตามประเพณี", 0f);
 
         // Music stage behind the contest stage (folk instruments shine here); keeps the gate path clear
         Places2.MusicStage(t, new Vector3(0f, 0f, 5.2f), 0f, "temple_fair", "ดนตรีงานวัด", new Color(0.75f, 0.15f, 0.12f));
 
-        // Fair stalls (ซุ้มงานวัด) with striped roofs
-        for (int i = 0; i < 2; i++)
+        // Fair stalls (ซุ้มงานวัด) with striped roofs, both sides of the gate path in front of the wall
+        var stallSpots = new[] { new Vector3(-13.5f, 0f, -1.5f), new Vector3(-17f, 0f, -1.5f), new Vector3(16.5f, 0f, -1.5f), new Vector3(20f, 0f, -1.5f), new Vector3(23.5f, 0f, -1.5f) };
+        for (int i = 0; i < stallSpots.Length; i++)
         {
-            // left of the gate path so the way to the ordination hall stays clear
-            var stall = PrimitiveKit.Group("FairStall", t, new Vector3(-13.5f - i * 3.5f, 0f, -2f));
+            var stall = PrimitiveKit.Group("FairStall", t, stallSpots[i]);
             PrimitiveKit.Box("Counter", stall.transform, new Vector3(0f, 0.45f, 0f), new Vector3(2.6f, 0.9f, 0.8f), wood);
             foreach (float x in new[] { -1.2f, 1.2f })
                 PrimitiveKit.Cylinder("Pole", stall.transform, new Vector3(x, 1.2f, 0.3f), new Vector3(0.06f, 1.2f, 0.06f), wood, collider: false);
-            PrimitiveKit.Box("Roof", stall.transform, new Vector3(0f, 2.4f, 0f), new Vector3(3f, 0.08f, 1.6f), i == 0 ? pink : blue, collider: false);
+            PrimitiveKit.Box("Roof", stall.transform, new Vector3(0f, 2.4f, 0f), new Vector3(3f, 0.08f, 1.6f), i % 2 == 0 ? pink : blue, collider: false);
         }
     }
 
@@ -303,6 +345,15 @@ public static class Places
         PrimitiveKit.Label(name, t, new Vector3(0.4f, 3.4f, -6.62f), 0.075f, Color.white);
         PrimitiveKit.Box("CrossV", t, new Vector3(-1.75f, 3.4f, -6.62f), new Vector3(0.14f, 0.5f, 0.02f), white, collider: false);
         PrimitiveKit.Box("CrossH", t, new Vector3(-1.75f, 3.4f, -6.62f), new Vector3(0.5f, 0.14f, 0.02f), white, collider: false);
+
+        // Treatment counter under the canopy (injuries from a knockout)
+        var clinic = new GameObject("HealZone");
+        clinic.transform.SetParent(t, false);
+        clinic.transform.localPosition = new Vector3(0f, 1f, -5.2f);
+        var clinicZone = clinic.AddComponent<BoxCollider>();
+        clinicZone.isTrigger = true;
+        clinicZone.size = new Vector3(4f, 2f, 2.2f);
+        clinic.AddComponent<HealSpot>().Configure("station", name, 50);
         return station;
     }
 
@@ -368,7 +419,10 @@ public static class Places
         PrimitiveKit.Box("LadderStep", hut.transform, new Vector3(0f, 0.7f, -1.3f), new Vector3(1f, 0.08f, 0.35f), wood, collider: false);
         var bed = new GameObject("RestPoint");
         bed.transform.SetParent(hut.transform, false);
-        bed.transform.localPosition = new Vector3(0f, 1.3f, 0.1f); // lying body just above the mat
+        // Lying down rolls the body onto the player's side axis; turning the rest point 90°
+        // lays it along the mat with the head toward the bolster (+Z)
+        bed.transform.localPosition = new Vector3(0f, 1.24f, 0.2f);
+        bed.transform.localRotation = Quaternion.Euler(0f, 90f, 0f);
         var rest = new GameObject("RestZone");
         rest.transform.SetParent(hut.transform, false);
         rest.transform.localPosition = new Vector3(0f, 1f, -1.6f);
@@ -428,25 +482,7 @@ public static class Places
         var wood = PrimitiveKit.Mat("WoodPlank", Wood);
         var roofMat = PrimitiveKit.Mat("CampRoof", new Color(0.55f, 0.58f, 0.6f));
 
-        // Ring (เวทีมวย): 6x6 m, top at 0.6 m
-        PrimitiveKit.Box("RingBase", t, new Vector3(0f, 0.25f, 0f), new Vector3(6f, 0.5f, 6f), baseMat);
-        PrimitiveKit.Box("RingCanvas", t, new Vector3(0f, 0.55f, 0f), new Vector3(5.8f, 0.1f, 5.8f), canvas);
-        PrimitiveKit.Cylinder("CornerRed", t, new Vector3(-2.8f, 1.5f, -2.8f), new Vector3(0.15f, 0.9f, 0.15f), red);
-        PrimitiveKit.Cylinder("CornerBlue", t, new Vector3(2.8f, 1.5f, 2.8f), new Vector3(0.15f, 0.9f, 0.15f), blue);
-        PrimitiveKit.Cylinder("CornerWhite", t, new Vector3(2.8f, 1.5f, -2.8f), new Vector3(0.15f, 0.9f, 0.15f), white);
-        PrimitiveKit.Cylinder("CornerWhite", t, new Vector3(-2.8f, 1.5f, 2.8f), new Vector3(0.15f, 0.9f, 0.15f), white);
-
-        // Ropes on three sides; the front (-Z) is left open as the entrance
-        Material[] ropeColors = { red, white, blue };
-        float[] ropeHeights = { 1.0f, 1.4f, 1.8f };
-        for (int i = 0; i < 3; i++)
-        {
-            PrimitiveKit.Box("Rope", t, new Vector3(0f, ropeHeights[i], 2.8f), new Vector3(5.6f, 0.05f, 0.05f), ropeColors[i]);
-            PrimitiveKit.Box("Rope", t, new Vector3(-2.8f, ropeHeights[i], 0f), new Vector3(0.05f, 0.05f, 5.6f), ropeColors[i]);
-            PrimitiveKit.Box("Rope", t, new Vector3(2.8f, ropeHeights[i], 0f), new Vector3(0.05f, 0.05f, 5.6f), ropeColors[i]);
-        }
-        PrimitiveKit.Box("Step", t, new Vector3(0f, 0.1f, -3.6f), new Vector3(2f, 0.2f, 0.4f), baseMat);
-        PrimitiveKit.Box("Step", t, new Vector3(0f, 0.2f, -3.2f), new Vector3(2f, 0.4f, 0.4f), baseMat);
+        BoxingRing(t, Vector3.zero, 0f, "เวทีค่ายมวย", "pads", "spar", "champ");
 
         // Open-sided gym roof over the ring and bags
         foreach (float x in new[] { -4.5f, 7.5f })
@@ -478,6 +514,59 @@ public static class Places
         desk.AddComponent<ShopCounter>().Configure("camp");
         Sign(t, new Vector3(-8.2f, 0f, -5.6f), "สมัครสมาชิกค่าย\n300 บาท", 0f);
         return camp;
+    }
+
+    // Boxing ring (เวทีมวย): 6x6 m, top at 0.6 m, ropes on three sides, steps at the open
+    // front (-Z) where a FightSpot offers the given events (boxing.lua ids)
+    public static Transform BoxingRing(Transform parent, Vector3 position, float yaw, string title, params string[] events)
+    {
+        var ring = PrimitiveKit.Group("BoxingRing_เวทีมวย", parent, position, yaw);
+        var t = ring.transform;
+        var baseMat = PrimitiveKit.Mat("RingBase", new Color(0.2f, 0.2f, 0.22f));
+        var canvas = PrimitiveKit.Mat("RingCanvas", new Color(0.35f, 0.6f, 0.9f));
+        var red = PrimitiveKit.Mat("CornerRed", new Color(0.85f, 0.15f, 0.15f));
+        var blue = PrimitiveKit.Mat("CornerBlue", new Color(0.15f, 0.3f, 0.85f));
+        var white = PrimitiveKit.Mat("RopeWhite", Color.white);
+        PrimitiveKit.Box("RingBase", t, new Vector3(0f, 0.25f, 0f), new Vector3(6f, 0.5f, 6f), baseMat);
+        PrimitiveKit.Box("RingCanvas", t, new Vector3(0f, 0.55f, 0f), new Vector3(5.8f, 0.1f, 5.8f), canvas);
+        PrimitiveKit.Cylinder("CornerRed", t, new Vector3(-2.8f, 1.5f, -2.8f), new Vector3(0.15f, 0.9f, 0.15f), red);
+        PrimitiveKit.Cylinder("CornerBlue", t, new Vector3(2.8f, 1.5f, 2.8f), new Vector3(0.15f, 0.9f, 0.15f), blue);
+        PrimitiveKit.Cylinder("CornerWhite", t, new Vector3(2.8f, 1.5f, -2.8f), new Vector3(0.15f, 0.9f, 0.15f), white);
+        PrimitiveKit.Cylinder("CornerWhite", t, new Vector3(-2.8f, 1.5f, 2.8f), new Vector3(0.15f, 0.9f, 0.15f), white);
+
+        // Ropes on three sides; the front (-Z) is left open as the entrance
+        Material[] ropeColors = { red, white, blue };
+        float[] ropeHeights = { 1.0f, 1.4f, 1.8f };
+        for (int i = 0; i < 3; i++)
+        {
+            PrimitiveKit.Box("Rope", t, new Vector3(0f, ropeHeights[i], 2.8f), new Vector3(5.6f, 0.05f, 0.05f), ropeColors[i]);
+            PrimitiveKit.Box("Rope", t, new Vector3(-2.8f, ropeHeights[i], 0f), new Vector3(0.05f, 0.05f, 5.6f), ropeColors[i]);
+            PrimitiveKit.Box("Rope", t, new Vector3(2.8f, ropeHeights[i], 0f), new Vector3(0.05f, 0.05f, 5.6f), ropeColors[i]);
+        }
+        PrimitiveKit.Box("Step", t, new Vector3(0f, 0.1f, -3.6f), new Vector3(2f, 0.2f, 0.4f), baseMat);
+        PrimitiveKit.Box("Step", t, new Vector3(0f, 0.2f, -3.2f), new Vector3(2f, 0.4f, 0.4f), baseMat);
+
+
+        // Lighting truss over the ring: two posts and a bar with stage lights
+        var steel = PrimitiveKit.Mat("SteelFrame", new Color(0.32f, 0.42f, 0.5f));
+        foreach (float x in new[] { -3.4f, 3.4f })
+            PrimitiveKit.Box("TrussPost", t, new Vector3(x, 2.3f, 0f), new Vector3(0.14f, 4.6f, 0.14f), steel);
+        PrimitiveKit.Box("TrussBar", t, new Vector3(0f, 4.6f, 0f), new Vector3(7f, 0.16f, 0.16f), steel, collider: false);
+        foreach (float x in new[] { -1.6f, 1.6f })
+            StreetFurniture.RingLight(t, new Vector3(x, 4.36f, 0f));
+
+        var centre = new GameObject("RingCentre");
+        centre.transform.SetParent(t, false);
+        centre.transform.localPosition = new Vector3(0f, 0.6f, 0f);
+        var spot = new GameObject("FightSpot");
+        spot.transform.SetParent(t, false);
+        spot.transform.localPosition = new Vector3(0f, 1f, -4.3f);
+        var zone = spot.AddComponent<BoxCollider>();
+        zone.isTrigger = true;
+        zone.size = new Vector3(3f, 2f, 1.6f);
+        spot.AddComponent<FightSpot>().Configure(title, centre.transform, events);
+        Sign(t, new Vector3(2.4f, 0f, -4.4f), title + "\nเดินมาที่บันไดเวที", 0f);
+        return centre.transform;
     }
 
     // ── Small pieces ────────────────────────────────────────────────────────────

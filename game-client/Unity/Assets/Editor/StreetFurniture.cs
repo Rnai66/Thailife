@@ -124,6 +124,16 @@ public static class StreetFurniture
         AddLight(go, new Vector3(0f, -0.1f, 0f), StreetLamp.Kind.Hanging);
     }
 
+    // Stage light over a boxing ring: always on, so fights are bright even under a roof
+    public static void RingLight(Transform parent, Vector3 position)
+    {
+        var go = PrimitiveKit.Group("RingLight", parent, position);
+        var steel = PrimitiveKit.Mat("SteelFrame", new Color(0.32f, 0.42f, 0.5f));
+        PrimitiveKit.Box("Housing", go.transform, new Vector3(0f, 0.08f, 0f), new Vector3(0.6f, 0.16f, 0.6f), steel, collider: false);
+        PrimitiveKit.Box("Lens", go.transform, new Vector3(0f, -0.01f, 0f), new Vector3(0.5f, 0.03f, 0.5f), PrimitiveKit.Glow("StageGlow", new Color(1f, 0.96f, 0.88f), 3f), collider: false);
+        AddLight(go, new Vector3(0f, -0.1f, 0f), StreetLamp.Kind.Ring);
+    }
+
     private static void AddLight(GameObject owner, Vector3 localPosition, StreetLamp.Kind kind)
     {
         var lightGo = new GameObject("LampLight");

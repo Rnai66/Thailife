@@ -51,7 +51,7 @@ M.FOOD_ORDER = { "soda", "iced_coffee", "moo_ping", "som_tam", "thai_tea", "coff
 -- Markets keep game-clock hours: the fresh market in the morning, the ตลาดนัด in the evening
 M.MARKETS = {
   market = { name = "ตลาดสดเทศบาล", open = 5,  close = 13 },
-  flea   = { name = "ตลาดนัดคอโค",  open = 16, close = 22 },
+  flea   = { name = "ตลาดนัด",  open = 16, close = 22 },
 }
 
 -- Musical instruments (เครื่องดนตรี): folk ones shine at village/temple venues, modern ones in the city
