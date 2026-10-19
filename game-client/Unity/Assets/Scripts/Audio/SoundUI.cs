@@ -12,6 +12,7 @@ public class SoundUI : MonoBehaviour
 
     private GameObject backdrop;
     private readonly List<Image> trackButtons = new List<Image>();
+    private readonly List<Image> qualityButtons = new List<Image>();
     private readonly List<Image> musicBar = new List<Image>(), sfxBar = new List<Image>();
     private Text musicValue, sfxValue;
 
@@ -33,10 +34,10 @@ public class SoundUI : MonoBehaviour
 
     private void Awake()
     {
-        var body = UiKit.PremiumWindow(transform, "SoundCanvas", new Vector2(1200f, 860f), 56, "ส",
+        var body = UiKit.PremiumWindow(transform, "SoundCanvas", new Vector2(1200f, 980f), 56, "ส",
             out backdrop, out var title, out var subtitle, Close, out _);
-        title.text = "ตั้งค่าเสียง";
-        subtitle.text = "เลือกเพลงบรรเลง · ปรับเสียงดัง-เบา";
+        title.text = "ตั้งค่า";
+        subtitle.text = "เพลงบรรเลง · ความดังเสียง · คุณภาพภาพ";
 
         // Music choice: off + each track
         UiKit.Label(body, 30, "เพลงบรรเลง", new Vector2(-380f, 270f), new Vector2(320f, 50f), UiKit.Ink, TextAnchor.MiddleLeft).fontStyle = FontStyle.Bold;
@@ -54,8 +55,19 @@ public class SoundUI : MonoBehaviour
         musicValue = Volume(body, "ความดังเพลง", 60f, musicBar, d => GameAudio.MusicVolume += d);
         sfxValue = Volume(body, "เสียงเอฟเฟกต์และเสียงสถานที่", -110f, sfxBar, d => { GameAudio.SfxVolume += d; GameAudio.Play("coins"); });
 
-        UiKit.Label(body, 22, "เดินเข้าวัด ร้านค้า โคกหนองนา ฟาร์มวัว ท่าเรือ ฯลฯ จะได้ยินเสียงประจำสถานที่",
-            new Vector2(0f, -250f), new Vector2(1100f, 40f), UiKit.Muted);
+        // Graphics quality: lower it if the phone gets hot or the game stutters
+        UiKit.Label(body, 28, "คุณภาพภาพ (ลดลงถ้าเครื่องร้อนหรือกระตุก)", new Vector2(-230f, -220f), new Vector2(620f, 44f), UiKit.Ink, TextAnchor.MiddleLeft).fontStyle = FontStyle.Bold;
+        for (int i = 0; i < GraphicsQuality.Names.Length; i++)
+        {
+            int level = i;
+            var b = UiKit.RoundButton(body, GraphicsQuality.Names[i], new Vector2(-270f + i * 270f, -295f), new Vector2(250f, 76f), Color.white, UiKit.Ink,
+                () => { GraphicsQuality.Level = level; Render(); }, 26);
+            b.gameObject.AddComponent<Outline>().effectColor = UiKit.CardBorder;
+            qualityButtons.Add(b.GetComponent<Image>());
+        }
+
+        UiKit.RoundButton(body, "บัญชี · รหัสกู้คืน", new Vector2(0f, -375f), new Vector2(380f, 70f), UiKit.Gold, UiKit.GoldInk,
+            () => { Close(); AccountUI.Show(); }, 26);
         backdrop.SetActive(false);
     }
 
@@ -77,6 +89,8 @@ public class SoundUI : MonoBehaviour
         int track = GameAudio.Track;
         for (int i = 0; i < trackButtons.Count; i++)
             trackButtons[i].color = i - 1 == track ? UiKit.Gold : Color.white;
+        for (int i = 0; i < qualityButtons.Count; i++)
+            qualityButtons[i].color = i == GraphicsQuality.Level ? UiKit.Gold : Color.white;
         Fill(musicBar, musicValue, GameAudio.MusicVolume);
         Fill(sfxBar, sfxValue, GameAudio.SfxVolume);
     }

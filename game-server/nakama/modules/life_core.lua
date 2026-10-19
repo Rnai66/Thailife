@@ -10,9 +10,9 @@ local M = {}
 
 M.MAX_ENERGY = 100
 M.PASSIVE_REGEN_PER_MIN = 1   -- real minutes
-M.SLEEP_REGEN_PER_SEC = 3     -- real seconds while sleeping
+M.SLEEP_REGEN_PER_SEC = 1     -- real seconds while sleeping (a full rest ~100 s, so energy paces the work)
 
-M.COST = { plow = 10, plant = 10, water = 5, harvest = 10, cast = 3 }
+M.COST = { plow = 10, plant = 10, water = 5, harvest = 10, cast = 4 }
 
 -- Calendar (same epoch as the client's GameClock): 1 game day = 24 real minutes,
 -- 1 game month = 30 game days = 12 real hours.

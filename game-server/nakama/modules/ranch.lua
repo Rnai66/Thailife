@@ -27,7 +27,7 @@ local MAX_FEED = 200
 local MILK_PRICE = 70       -- per bottle, one bottle per fed cow per game day
 local MAX_MILK_PER_COW = 5  -- the milk waits this long before it spoils
 local GROWN_DAYS = 12       -- fed days until a cow is fully grown
-local GROWN_PRICE = 42000
+local GROWN_PRICE = 36000
 local MAX_SETTLE_DAYS = 10
 
 local function err(msg, code) error({ msg, code or GRPC_FAILED_PRECONDITION }) end

@@ -166,6 +166,24 @@ public class NakamaConnection : MonoBehaviour
         return session;
     }
 
+    // Moving to this phone from another one: log in with the recovery code (account.lua links it as a
+    // custom ID), link a fresh device ID for this phone to that account, then reload the scene so
+    // every client loads the recovered account.
+    public async Task RecoverAsync(string code)
+    {
+        string normalized = code.Trim().ToUpperInvariant().Replace(" ", "");
+        var session = await Client.AuthenticateCustomAsync("recover-" + normalized, create: false);
+        string newId = Guid.NewGuid().ToString();
+        await Client.LinkDeviceAsync(session, newId);
+        PlayerPrefs.SetString(DeviceIdKey, newId);
+        PlayerPrefs.SetString(SessionTokenKey, session.AuthToken);
+        PlayerPrefs.SetString(RefreshTokenKey, session.RefreshToken);
+        PlayerPrefs.Save();
+        Debug.Log($"[Nakama] Account recovered: now user {session.UserId}");
+        if (Socket != null) await Socket.CloseAsync();
+        UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
+    }
+
     private string GetDeviceId()
     {
         string id = PlayerPrefs.GetString(DeviceIdKey, "");

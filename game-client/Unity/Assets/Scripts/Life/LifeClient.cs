@@ -49,7 +49,7 @@ public class LifeClient : MonoBehaviour
     }
 
     private const float PassiveRegenPerSec = 1f / 60f;
-    private const float SleepRegenPerSec = 3f;
+    private const float SleepRegenPerSec = 1f; // life_core.lua SLEEP_REGEN_PER_SEC
     private const float PollInterval = 20f;
 
     public static LifeClient Instance { get; private set; }
@@ -90,6 +90,7 @@ public class LifeClient : MonoBehaviour
         if (GetComponent<BankClient>() == null) gameObject.AddComponent<BankClient>();
         if (GetComponent<RanchClient>() == null) gameObject.AddComponent<RanchClient>();
         if (GetComponent<HotelClient>() == null) gameObject.AddComponent<HotelClient>();
+        if (GetComponent<TutorialGuide>() == null) gameObject.AddComponent<TutorialGuide>();
 
         // Every location scene gets a day/night sun without extra setup
         foreach (var light in FindObjectsByType<Light>(FindObjectsSortMode.None))

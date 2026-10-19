@@ -279,7 +279,7 @@ public class HealthHud : MonoBehaviour
         var calendar = UiKit.WoodButton(menuRow, "ปฏิทินงาน", Vector2.zero, new Vector2(146f, 54f), () => { EventCalendarUI.Toggle(); ToggleMenu(); }, 22, flowers: false);
         Pin(calendar, new Vector2(-136f, 0f));
         calendarImage = calendar.GetComponent<Image>();
-        var sound = UiKit.WoodButton(menuRow, "เสียง", Vector2.zero, new Vector2(130f, 54f), () => { SoundUI.Toggle(); ToggleMenu(); }, 24, flowers: false);
+        var sound = UiKit.WoodButton(menuRow, "ตั้งค่า", Vector2.zero, new Vector2(130f, 54f), () => { SoundUI.Toggle(); ToggleMenu(); }, 24, flowers: false);
         Pin(sound, new Vector2(0f, 0f));
         menuRow.gameObject.SetActive(false);
 

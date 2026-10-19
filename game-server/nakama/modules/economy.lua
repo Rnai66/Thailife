@@ -21,11 +21,11 @@ local FISH_PRICES = {
   { id = "catfish",   name = "ปลาดุก",     price = 60 },
   { id = "snakehead", name = "ปลาช่อน",    price = 80 },
   -- sea fish from the pier at the beach
-  { id = "mackerel",  name = "ปลาทู",       price = 35 },
-  { id = "squid",     name = "ปลาหมึก",     price = 70 },
-  { id = "seabass",   name = "ปลากะพงขาว",  price = 120 },
-  { id = "grouper",   name = "ปลาเก๋า",      price = 160 },
-  { id = "kingfish",  name = "ปลาอินทรี",    price = 220 },
+  { id = "mackerel",  name = "ปลาทู",       price = 25 },
+  { id = "squid",     name = "ปลาหมึก",     price = 55 },
+  { id = "seabass",   name = "ปลากะพงขาว",  price = 90 },
+  { id = "grouper",   name = "ปลาเก๋า",      price = 120 },
+  { id = "kingfish",  name = "ปลาอินทรี",    price = 165 },
 }
 
 local function read_inventory(user_id)
