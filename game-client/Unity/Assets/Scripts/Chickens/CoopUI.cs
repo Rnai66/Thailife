@@ -35,7 +35,7 @@ public class CoopUI : MonoBehaviour
 
     private void Awake()
     {
-        var body = UiKit.PremiumWindow(transform, "CoopCanvas", new Vector2(1640f, 940f), 50, "ก",
+        var body = UiKit.PremiumWindow(transform, "CoopCanvas", new Vector2(1640f, 940f), 50, "icon:farm",
             out backdrop, out titleText, out subtitleText, Hide, out _);
         titleText.text = "เล้าไก่";
 

@@ -65,7 +65,7 @@ public class BoxingUI : MonoBehaviour
 
     private void Awake()
     {
-        var body = UiKit.PremiumWindow(transform, "BoxingCanvas", new Vector2(1400f, 900f), 55, "ม",
+        var body = UiKit.PremiumWindow(transform, "BoxingCanvas", new Vector2(1400f, 900f), 55, "icon:boxing",
             out backdrop, out titleText, out subtitleText, Close, out _);
         list = UiKit.Container(body, new Vector2(0f, 255f));
         toastText = UiKit.ToastBar(body, new Vector2(0f, -340f), 760f);

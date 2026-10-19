@@ -35,6 +35,155 @@ public static class UiKit
 
     // Premium window frame: teak header (logo letter, title, subtitle, close X) with a gold
     // underline over a cream rounded body. Returns the body; header texts come back via out.
+    // ── Wood-sign style (like the game art): plank texture, cream text with a brown outline ──
+    public static readonly Color WoodInk = new Color32(0xFF, 0xF3, 0xD6, 0xFF);   // cream lettering
+    public static readonly Color WoodEdge = new Color32(0x3E, 0x20, 0x0C, 0xFF);  // dark outline
+    private static Sprite wood, flower;
+
+    // A wooden plaque: warm planks with grain, a dark rim and a light top edge (9-sliced)
+    public static Sprite WoodSprite => wood != null ? wood : wood = MakeWood();
+
+    private static Sprite MakeWood()
+    {
+        const int w = 160, h = 80, r = 22, rim = 6;
+        var tex = new Texture2D(w, h, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Bilinear };
+        var px = new Color32[w * h];
+        var light = new Color(0.78f, 0.5f, 0.26f);
+        var dark = new Color(0.52f, 0.29f, 0.12f);
+        var edge = (Color)WoodEdge;
+        for (int y = 0; y < h; y++)
+        for (int x = 0; x < w; x++)
+        {
+            float cx = Mathf.Clamp(x + 0.5f, r, w - r), cy = Mathf.Clamp(y + 0.5f, r, h - r);
+            float d = Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), new Vector2(cx, cy)); // distance from the rounded core
+            float alpha = Mathf.Clamp01(r + 0.5f - d);
+            float v = y / (float)(h - 1);
+            // Grain: wavy streaks along the plank
+            float grain = Mathf.Sin(y * 0.55f + Mathf.Sin(x * 0.05f) * 2.2f) * 0.5f + 0.5f;
+            grain = grain * 0.6f + Mathf.PerlinNoise(x * 0.04f, y * 0.35f) * 0.4f;
+            Color c = Color.Lerp(dark, light, 0.35f + v * 0.45f) * (0.85f + grain * 0.22f);
+            if (d > r - rim) c = Color.Lerp(c, edge, Mathf.Clamp01((d - (r - rim)) / 2f));       // dark rim
+            else if (y > h - rim - 4 && d < r - rim) c = Color.Lerp(c, new Color(1f, 0.85f, 0.6f), 0.35f); // top highlight
+            c.a = alpha;
+            px[y * w + x] = c;
+        }
+        tex.SetPixels32(px);
+        tex.Apply();
+        return Sprite.Create(tex, new Rect(0, 0, w, h), new Vector2(0.5f, 0.5f), 100f, 0, SpriteMeshType.FullRect, new Vector4(r + 2, r + 2, r + 2, r + 2));
+    }
+
+    // Little yellow frangipani (ลีลาวดี) used as an ornament on plaques
+    public static Sprite FlowerSprite => flower != null ? flower : flower = MakeFlower();
+
+    private static Sprite MakeFlower()
+    {
+        const int n = 64;
+        var tex = new Texture2D(n, n, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp };
+        var px = new Color32[n * n];
+        for (int y = 0; y < n; y++)
+        for (int x = 0; x < n; x++)
+        {
+            float dx = (x + 0.5f) / n * 2f - 1f, dy = (y + 0.5f) / n * 2f - 1f;
+            float r = Mathf.Sqrt(dx * dx + dy * dy), a = Mathf.Atan2(dy, dx);
+            float petal = 0.55f + 0.4f * Mathf.Abs(Mathf.Cos(a * 2.5f));   // five petals
+            float inside = Mathf.Clamp01((petal - r) * 18f);
+            Color c = Color.Lerp(new Color(1f, 0.72f, 0.15f), new Color(1f, 0.95f, 0.6f), Mathf.Clamp01(r * 1.6f));
+            if (r > petal - 0.08f) c = Color.Lerp(c, new Color(0.6f, 0.35f, 0.05f), 0.6f); // outline
+            c.a = inside;
+            px[y * n + x] = c;
+        }
+        tex.SetPixels32(px);
+        tex.Apply();
+        return Sprite.Create(tex, new Rect(0, 0, n, n), new Vector2(0.5f, 0.5f), 100f);
+    }
+
+    // Cartoon lettering: bold with a thick brown outline
+    public static Text Cartoon(Text t, float outline = 2.5f)
+    {
+        t.font = ThaiFont.Display;     // Mitr: rounded cartoon lettering
+        t.fontStyle = FontStyle.Normal;
+        var o = t.gameObject.AddComponent<Outline>();
+        o.effectColor = WoodEdge;
+        o.effectDistance = new Vector2(outline, -outline);
+        return t;
+    }
+
+    public static RectTransform WoodPlate(Transform parent, Vector2 position, Vector2 size)
+    {
+        var rt = Rect("WoodPlate", parent, Color.white);
+        rt.anchoredPosition = position;
+        rt.sizeDelta = size;
+        var img = rt.GetComponent<Image>();
+        img.sprite = WoodSprite;
+        img.type = Image.Type.Sliced;
+        rt.gameObject.AddComponent<Shadow>().effectDistance = new Vector2(0f, -5f);
+        return rt;
+    }
+
+    // Wooden sign button "✿ ข้อความ ✿" like the labels in the game art
+    public static Button WoodButton(Transform parent, string text, Vector2 position, Vector2 size, UnityAction onClick, int fontSize = 30, bool flowers = true)
+    {
+        var rt = WoodPlate(parent, position, size);
+        var button = rt.gameObject.AddComponent<UnityEngine.UI.Button>();
+        button.onClick.AddListener(onClick);
+        var colors = button.colors;
+        colors.disabledColor = new Color(0.65f, 0.65f, 0.65f, 0.7f);
+        button.colors = colors;
+        rt.gameObject.AddComponent<PressScale>();
+        bool roomy = flowers && size.x >= 220f;
+        float pad = roomy ? size.y * 0.9f : 12f;
+        Cartoon(Label(rt, fontSize, text, Vector2.zero, new Vector2(size.x - pad * 2f, size.y - 8f), WoodInk));
+        if (roomy)
+            foreach (float side in new[] { -1f, 1f })
+            {
+                var f = Rect("Flower", rt, Color.white);
+                f.GetComponent<Image>().sprite = FlowerSprite;
+                f.GetComponent<Image>().raycastTarget = false;
+                f.sizeDelta = Vector2.one * size.y * 0.5f;
+                f.anchoredPosition = new Vector2(side * (size.x * 0.5f - size.y * 0.45f), 0f);
+            }
+        return button;
+    }
+
+    // ── Artwork (Resources/Branding) ───────────────────────────────────────────
+    private static readonly System.Collections.Generic.Dictionary<string, Sprite> sprites = new System.Collections.Generic.Dictionary<string, Sprite>();
+
+    // A picture from Resources/Branding (e.g. "Icons/temple", "Logo"); null if it isn't there
+    public static Sprite Art(string path)
+    {
+        if (sprites.TryGetValue(path, out var s) && s != null) return s;
+        var tex = Resources.Load<Texture2D>("Branding/" + path);
+        if (tex == null) return null;
+        s = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
+        sprites[path] = s;
+        return s;
+    }
+
+    // A place icon (Resources/Branding/Icons/<name>) clipped to a rounded tile
+    public static RectTransform IconTile(Transform parent, string name, Vector2 position, Vector2 size)
+    {
+        var tile = Panel("IconTile", parent, Color.white, position, size);
+        tile.gameObject.AddComponent<Mask>().showMaskGraphic = false;
+        var img = Rect("Icon", tile, Color.white);
+        img.anchorMin = Vector2.zero;
+        img.anchorMax = Vector2.one;
+        img.offsetMin = new Vector2(-size.x * 0.04f, -size.y * 0.04f); // trim the artwork's own rounded edge
+        img.offsetMax = new Vector2(size.x * 0.04f, size.y * 0.04f);
+        var image = img.GetComponent<Image>();
+        image.sprite = Art("Icons/" + name);
+        image.raycastTarget = false;
+        return tile;
+    }
+
+    // Window badge: "icon:temple" shows a place icon, anything else a letter
+    public static void Badge(RectTransform badge, string logo)
+    {
+        if (logo != null && logo.StartsWith("icon:") && Art("Icons/" + logo.Substring(5)) != null)
+            IconTile(badge, logo.Substring(5), Vector2.zero, badge.sizeDelta - new Vector2(6f, 6f));
+        else
+            Label(badge, 40, logo, Vector2.zero, badge.sizeDelta - new Vector2(6f, 6f), GoldInk).fontStyle = FontStyle.Bold;
+    }
+
     public static RectTransform PremiumWindow(Transform owner, string name, Vector2 size, int sortingOrder,
         string logo, out GameObject backdrop, out Text title, out Text subtitle, UnityAction onClose, out RectTransform header)
     {
@@ -45,17 +194,18 @@ public static class UiKit
         cardImage.color = TeakDark;
 
         float top = size.y * 0.5f;
-        header = Panel("Header", card, Teak, new Vector2(0f, top - 58f), new Vector2(size.x, 116f));
+        header = Panel("Header", card, Color.white, new Vector2(0f, top - 58f), new Vector2(size.x, 116f));
+        header.GetComponent<Image>().sprite = WoodSprite; // wooden sign header
         var line = Rect("GoldLine", card, Gold);
         line.anchoredPosition = new Vector2(0f, top - 117f);
         line.sizeDelta = new Vector2(size.x, 4f);
 
         float left = -size.x * 0.5f;
         var badge = Panel("Logo", header, Gold, new Vector2(left + 70f, 0f), new Vector2(76f, 76f));
-        Label(badge, 40, logo, Vector2.zero, new Vector2(70f, 70f), GoldInk).fontStyle = FontStyle.Bold;
-        title = Label(header, 40, "", new Vector2(left + 360f, 14f), new Vector2(520f, 54f), HeaderText, TextAnchor.MiddleLeft);
-        title.fontStyle = FontStyle.Bold;
-        subtitle = Label(header, 24, "", new Vector2(left + 360f, -26f), new Vector2(520f, 34f), HeaderSub, TextAnchor.MiddleLeft);
+        Badge(badge, logo);
+        title = Cartoon(Label(header, 40, "", new Vector2(left + 360f, 14f), new Vector2(520f, 54f), WoodInk, TextAnchor.MiddleLeft), 3f);
+        subtitle = Label(header, 24, "", new Vector2(left + 360f, -26f), new Vector2(520f, 34f), new Color32(0xFF, 0xE2, 0xA8, 0xFF), TextAnchor.MiddleLeft);
+        subtitle.gameObject.AddComponent<Outline>().effectColor = WoodEdge;
         if (onClose != null)
             RoundButton(header, "X", new Vector2(-left - 60f, 0f), new Vector2(70f, 70f), new Color32(0x5A, 0x3A, 0x26, 0xFF), HeaderText, onClose, 32, circle: true);
 
@@ -240,7 +390,7 @@ public static class UiKit
         button.colors = colors;
         rt.gameObject.AddComponent<PressScale>();
         var label = Label(rt, fontSize, text, Vector2.zero, size - new Vector2(12f, 6f), textColor);
-        label.fontStyle = FontStyle.Bold;
+        label.font = ThaiFont.Display; // rounded Mitr on every button
         return button;
     }
 

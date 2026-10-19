@@ -137,8 +137,8 @@ public static class TambonBuilder
         CityCivic.Build(root);
 
         // Fairground for the big festivals (งานใหญ่: งานประจำปีวัด สงกรานต์ ออกพรรษา กฐิน ลอยกระทง)
-        FestivalGrounds.Build(root, new Vector3(32f, 0f, -30f), 180f, big: true);
-        PrimitiveKit.Box("FairPath", root, new Vector3(32f, 0.01f, -13.5f), new Vector3(4f, 0.012f, 7f),
+        FestivalGrounds.Build(root, new Vector3(-34.5f, 0f, -30f), 180f, big: true); // beside the town temple
+        PrimitiveKit.Box("FairPath", root, new Vector3(-34.5f, 0.01f, -13.5f), new Vector3(4f, 0.012f, 7f),
             PrimitiveKit.Mat("Pavement", new Color(0.72f, 0.7f, 0.66f)), collider: false);
 
         // Power line on the south side of the main road (the shop awnings fill the north side),

@@ -13,6 +13,20 @@ public static class ThaiFont
 
     private static Font font;
     private static Font legacy;
+    private static Font display;
+
+    // Rounded, friendly display font (Mitr SemiBold, SIL OFL) for signs, buttons, titles and
+    // floating text — the cartoon look of the game art. Body text stays in Sarabun.
+    public static Font Display
+    {
+        get
+        {
+            if (display != null) return display;
+            display = Resources.Load<Font>("Fonts/Mitr-SemiBold");
+            if (display == null) display = Font;
+            return display;
+        }
+    }
 
     public static Font Font
     {
@@ -44,13 +58,14 @@ public static class ThaiFont
         {
             thai.RequestCharactersInTexture(ThaiChars, size, FontStyle.Normal);
             thai.RequestCharactersInTexture(ThaiChars, size, FontStyle.Bold);
+            Display.RequestCharactersInTexture(ThaiChars, size, FontStyle.Normal);
         }
 
         // When the atlas is rebuilt (new sizes/glyphs), UI Text redraws itself but TextMesh doesn't:
         // nudge every TextMesh so no letters go missing.
         Font.textureRebuilt += rebuilt =>
         {
-            if (rebuilt != font) return;
+            if (rebuilt != font && rebuilt != display) return;
             foreach (var mesh in Object.FindObjectsByType<TextMesh>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             {
                 string text = mesh.text;
@@ -74,10 +89,12 @@ public static class ThaiFont
             Apply(mesh);
     }
 
+    // 3D text (signs, names over heads, floating numbers) uses the display font
     public static void Apply(TextMesh mesh)
     {
-        mesh.font = Font;
+        mesh.font = Display;
+        mesh.fontStyle = FontStyle.Normal; // Mitr SemiBold is already heavy
         var renderer = mesh.GetComponent<MeshRenderer>();
-        if (renderer != null) renderer.sharedMaterial = Font.material;
+        if (renderer != null) renderer.sharedMaterial = Display.material;
     }
 }

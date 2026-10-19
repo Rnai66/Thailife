@@ -29,7 +29,7 @@ public class ContextButton : MonoBehaviour
         instance.status.text = message ?? "";
         instance.status.transform.parent.gameObject.SetActive(!string.IsNullOrEmpty(message));
         instance.button.interactable = enabled;
-        instance.buttonImage.color = highlight ? new Color(1f, 0.55f, 0.2f, 0.95f) : new Color(0.25f, 0.65f, 0.35f, 0.9f);
+        instance.buttonImage.color = highlight ? new Color(1f, 0.78f, 0.45f) : Color.white; // wooden sign, golden when urgent
         instance.root.SetActive(true);
     }
 
@@ -86,9 +86,14 @@ public class ContextButton : MonoBehaviour
         rt.anchoredPosition = new Vector2(-300f, 600f);
         rt.sizeDelta = new Vector2(300f, 160f);
         buttonImage = buttonGo.GetComponent<Image>();
+        buttonImage.sprite = UiKit.WoodSprite;
+        buttonImage.type = Image.Type.Sliced;
+        buttonGo.AddComponent<Shadow>().effectDistance = new Vector2(0f, -6f);
+        buttonGo.AddComponent<PressScale>();
         button = buttonGo.GetComponent<Button>();
         button.onClick.AddListener(() => onPress?.Invoke());
-        buttonLabel = MakeText(rt, font, 40, new Vector2(280f, 150f));
+        buttonLabel = UiKit.Cartoon(MakeText(rt, font, 40, new Vector2(270f, 140f)), 3f);
+        buttonLabel.color = UiKit.WoodInk;
 
         var statusBg = new GameObject("Status", typeof(RectTransform), typeof(Image));
         var srt = (RectTransform)statusBg.transform;
@@ -97,9 +102,12 @@ public class ContextButton : MonoBehaviour
         srt.anchoredPosition = new Vector2(0f, -170f);
         srt.sizeDelta = new Vector2(1000f, 76f);
         var bg = statusBg.GetComponent<Image>();
-        bg.color = new Color(0f, 0f, 0f, 0.5f);
+        bg.sprite = UiKit.WoodSprite;
+        bg.type = Image.Type.Sliced;
+        bg.color = new Color(1f, 1f, 1f, 0.95f);
         bg.raycastTarget = false;
-        status = MakeText(srt, font, 34, new Vector2(980f, 76f));
+        status = UiKit.Cartoon(MakeText(srt, font, 32, new Vector2(960f, 70f)), 2f);
+        status.color = UiKit.WoodInk;
 
         root.SetActive(false);
     }

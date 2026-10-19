@@ -67,6 +67,9 @@ public static class IOSBuild
     private static void Configure()
     {
         PlayerSettings.productName = "Thai Life";
+        // App icon from the game artwork (Resources/Branding/AppIcon.png, 1024x1024)
+        var appIcon = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Resources/Branding/AppIcon.png");
+        if (appIcon != null) PlayerSettings.SetIcons(NamedBuildTarget.Unknown, new[] { appIcon }, IconKind.Any);
         PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.iOS, BundleId);
         PlayerSettings.iOS.appleDeveloperTeamID = TeamId;
         PlayerSettings.iOS.appleEnableAutomaticSigning = true;

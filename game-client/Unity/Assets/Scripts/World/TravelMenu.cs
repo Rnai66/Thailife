@@ -28,14 +28,14 @@ public class TravelMenu : MonoBehaviour
         if (FindAnyObjectByType<EventSystem>() == null)
             Debug.LogWarning("[Travel] No EventSystem in the scene — run Thai Life > Repair Scene.");
 
-        var body = UiKit.PremiumWindow(transform, "TravelCanvas", new Vector2(1500f, 760f), 50, "รถ",
+        var body = UiKit.PremiumWindow(transform, "TravelCanvas", new Vector2(1500f, 880f), 50, "icon:travel",
             out backdrop, out var title, out var subtitle, Hide, out _);
         title.text = "ป้ายรถสองแถว";
         subtitle.text = "เลือกจุดหมายปลายทาง";
 
         // Route line behind the cards
         var route = UiKit.Rect("Route", body, UiKit.Gold);
-        route.anchoredPosition = new Vector2(0f, 150f);
+        route.anchoredPosition = new Vector2(0f, 230f);
         route.sizeDelta = new Vector2(940f, 6f);
 
         var current = Locations.Current;
@@ -53,14 +53,18 @@ public class TravelMenu : MonoBehaviour
         // Stop marker on the route
         var dot = UiKit.Rect("Stop", body, here ? UiKit.PayGreen : UiKit.Gold);
         dot.GetComponent<Image>().sprite = UiKit.CircleSprite;
-        dot.anchoredPosition = new Vector2(x, 150f);
+        dot.anchoredPosition = new Vector2(x, 230f);
         dot.sizeDelta = new Vector2(44f, 44f);
 
         var card = UiKit.Panel("Destination", body, here ? (Color)new Color32(0xF3, 0xFA, 0xEC, 0xFF) : Color.white,
-            new Vector2(x, -60f), new Vector2(440f, 340f), shadow: true);
+            new Vector2(x, -40f), new Vector2(440f, 470f), shadow: true);
         card.gameObject.AddComponent<Outline>().effectColor = here ? UiKit.PayGreen : UiKit.CardBorder;
 
-        UiKit.PillLabel(card, Locations.LevelNameTh(location.Level), new Vector2(0f, 125f), new Vector2(160f, 44f),
+        // Place picture (บ้าน / อบต. / เมือง)
+        string icon = location.Level == LocationLevel.Village ? "home" : location.Level == LocationLevel.Subdistrict ? "sao" : "city";
+        UiKit.IconTile(card, icon, new Vector2(0f, 82f), new Vector2(180f, 180f));
+
+        UiKit.PillLabel(card, Locations.LevelNameTh(location.Level), new Vector2(0f, 205f), new Vector2(160f, 40f),
             here ? UiKit.OkTint : UiKit.Pill, here ? UiKit.OkGreen : UiKit.Price, 26);
 
         // "ตำบล · อบต. รพ.สต. …" → name on top, places underneath
@@ -71,18 +75,18 @@ public class TravelMenu : MonoBehaviour
             places = name.Substring(dotIndex + 1).Trim();
             name = name.Substring(0, dotIndex).Trim();
         }
-        UiKit.Label(card, 36, name, new Vector2(0f, 60f), new Vector2(400f, 54f), UiKit.Ink).fontStyle = FontStyle.Bold;
-        UiKit.Label(card, 24, places, new Vector2(0f, -10f), new Vector2(390f, 80f), UiKit.Muted);
+        UiKit.Label(card, 36, name, new Vector2(0f, -32f), new Vector2(400f, 50f), UiKit.Ink).fontStyle = FontStyle.Bold;
+        UiKit.Label(card, 22, places, new Vector2(0f, -88f), new Vector2(390f, 60f), UiKit.Muted);
 
         if (here)
         {
-            UiKit.RoundButton(card, "อยู่ที่นี่", new Vector2(0f, -115f), new Vector2(360f, 76f), UiKit.OkTint, UiKit.OkGreen, () => { }, 30)
+            UiKit.RoundButton(card, "อยู่ที่นี่", new Vector2(0f, -175f), new Vector2(360f, 76f), UiKit.OkTint, UiKit.OkGreen, () => { }, 30)
                 .interactable = false;
         }
         else
         {
             var target = location;
-            var go = UiKit.RoundButton(card, location.Available ? "ไปที่นี่" : "เร็วๆ นี้", new Vector2(0f, -115f), new Vector2(360f, 76f),
+            var go = UiKit.RoundButton(card, location.Available ? "ไปที่นี่" : "เร็วๆ นี้", new Vector2(0f, -175f), new Vector2(360f, 76f),
                 UiKit.Gold, UiKit.GoldInk, () => Locations.TravelTo(target), 32);
             go.interactable = location.Available;
         }

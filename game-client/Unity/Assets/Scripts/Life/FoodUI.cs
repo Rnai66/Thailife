@@ -29,7 +29,7 @@ public class FoodUI : MonoBehaviour
 
     private void Awake()
     {
-        var body = UiKit.PremiumWindow(transform, "FoodCanvas", new Vector2(1300f, 860f), 55, "ก",
+        var body = UiKit.PremiumWindow(transform, "FoodCanvas", new Vector2(1300f, 860f), 55, "icon:food",
             out backdrop, out titleText, out subtitleText, Close, out _);
         titleText.text = "กระเป๋าอาหาร";
         subtitleText.text = "กินแล้วพลังงานเพิ่ม · ซื้อเพิ่มได้ที่ร้านค้าชุมชนและร้านอาหารในเมือง";

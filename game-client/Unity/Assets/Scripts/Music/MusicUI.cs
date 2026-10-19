@@ -57,7 +57,7 @@ public class MusicUI : MonoBehaviour
 
     private void Awake()
     {
-        card = UiKit.PremiumWindow(transform, "MusicCanvas", new Vector2(1500f, 1000f), 55, "ด",
+        card = UiKit.PremiumWindow(transform, "MusicCanvas", new Vector2(1500f, 1000f), 55, "icon:fair",
             out backdrop, out titleText, out subtitleText, Hide, out _);
         titleText.text = "เวทีดนตรี";
         songText = subtitleText;

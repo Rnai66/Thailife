@@ -39,7 +39,7 @@ public class ContestUI : MonoBehaviour
 
     private void Awake()
     {
-        var body = UiKit.PremiumWindow(transform, "ContestCanvas", new Vector2(1500f, 900f), 50, "ป",
+        var body = UiKit.PremiumWindow(transform, "ContestCanvas", new Vector2(1500f, 900f), 50, "icon:fair",
             out backdrop, out titleText, out subtitleText, Hide, out _);
         titleText.text = "ประกวดไก่สวย";
         subtitleText.text = "งานวัดตามประเพณี · สงกรานต์ ออกพรรษา กฐิน ลอยกระทง ฯลฯ";

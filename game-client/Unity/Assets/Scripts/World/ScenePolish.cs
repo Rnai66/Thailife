@@ -9,7 +9,7 @@ using UnityEngine.SceneManagement;
 // at night together with DayNightCycle.
 public class ScenePolish : MonoBehaviour
 {
-    private static readonly Color DayFog = new Color(0.74f, 0.83f, 0.9f);
+    private static readonly Color DayFog = new Color(0.7f, 0.84f, 0.97f);
     private static readonly Color NightFog = new Color(0.08f, 0.1f, 0.17f);
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -46,14 +46,25 @@ public class ScenePolish : MonoBehaviour
         bloom.threshold.Override(0.9f);
         bloom.scatter.Override(0.75f);
         var color = profile.Add<ColorAdjustments>(true);
-        color.postExposure.Override(0.3f);   // ACES darkens; bring the midtones back up
-        color.contrast.Override(12f);
-        color.saturation.Override(15f);
+        color.postExposure.Override(0.45f);  // bright, sunny, storybook look like the game art
+        color.contrast.Override(14f);
+        color.saturation.Override(30f);
         profile.Add<WhiteBalance>(true).temperature.Override(6f); // a touch of warm tropical light
         var vignette = profile.Add<Vignette>(true);
         vignette.intensity.Override(0.18f);
         vignette.smoothness.Override(0.5f);
         volume.sharedProfile = profile;
+
+        // Vivid blue sky (procedural skybox), on our own copy so the asset isn't changed
+        if (RenderSettings.skybox != null && RenderSettings.skybox.HasProperty("_SkyTint"))
+        {
+            var sky = new Material(RenderSettings.skybox);
+            sky.SetColor("_SkyTint", new Color(0.35f, 0.6f, 1f));
+            if (sky.HasProperty("_AtmosphereThickness")) sky.SetFloat("_AtmosphereThickness", 0.75f);
+            if (sky.HasProperty("_Exposure")) sky.SetFloat("_Exposure", 1.35f);
+            if (sky.HasProperty("_GroundColor")) sky.SetColor("_GroundColor", new Color(0.55f, 0.65f, 0.45f));
+            RenderSettings.skybox = sky;
+        }
 
         RenderSettings.fog = true;
         RenderSettings.fogMode = FogMode.Linear;

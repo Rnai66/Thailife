@@ -94,7 +94,7 @@ public class DecorateUI : MonoBehaviour
         toastText = UiKit.ToastBar(canvasGo.transform, new Vector2(0f, -240f), 700f);
 
         // "เพิ่มของ" list
-        var body = UiKit.PremiumWindow(transform, "FurnitureList", new Vector2(1300f, 860f), 56, "บ",
+        var body = UiKit.PremiumWindow(transform, "FurnitureList", new Vector2(1300f, 860f), 56, "icon:home",
             out listBackdrop, out var title, out var subtitle, () => listBackdrop.SetActive(false), out _);
         title.text = "ของในบ้าน";
         subtitle.text = "เลือกของที่จะวาง · ซื้อเพิ่มที่ร้านค้าชุมชน แท็บแต่งบ้าน";

@@ -89,8 +89,7 @@ public class HealthHud : MonoBehaviour
         {
             bool reward = q.HasReward;
             questLabel.text = reward ? "ภารกิจ: กดรับรางวัล!" : $"ภารกิจวันนี้ {q.DoneCount}/{q.Current.quests?.Length ?? 0}";
-            questImage.color = reward ? UiKit.Gold : UiKit.Teak;
-            questLabel.color = reward ? UiKit.GoldInk : UiKit.GoldText;
+            questImage.color = reward ? new Color(1f, 0.85f, 0.45f) : Color.white; // golden glow on the wood when a reward waits
         }
         else questLabel.text = "ภารกิจวันนี้";
 
@@ -151,6 +150,7 @@ public class HealthHud : MonoBehaviour
 
         // Bar background, inset from the top-left corner (clear of the notch in landscape)
         var background = CreateRect("HealthBar", canvasGo.transform, new Color(0f, 0f, 0f, 0.5f));
+        Frame(background);
         background.anchorMin = background.anchorMax = new Vector2(0f, 1f);
         background.pivot = new Vector2(0f, 1f);
         background.anchoredPosition = new Vector2(120f, -50f);
@@ -170,6 +170,7 @@ public class HealthHud : MonoBehaviour
 
         // Career: XP bar + level/rank text under the health bar
         var xpBackground = CreateRect("XpBar", canvasGo.transform, new Color(0f, 0f, 0f, 0.5f));
+        Frame(xpBackground);
         xpBackground.anchorMin = xpBackground.anchorMax = new Vector2(0f, 1f);
         xpBackground.pivot = new Vector2(0f, 1f);
         xpBackground.anchoredPosition = new Vector2(120f, -100f);
@@ -195,7 +196,7 @@ public class HealthHud : MonoBehaviour
         fishRect.pivot = new Vector2(0f, 1f);
         fishRect.anchoredPosition = new Vector2(120f, -162f);
         fishRect.sizeDelta = new Vector2(900f, 40f);
-        fishLabel.gameObject.AddComponent<Shadow>();
+        UiKit.Cartoon(fishLabel, 2f);
 
         moneyLabel = CreateText("Money", canvasGo.transform, font, 34, TextAnchor.MiddleRight);
         var moneyRect = moneyLabel.rectTransform;
@@ -204,7 +205,7 @@ public class HealthHud : MonoBehaviour
         moneyRect.anchoredPosition = new Vector2(-120f, -50f);
         moneyRect.sizeDelta = new Vector2(500f, 50f);
         moneyLabel.color = new Color(1f, 0.85f, 0.2f);
-        moneyLabel.gameObject.AddComponent<Shadow>();
+        UiKit.Cartoon(moneyLabel, 3f);
 
         // Game clock and energy bar under the money (top-right)
         clockLabel = CreateText("Clock", canvasGo.transform, font, 30, TextAnchor.MiddleRight);
@@ -213,9 +214,10 @@ public class HealthHud : MonoBehaviour
         clockRect.pivot = new Vector2(1f, 1f);
         clockRect.anchoredPosition = new Vector2(-120f, -100f);
         clockRect.sizeDelta = new Vector2(600f, 44f);
-        clockLabel.gameObject.AddComponent<Shadow>();
+        UiKit.Cartoon(clockLabel, 2.5f);
 
         var energyBg = CreateRect("EnergyBar", canvasGo.transform, new Color(0f, 0f, 0f, 0.5f));
+        Frame(energyBg);
         energyBg.anchorMin = energyBg.anchorMax = new Vector2(1f, 1f);
         energyBg.pivot = new Vector2(1f, 1f);
         energyBg.anchoredPosition = new Vector2(-120f, -150f);
@@ -232,24 +234,23 @@ public class HealthHud : MonoBehaviour
         energyLabel.color = new Color(0.15f, 0.1f, 0.05f);
 
         // Character name above the health bar; tap to rename
-        var nameButton = UiKit.Button(canvasGo.transform, "", Vector2.zero, new Vector2(520f, 40f), new Color(0f, 0f, 0f, 0.35f), () => NameUI.Show(firstTime: false), 26);
+        var nameButton = UiKit.WoodButton(canvasGo.transform, "", Vector2.zero, new Vector2(520f, 46f), () => NameUI.Show(firstTime: false), 24, flowers: false);
         var nameRect = (RectTransform)nameButton.transform;
         nameRect.anchorMin = nameRect.anchorMax = new Vector2(0f, 1f);
         nameRect.pivot = new Vector2(0f, 1f);
         nameRect.anchoredPosition = new Vector2(120f, -6f);
         nameLabel = nameButton.GetComponentInChildren<Text>();
-        nameLabel.color = Color.white;
         nameLabel.alignment = TextAnchor.MiddleLeft;
 
         // "กิน" opens the food bag (left of the energy bar)
-        var eat = UiKit.Button(canvasGo.transform, "กิน", Vector2.zero, new Vector2(110f, 48f), new Color(1f, 0.8f, 0.3f), FoodUI.Toggle, 28);
+        var eat = UiKit.WoodButton(canvasGo.transform, "กิน", Vector2.zero, new Vector2(120f, 54f), FoodUI.Toggle, 28);
         var eatRect = (RectTransform)eat.transform;
         eatRect.anchorMin = eatRect.anchorMax = new Vector2(1f, 1f);
         eatRect.pivot = new Vector2(1f, 1f);
         eatRect.anchoredPosition = new Vector2(-535f, -143f);
 
         // "ภารกิจ" opens the daily quests (under the energy bar)
-        var quests = UiKit.RoundButton(canvasGo.transform, "ภารกิจวันนี้", Vector2.zero, new Vector2(400f, 52f), UiKit.Teak, UiKit.GoldText, QuestUI.Toggle, 26);
+        var quests = UiKit.WoodButton(canvasGo.transform, "ภารกิจวันนี้", Vector2.zero, new Vector2(420f, 60f), QuestUI.Toggle, 26);
         var questRect = (RectTransform)quests.transform;
         questRect.anchorMin = questRect.anchorMax = new Vector2(1f, 1f);
         questRect.pivot = new Vector2(1f, 1f);
@@ -258,11 +259,11 @@ public class HealthHud : MonoBehaviour
         questLabel = quests.GetComponentInChildren<Text>();
 
         // "ทักทาย": ไหว้, โบกมือ and preset phrases
-        var greet = UiKit.RoundButton(canvasGo.transform, "ทักทาย", Vector2.zero, new Vector2(400f, 52f), UiKit.Teak, UiKit.GoldText, EmoteUI.Toggle, 26);
+        var greet = UiKit.WoodButton(canvasGo.transform, "ทักทาย", Vector2.zero, new Vector2(420f, 60f), EmoteUI.Toggle, 26);
         var greetRect = (RectTransform)greet.transform;
         greetRect.anchorMin = greetRect.anchorMax = new Vector2(1f, 1f);
         greetRect.pivot = new Vector2(1f, 1f);
-        greetRect.anchoredPosition = new Vector2(-120f, -256f);
+        greetRect.anchoredPosition = new Vector2(-120f, -266f);
 
         var ko = CreateText("KO", canvasGo.transform, font, 160, TextAnchor.MiddleCenter);
         ko.text = "KO!";
@@ -271,6 +272,18 @@ public class HealthHud : MonoBehaviour
         ko.rectTransform.sizeDelta = new Vector2(800f, 240f);
         koBanner = ko.gameObject;
         koBanner.SetActive(false);
+    }
+
+    // Bars sit in a rounded dark-wood track with a gold edge (game-art style)
+    private static void Frame(RectTransform bar)
+    {
+        var img = bar.GetComponent<Image>();
+        img.sprite = UiKit.RoundedSprite;
+        img.type = Image.Type.Sliced;
+        img.color = new Color(0.24f, 0.13f, 0.06f, 0.9f);
+        var o = bar.gameObject.AddComponent<Outline>();
+        o.effectColor = UiKit.Gold;
+        o.effectDistance = new Vector2(2f, -2f);
     }
 
     private static RectTransform CreateRect(string name, Transform parent, Color color)

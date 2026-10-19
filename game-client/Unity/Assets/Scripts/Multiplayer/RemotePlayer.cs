@@ -124,7 +124,7 @@ public class RemotePlayer : MonoBehaviour, IHittable
         label.transform.localPosition = new Vector3(0f, 1.4f, 0f);
 
         var text = label.AddComponent<TextMesh>();
-        var font = ThaiFont.Font;
+        var font = ThaiFont.Display; // rounded cartoon lettering (Mitr)
         text.font = font;
         label.GetComponent<MeshRenderer>().sharedMaterial = font.material;
         text.text = username;

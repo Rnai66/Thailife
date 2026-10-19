@@ -15,14 +15,14 @@ public class FloatingText : MonoBehaviour
         var go = new GameObject("FloatingText");
         go.transform.position = position;
 
-        var font = ThaiFont.Font;
+        var font = ThaiFont.Display; // rounded cartoon lettering (Mitr)
         var mesh = go.AddComponent<TextMesh>();
         mesh.font = font;
         go.GetComponent<MeshRenderer>().sharedMaterial = font.material;
         mesh.text = message;
         mesh.characterSize = 0.1f;
         mesh.fontSize = 56;
-        mesh.fontStyle = FontStyle.Bold;
+        mesh.fontStyle = FontStyle.Normal;
         mesh.anchor = TextAnchor.MiddleCenter;
         mesh.color = color;
 

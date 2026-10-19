@@ -31,7 +31,7 @@ public class KokaiUI : MonoBehaviour
 
     private void Awake()
     {
-        var body = UiKit.PremiumWindow(transform, "KokaiCanvas", new Vector2(1400f, 860f), 58, "ก",
+        var body = UiKit.PremiumWindow(transform, "KokaiCanvas", new Vector2(1400f, 860f), 58, "icon:fair",
             out backdrop, out titleText, out subtitleText, Close, out _);
         titleText.text = "มหาลัย ก.ไก่";
         subtitleText.text = "อักษรบนกระดาษครบ 4 ตัวเร็ว ได้รางวัลใหญ่";

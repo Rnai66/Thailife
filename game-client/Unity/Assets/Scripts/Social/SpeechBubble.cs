@@ -33,13 +33,13 @@ public class SpeechBubble : MonoBehaviour
         var go = new GameObject(name);
         go.transform.SetParent(transform, false);
         go.transform.localPosition = offset;
-        var font = ThaiFont.Font;
+        var font = ThaiFont.Display; // rounded cartoon lettering (Mitr)
         var mesh = go.AddComponent<TextMesh>();
         mesh.font = font;
         go.GetComponent<MeshRenderer>().sharedMaterial = font.material;
         mesh.characterSize = 0.09f;
         mesh.fontSize = 56;
-        mesh.fontStyle = FontStyle.Bold;
+        mesh.fontStyle = FontStyle.Normal;
         mesh.anchor = TextAnchor.LowerCenter;
         mesh.alignment = TextAlignment.Center;
         mesh.color = color;

@@ -40,6 +40,7 @@ public class ShopUI : MonoBehaviour
     private static ShopUI instance;
 
     private string shopId = "community";
+    private RectTransform shopBadge;
     private string tab;
     private GameObject backdrop;
     private Text titleText, subtitleText, balanceText, toastText;
@@ -243,6 +244,11 @@ public class ShopUI : MonoBehaviour
         subtitleText.text = market != null ? $"{(market.open ? "เปิดอยู่" : "ปิดอยู่")} · เปิด {market.hours} น."
             : shopId == "community" ? "หมู่บ้าน" : "ตัวเมือง";
         balanceText.text = snapshot != null ? $"{snapshot.baht:N0} บาท" : "ออฟไลน์";
+
+        // Header icon for this shop
+        UiKit.Clear(shopBadge);
+        UiKit.Badge(shopBadge, shopId == "community" ? "icon:shop" : shopId == "flea" ? "icon:fair"
+            : shopId == "camp" ? "icon:boxing" : shopId == "music" ? "ด" : "icon:food");
 
         RenderTabs(categories);
         UiKit.Clear(grid);
@@ -455,8 +461,7 @@ public class ShopUI : MonoBehaviour
         underline.anchoredPosition = new Vector2(0f, 353f);
         underline.sizeDelta = new Vector2(1640f, 4f);
 
-        var logo = UiKit.Panel("Logo", header, Gold, new Vector2(-750f, 0f), new Vector2(76f, 76f));
-        UiKit.Label(logo, 40, "ร", Vector2.zero, new Vector2(70f, 70f), new Color32(0x41, 0x24, 0x02, 0xFF)).fontStyle = FontStyle.Bold;
+        shopBadge = UiKit.Panel("Logo", header, Gold, new Vector2(-750f, 0f), new Vector2(76f, 76f));
         titleText = UiKit.Label(header, 40, "", new Vector2(-470f, 14f), new Vector2(460f, 54f), new Color32(0xFA, 0xEE, 0xDA, 0xFF), TextAnchor.MiddleLeft);
         titleText.fontStyle = FontStyle.Bold;
         subtitleText = UiKit.Label(header, 24, "", new Vector2(-470f, -26f), new Vector2(460f, 34f), new Color32(0xC9, 0xA9, 0x7A, 0xFF), TextAnchor.MiddleLeft);
