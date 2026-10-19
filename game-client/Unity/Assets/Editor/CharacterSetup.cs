@@ -5,9 +5,10 @@ using UnityEditor.Animations;
 using UnityEngine;
 
 // Thai Life > Setup Character: turns the Mixamo files in Assets/Characters into the animated
-// character the game loads (Resources/Characters/ThaiCharacter.prefab + .controller).
-// Expected files (names only need to contain the word): Character (with skin), Idle, Walk, Run,
-// Punch, Kick, Jump, Block. Animations downloaded "Without Skin", walk/run with "In Place".
+// characters the game loads (Resources/Characters/Skin_N.prefab + ThaiCharacter.controller).
+// Expected files (names only need to contain the word): Character, Character2, ... (with skin,
+// one per look), Idle, Walk, Run, Punch, Kick, Jump, Block; optional Wai/Pray/Bow and Wave.
+// Animations downloaded "Without Skin", walk/run with "In Place".
 public static class CharacterSetup
 {
     private const string SourceFolder = "Assets/Characters";
@@ -16,6 +17,13 @@ public static class CharacterSetup
 
     private static readonly string[] Clips = { "idle", "walk", "run", "punch", "kick", "jump", "block" };
     private static readonly string[] Looping = { "idle", "walk", "run", "block" };
+
+    // Optional greeting clips (ทักทาย): file name containing any of the words
+    private static readonly (string trigger, string[] words)[] Optional =
+    {
+        ("Wai", new[] { "wai", "pray", "bow" }),
+        ("Wave", new[] { "wav" }),
+    };
 
     [MenuItem("Thai Life/Setup Character (Mixamo)")]
     public static void Setup()
@@ -34,31 +42,130 @@ public static class CharacterSetup
         }
 
         var files = Directory.GetFiles(SourceFolder, "*.fbx", SearchOption.AllDirectories).Select(p => p.Replace('\\', '/')).ToArray();
-        string Find(string word) => files.FirstOrDefault(f => Path.GetFileNameWithoutExtension(f).ToLowerInvariant().Contains(word));
+        string NameOf(string f) => Path.GetFileNameWithoutExtension(f).ToLowerInvariant();
+        string Find(string word) => files.FirstOrDefault(f => NameOf(f).Contains(word));
+        string FindAny(string[] words) => words.Select(Find).FirstOrDefault(f => f != null);
+        bool IsClip(string f) => Clips.Concat(Optional.SelectMany(o => o.words)).Any(w => NameOf(f).Contains(w));
 
-        string characterPath = Find("character") ?? files.FirstOrDefault(f => !Clips.Any(c => Path.GetFileNameWithoutExtension(f).ToLowerInvariant().Contains(c)));
+        // Looks (หน้าตา): Character.fbx, Character2.fbx, Character3.fbx ... in number order
+        var characters = files.Where(f => NameOf(f).Contains("character")).OrderBy(TrailingNumber).ThenBy(f => f).ToList();
+        if (characters.Count == 0) characters = files.Where(f => !IsClip(f)).Take(1).ToList();
+
         var missing = Clips.Where(c => Find(c) == null).ToList();
-        if (characterPath == null) missing.Insert(0, "character");
+        if (characters.Count == 0) missing.Insert(0, "character");
         if (missing.Count > 0)
         {
             EditorUtility.DisplayDialog("Setup Character", "ยังขาดไฟล์: " + string.Join(", ", missing) + "\nใน Assets/Characters", "ตกลง");
             return;
         }
+        // A "character" downloaded Without Skin is only a skeleton: invisible in the game
+        var skinless = characters.Where(c => AssetDatabase.LoadAssetAtPath<GameObject>(c)?.GetComponentInChildren<SkinnedMeshRenderer>() == null).ToList();
+        if (skinless.Count > 0)
+        {
+            characters = characters.Except(skinless).ToList();
+            EditorUtility.DisplayDialog("Setup Character", "ไฟล์นี้ไม่มีตัวละคร (โหลดแบบ Without Skin) จึงข้ามไป:\n"
+                + string.Join("\n", skinless.Select(Path.GetFileName))
+                + "\n\nโหลดใหม่จากแท็บ Characters โดยตั้ง Skin = With Skin", "ตกลง");
+            if (characters.Count == 0) return;
+        }
+        var optional = Optional.Select(o => (o.trigger, path: FindAny(o.words))).Where(o => o.path != null).ToList();
 
         // 1) Humanoid rig for everything; loop the looping clips
-        ImportHumanoid(characterPath, false, true);
+        foreach (var c in characters)
+        {
+            ImportHumanoid(c, false, true);
+            ExtractTextures(c);
+        }
         foreach (var c in Clips) ImportHumanoid(Find(c), Looping.Contains(c), c != "jump");
+        foreach (var o in optional) ImportHumanoid(o.path, false, true);
         AssetDatabase.Refresh();
 
-        // 2) Animator controller
+        // 2) One animator controller shared by every look (humanoid clips retarget)
         if (!AssetDatabase.IsValidFolder("Assets/Resources")) AssetDatabase.CreateFolder("Assets", "Resources");
         if (!AssetDatabase.IsValidFolder(OutputFolder)) AssetDatabase.CreateFolder("Assets/Resources", "Characters");
         string controllerPath = OutputFolder + "/ThaiCharacter.controller";
-        var controller = BuildController(controllerPath, c => ClipFrom(Find(c)));
+        var controller = BuildController(controllerPath, c => ClipFrom(Find(c)),
+            optional.Select(o => (o.trigger, ClipFrom(o.path))).ToList());
 
-        // 3) Prefab: wrapper root + model scaled to a person's height
+        // 3) Prefabs: Skin_0, Skin_1 ... (+ ThaiCharacter = the first look, for older builds)
+        // Some Mixamo characters come in with the body flipped below the feet; retry those with
+        // the axis conversion baked in, and leave out any that are still wrong
+        var flipped = characters.Where(c => !UprightOrFixed(c)).ToList();
+        characters = characters.Except(flipped).ToList();
+        for (int i = 0; i < characters.Count; i++)
+        {
+            SavePrefab(characters[i], controller, $"{OutputFolder}/Skin_{i}.prefab");
+            if (i == 0) SavePrefab(characters[i], controller, OutputFolder + "/ThaiCharacter.prefab");
+        }
+        if (flipped.Count > 0)
+            EditorUtility.DisplayDialog("Setup Character", "ตัวละครนี้นำเข้าแบบกลับหัว แก้อัตโนมัติไม่ได้ จึงข้ามไป:\n"
+                + string.Join("\n", flipped.Select(Path.GetFileName)) + "\n\nลองโหลดตัวละครตัวอื่นจาก Mixamo แทน", "ตกลง");
+        for (int i = characters.Count; i < 8; i++) AssetDatabase.DeleteAsset($"{OutputFolder}/Skin_{i}.prefab");
+        AssetDatabase.SaveAssets();
+
+        string extras = optional.Count > 0 ? "\nท่าพิเศษ: " + string.Join(", ", optional.Select(o => o.trigger == "Wai" ? "ไหว้" : "โบกมือ")) : "";
+        EditorUtility.DisplayDialog("Setup Character", $"ตัวละครพร้อมแล้ว! ({characters.Count} แบบ){extras}\nกด Play เพื่อทดสอบ", "ตกลง");
+        Debug.Log($"[Character] Built {characters.Count} look(s): {string.Join(", ", characters.Select(Path.GetFileName))}");
+    }
+
+    // Mixamo embeds the skin/clothes pictures in the .fbx; pull them out so the materials use them
+    // (otherwise the character renders plain grey/white)
+    private static void ExtractTextures(string path)
+    {
+        // One "Textures" folder next to the models: that's where Unity looks when it links
+        // materials to pictures (Mixamo picture names are unique per character)
+        string folder = SourceFolder + "/Textures";
+        var importer = (ModelImporter)AssetImporter.GetAtPath(path);
+        if (importer.userData == "textures-extracted") return;
+        if (!AssetDatabase.IsValidFolder(folder)) AssetDatabase.CreateFolder(SourceFolder, "Textures");
+        importer.materialImportMode = ModelImporterMaterialImportMode.ImportViaMaterialDescription;
+        importer.materialLocation = ModelImporterMaterialLocation.InPrefab;
+        importer.materialSearch = ModelImporterMaterialSearch.Local;
+        if (!importer.ExtractTextures(folder)) Debug.LogWarning($"[Character] No embedded textures in {path}");
+        AssetDatabase.Refresh();
+        importer = (ModelImporter)AssetImporter.GetAtPath(path);
+        importer.userData = "textures-extracted";
+        importer.SaveAndReimport(); // re-link the materials to the extracted pictures
+    }
+
+    private static int TrailingNumber(string path)
+    {
+        var digits = new string(Path.GetFileNameWithoutExtension(path).TrimEnd('.', ' ').Reverse().TakeWhile(char.IsDigit).Reverse().ToArray());
+        return digits.Length > 0 ? int.Parse(digits) : 1;
+    }
+
+    // Feet at the model's origin and the body above them
+    private static bool IsUpright(string path)
+    {
+        var instance = (GameObject)PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(path));
+        try
+        {
+            var renderers = instance.GetComponentsInChildren<Renderer>();
+            if (renderers.Length == 0) return false;
+            var bounds = renderers[0].bounds;
+            foreach (var r in renderers) bounds.Encapsulate(r.bounds);
+            bool upright = bounds.min.y > -0.2f * bounds.size.y;
+            if (!upright) Debug.LogWarning($"[Character] {path} looks flipped: bounds {bounds.min.y:0.00}..{bounds.max.y:0.00}");
+            return upright;
+        }
+        finally { Object.DestroyImmediate(instance); }
+    }
+
+    private static bool UprightOrFixed(string path)
+    {
+        if (IsUpright(path)) return true;
+        var importer = (ModelImporter)AssetImporter.GetAtPath(path);
+        importer.bakeAxisConversion = !importer.bakeAxisConversion;
+        importer.SaveAndReimport();
+        if (IsUpright(path)) { Debug.Log($"[Character] Fixed {path} by switching Bake Axis Conversion"); return true; }
+        return false;
+    }
+
+    // Wrapper root + model scaled to a person's height
+    private static void SavePrefab(string characterPath, AnimatorController controller, string prefabPath)
+    {
         var model = AssetDatabase.LoadAssetAtPath<GameObject>(characterPath);
-        var root = new GameObject("ThaiCharacter");
+        var root = new GameObject(Path.GetFileNameWithoutExtension(prefabPath));
         var instance = (GameObject)PrefabUtility.InstantiatePrefab(model);
         instance.transform.SetParent(root.transform, false);
         var renderers = instance.GetComponentsInChildren<Renderer>();
@@ -68,15 +175,12 @@ public static class CharacterSetup
             foreach (var r in renderers) bounds.Encapsulate(r.bounds);
             if (bounds.size.y > 0.01f) instance.transform.localScale = Vector3.one * (TargetHeight / bounds.size.y);
         }
-        var animator = instance.GetComponent<Animator>() ?? instance.AddComponent<Animator>();
+        var animator = instance.GetComponent<Animator>();
+        if (animator == null) animator = instance.AddComponent<Animator>();
         animator.runtimeAnimatorController = controller;
         animator.applyRootMotion = false;
-        PrefabUtility.SaveAsPrefabAsset(root, OutputFolder + "/ThaiCharacter.prefab");
+        PrefabUtility.SaveAsPrefabAsset(root, prefabPath);
         Object.DestroyImmediate(root);
-        AssetDatabase.SaveAssets();
-
-        EditorUtility.DisplayDialog("Setup Character", "ตัวละครพร้อมแล้ว!\nกด Play เพื่อดูตัวละครเดิน วิ่ง ต่อย เตะ", "ตกลง");
-        Debug.Log($"[Character] Built from {characterPath}");
     }
 
     private static void ImportHumanoid(string path, bool loop, bool bakeHeight)
@@ -108,7 +212,8 @@ public static class CharacterSetup
     private static AnimationClip ClipFrom(string path) =>
         AssetDatabase.LoadAllAssetsAtPath(path).OfType<AnimationClip>().First(c => !c.name.StartsWith("__preview__"));
 
-    private static AnimatorController BuildController(string path, System.Func<string, AnimationClip> clip)
+    private static AnimatorController BuildController(string path, System.Func<string, AnimationClip> clip,
+        System.Collections.Generic.List<(string trigger, AnimationClip clip)> extras)
     {
         // Rebuild in place: deleting and re-creating the file leaves the loaded prefab pointing at
         // a dead object ("Animator is not playing an AnimatorController")
@@ -149,6 +254,13 @@ public static class CharacterSetup
         // Jump: the game lifts the body the moment the button is pressed and lands ~0.7 s later,
         // so skip the clip's crouch and fit the rest into the time in the air
         OneShot(sm, loco, "Jump", clip("jump"), 0.7f, startAt: 0.2f, exitAt: 0.95f, blendOut: 0.1f);
+
+        // Greetings: play at their own pace
+        foreach (var (trigger, extra) in extras)
+        {
+            controller.AddParameter(trigger, AnimatorControllerParameterType.Trigger);
+            OneShot(sm, loco, trigger, extra, extra.length, exitAt: 0.9f, blendOut: 0.25f);
+        }
 
         var block = sm.AddState("Block");
         block.motion = clip("block");

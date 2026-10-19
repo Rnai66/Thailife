@@ -257,6 +257,13 @@ public class HealthHud : MonoBehaviour
         questImage = quests.GetComponent<Image>();
         questLabel = quests.GetComponentInChildren<Text>();
 
+        // "ทักทาย": ไหว้, โบกมือ and preset phrases
+        var greet = UiKit.RoundButton(canvasGo.transform, "ทักทาย", Vector2.zero, new Vector2(400f, 52f), UiKit.Teak, UiKit.GoldText, EmoteUI.Toggle, 26);
+        var greetRect = (RectTransform)greet.transform;
+        greetRect.anchorMin = greetRect.anchorMax = new Vector2(1f, 1f);
+        greetRect.pivot = new Vector2(1f, 1f);
+        greetRect.anchoredPosition = new Vector2(-120f, -256f);
+
         var ko = CreateText("KO", canvasGo.transform, font, 160, TextAnchor.MiddleCenter);
         ko.text = "KO!";
         ko.color = new Color(1f, 0.85f, 0.2f);

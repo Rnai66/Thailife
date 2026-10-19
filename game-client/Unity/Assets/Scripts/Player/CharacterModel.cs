@@ -1,21 +1,45 @@
 using UnityEngine;
 
-// Swaps the placeholder capsule for the animated character (Resources/Characters/ThaiCharacter,
-// made by Thai Life > Setup Character). Works for the local player and RemotePlayer avatars:
+// Swaps the placeholder capsule for an animated character (Resources/Characters/Skin_N, made by
+// Thai Life > Setup Character). Works for the local player and RemotePlayer avatars:
 // walk/run speed is measured from how the object moves, actions come from ActionFeedback.
-// Without the prefab (fresh clone, files not downloaded yet) the capsule simply stays.
+// Without the prefabs (fresh clone, files not downloaded yet) the capsule simply stays.
 public class CharacterModel : MonoBehaviour
 {
     public const string PrefabPath = "Characters/ThaiCharacter";
+    private const int MaxSkins = 8;
 
-    private static GameObject prefab;
-    private static bool looked;
+    private static int skinCount = -1;
 
     private Animator animator;
+    private GameObject model;
     private Vector3 lastPosition;
     private float speed;
+    private int skin = -1;
+    private ProfileClient profile;
 
     public bool HasModel => animator != null;
+
+    // How many looks Setup Character made (Skin_0, Skin_1, ...)
+    public static int SkinCount
+    {
+        get
+        {
+            if (skinCount < 0)
+            {
+                skinCount = 0;
+                while (skinCount < MaxSkins && Resources.Load<GameObject>(SkinPath(skinCount)) != null) skinCount++;
+            }
+            return skinCount;
+        }
+    }
+
+    // Domain reload is off in this project (Enter Play Mode Options), so statics survive between
+    // Play sessions: count again every time, e.g. after running Setup Character
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetStatics() => skinCount = -1;
+
+    private static string SkinPath(int index) => $"Characters/Skin_{index}";
 
     public static void Attach(GameObject host)
     {
@@ -24,12 +48,36 @@ public class CharacterModel : MonoBehaviour
 
     private void Awake()
     {
-        if (!looked)
-        {
-            prefab = Resources.Load<GameObject>(PrefabPath);
-            looked = true;
-        }
-        if (prefab == null) { enabled = false; return; }
+        SetSkin(0);
+        lastPosition = transform.position;
+    }
+
+    private void Start()
+    {
+        // The local player follows the look saved in the profile
+        if (GetComponent<PlayerController>() == null) return;
+        profile = ProfileClient.Instance;
+        if (profile == null) return;
+        profile.SkinChanged += SetSkin;
+        SetSkin(profile.Skin);
+    }
+
+    private void OnDestroy()
+    {
+        if (profile != null) profile.SkinChanged -= SetSkin;
+    }
+
+    public void SetSkin(int index)
+    {
+        if (index == skin && model != null) return;
+        var prefab = Resources.Load<GameObject>(SkinPath(index))
+                     ?? Resources.Load<GameObject>(SkinPath(0))
+                     ?? Resources.Load<GameObject>(PrefabPath);
+        if (prefab == null) return; // keep the capsule
+        skin = index;
+
+        bool blocking = animator != null && animator.GetBool("Block");
+        if (model != null) Destroy(model);
 
         // Stand the feet on the bottom of the capsule
         float foot = -1f;
@@ -38,7 +86,7 @@ public class CharacterModel : MonoBehaviour
         if (cc != null) foot = cc.center.y - cc.height * 0.5f;
         else if (capsule != null) foot = capsule.center.y - capsule.height * 0.5f;
 
-        var model = Instantiate(prefab, transform);
+        model = Instantiate(prefab, transform);
         model.name = "Model";
         model.transform.localPosition = new Vector3(0f, foot, 0f);
         model.transform.localRotation = Quaternion.identity;
@@ -50,13 +98,13 @@ public class CharacterModel : MonoBehaviour
                 animator.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>(PrefabPath);
             animator.applyRootMotion = false;
             animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+            if (blocking) animator.SetBool("Block", true);
         }
         if (animator == null || animator.runtimeAnimatorController == null)
             Debug.LogWarning("[Character] Model has no Animator controller — run Thai Life > Setup Character (not in Play mode)");
 
         var placeholder = GetComponent<MeshRenderer>();
         if (placeholder != null) placeholder.enabled = false;
-        lastPosition = transform.position;
     }
 
     private void Update()
@@ -82,7 +130,16 @@ public class CharacterModel : MonoBehaviour
             case PlayerAction.Jump: animator.SetTrigger("Jump"); break;
             case PlayerAction.BlockStart: animator.SetBool("Block", true); break;
             case PlayerAction.BlockEnd: animator.SetBool("Block", false); break;
+            case PlayerAction.Wai: Trigger("Wai"); break;
+            case PlayerAction.Wave: Trigger("Wave"); break;
         }
         return true;
+    }
+
+    // Wai/Wave clips are optional in Setup Character
+    private void Trigger(string name)
+    {
+        foreach (var p in animator.parameters)
+            if (p.name == name) { animator.SetTrigger(name); return; }
     }
 }

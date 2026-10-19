@@ -12,6 +12,8 @@ public enum PlayerAction : byte
     BlockStart = 3,
     BlockEnd = 4,
     Jump = 5,
+    Wai = 6,    // ไหว้
+    Wave = 7,   // โบกมือ
 }
 
 // Buttons the player can press (on-screen, keyboard or gamepad).
@@ -103,6 +105,13 @@ public class PlayerActions : MonoBehaviour
         IsBlocking = blocking;
         controller.MoveSpeedMultiplier = blocking ? blockMoveMultiplier : 1f;
         Perform(blocking ? PlayerAction.BlockStart : PlayerAction.BlockEnd);
+    }
+
+    // Greetings from the ทักทาย menu
+    public void Emote(PlayerAction action)
+    {
+        if (combat.IsKnockedOut || IsBlocking) return;
+        Perform(action);
     }
 
     private void Perform(PlayerAction action)

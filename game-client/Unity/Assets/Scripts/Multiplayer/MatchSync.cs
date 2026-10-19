@@ -14,6 +14,8 @@ public class MatchSync : MonoBehaviour
     private const long OpAction = 2;
     private const long OpHit = 3;     // attacker → victim only
     private const long OpHealth = 4;  // victim → everyone
+    private const long OpChat = 5;    // one byte: QuickChat phrase index (no free text)
+    private const long OpProfile = 6; // "my name/look changed, look me up again"
 
     // Sanity check on incoming hits: the attacker must be roughly within reach
     private const float MaxHitDistance = 3f;
@@ -24,7 +26,10 @@ public class MatchSync : MonoBehaviour
     [SerializeField] private float sendRate = 10f;
     [SerializeField] private float heartbeatInterval = 1f;
 
+    public static MatchSync Instance { get; private set; }
+
     private NakamaConnection connection;
+    private ProfileClient profile;
     private PlayerActions localActions;
     private PlayerCombat localCombat;
     private IMatch match;
@@ -49,6 +54,8 @@ public class MatchSync : MonoBehaviour
             if (player != null) localPlayer = player.transform;
         }
 
+        Instance = this;
+        profile = GetComponent<ProfileClient>();
         if (localPlayer != null)
         {
             localActions = localPlayer.GetComponent<PlayerActions>();
@@ -61,6 +68,7 @@ public class MatchSync : MonoBehaviour
         connection.Connected += OnConnected;
         if (localActions != null) localActions.Performed += OnLocalAction;
         if (localCombat != null) localCombat.HealthChanged += OnLocalHealthChanged;
+        if (profile != null) { profile.NameChanged += OnLocalNameChanged; profile.SkinChanged += OnLocalSkinChanged; }
         if (connection.IsConnected) OnConnected(connection);
     }
 
@@ -69,11 +77,17 @@ public class MatchSync : MonoBehaviour
         connection.Connected -= OnConnected;
         if (localActions != null) localActions.Performed -= OnLocalAction;
         if (localCombat != null) localCombat.HealthChanged -= OnLocalHealthChanged;
+        if (profile != null) { profile.NameChanged -= OnLocalNameChanged; profile.SkinChanged -= OnLocalSkinChanged; }
         if (connection.Socket != null)
         {
             connection.Socket.ReceivedMatchState -= OnMatchState;
             connection.Socket.ReceivedMatchPresence -= OnMatchPresence;
         }
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this) Instance = null;
     }
 
     private async void OnConnected(NakamaConnection conn)
@@ -198,6 +212,16 @@ public class MatchSync : MonoBehaviour
         {
             remote.PlayAction((PlayerAction)state.State[0]);
         }
+        else if (state.OpCode == OpChat && state.State.Length >= 1)
+        {
+            string phrase = QuickChat.Get(state.State[0]);
+            if (phrase != null) SpeechBubble.Show(remote.transform, phrase);
+        }
+        else if (state.OpCode == OpProfile)
+        {
+            if (profile != null) profile.Forget(remote.UserId);
+            LookUpName(remote);
+        }
         else if (state.OpCode == OpHealth && state.State.Length >= 1)
         {
             remote.SetHealth(state.State[0]);
@@ -247,10 +271,29 @@ public class MatchSync : MonoBehaviour
     // Show the character name (stored server-side) instead of the random username
     private async void LookUpName(RemotePlayer remote)
     {
-        var profile = GetComponent<ProfileClient>();
         if (profile == null) return;
-        string name = await profile.GetNameAsync(remote.UserId, remote.Presence.Username);
-        if (remote != null) remote.SetDisplayName(name);
+        var info = await profile.GetInfoAsync(remote.UserId, remote.Presence.Username);
+        if (remote == null) return;
+        remote.SetDisplayName(info.Name);
+        remote.SetSkin(info.Skin);
+    }
+
+    // Say a preset phrase: bubble over our head here and on everyone else's screen
+    public void SendChat(int phrase)
+    {
+        if (localPlayer == null || QuickChat.Get(phrase) == null) return;
+        SpeechBubble.Show(localPlayer, QuickChat.Get(phrase));
+        _ = SendAsync(OpChat, new[] { (byte)phrase });
+    }
+
+    private void OnLocalNameChanged(string name) => _ = SendAsync(OpProfile, new byte[] { 1 });
+    private void OnLocalSkinChanged(int skin) => _ = SendAsync(OpProfile, new byte[] { 1 });
+
+    private async Task SendAsync(long opCode, byte[] data)
+    {
+        if (match == null || !connection.IsConnected) return;
+        try { await connection.Socket.SendMatchStateAsync(match.Id, opCode, data); }
+        catch (Exception e) { Debug.LogWarning($"[Match] Send {opCode} failed: {e.Message}"); }
     }
 
     // Presence events can arrive before CreateMatchAsync returns (match.Self unknown yet),

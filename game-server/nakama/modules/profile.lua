@@ -1,11 +1,14 @@
--- Player profile: character name (ชื่อตัวละคร), stored as the account's display name.
+-- Player profile: character name (ชื่อตัวละคร), stored as the account's display name, and
+-- the character look (หน้าตา), stored as the avatar url "skin:N".
 --   profile_set_name  {"name": "..."}  -> {name}
--- Other players read it with GetUsers, so names can't be spoofed through match messages.
+--   profile_set_skin  {"skin": 0..7}   -> {skin}
+-- Other players read both with GetUsers, so they can't be spoofed through match messages.
 
 local nk = require("nakama")
 
 local GRPC_INVALID_ARGUMENT = 3
 local MIN_CHARS, MAX_CHARS = 2, 16
+local MAX_SKINS = 8
 
 -- Count UTF-8 characters (Thai letters are 3 bytes each)
 local function char_count(s)
@@ -38,3 +41,13 @@ nk.register_rpc(function(context, payload)
   nk.account_update_id(context.user_id, nil, nil, name)
   return nk.json_encode({ name = name })
 end, "profile_set_name")
+
+nk.register_rpc(function(context, payload)
+  local ok, req = pcall(nk.json_decode, payload or "")
+  if not ok or type(req) ~= "table" then error({ "invalid payload", GRPC_INVALID_ARGUMENT }) end
+  local skin = math.floor(tonumber(req.skin) or -1)
+  if skin < 0 or skin >= MAX_SKINS then error({ "unknown skin", GRPC_INVALID_ARGUMENT }) end
+
+  nk.account_update_id(context.user_id, nil, nil, nil, nil, nil, nil, "skin:" .. skin)
+  return nk.json_encode({ skin = skin })
+end, "profile_set_skin")

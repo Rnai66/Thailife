@@ -81,6 +81,12 @@ public class RemotePlayer : MonoBehaviour, IHittable
         RefreshLabel();
     }
 
+    public void SetSkin(int skin)
+    {
+        var model = GetComponent<CharacterModel>();
+        if (model != null) model.SetSkin(skin);
+    }
+
     public void SetDisplayName(string name)
     {
         DisplayName = name;
