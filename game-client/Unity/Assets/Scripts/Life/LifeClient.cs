@@ -89,6 +89,7 @@ public class LifeClient : MonoBehaviour
         if (GetComponent<FestivalClient>() == null) gameObject.AddComponent<FestivalClient>();
         if (GetComponent<BankClient>() == null) gameObject.AddComponent<BankClient>();
         if (GetComponent<RanchClient>() == null) gameObject.AddComponent<RanchClient>();
+        if (GetComponent<HotelClient>() == null) gameObject.AddComponent<HotelClient>();
 
         // Every location scene gets a day/night sun without extra setup
         foreach (var light in FindObjectsByType<Light>(FindObjectsSortMode.None))

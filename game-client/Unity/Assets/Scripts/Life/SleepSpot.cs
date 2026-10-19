@@ -96,6 +96,8 @@ public class SleepSpot : MonoBehaviour
             Debug.LogWarning($"[Life] Sleep failed: {e.Message}");
             if (e.Message.Contains("not enough baht"))
                 ContextButton.Show(this, action, $"เงินไม่พอจ่ายค่าเช่า {price} บาท", () => Sleep(player));
+            else if (e.Message.Contains("no booking"))
+                ContextButton.Show(this, action, "การจองห้องหมดเวลาแล้ว — จองใหม่ที่เคาน์เตอร์", () => Sleep(player));
         }
         busy = false;
     }

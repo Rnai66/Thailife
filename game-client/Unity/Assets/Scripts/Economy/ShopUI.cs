@@ -257,7 +257,7 @@ public class ShopUI : MonoBehaviour
         // Header icon for this shop
         UiKit.Clear(shopBadge);
         UiKit.Badge(shopBadge, shopId == "community" ? "icon:shop" : shopId == "flea" ? "icon:fair"
-            : shopId == "camp" ? "icon:boxing" : shopId == "music" ? "ด" : "icon:food");
+            : shopId == "camp" ? "icon:boxing" : shopId == "music" ? "icon:music" : "icon:food");
 
         RenderTabs(categories);
         UiKit.Clear(grid);
@@ -309,10 +309,15 @@ public class ShopUI : MonoBehaviour
         var card = UiKit.Panel("Card", grid, qty > 0 ? (Color)new Color32(0xFF, 0xF6, 0xDF, 0xFF) : Color.white, new Vector2(x, y), new Vector2(500f, 156f), shadow: true);
         card.gameObject.AddComponent<Outline>().effectColor = qty > 0 ? Gold : CardBorder;
 
-        // Icon tile with the item's initial letter in the category colour
-        var tile = UiKit.Panel("Icon", card, category.Tile, new Vector2(-185f, 0f), new Vector2(104f, 104f));
-        var initial = UiKit.Label(tile, 56, Initial(item.name), Vector2.zero, new Vector2(100f, 100f), category.TileInk);
-        initial.fontStyle = FontStyle.Bold;
+        // Item picture (Resources/Branding/Icons/<item id>, e.g. the instruments), or its initial letter in the category colour
+        if (UiKit.Art("Icons/" + item.id) != null)
+            UiKit.IconTile(card, item.id, new Vector2(-185f, 0f), new Vector2(104f, 104f));
+        else
+        {
+            var tile = UiKit.Panel("Icon", card, category.Tile, new Vector2(-185f, 0f), new Vector2(104f, 104f));
+            var initial = UiKit.Label(tile, 56, Initial(item.name), Vector2.zero, new Vector2(100f, 100f), category.TileInk);
+            initial.fontStyle = FontStyle.Bold;
+        }
 
         var name = UiKit.Label(card, 30, item.name, new Vector2(-10f, 46f), new Vector2(250f, 44f), Ink, TextAnchor.MiddleLeft);
         name.fontStyle = FontStyle.Bold;

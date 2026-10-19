@@ -38,6 +38,7 @@ public static class Seaside
             Umbrella(root, new Vector3(-30f + i * 10f, 0f, 14f), canopy[i], i);
 
         Pier(root, new Vector3(25f, 0f, 18f));
+        TourBoat(root);
 
         // Longtail boats (เรือหางยาว) and a fishing boat moored by the pier
         LongtailBoat(root, new Vector3(-12f, 0f, 30f), 20f, new Color(0.95f, 0.35f, 0.25f));
@@ -55,6 +56,7 @@ public static class Seaside
         BeachRoad(root);
         Mountains(root);
         ConcertStage(root, new Vector3(40f, 0f, 12f));
+        HotelRooms(root);
     }
 
     // Beach concert stage (เวทีคอนเสิร์ตริมหาด) for the national events: the stage, band, screen
@@ -116,6 +118,15 @@ public static class Seaside
         foreach (float x in new[] { -4f, 4f })
             StreetFurniture.RingLight(show, new Vector3(x, 8.6f, -1f));
         ConcertRig(show);
+
+        // Musicians (Lv 12) can play the concert: stand in front of the stage while it's on
+        var music = new GameObject("MusicZone");
+        music.transform.SetParent(show, false);
+        music.transform.localPosition = new Vector3(0f, 1f, -4.6f);
+        var musicBox = music.AddComponent<BoxCollider>();
+        musicBox.isTrigger = true;
+        musicBox.size = new Vector3(4f, 2f, 2f);
+        music.AddComponent<MusicSpot>().Configure("beach_concert");
         // Bunting from the truss to the beach poles
         FairLights.Pole(show, new Vector3(-7f, 0f, -12f));
         FairLights.Pole(show, new Vector3(7f, 0f, -12f));
@@ -170,6 +181,129 @@ public static class Seaside
         PrimitiveKit.Label(name, b, new Vector3(0f, floors * 3.2f + 1.1f, -3.1f), 0.12f, new Color(0.35f, 0.15f, 0.05f));
         foreach (float x in new[] { -width * 0.5f - 0.8f, width * 0.5f + 0.8f })
             Nature.CoconutPalm(b, new Vector3(x, 0f, -6.5f), 0.9f, (int)(x * 10f) + floors);
+
+        // Front desk under the entrance canopy: book a room, go up to it
+        var desk = new GameObject("HotelDesk_" + name);
+        desk.transform.SetParent(root, false);
+        desk.transform.localPosition = new Vector3(pos.x, 1f, -13.4f);
+        desk.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
+        var box = desk.AddComponent<BoxCollider>();
+        box.isTrigger = true;
+        box.size = new Vector3(3f, 2f, 1.8f);
+        desk.AddComponent<HotelDesk>().Configure(name);
+    }
+
+    // ── Hotel rooms (one per tier), out of sight beyond the hills: the desk teleports you in ──
+    private static void HotelRooms(Transform root)
+    {
+        var area = PrimitiveKit.Group("HotelRooms_ห้องพักโรงแรม", root, new Vector3(0f, 0f, -220f)).transform;
+        PrimitiveKit.Box("Terrace", area, new Vector3(0f, -0.05f, 0f), new Vector3(100f, 0.1f, 40f), PrimitiveKit.Mat("Pavement", new Color(0.78f, 0.74f, 0.66f)));
+        for (int i = 0; i < 10; i++)
+            Nature.CoconutPalm(area, new Vector3(-45f + i * 10f, 0f, (i % 2 == 0) ? -14f : 14f), 1f, 120 + i);
+        Room(area, new Vector3(-26f, 0f, 0f), "standard", "ห้องมาตรฐาน");
+        Room(area, new Vector3(0f, 0f, 0f), "deluxe", "ห้องดีลักซ์วิวทะเล");
+        Room(area, new Vector3(28f, 0f, 0f), "suite", "สวีทริมหาด");
+    }
+
+    // An open-topped room (the camera looks in over the walls): bed to sleep in, decor by tier, door out
+    private static void Room(Transform area, Vector3 pos, string tier, string title)
+    {
+        bool deluxe = tier != "standard", suite = tier == "suite";
+        float w = suite ? 16f : 12f, d = suite ? 11f : 9f, h = 2.6f;
+        var r = PrimitiveKit.Group("HotelRoom_" + tier, area, pos).transform;
+        var floor = PrimitiveKit.Mat(suite ? "MarbleFloor" : deluxe ? "WoodFloorWarm" : "CarpetBeige",
+            suite ? new Color(0.95f, 0.94f, 0.9f) : deluxe ? new Color(0.62f, 0.43f, 0.26f) : new Color(0.8f, 0.72f, 0.58f));
+        var wall = PrimitiveKit.Mat(suite ? "SuiteWall" : deluxe ? "DeluxeWall" : "RoomWall",
+            suite ? new Color(0.97f, 0.93f, 0.85f) : deluxe ? new Color(0.9f, 0.95f, 0.97f) : new Color(0.95f, 0.92f, 0.85f));
+        var wood = PrimitiveKit.Mat("WoodPlank", Wood);
+        var white = PrimitiveKit.Mat("Linen", new Color(0.97f, 0.97f, 0.95f));
+        PrimitiveKit.Box("Floor", r, new Vector3(0f, 0.05f, 0f), new Vector3(w, 0.1f, d), floor);
+        PrimitiveKit.Box("WallBack", r, new Vector3(0f, h * 0.5f, d * 0.5f), new Vector3(w, h, 0.2f), wall);
+        PrimitiveKit.Box("WallFront", r, new Vector3(0f, h * 0.5f, -d * 0.5f), new Vector3(w, h, 0.2f), wall);
+        PrimitiveKit.Box("WallL", r, new Vector3(-w * 0.5f, h * 0.5f, 0f), new Vector3(0.2f, h, d), wall);
+        PrimitiveKit.Box("WallR", r, new Vector3(w * 0.5f, h * 0.5f, 0f), new Vector3(0.2f, h, d), wall);
+        PrimitiveKit.Box("Door", r, new Vector3(-w * 0.5f + 1.6f, 1.05f, -d * 0.5f + 0.12f), new Vector3(1.1f, 2.1f, 0.06f), PrimitiveKit.Mat("DarkWood", new Color(0.36f, 0.22f, 0.12f)), collider: false);
+        PrimitiveKit.Label(title, r, new Vector3(0f, 2.2f, d * 0.5f - 0.12f), 0.06f, new Color(0.45f, 0.3f, 0.15f));
+
+        // Window (sea view in the better rooms)
+        float winW = suite ? 7f : deluxe ? 5f : 2f;
+        PrimitiveKit.Box("WindowSky", r, new Vector3(2f, 1.75f, d * 0.5f - 0.12f), new Vector3(winW, 0.9f, 0.04f), PrimitiveKit.Glow("ViewSky", new Color(0.55f, 0.8f, 1f), 1.2f), collider: false);
+        if (deluxe)
+            PrimitiveKit.Box("WindowSea", r, new Vector3(2f, 1.05f, d * 0.5f - 0.12f), new Vector3(winW, 0.5f, 0.04f), PrimitiveKit.Glow("ViewSea", new Color(0.1f, 0.5f, 0.8f), 1.2f), collider: false);
+
+        // Bed (king size with posts in the suite)
+        float bedW = suite ? 2.6f : 2f;
+        var bedPos = new Vector3(-w * 0.5f + 2.2f, 0f, d * 0.5f - 1.6f);
+        PrimitiveKit.Box("BedFrame", r, bedPos + new Vector3(0f, 0.25f, 0f), new Vector3(bedW, 0.4f, 2.3f), wood);
+        PrimitiveKit.Box("Mattress", r, bedPos + new Vector3(0f, 0.55f, 0f), new Vector3(bedW - 0.1f, 0.22f, 2.2f), white, collider: false);
+        PrimitiveKit.Box("Headboard", r, bedPos + new Vector3(0f, 0.9f, 1.1f), new Vector3(bedW, 1.1f, 0.12f), wood, collider: false);
+        foreach (float x in suite ? new[] { -0.7f, 0f, 0.7f } : new[] { -0.45f, 0.45f })
+            PrimitiveKit.Box("Pillow", r, bedPos + new Vector3(x, 0.72f, 0.8f), new Vector3(0.55f, 0.14f, 0.35f), white, collider: false);
+        PrimitiveKit.Box("Blanket", r, bedPos + new Vector3(0f, 0.67f, -0.4f), new Vector3(bedW - 0.05f, 0.05f, 1.2f),
+            PrimitiveKit.Mat(suite ? "BlanketGold" : deluxe ? "BlanketBlue" : "BlanketGreen", suite ? new Color(0.85f, 0.65f, 0.25f) : deluxe ? new Color(0.2f, 0.45f, 0.75f) : new Color(0.35f, 0.6f, 0.45f)), collider: false);
+        if (suite)
+            foreach (float x in new[] { -1.3f, 1.3f })
+                foreach (float z in new[] { -1.15f, 1.15f })
+                    PrimitiveKit.Cylinder("BedPost", r, bedPos + new Vector3(x, 1.2f, z), new Vector3(0.08f, 1.2f, 0.08f), PrimitiveKit.Mat("Gold", new Color(0.95f, 0.75f, 0.2f)), collider: false);
+        var restPoint = PrimitiveKit.Group("RestPoint", r, bedPos + new Vector3(0f, 0.75f, -0.1f), 180f);
+        var sleep = new GameObject("BedZone");
+        sleep.transform.SetParent(r, false);
+        sleep.transform.localPosition = bedPos + new Vector3(bedW * 0.5f + 0.6f, 1f, 0f);
+        var sleepBox = sleep.AddComponent<BoxCollider>();
+        sleepBox.isTrigger = true;
+        sleepBox.size = new Vector3(1.2f, 2f, 2.4f);
+        var bed = sleep.AddComponent<SleepSpot>();
+        bed.Configure(title, "นอนพักในห้อง", restPoint.transform);
+        bed.ConfigurePaid("hotel", 0); // free while the booking lasts (life.lua checks it)
+
+        // Nightstand with a lamp, TV
+        PrimitiveKit.Box("Nightstand", r, bedPos + new Vector3(bedW * 0.5f + 0.45f, 0.3f, 0.9f), new Vector3(0.5f, 0.6f, 0.5f), wood);
+        PrimitiveKit.Sphere("BedLamp", r, bedPos + new Vector3(bedW * 0.5f + 0.45f, 0.8f, 0.9f), Vector3.one * 0.3f, PrimitiveKit.Glow("BulbWarm", new Color(1f, 0.85f, 0.55f), 2.5f));
+        PrimitiveKit.Box("TVStand", r, new Vector3(w * 0.5f - 0.5f, 0.35f, 0f), new Vector3(0.6f, 0.7f, 2f), wood);
+        PrimitiveKit.Box("TV", r, new Vector3(w * 0.5f - 0.35f, 1.35f, 0f), new Vector3(0.08f, 0.8f, 1.4f), PrimitiveKit.Mat("SpeakerBlack", new Color(0.08f, 0.08f, 0.09f)), collider: false);
+
+        if (deluxe)
+        {
+            var sofa = PrimitiveKit.Mat("SofaFabric", suite ? new Color(0.55f, 0.15f, 0.2f) : new Color(0.35f, 0.5f, 0.6f));
+            PrimitiveKit.Box("Sofa", r, new Vector3(1.5f, 0.3f, -1.5f), new Vector3(2.4f, 0.6f, 0.9f), sofa);
+            PrimitiveKit.Box("SofaBack", r, new Vector3(1.5f, 0.7f, -1.9f), new Vector3(2.4f, 0.6f, 0.2f), sofa, collider: false);
+            PrimitiveKit.Box("Rug", r, new Vector3(1.5f, 0.11f, 0f), new Vector3(3.6f, 0.02f, 2.6f), PrimitiveKit.Mat("RugRed", new Color(0.7f, 0.25f, 0.2f)), collider: false);
+            PrimitiveKit.Box("CoffeeTable", r, new Vector3(1.5f, 0.25f, -0.2f), new Vector3(1.2f, 0.08f, 0.7f), wood);
+            Nature.Bush(r, new Vector3(w * 0.5f - 0.8f, 0.1f, d * 0.5f - 0.8f), 0.6f, 9, flowers: true);
+        }
+        if (suite)
+        {
+            PrimitiveKit.Box("Bathtub", r, new Vector3(w * 0.5f - 1.6f, 0.35f, -d * 0.5f + 1.3f), new Vector3(1.8f, 0.7f, 0.9f), white);
+            PrimitiveKit.Box("BathWater", r, new Vector3(w * 0.5f - 1.6f, 0.62f, -d * 0.5f + 1.3f), new Vector3(1.6f, 0.04f, 0.7f), PrimitiveKit.Mat("CanalWater", new Color(0.25f, 0.45f, 0.5f)), collider: false);
+            PrimitiveKit.Box("Minibar", r, new Vector3(-w * 0.5f + 0.5f, 0.5f, -1f), new Vector3(0.6f, 1f, 1.4f), wood);
+            for (int i = 0; i < 5; i++)
+            {
+                float a = i * Mathf.PI * 2f / 5f;
+                PrimitiveKit.Sphere("Chandelier", r, new Vector3(1.5f + Mathf.Cos(a) * 0.5f, 2.3f, Mathf.Sin(a) * 0.5f), Vector3.one * 0.18f, PrimitiveKit.Glow("BulbWarm", new Color(1f, 0.85f, 0.55f), 2.5f));
+            }
+        }
+
+        // Warm room light (always on: rooms are lit for guests)
+        var lightGo = new GameObject("RoomLight");
+        lightGo.transform.SetParent(r, false);
+        lightGo.transform.localPosition = new Vector3(0f, 2.4f, 0f);
+        var l = lightGo.AddComponent<Light>();
+        l.type = LightType.Point;
+        l.range = w;
+        l.intensity = 3f;
+        l.color = new Color(1f, 0.88f, 0.7f);
+        l.shadows = LightShadows.None;
+
+        // Arrive just inside the door; the door takes you back to the lobby
+        var entry = PrimitiveKit.Group("Entry", r, new Vector3(-w * 0.5f + 1.6f, 0f, -d * 0.5f + 1.4f), 0f);
+        var exit = new GameObject("DoorZone");
+        exit.transform.SetParent(r, false);
+        exit.transform.localPosition = new Vector3(-w * 0.5f + 1.6f, 1f, -d * 0.5f + 0.5f);
+        var exitBox = exit.AddComponent<BoxCollider>();
+        exitBox.isTrigger = true;
+        exitBox.size = new Vector3(1.6f, 2f, 0.8f);
+        exit.AddComponent<HotelRoomExit>();
+        r.gameObject.AddComponent<HotelRoom>().Configure(tier, entry.transform);
     }
 
     // Open-front restaurant: roof on posts, kitchen counter at the back, tables and a string of lights
@@ -369,7 +503,7 @@ public static class Seaside
         StreetFurniture.LampPost(p, new Vector3(1.2f, 0.3f, 18.3f));
     }
 
-    private static void LongtailBoat(Transform root, Vector3 pos, float yaw, Color ribbon)
+    private static Transform LongtailBoat(Transform root, Vector3 pos, float yaw, Color ribbon)
     {
         var b = PrimitiveKit.Group("LongtailBoat_เรือหางยาว", root, pos, yaw).transform;
         var hull = PrimitiveKit.Mat("BoatWood", new Color(0.55f, 0.32f, 0.15f));
@@ -383,6 +517,33 @@ public static class Seaside
             PrimitiveKit.Box("Ribbon", b, new Vector3(0f, 1.05f - i * 0.08f, 3.65f), new Vector3(0.25f, 0.07f, 0.04f),
                 PrimitiveKit.Mat($"Ribbon{i}", i == 0 ? ribbon : i == 1 ? Color.white : new Color(1f, 0.85f, 0.2f)), new Vector3(0f, 0f, 15f * (i - 1)), collider: false);
         b.gameObject.AddComponent<Bob>();
+        return b;
+    }
+
+    // The tour boat moored at the pier (งานพิเศษ: พานักท่องเที่ยวนั่งเรือหางยาวรอบอ่าว)
+    private static void TourBoat(Transform root)
+    {
+        var dock = new Vector3(21.3f, 0f, 26f);
+        var boat = PrimitiveKit.Group("TourBoat_เรือพานักท่องเที่ยว", root, dock).transform; // moves along the route
+        LongtailBoat(boat, Vector3.zero, 0f, new Color(1f, 0.45f, 0.75f));                     // bobs inside it
+        var seat = PrimitiveKit.Group("Seat", boat, new Vector3(0f, 0.45f, -2.4f)).transform;
+        int look = 1;
+        foreach (float z in new[] { 0.4f, 1.6f })
+            PrimitiveKit.Group("Tourist", boat, new Vector3(0f, 0.3f, z)).AddComponent<MarketVendor>().Configure(look++);
+
+        var zone = new GameObject("BoatTourZone");
+        zone.transform.SetParent(root, false);
+        zone.transform.localPosition = new Vector3(23.9f, 1.3f, 26f);
+        var box = zone.AddComponent<BoxCollider>();
+        box.isTrigger = true;
+        box.size = new Vector3(1.4f, 2f, 3f);
+        var route = new[]
+        {
+            dock, new Vector3(18f, 0f, 40f), new Vector3(0f, 0f, 47f), new Vector3(-25f, 0f, 47f), new Vector3(-40f, 0f, 41f),
+            new Vector3(-38f, 0f, 36f), new Vector3(-10f, 0f, 37.5f), new Vector3(10f, 0f, 38f), new Vector3(19f, 0f, 32f), dock,
+        };
+        zone.AddComponent<BoatTour>().Configure(boat, seat, route);
+        Places.Sign(root, new Vector3(23.6f, 0.3f, 22.5f), "เรือหางยาวพาเที่ยว\nงานพิเศษ: ขับเรือรอบอ่าว", 90f);
     }
 
     private static void FishingBoat(Transform root, Vector3 pos)
@@ -476,6 +637,16 @@ public static class Seaside
             Cow(f, new Vector3(c.x, 0f, c.y), i, new Vector2(hx - 1.5f - Mathf.Abs(c.x), hz - 1.5f - Mathf.Abs(c.y)));
         }
         f.gameObject.AddComponent<CowPen>();
+
+        // In the pen by the trough: milk the cows (รีดนม) and check feed / growth
+        var penZone = new GameObject("CowPenZone");
+        penZone.transform.SetParent(f, false);
+        penZone.transform.localPosition = new Vector3(2.6f, 1f, 2.6f);
+        var penBox = penZone.AddComponent<BoxCollider>();
+        penBox.isTrigger = true;
+        penBox.size = new Vector3(2.8f, 2f, 1.6f);
+        penZone.AddComponent<RanchCounter>().Configure("pen");
+        PrimitiveKit.Cylinder("MilkCan", f, new Vector3(3.9f, 0.35f, 3.2f), new Vector3(0.35f, 0.35f, 0.35f), PrimitiveKit.Mat("SteelFrame", new Color(0.7f, 0.72f, 0.75f)), collider: false);
         Places.Sign(f, new Vector3(-1.8f, 0f, -hz - 0.6f), "ฟาร์มวัว", 0f);
 
         // Cow seller (พ่อค้าวัว) at the gate: buy more cows here

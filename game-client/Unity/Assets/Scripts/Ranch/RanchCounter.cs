@@ -15,8 +15,10 @@ public class RanchCounter : MonoBehaviour
         if (other.GetComponent<PlayerController>() == null) return;
         if (mode == "sao")
             ContextButton.Show(this, "รับวัวจาก อบต.", "โครงการวัวให้ชาวบ้าน · รับฟรีคนละ 1 ตัว", () => RanchUI.Show(mode));
+        else if (mode == "pen")
+            ContextButton.Show(this, "ดูแลวัว", "รีดนมขาย · ดูอาหารวัวและการเติบโต", () => RanchUI.Show(mode));
         else
-            ContextButton.Show(this, "ซื้อวัว", "พ่อค้าวัว · ซื้อวัวเพิ่มเข้าคอก", () => RanchUI.Show(mode));
+            ContextButton.Show(this, "พ่อค้าวัว", "ซื้อวัว · ซื้ออาหารวัว · ขายวัวโต", () => RanchUI.Show(mode));
     }
 
     private void OnTriggerExit(Collider other)

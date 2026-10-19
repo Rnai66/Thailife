@@ -57,7 +57,7 @@ public class MusicUI : MonoBehaviour
 
     private void Awake()
     {
-        card = UiKit.PremiumWindow(transform, "MusicCanvas", new Vector2(1500f, 1000f), 55, "icon:fair",
+        card = UiKit.PremiumWindow(transform, "MusicCanvas", new Vector2(1500f, 1000f), 55, "icon:music",
             out backdrop, out titleText, out subtitleText, Hide, out _);
         titleText.text = "เวทีดนตรี";
         songText = subtitleText;
@@ -148,8 +148,13 @@ public class MusicUI : MonoBehaviour
         var pos = new Vector2((index % 4 - 1.5f) * 345f, -(index / 4) * 115f);
         var c = UiKit.Panel("Instrument", instrumentList, item.equipped ? (Color)new Color32(0xFF, 0xF6, 0xDF, 0xFF) : Color.white, pos, new Vector2(330f, 102f), shadow: true);
         c.gameObject.AddComponent<Outline>().effectColor = item.equipped ? UiKit.Gold : UiKit.CardBorder;
-        UiKit.Label(c, 26, item.name, new Vector2(-55f, 20f), new Vector2(200f, 40f), item.owned ? UiKit.Ink : UiKit.Muted, TextAnchor.MiddleLeft).fontStyle = FontStyle.Bold;
-        UiKit.Label(c, 20, item.owned ? $"{(item.folk ? "พื้นบ้าน" : "สากล")} x{item.mult:0.00}" : "ยังไม่มี", new Vector2(-55f, -22f), new Vector2(200f, 34f), UiKit.Muted, TextAnchor.MiddleLeft);
+        if (UiKit.Art("Icons/inst_" + item.id) != null)
+        {
+            var icon = UiKit.IconTile(c, "inst_" + item.id, new Vector2(-118f, 0f), new Vector2(82f, 82f));
+            if (!item.owned) foreach (var img in icon.GetComponentsInChildren<Image>()) img.color = new Color(1f, 1f, 1f, 0.45f); // not yours yet
+        }
+        UiKit.Label(c, 26, item.name, new Vector2(-15f, 20f), new Vector2(130f, 40f), item.owned ? UiKit.Ink : UiKit.Muted, TextAnchor.MiddleLeft).fontStyle = FontStyle.Bold;
+        UiKit.Label(c, 20, item.owned ? $"{(item.folk ? "พื้นบ้าน" : "สากล")} x{item.mult:0.00}" : "ยังไม่มี", new Vector2(-15f, -22f), new Vector2(130f, 34f), UiKit.Muted, TextAnchor.MiddleLeft);
         if (item.equipped)
             UiKit.PillLabel(c, "ใช้อยู่", new Vector2(100f, 0f), new Vector2(100f, 44f), UiKit.Gold, UiKit.GoldInk, 22);
         else

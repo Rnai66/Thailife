@@ -27,12 +27,13 @@ local VENUES = {
   temple_fair  = { name = "งานวัด",    level = 1,  base = 120, bonus = "folk", fair = true },
   tambon_event = { name = "เวทีอีเวนต์ตำบล",   level = 5,  base = 150, bonus = "any" },
   city_event   = { name = "เวทีอีเวนต์เมือง",   level = 8,  base = 220, bonus = "modern" },
+  beach_concert = { name = "เวทีคอนเสิร์ตริมหาด", level = 12, base = 500, bonus = "modern", concert = true },
   -- Pubs (ผับ) in the city, named by style: open 19:00-03:00, each one once per game day
   pub_puea_chiwit = { name = "ผับเพื่อชีวิต", level = 10, base = 350, bonus = "any",    night = true, pub = true },
   pub_blues       = { name = "ผับบลูส์",     level = 10, base = 350, bonus = "modern", night = true, pub = true },
   pub_indie       = { name = "ผับอินดี้",     level = 10, base = 350, bonus = "modern", night = true, pub = true },
 }
-local VENUE_ORDER = { "village_hall", "temple_fair", "tambon_event", "city_event", "pub_puea_chiwit", "pub_blues", "pub_indie" }
+local VENUE_ORDER = { "village_hall", "temple_fair", "tambon_event", "city_event", "beach_concert", "pub_puea_chiwit", "pub_blues", "pub_indie" }
 
 local SONGS = { "ลำเพลิน", "เต้ยโขง", "ลาวแพน", "มนต์รักลูกทุ่ง", "สาวบ้านแต้", "ลำเต้ย", "รำวงชาวบ้าน", "เพลงงานวัด" }
 
@@ -65,6 +66,10 @@ end
 
 local function venue_open(v, now, env)
   if v.fair then return (life.fair(now, fair_always_open(env))) end
+  if v.concert then -- only during the national beach concerts
+    local open, _, _, _, f = life.fair(now, fair_always_open(env))
+    return open and f ~= nil and (f.scale == "beach" or f.scale == "both")
+  end
   if v.night then return is_night(now) or (env ~= nil and env.pubs_always_open == "true") end
   return true
 end
@@ -91,7 +96,7 @@ local function view(user_id, s, env, extra)
     table.insert(venues, { id = id, name = v.name, level = v.level, base = v.base, bonus = v.bonus,
                            unlocked = s.level >= v.level, open = venue_open(v, now, env),
                            played_today = v.pub == true and (s.pub_days or {})[id] == life.game_day(now),
-                           when = v.fair and "งานวัดตามประเพณี" or v.night and "กลางคืน 19:00-03:00 (ร้านละครั้งต่อวัน)" or "ทุกเวลา" })
+                           when = v.fair and "งานวัดตามประเพณี" or v.concert and "ช่วงคอนเสิร์ตริมหาด (ดูปฏิทินงาน)" or v.night and "กลางคืน 19:00-03:00 (ร้านละครั้งต่อวัน)" or "ทุกเวลา" })
   end
   local result = {
     level = s.level, xp = s.xp, xp_to_next = (s.level >= MAX_LEVEL) and 0 or xp_to_next(s.level),

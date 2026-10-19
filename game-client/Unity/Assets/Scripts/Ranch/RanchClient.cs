@@ -11,6 +11,9 @@ public class RanchClient : MonoBehaviour
     {
         public int cows, max_cows, price;
         public bool claimed;
+        public int feed, max_feed, feed_pack, feed_pack_price;
+        public int milk, milk_price, grown, grown_days, grown_price, next_day_s;
+        public int[] growth;
         public string done;
     }
 
@@ -49,14 +52,18 @@ public class RanchClient : MonoBehaviour
     public Task<State> RefreshAsync() => Call("ranch_get");
     public Task<State> ClaimAsync() => Call("ranch_claim");
     public Task<State> BuyAsync() => Call("ranch_buy");
+    public Task<State> FeedAsync(int packs) => Call("ranch_feed", $"{{\"packs\":{packs}}}");
+    public Task<State> MilkAsync() => Call("ranch_milk");
+    public Task<State> SellAsync() => Call("ranch_sell");
 
-    private async Task<State> Call(string rpc)
+    private async Task<State> Call(string rpc, string payload = "{}")
     {
-        var result = await connection.Client.RpcAsync(connection.Session, rpc, "{}");
+        var result = await connection.Client.RpcAsync(connection.Session, rpc, payload);
         var state = JsonUtility.FromJson<State>(result.Payload);
         Current = state;
         Changed?.Invoke(state);
-        if (WalletClient.Instance != null && rpc == "ranch_buy") _ = WalletClient.Instance.RefreshAsync();
+        if (WalletClient.Instance != null && rpc != "ranch_get" && rpc != "ranch_claim") _ = WalletClient.Instance.RefreshAsync();
+        if (rpc == "ranch_milk") LifeClient.Instance?.Refresh(); // milking costs a little energy
         return state;
     }
 }
