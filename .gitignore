@@ -33,3 +33,5 @@ game-client/Unity/Assets/Characters/
 game-client/Unity/Assets/Characters.meta
 game-client/Unity/Assets/Resources/Characters/
 game-client/Unity/Assets/Resources/Characters.meta
+game-server/deploy/.env.prod
+game-server/deploy/backups/
