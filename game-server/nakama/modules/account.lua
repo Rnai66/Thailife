@@ -5,6 +5,7 @@
 --
 --   account_recovery_get  {}  -> the current code (or "" if none yet)
 --   account_recovery_new  {}  -> makes a new code (the old one stops working)
+--   account_delete        {"confirm": "DELETE"} -> deletes the account and all its game data (App Store rule)
 
 local nk = require("nakama")
 
@@ -48,3 +49,10 @@ nk.register_rpc(function(context)
                        permission_read = 1, permission_write = 0 } })
   return nk.json_encode({ code = code })
 end, "account_recovery_new")
+
+nk.register_rpc(function(context, payload)
+  local ok, req = pcall(nk.json_decode, payload or "")
+  if not ok or type(req) ~= "table" or req.confirm ~= "DELETE" then error({ "confirm required", 3 }) end
+  nk.account_delete_id(context.user_id, false) -- removes the account, its storage objects and wallet
+  return nk.json_encode({ deleted = true })
+end, "account_delete")

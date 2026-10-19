@@ -1,5 +1,12 @@
 # HTTPS for the game API and realtime socket (WebSocket upgrades are forwarded automatically)
 {$DOMAIN} {
 	encode gzip
-	reverse_proxy nakama:7350
+	# Privacy policy for the App Store listing: https://<domain>/privacy/
+	handle /privacy* {
+		root * /srv/site
+		file_server
+	}
+	handle {
+		reverse_proxy nakama:7350
+	}
 }

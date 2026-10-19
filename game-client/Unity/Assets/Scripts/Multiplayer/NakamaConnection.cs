@@ -184,6 +184,20 @@ public class NakamaConnection : MonoBehaviour
         UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
     }
 
+    // Delete this account on the server (and everything in it), forget it on this phone, and start
+    // over with a brand-new account.
+    public async Task DeleteAccountAsync()
+    {
+        await Client.RpcAsync(Session, "account_delete", "{\"confirm\":\"DELETE\"}");
+        PlayerPrefs.DeleteKey(DeviceIdKey);
+        PlayerPrefs.DeleteKey(SessionTokenKey);
+        PlayerPrefs.DeleteKey(RefreshTokenKey);
+        PlayerPrefs.Save();
+        Debug.Log("[Nakama] Account deleted");
+        if (Socket != null) await Socket.CloseAsync();
+        UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
+    }
+
     private string GetDeviceId()
     {
         string id = PlayerPrefs.GetString(DeviceIdKey, "");

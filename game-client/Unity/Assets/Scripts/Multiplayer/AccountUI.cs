@@ -17,7 +17,8 @@ public class AccountUI : MonoBehaviour
     private Text newCodeLabel;
     private InputField input;
     private bool busy, confirmRecover;
-    private Text recoverLabel;
+    private Text recoverLabel, deleteLabel;
+    private int deleteTaps;
 
     public static void Show()
     {
@@ -27,6 +28,8 @@ public class AccountUI : MonoBehaviour
         instance.confirmRecover = false;
         instance.recoverLabel.text = "กู้คืนบัญชี";
         instance.messageText.text = "";
+        instance.deleteTaps = 0;
+        instance.deleteLabel.text = "ลบบัญชี";
         instance.LoadCode();
     }
 
@@ -67,7 +70,9 @@ public class AccountUI : MonoBehaviour
         recoverLabel = recover.GetComponentInChildren<Text>();
         UiKit.Label(body, 22, "การกู้คืนจะเปลี่ยนเครื่องนี้ไปใช้บัญชีเดิม (ความคืบหน้าที่เล่นในเครื่องนี้จะไม่ถูกใช้อีก)",
             new Vector2(0f, -175f), new Vector2(1100f, 40f), UiKit.Muted);
-        messageText = UiKit.Label(body, 26, "", new Vector2(0f, -260f), new Vector2(1100f, 60f), UiKit.Muted);
+        messageText = UiKit.Label(body, 26, "", new Vector2(0f, -245f), new Vector2(1100f, 60f), UiKit.Muted);
+        var delete = UiKit.RoundButton(body, "ลบบัญชี", new Vector2(0f, -320f), new Vector2(300f, 64f), UiKit.DangerTint, UiKit.Danger, DeleteAccount, 24);
+        deleteLabel = delete.GetComponentInChildren<Text>();
         backdrop.SetActive(false);
     }
 
@@ -105,6 +110,32 @@ public class AccountUI : MonoBehaviour
             messageText.color = UiKit.PayGreen;
         }
         catch (Exception) { messageText.text = "สร้างรหัสไม่สำเร็จ ลองใหม่"; messageText.color = UiKit.Danger; }
+        busy = false;
+    }
+
+    // Three taps: ลบบัญชี → แน่ใจไหม? → ยืนยันลบถาวร
+    private async void DeleteAccount()
+    {
+        var conn = Connection();
+        if (busy || conn == null) return;
+        deleteTaps++;
+        if (deleteTaps == 1)
+        {
+            deleteLabel.text = "แน่ใจไหม?";
+            messageText.text = "การลบบัญชีจะลบเงิน ของ เลเวล และความคืบหน้าทั้งหมดอย่างถาวร กู้คืนไม่ได้";
+            messageText.color = UiKit.Danger;
+            return;
+        }
+        if (deleteTaps == 2) { deleteLabel.text = "ยืนยันลบถาวร"; return; }
+        busy = true;
+        messageText.text = "กำลังลบบัญชี…";
+        try { await conn.DeleteAccountAsync(); }
+        catch (Exception)
+        {
+            messageText.text = "ลบบัญชีไม่สำเร็จ ลองใหม่";
+            deleteTaps = 0;
+            deleteLabel.text = "ลบบัญชี";
+        }
         busy = false;
     }
 
