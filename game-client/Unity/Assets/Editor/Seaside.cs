@@ -545,7 +545,10 @@ public static class Seaside
         PrimitiveKit.Box("Transom", b, new Vector3(0f, (HullSheer(0f) + HullKeel(0f)) * 0.5f + 0.05f, HullZ(0f) - 0.02f), new Vector3(HullBeam(0f) * 1.9f, HullSheer(0f) - HullKeel(0f) - 0.1f, 0.06f), dark, collider: false);
 
         // Solid plank deck above the waterline (hides the sea inside the hull), with plank seams
-        MeshKit.Place("Deck", b, LongtailDeck(DeckY), plank, Vector3.zero);
+        // Solid deck of darker boards, wider than the hull at that height so no water shows at the edges
+        var deckWood = PrimitiveKit.Mat("BoatDeck", new Color(0.5f, 0.32f, 0.17f));
+        deckWood.SetFloat("_Cull", 0f);
+        MeshKit.Place("Deck", b, LongtailDeck(DeckY), deckWood, Vector3.zero);
         for (float z = -3.6f; z <= 3.0f; z += 0.45f)
             PrimitiveKit.Box("DeckSeam", b, new Vector3(0f, DeckY + 0.005f, z), new Vector3(HullHalfWidthAt(HullT(z), DeckY) * 2f, 0.01f, 0.03f), dark, collider: false);
         foreach (float z in new[] { -2.9f, -0.9f, 0.6f, 2.0f })
@@ -633,7 +636,7 @@ public static class Seaside
         {
             float t = i / (float)n;
             if (HullKeel(t) >= y) break;
-            float w = HullHalfWidthAt(t, y);
+            float w = HullHalfWidthAt(t, y) / 0.98f + 0.02f; // reaches into the hull wall: no gap
             v.Add(new Vector3(-w, y, HullZ(t)));
             v.Add(new Vector3(w, y, HullZ(t)));
         }

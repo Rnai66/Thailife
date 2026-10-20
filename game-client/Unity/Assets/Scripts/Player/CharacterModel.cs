@@ -107,12 +107,21 @@ public class CharacterModel : MonoBehaviour
         if (placeholder != null) placeholder.enabled = false;
     }
 
+    // Sitting (on a boat that moves under us): stay in the idle pose instead of walking
+    public bool Seated { get; set; }
+
     private void Update()
     {
         if (animator == null) return;
         float dt = Mathf.Max(Time.deltaTime, 0.0001f);
         Vector3 delta = transform.position - lastPosition;
         lastPosition = transform.position;
+        if (Seated)
+        {
+            speed = 0f;
+            animator.SetFloat("Speed", 0f);
+            return;
+        }
         delta.y = 0f;
         float measured = Mathf.Min(delta.magnitude / dt, 8f); // teleports/snaps don't spike the run
         speed = Mathf.Lerp(speed, measured, 1f - Mathf.Exp(-10f * dt));

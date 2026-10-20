@@ -8,6 +8,18 @@ public class SeatedPose : MonoBehaviour
     public bool HoldTiller;
 
     private Animator animator;
+    private CharacterModel model;
+
+    private void OnEnable()
+    {
+        model = GetComponent<CharacterModel>();
+        if (model != null) model.Seated = true;
+    }
+
+    private void OnDisable()
+    {
+        if (model != null) model.Seated = false;
+    }
 
     private void LateUpdate()
     {
