@@ -256,7 +256,7 @@ public class ShopUI : MonoBehaviour
 
         // Header icon for this shop
         UiKit.Clear(shopBadge);
-        UiKit.Badge(shopBadge, shopId == "community" ? "icon:shop" : shopId == "flea" ? "icon:fair"
+        UiKit.Badge(shopBadge, shopId == "community" ? "icon:shop" : shopId == "flea" || shopId == "market" || shopId == "flea_furn" ? "icon:market"
             : shopId == "camp" ? "icon:boxing" : shopId == "music" ? "icon:music" : "icon:food");
 
         RenderTabs(categories);
