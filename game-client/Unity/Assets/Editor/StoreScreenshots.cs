@@ -110,8 +110,12 @@ public static class StoreScreenshots
     {
         if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
         Directory.CreateDirectory(OutDir);
-        Capture(new Shot { File = "preview_soidao", Scene = "Tambon", Title = "สอยดาว", Subtitle = "ซุ้มแยก · ต้นไม้แขวนสลาก",
-            Camera = new Vector3(-29.8f, 2.3f, -23.2f), LookAt = new Vector3(-25f, 1.3f, -20.6f), Fov = 55f }, LoadClips());
+        // Fairground at (-36, -30) turned 180°: the pens sit at world (-26.4, -21.8) and (-26.4, -30.2), gates facing -X
+        var clips = LoadClips();
+        Capture(new Shot { File = "preview_soidao", Scene = "Tambon", Title = "คอกสอยดาว", Subtitle = "ต้นสอยดาวกลางคอก",
+            Camera = new Vector3(-33f, 5.5f, -21.8f), LookAt = new Vector3(-25.5f, 0.8f, -21.8f), Fov = 60f }, clips);
+        Capture(new Shot { File = "preview_kokai", Scene = "Tambon", Title = "มหาลัย ก.ไก่", Subtitle = "คอกห้องเรียน · กระดานดำ",
+            Camera = new Vector3(-31.5f, 5.2f, -30.2f), LookAt = new Vector3(-25f, 0.8f, -30.2f), Fov = 60f, HideUpper = true }, clips);
         EditorSceneManager.OpenScene("Assets/Scenes/ThaiVillage.unity");
     }
 
@@ -141,7 +145,7 @@ public static class StoreScreenshots
         EditorSceneManager.OpenScene($"Assets/Scenes/{shot.Scene}.unity");
         if (shot.HideUpper)
             foreach (var t in Object.FindObjectsByType<Transform>(FindObjectsInactive.Exclude))
-                if (t.name == "UpperFloor") t.gameObject.SetActive(false); // look into walk-in buildings
+                if (t.name == "UpperFloor" || t.name == "Canopy") t.gameObject.SetActive(false); // look into walk-in buildings and tents
         if (System.Environment.GetEnvironmentVariable("SHOTS_NOPOLISH") != "1") ScenePolish.ApplyNow();
         SetTimeOfDay(shot.Night, shot.LookAt - shot.Camera);
 
