@@ -11,6 +11,7 @@ public static class Education
     {
         public string id, name, desc;
         public int level, xp, xp_to_next, fee, energy, main_xp, need_level;
+        public int lib_energy, lib_xp, lib_main_xp; // self-study in the library
         public bool unlocked;
     }
 
@@ -26,7 +27,8 @@ public static class Education
     public class Timer
     {
         public string id;   // empty = none (JsonUtility fills missing objects with defaults)
-        public float remain;
+        public float remain, secs;
+        public bool library;
         public bool Active => !string.IsNullOrEmpty(id);
     }
 
@@ -35,7 +37,7 @@ public static class Education
     {
         public string subject, name;
         public int xp, main_xp, level, main_level;
-        public bool subject_up, main_up;
+        public bool subject_up, main_up, library;
     }
 
     [Serializable]
@@ -63,7 +65,7 @@ public static class Education
         }
     }
 
-    [Serializable] private class SubjectRequest { public string subject; }
+    [Serializable] private class SubjectRequest { public string subject; public bool library; }
     [Serializable] private class JobRequest { public string job; }
 
     private static NakamaConnection Connection()
@@ -83,7 +85,8 @@ public static class Education
     }
 
     public static Task<State> GetAsync() => Call("edu_get");
-    public static Task<State> StartClassAsync(string subject) => Call("class_start", JsonUtility.ToJson(new SubjectRequest { subject = subject }));
+    public static Task<State> StartClassAsync(string subject, bool library = false) =>
+        Call("class_start", JsonUtility.ToJson(new SubjectRequest { subject = subject, library = library }));
     public static Task<State> FinishClassAsync() => Call("class_finish");
     public static Task<State> StartJobAsync(string job) => Call("job_start", JsonUtility.ToJson(new JobRequest { job = job }));
     public static Task<State> FinishJobAsync() => Call("job_finish");

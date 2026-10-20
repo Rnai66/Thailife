@@ -24,7 +24,7 @@ public static class StoreScreenshots
         public string File, Scene, Title, Subtitle;
         public Vector3 Camera, LookAt;
         public float Fov = 50f;
-        public bool Night;
+        public bool Night, HideUpper;
         public Person[] People = new Person[0];
     }
 
@@ -97,8 +97,11 @@ public static class StoreScreenshots
     {
         if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
         Directory.CreateDirectory(OutDir);
-        Capture(new Shot { File = "preview_school", Scene = "Tambon", Title = "โรงเรียน", Subtitle = "ห้องเรียน · เวทีมวย",
-            Camera = new Vector3(4f, 9f, -5f), LookAt = new Vector3(-3f, 0f, -23f), Fov = 60f }, LoadClips());
+        var clips = LoadClips();
+        Capture(new Shot { File = "preview_school", Scene = "Tambon", Title = "โรงเรียน", Subtitle = "เดินเข้าได้ · เวทีมวย",
+            Camera = new Vector3(-2f, 5f, -12f), LookAt = new Vector3(-8f, 1.5f, -26f), Fov = 60f }, clips);
+        Capture(new Shot { File = "preview_school_inside", Scene = "Tambon", Title = "ห้องเรียน · ห้องสมุด", Subtitle = "ข้างในโรงเรียน",
+            Camera = new Vector3(-10f, 9f, -20f), LookAt = new Vector3(-10f, 0f, -28.5f), Fov = 70f, HideUpper = true }, clips);
         EditorSceneManager.OpenScene("Assets/Scenes/ThaiVillage.unity");
     }
 
@@ -126,6 +129,9 @@ public static class StoreScreenshots
     private static void Capture(Shot shot, Dictionary<string, AnimationClip> clips)
     {
         EditorSceneManager.OpenScene($"Assets/Scenes/{shot.Scene}.unity");
+        if (shot.HideUpper)
+            foreach (var t in Object.FindObjectsByType<Transform>(FindObjectsInactive.Exclude))
+                if (t.name == "UpperFloor") t.gameObject.SetActive(false); // look into walk-in buildings
         if (System.Environment.GetEnvironmentVariable("SHOTS_NOPOLISH") != "1") ScenePolish.ApplyNow();
         SetTimeOfDay(shot.Night, shot.LookAt - shot.Camera);
 

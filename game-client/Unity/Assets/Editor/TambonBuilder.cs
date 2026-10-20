@@ -66,14 +66,12 @@ public static class TambonBuilder
         StreetFurniture.LampPost(root, new Vector3(41.5f, 0f, 13.2f));
 
         // School grounds: the tambon event boxing ring (also the sports class ring), the classroom
-        // and the school jobs (โค้ชกีฬา by the football field, ติวเตอร์ by the classrooms)
+        // and the school jobs (โค้ชกีฬา by the football field; the classroom, library and ติวเตอร์ are inside the school)
         Places.BoxingRing(root, new Vector3(6f, 0f, -24f), 180f, "เวทีมวยงานตำบล", "tambon");
         Lane(root, 6f, -19.5f, -10f);
         StreetFurniture.LampPost(root, new Vector3(2f, 0f, -19f));
         StreetFurniture.LampPost(root, new Vector3(10f, 0f, -19f));
-        Schooling.ClassroomDoor(root, new Vector3(-10f, 0f, -23.6f), 180f);
         Schooling.JobSpot(root, new Vector3(-21f, 0f, -14.5f), 180f, "coach", "โค้ชกีฬาโรงเรียน\nค่าจ้าง 300 ฿ · ต้องมี เลเวล 8 · กีฬา Lv 4");
-        Schooling.JobSpot(root, new Vector3(-15.5f, 0f, -23.4f), 180f, "tutor", "ติวเตอร์ตรรกะ\nค่าจ้าง 380 ฿ · ต้องมี เลเวล 10 · ตรรกะ Lv 5");
 
         // ตลาดนัด south of the road, entrance facing it (evening market, 16:00-22:00)
         Markets.FleaMarket(root, new Vector3(28f, 0f, -28f), "ตลาดนัด", "16:00-22:00", 180f);

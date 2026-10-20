@@ -6,6 +6,8 @@ using UnityEngine.UI;
 // with its level and XP bar, the fee and energy, and a "เข้าเรียน" button. A class lasts 30 s (the server
 // times it); the progress bar fills, then the class ends by itself and the XP is shown. Underneath, the
 // skilled jobs each subject opens up, ticked when you qualify.
+// The same window is the school library (ห้องสมุด) in library mode: read a book on your own — free,
+// a little energy, 45 s, smaller XP — so you can raise a skill without paying for a class.
 public class SchoolUI : MonoBehaviour
 {
     private static SchoolUI instance;
@@ -25,13 +27,16 @@ public class SchoolUI : MonoBehaviour
     private Education.State state;
     private Coroutine toastRun;
     private float classEndsAt;
-    private bool busy, finishing;
+    private bool busy, finishing, library;
+    private float classLength = 30f;
 
     private static readonly string[] SubjectIds = { "computer", "sports", "craft", "logic" };
 
-    public static void Show()
+    public static void Show(bool library = false)
     {
         if (instance == null) instance = new GameObject("SchoolUI").AddComponent<SchoolUI>();
+        instance.library = library;
+        instance.title.text = library ? "ห้องสมุดโรงเรียน" : "ห้องเรียน · โรงเรียนตำบล";
         instance.backdrop.SetActive(true);
         instance.Refresh();
     }
@@ -106,7 +111,8 @@ public class SchoolUI : MonoBehaviour
     {
         state = s;
         if (s == null || s.subjects == null) return;
-        subtitle.text = $"เลเวลหลัก Lv {s.main_level} · เรียนเพื่อเพิ่มเลเวลและเปิดอาชีพใหม่";
+        subtitle.text = library ? $"เลเวลหลัก Lv {s.main_level} · อ่านหนังสือฝึกทักษะเองฟรี"
+                                : $"เลเวลหลัก Lv {s.main_level} · เรียนเพื่อเพิ่มเลเวลและเปิดอาชีพใหม่";
         bool inClass = s.@class != null && s.@class.Active;
         bool working = s.job != null && s.job.Active;
         for (int i = 0; i < cards.Length && i < s.subjects.Length; i++)
@@ -118,9 +124,12 @@ public class SchoolUI : MonoBehaviour
             float k = sub.xp_to_next > 0 ? Mathf.Clamp01(sub.xp / (float)sub.xp_to_next) : 1f;
             c.xpFill.anchorMax = new Vector2(k, 1f);
             c.desc.text = sub.desc;
-            c.cost.text = $"ค่าเรียน {sub.fee} ฿ · พลังงาน {sub.energy}\n+{sub.main_xp} XP เลเวลหลัก";
+            c.cost.text = library
+                ? $"ฟรี · พลังงาน {sub.lib_energy} · 45 วิ\n+{sub.lib_xp} XP วิชา · +{sub.lib_main_xp} XP เลเวลหลัก"
+                : $"ค่าเรียน {sub.fee} ฿ · พลังงาน {sub.energy}\n+{sub.main_xp} XP เลเวลหลัก";
             bool here = inClass && s.@class.id == sub.id;
-            c.buttonText.text = !sub.unlocked ? $"ต้องเลเวล {sub.need_level}" : here ? "กำลังเรียน..." : "เข้าเรียน";
+            c.buttonText.text = !sub.unlocked ? $"ต้องเลเวล {sub.need_level}" : here ? (s.@class.library ? "กำลังอ่าน..." : "กำลังเรียน...")
+                : library ? "อ่านหนังสือ" : "เข้าเรียน";
             c.button.interactable = sub.unlocked && !inClass && !working && !busy;
         }
 
@@ -137,11 +146,13 @@ public class SchoolUI : MonoBehaviour
         if (inClass)
         {
             classEndsAt = Time.unscaledTime + s.@class.remain;
+            classLength = s.@class.secs > 0f ? s.@class.secs : 30f;
             string name = "";
             foreach (var sub in s.subjects) if (sub.id == s.@class.id) name = sub.name;
-            classText.text = $"กำลังเรียนวิชา{name}...";
+            classText.text = s.@class.library ? $"กำลังอ่านหนังสือวิชา{name}..." : $"กำลังเรียนวิชา{name}...";
         }
-        else classText.text = working ? "กำลังทำงานอยู่ — เลิกงานก่อนแล้วค่อยมาเรียน" : "เลือกวิชาที่อยากเรียน";
+        else classText.text = working ? "กำลังทำงานอยู่ — เลิกงานก่อนแล้วค่อยมาเรียน"
+            : library ? "เลือกหนังสือวิชาที่อยากอ่าน" : "เลือกวิชาที่อยากเรียน";
         progressBar.gameObject.SetActive(inClass);
     }
 
@@ -149,7 +160,7 @@ public class SchoolUI : MonoBehaviour
     {
         if (backdrop == null || !backdrop.activeSelf || state == null || state.@class == null || !state.@class.Active) return;
         float remain = Mathf.Max(0f, classEndsAt - Time.unscaledTime);
-        progressFill.anchorMax = new Vector2(1f - remain / 30f, 1f);
+        progressFill.anchorMax = new Vector2(1f - remain / classLength, 1f);
         if (remain <= 0f && !finishing) FinishClass();
     }
 
@@ -159,7 +170,7 @@ public class SchoolUI : MonoBehaviour
         busy = true;
         try
         {
-            Render(await Education.StartClassAsync(subject));
+            Render(await Education.StartClassAsync(subject, library));
             LifeClient.Instance?.Refresh();
             if (WalletClient.Instance != null) _ = WalletClient.Instance.RefreshAsync();
             GameAudio.Play("bell", null, 0.6f);
@@ -177,7 +188,7 @@ public class SchoolUI : MonoBehaviour
             var s = await Education.FinishClassAsync();
             var f = s.finished;
             Render(s);
-            string msg = $"จบคาบ{f.name}! +{f.xp} XP วิชา · +{f.main_xp} XP เลเวลหลัก";
+            string msg = $"{(f.library ? "อ่านจบ" : "จบคาบ")}{f.name}! +{f.xp} XP วิชา · +{f.main_xp} XP เลเวลหลัก";
             if (f.subject_up) msg = $"วิชา{f.name} ขึ้น Lv {f.level}! " + msg;
             if (f.main_up) msg = $"เลเวลหลักขึ้น Lv {f.main_level}! " + msg;
             Say(msg, UiKit.PayGreen);

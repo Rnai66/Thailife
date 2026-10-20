@@ -4,7 +4,8 @@
 -- The server times classes and shifts, so they can't be skipped.
 --
 --   edu_get       {}                -> subjects, jobs (with requirements), current class / shift
---   class_start   {"subject": id}   -> pays the fee and energy, starts the class
+--   class_start   {"subject": id, "library": bool} -> pays the fee and energy, starts the class
+--                 (library = read on your own in the school library: free, slower, less XP)
 --   class_finish  {}                -> subject XP + main XP
 --   job_start     {"job": id}       -> checks requirements and today's shifts, spends energy
 --   job_finish    {}                -> pays the wage
@@ -26,6 +27,9 @@ local MAX_LEVEL = 100
 local SUBJECT_MAX = 30
 
 local CLASS_SECONDS = 30
+-- Self-study in the library (ห้องสมุด): no fee, a little energy, takes longer, smaller XP
+M.LIBRARY = { secs = 45, energy = 4, xp = 6, main_xp = 10 }
+local function class_secs(c) return c.library and M.LIBRARY.secs or CLASS_SECONDS end
 local SUBJECT_ORDER = { "computer", "sports", "craft", "logic" }
 M.SUBJECTS = {
   computer = { name = "คอมพิวเตอร์", desc = "พิมพ์งาน ใช้โปรแกรม เขียนโค้ดเบื้องต้น", need_level = 1, fee = 20, energy = 6, xp = 10, main_xp = 20 },
@@ -137,6 +141,7 @@ local function view(user_id, s, extra)
       xp_to_next = (st.level >= SUBJECT_MAX) and 0 or subject_xp_to_next(st.level),
       fee = def.fee, energy = def.energy, main_xp = def.main_xp, need_level = def.need_level,
       unlocked = c.level >= def.need_level,
+      lib_energy = M.LIBRARY.energy, lib_xp = M.LIBRARY.xp, lib_main_xp = M.LIBRARY.main_xp,
     })
   end
   local jobs = {}
@@ -150,7 +155,9 @@ local function view(user_id, s, extra)
   end
   local result = { main_level = c.level, subjects = subjects, jobs = jobs }
   if s.class then
-    result.class = { id = s.class.id, remain = math.max(0, CLASS_SECONDS - (now - s.class.start_ms) / 1000) }
+    local secs = class_secs(s.class)
+    result.class = { id = s.class.id, remain = math.max(0, secs - (now - s.class.start_ms) / 1000), secs = secs,
+                     library = s.class.library == true }
   end
   if s.job then
     local job = M.JOBS[s.job.id]
@@ -180,10 +187,15 @@ nk.register_rpc(function(context, payload)
   if s.job then err("working") end
   if read_career(user_id).level < def.need_level then err("level too low") end
   if s.subjects[req.subject].level >= SUBJECT_MAX then err("subject maxed") end
-  if wallet(user_id) < def.fee then err("not enough baht") end
-  life.spend(user_id, def.energy)
-  nk.wallet_update(user_id, { [data.CURRENCY] = -def.fee }, { reason = "school_fee", subject = req.subject }, true)
-  s.class = { id = req.subject, start_ms = nk.time() }
+  local library = req.library == true
+  if library then
+    life.spend(user_id, M.LIBRARY.energy)
+  else
+    if wallet(user_id) < def.fee then err("not enough baht") end
+    life.spend(user_id, def.energy)
+    nk.wallet_update(user_id, { [data.CURRENCY] = -def.fee }, { reason = "school_fee", subject = req.subject }, true)
+  end
+  s.class = { id = req.subject, start_ms = nk.time(), library = library or nil }
   write(user_id, s)
   return view(user_id, s)
 end, "class_start")
@@ -193,11 +205,14 @@ nk.register_rpc(function(context, payload)
   local s = read(user_id)
   if not s.class then err("no class") end
   local elapsed = (nk.time() - s.class.start_ms) / 1000
-  if elapsed < CLASS_SECONDS - 2 then err("too early") end
+  if elapsed < class_secs(s.class) - 2 then err("too early") end
   local id = s.class.id
   local def, st = M.SUBJECTS[id], s.subjects[s.class.id]
+  local library = s.class.library == true
+  local xp = library and M.LIBRARY.xp or def.xp
+  local main_xp = library and M.LIBRARY.main_xp or def.main_xp
   s.class = nil
-  st.xp = st.xp + def.xp
+  st.xp = st.xp + xp
   local subject_up = false
   while st.level < SUBJECT_MAX and st.xp >= subject_xp_to_next(st.level) do
     st.xp = st.xp - subject_xp_to_next(st.level)
@@ -206,9 +221,9 @@ nk.register_rpc(function(context, payload)
   end
   if st.level >= SUBJECT_MAX then st.xp = 0 end
   write(user_id, s)
-  local c, main_up = add_main_xp(user_id, def.main_xp)
+  local c, main_up = add_main_xp(user_id, main_xp)
   quest.progress(user_id, "study", 1)
-  return view(user_id, s, { finished = { subject = id, name = def.name, xp = def.xp, main_xp = def.main_xp,
+  return view(user_id, s, { finished = { subject = id, name = def.name, xp = xp, main_xp = main_xp, library = library,
                                          level = st.level, subject_up = subject_up, main_level = c.level, main_up = main_up } })
 end, "class_finish")
 

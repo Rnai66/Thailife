@@ -286,13 +286,10 @@ public static class Places
         var field = PrimitiveKit.Mat("FieldGreen", new Color(0.3f, 0.65f, 0.28f));
         var gate = PrimitiveKit.Mat("SchoolGate", new Color(0.2f, 0.35f, 0.7f));
 
-        // Two-storey classroom building
-        PrimitiveKit.Box("Building", t, new Vector3(0f, 3f, 0f), new Vector3(16f, 6f, 6f), cream);
-        for (int floor = 0; floor < 2; floor++)
-        for (int i = 0; i < 6; i++)
-            PrimitiveKit.Box("Window", t, new Vector3(-6.25f + i * 2.5f, 1.6f + floor * 3f, -3.03f), new Vector3(1.4f, 1.2f, 0.05f), window, collider: false);
-        PrimitiveKit.Box("RoofFront", t, new Vector3(0f, 6.85f, -1.6f), new Vector3(17f, 0.15f, 3.8f), roof, new Vector3(-30f, 0f, 0f));
-        PrimitiveKit.Box("RoofBack", t, new Vector3(0f, 6.85f, 1.6f), new Vector3(17f, 0.15f, 3.8f), roof, new Vector3(30f, 0f, 0f));
+        // Two-storey school you can walk into: a doorway in the middle of the front opens on a lobby,
+        // the classroom (ห้องเรียน) to the left and the library (ห้องสมุด) to the right. The upper floor and
+        // roof hide while you're inside (InteriorReveal) so the camera can see the rooms.
+        SchoolBuilding(t, cream, roof, window);
 
         // Flagpole with the Thai flag (red-white-blue-white-red)
         PrimitiveKit.Cylinder("Flagpole", t, new Vector3(0f, 4f, -8f), new Vector3(0.12f, 4f, 0.12f), white);
@@ -320,6 +317,142 @@ public static class Places
 
         Gate(t, new Vector3(0f, 0f, -13f), name, gate, PrimitiveKit.Mat("SignYellow", new Color(1f, 0.85f, 0.15f)), new Color(0.15f, 0.2f, 0.5f));
         return school;
+    }
+
+    private static void SchoolBuilding(Transform t, Material cream, Material roof, Material window)
+    {
+        var blue = PrimitiveKit.Mat("SchoolGate", new Color(0.2f, 0.35f, 0.7f));
+        var tile = PrimitiveKit.Mat("SchoolTile", new Color(0.86f, 0.84f, 0.78f), 0.4f);
+        var wood = PrimitiveKit.Mat("WoodPlank", Wood);
+        var dark = PrimitiveKit.Mat("DarkWood", new Color(0.36f, 0.22f, 0.12f));
+        var gold = PrimitiveKit.Glow("ClassMarker", new Color(1f, 0.78f, 0.3f), 0.6f);
+        const float W = 16f, D = 8f, H = 3f;
+
+        // Ground floor shell
+        PrimitiveKit.Box("Floor", t, new Vector3(0f, 0.03f, 0f), new Vector3(W - 0.4f, 0.04f, D - 0.4f), tile, collider: false);
+        PrimitiveKit.Box("BackWall", t, new Vector3(0f, H * 0.5f, D * 0.5f - 0.1f), new Vector3(W, H, 0.2f), cream);
+        foreach (float side in new[] { -1f, 1f })
+        {
+            PrimitiveKit.Box("SideWall", t, new Vector3(side * (W * 0.5f - 0.1f), H * 0.5f, 0f), new Vector3(0.2f, H, D), cream);
+            PrimitiveKit.Box("FrontWall", t, new Vector3(side * 4.65f, H * 0.5f, -D * 0.5f + 0.1f), new Vector3(6.7f, H, 0.2f), cream);
+            // Partition between the lobby and each room, with an open doorway in the middle
+            foreach (float z in new[] { -2.5f, 2.5f })
+                PrimitiveKit.Box("Partition", t, new Vector3(side * 2.4f, H * 0.5f, z), new Vector3(0.15f, H, 3f), cream);
+            PrimitiveKit.Box("PartitionLintel", t, new Vector3(side * 2.4f, 2.7f, 0f), new Vector3(0.15f, 0.6f, 2f), cream, collider: false);
+            // Door frame posts
+            PrimitiveKit.Box("DoorPost", t, new Vector3(side * 1.35f, 1.2f, -D * 0.5f - 0.02f), new Vector3(0.18f, 2.4f, 0.28f), blue, collider: false);
+        }
+        PrimitiveKit.Box("Lintel", t, new Vector3(0f, 2.7f, -D * 0.5f + 0.1f), new Vector3(2.6f, 0.6f, 0.2f), cream, collider: false);
+        PrimitiveKit.Box("DoorHead", t, new Vector3(0f, 2.46f, -D * 0.5f - 0.02f), new Vector3(2.9f, 0.16f, 0.28f), blue, collider: false);
+        PrimitiveKit.Box("Doormat", t, new Vector3(0f, 0.04f, -D * 0.5f - 0.7f), new Vector3(2.2f, 0.02f, 1f), blue, collider: false);
+        // Ground-floor windows, seen from outside and inside
+        foreach (float x in new[] { -6.25f, -3.75f, 3.75f, 6.25f })
+            foreach (float z in new[] { -D * 0.5f - 0.03f, -D * 0.5f + 0.23f, D * 0.5f + 0.03f, D * 0.5f - 0.23f })
+                PrimitiveKit.Box("Window", t, new Vector3(x, 1.6f, z), new Vector3(1.4f, 1.2f, 0.05f), window, collider: false);
+        foreach (float x in new[] { -5f, 0f, 5f })
+            StreetFurniture.HangingLight(t, new Vector3(x, 2.75f, 0f));
+
+        // Upper floor, ceiling and roof: hidden while you're inside
+        var upper = PrimitiveKit.Group("UpperFloor", t, Vector3.zero).transform;
+        PrimitiveKit.Box("Ceiling", upper, new Vector3(0f, H + 0.05f, 0f), new Vector3(W, 0.1f, D), cream, collider: false);
+        PrimitiveKit.Box("Storey", upper, new Vector3(0f, H + 1.55f, 0f), new Vector3(W, 2.9f, D), cream, collider: false);
+        for (int i = 0; i < 6; i++)
+            foreach (float z in new[] { -D * 0.5f - 0.03f, D * 0.5f + 0.03f })
+                PrimitiveKit.Box("Window", upper, new Vector3(-6.25f + i * 2.5f, 4.6f, z), new Vector3(1.4f, 1.2f, 0.05f), window, collider: false);
+        const float eave = 6.1f, half = D * 0.5f + 0.6f, pitch = 30f;
+        float rise = half * Mathf.Tan(pitch * Mathf.Deg2Rad);
+        foreach (float side in new[] { -1f, 1f })
+            PrimitiveKit.Box(side < 0 ? "RoofFront" : "RoofBack", upper, new Vector3(0f, eave + rise * 0.5f, side * half * 0.5f),
+                new Vector3(W + 1f, 0.15f, half / Mathf.Cos(pitch * Mathf.Deg2Rad) + 0.1f), roof, new Vector3(side * pitch, 0f, 0f), collider: false);
+        MeshKit.Place("Gable", upper, MeshKit.Gable("SchoolGable", D, rise - 0.05f, W), cream, new Vector3(-W * 0.5f, 6f, 0f), new Vector3(0f, 90f, 0f));
+
+        var reveal = new GameObject("InteriorZone");
+        reveal.transform.SetParent(t, false);
+        reveal.transform.localPosition = new Vector3(0f, 1.5f, 0.2f);
+        var revealBox = reveal.AddComponent<BoxCollider>();
+        revealBox.isTrigger = true;
+        revealBox.size = new Vector3(W - 0.4f, H, D - 0.8f);
+        reveal.AddComponent<InteriorReveal>().Configure(upper);
+
+        // Room names over the inner doorways (seen from the lobby)
+        PrimitiveKit.Label("ห้องเรียน", t, new Vector3(-2.3f, 2.7f, 0f), 0.035f, new Color(0.15f, 0.2f, 0.5f), -90f);
+        PrimitiveKit.Label("ห้องสมุด", t, new Vector3(2.3f, 2.7f, 0f), 0.035f, new Color(0.15f, 0.2f, 0.5f), 90f);
+
+        // ── Classroom (left): blackboard, teacher's desk, rows of desks ──
+        PrimitiveKit.Box("Blackboard", t, new Vector3(-7.75f, 1.7f, 0f), new Vector3(0.06f, 1.2f, 3.4f), PrimitiveKit.Mat("Blackboard", new Color(0.12f, 0.28f, 0.2f)), collider: false);
+        PrimitiveKit.Box("BoardFrame", t, new Vector3(-7.78f, 1.7f, 0f), new Vector3(0.04f, 1.36f, 3.56f), wood, collider: false);
+        PrimitiveKit.Label("ก ข ค  1+1=2", t, new Vector3(-7.7f, 1.8f, 0f), 0.03f, Color.white, 90f);
+        PrimitiveKit.Box("TeacherDesk", t, new Vector3(-6.7f, 0.4f, -0.8f), new Vector3(0.8f, 0.8f, 1.6f), wood);
+        for (int col = 0; col < 2; col++)
+            for (int row = 0; row < 4; row++)
+            {
+                float x = -5.4f + col * 1.6f, z = -2.6f + row * 1.7f;
+                PrimitiveKit.Box("Desk", t, new Vector3(x, 0.72f, z), new Vector3(0.6f, 0.05f, 0.9f), wood, collider: false);
+                PrimitiveKit.Box("DeskLegs", t, new Vector3(x, 0.36f, z), new Vector3(0.5f, 0.7f, 0.05f), dark, collider: false);
+                PrimitiveKit.Box("Chair", t, new Vector3(x + 0.55f, 0.42f, z), new Vector3(0.4f, 0.05f, 0.4f), blue, collider: false);
+                PrimitiveKit.Box("ChairBack", t, new Vector3(x + 0.75f, 0.68f, z), new Vector3(0.05f, 0.5f, 0.4f), blue, collider: false);
+            }
+        PrimitiveKit.Box("ClassMarker", t, new Vector3(-3.3f, 0.06f, 0f), new Vector3(1.3f, 0.02f, 1.8f), gold, collider: false);
+        var classZone = new GameObject("ClassZone");
+        classZone.transform.SetParent(t, false);
+        classZone.transform.localPosition = new Vector3(-3.3f, 1f, 0f);
+        var classBox = classZone.AddComponent<BoxCollider>();
+        classBox.isTrigger = true;
+        classBox.size = new Vector3(1.3f, 2f, 1.8f);
+        classZone.AddComponent<SchoolDesk>().Configure(false);
+
+        // ── Library (right): bookshelves, reading tables, librarian's counter ──
+        Color[] covers = { new Color(0.8f, 0.2f, 0.2f), new Color(0.2f, 0.45f, 0.8f), new Color(0.95f, 0.75f, 0.2f), new Color(0.25f, 0.6f, 0.3f), new Color(0.6f, 0.3f, 0.65f), new Color(0.95f, 0.5f, 0.2f) };
+        var bookMats = new Material[covers.Length];
+        for (int i = 0; i < covers.Length; i++) bookMats[i] = PrimitiveKit.Mat($"BookCover{i}", covers[i]);
+        void Shelf(Vector3 at, float yaw, int seed)
+        {
+            var shelf = PrimitiveKit.Group("Bookshelf", t, at, yaw).transform;
+            PrimitiveKit.Box("Back", shelf, new Vector3(0f, 1.1f, 0.18f), new Vector3(1.6f, 2.2f, 0.05f), dark);
+            foreach (float x in new[] { -0.78f, 0.78f })
+                PrimitiveKit.Box("Side", shelf, new Vector3(x, 1.1f, 0f), new Vector3(0.05f, 2.2f, 0.4f), dark, collider: false);
+            for (int r = 0; r < 4; r++)
+            {
+                float y = 0.15f + r * 0.52f;
+                PrimitiveKit.Box("Board", shelf, new Vector3(0f, y, 0f), new Vector3(1.56f, 0.04f, 0.38f), wood, collider: false);
+                float x = -0.7f;
+                for (int b = 0; x < 0.68f; b++)
+                {
+                    float w = 0.08f + ((seed + r * 3 + b) % 3) * 0.03f, h = 0.32f + ((seed + b * 7 + r) % 4) * 0.04f;
+                    PrimitiveKit.Box("Book", shelf, new Vector3(x + w * 0.5f, y + 0.02f + h * 0.5f, 0f), new Vector3(w - 0.01f, h, 0.28f), bookMats[(seed + r + b) % bookMats.Length], collider: false);
+                    x += w;
+                }
+            }
+        }
+        foreach (float x in new[] { 3.6f, 5.3f, 7.0f })
+            Shelf(new Vector3(x, 0f, 3.55f), 0f, (int)(x * 3f));
+        Shelf(new Vector3(7.55f, 0f, 0.8f), 90f, 11);
+        Shelf(new Vector3(7.55f, 0f, -1.2f), 90f, 17);
+        foreach (float z in new[] { -2.4f, 0.4f })
+        {
+            PrimitiveKit.Box("ReadingTable", t, new Vector3(5.2f, 0.74f, z), new Vector3(1.8f, 0.06f, 1f), wood, collider: false);
+            PrimitiveKit.Box("TableLegs", t, new Vector3(5.2f, 0.37f, z), new Vector3(1.6f, 0.72f, 0.1f), dark, collider: false);
+            foreach (float x in new[] { 4.6f, 5.8f })
+                foreach (float dz in new[] { -0.75f, 0.75f })
+                    PrimitiveKit.Box("Stool", t, new Vector3(x, 0.42f, z + dz), new Vector3(0.38f, 0.05f, 0.38f), blue, collider: false);
+            PrimitiveKit.Box("OpenBook", t, new Vector3(5.0f, 0.79f, z), new Vector3(0.45f, 0.03f, 0.3f), PrimitiveKit.Mat("PagesWhite", new Color(0.97f, 0.95f, 0.88f)), collider: false);
+        }
+        PrimitiveKit.Sphere("Globe", t, new Vector3(5.8f, 1.0f, -2.4f), Vector3.one * 0.4f, PrimitiveKit.Mat("GlobeBlue", new Color(0.25f, 0.55f, 0.85f)));
+        PrimitiveKit.Box("LibrarianDesk", t, new Vector3(3.3f, 0.5f, -3.1f), new Vector3(1.4f, 1f, 0.6f), wood);
+        PrimitiveKit.Box("LibraryMarker", t, new Vector3(3.3f, 0.06f, 0f), new Vector3(1.3f, 0.02f, 1.8f), gold, collider: false);
+        var libZone = new GameObject("LibraryZone");
+        libZone.transform.SetParent(t, false);
+        libZone.transform.localPosition = new Vector3(3.3f, 1f, 0f);
+        var libBox = libZone.AddComponent<BoxCollider>();
+        libBox.isTrigger = true;
+        libBox.size = new Vector3(1.3f, 2f, 1.8f);
+        libZone.AddComponent<SchoolDesk>().Configure(true);
+
+        // ── Lobby: notice board and the tutoring desk (skilled job) ──
+        PrimitiveKit.Box("NoticeBoard", t, new Vector3(0f, 1.7f, 3.75f), new Vector3(2f, 1.1f, 0.05f), PrimitiveKit.Mat("Corkboard", new Color(0.72f, 0.55f, 0.35f)), collider: false);
+        for (int i = 0; i < 5; i++)
+            PrimitiveKit.Box("Notice", t, new Vector3(-0.7f + i * 0.35f, 1.65f + (i % 2) * 0.2f, 3.72f), new Vector3(0.26f, 0.34f, 0.01f), bookMats[i % bookMats.Length], collider: false);
+        Schooling.JobSpot(t, new Vector3(0f, 0f, 2.2f), 180f, "tutor", "ติวเตอร์ตรรกะ\nค่าจ้าง 380 ฿ · ต้องมี เลเวล 10 · ตรรกะ Lv 5");
     }
 
     // ── Sub-district health promoting hospital (รพ.สต. / สถานีอนามัย) ─────────────

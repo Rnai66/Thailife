@@ -1,23 +1,9 @@
 using UnityEngine;
 
-// Places for the school and skilled jobs (education.lua): the classroom door at the school, job
+// Places for the skilled jobs (education.lua): job
 // spots (a signpost with the job's picture and a trigger with JobDesk) and the motorbike repair shop.
 public static class Schooling
 {
-    // Classroom door: walking in opens the classroom window (SchoolUI)
-    public static void ClassroomDoor(Transform parent, Vector3 position, float yaw)
-    {
-        var door = PrimitiveKit.Group("Classroom_ห้องเรียน", parent, position, yaw);
-        var zone = new GameObject("ClassZone");
-        zone.transform.SetParent(door.transform, false);
-        zone.transform.localPosition = new Vector3(0f, 1f, 0f);
-        var box = zone.AddComponent<BoxCollider>();
-        box.isTrigger = true;
-        box.size = new Vector3(3.2f, 2f, 1.6f);
-        zone.AddComponent<SchoolDesk>();
-        Places.Sign(door.transform, new Vector3(2.4f, 0f, 0.2f), "ห้องเรียน\nคอมพิวเตอร์ · กีฬา · ช่าง · ตรรกะ\nเรียนเพื่อเพิ่มเลเวล", 0f);
-    }
-
     // A job's workplace: signpost + the trigger where you start and finish shifts
     public static void JobSpot(Transform parent, Vector3 position, float yaw, string jobId, string sign)
     {
