@@ -34,7 +34,7 @@ public class SoundUI : MonoBehaviour
 
     private void Awake()
     {
-        var body = UiKit.PremiumWindow(transform, "SoundCanvas", new Vector2(1200f, 980f), 56, "ส",
+        var body = UiKit.PremiumWindow(transform, "SoundCanvas", new Vector2(1200f, 980f), 56, "icon:settings",
             out backdrop, out var title, out var subtitle, Close, out _);
         title.text = "ตั้งค่า";
         subtitle.text = "เพลงบรรเลง · ความดังเสียง · คุณภาพภาพ";
