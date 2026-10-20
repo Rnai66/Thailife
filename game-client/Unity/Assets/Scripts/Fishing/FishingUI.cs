@@ -121,6 +121,7 @@ public class FishingUI : MonoBehaviour
         {
             FloatingText.Spawn(at, $"ได้{result.fish_name} {result.kg:0.00} กก.!", new Color(0.4f, 0.9f, 1f));
             if (spot != null) CaughtFish.Play(spot.BobberPosition, player != null ? player.transform : null, result.fish_id, result.kg);
+            FishCatchUI.Show(result.fish_id, result.fish_name, result.kg); // full-screen catch card
             SetState(State.Idle, $"ได้{result.fish_name} {result.kg:0.00} กก. — ตกต่อได้เลย");
         }
         else

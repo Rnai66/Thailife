@@ -20,6 +20,7 @@ public class BoatTour : MonoBehaviour
     private Vector3 standPosition;
     private Quaternion standRotation;
     private bool busy;
+    private SeatedPose pose;
 
     [Serializable] private class FinishResult { public int fare, tip, earned; public string done; }
 
@@ -71,6 +72,8 @@ public class BoatTour : MonoBehaviour
             standRotation = player.transform.rotation;
             player.InputEnabled = false;
             player.enabled = false;
+            pose = player.gameObject.AddComponent<SeatedPose>();
+            pose.HoldTiller = true; // the boatman sits by the engine, hand on the tiller
             StartCoroutine(Ride(conn));
         }
         catch (ApiResponseException e)
@@ -125,6 +128,7 @@ public class BoatTour : MonoBehaviour
 
         var player = rider;
         rider = null;
+        if (pose != null) Destroy(pose);
         player.enabled = true;
         player.InputEnabled = true;
         player.Teleport(standPosition, standRotation);
@@ -142,6 +146,7 @@ public class BoatTour : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (pose != null) Destroy(pose);
         if (rider != null)
         {
             rider.enabled = true;
