@@ -2,8 +2,9 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
-// Title screen (โลโก้ Thai Life Simulator) shown once when the game starts: the logo banner
-// over the temple fair, "แตะเพื่อเริ่มเล่น", then it fades away. Art: Resources/Branding.
+// Title screen (ThaiLife9) shown once when the game starts: the whole banner fitted to the screen
+// width over a darkened, screen-filling copy of itself, "แตะเพื่อเริ่มเล่น" on a wood sign in the
+// space below, then it fades away. Art: Resources/Branding/TitleBanner.
 public class TitleScreen : MonoBehaviour
 {
     private static bool shown;
@@ -22,7 +23,7 @@ public class TitleScreen : MonoBehaviour
     }
 
     private CanvasGroup group;
-    private RectTransform banner, screenRect;
+    private RectTransform banner, backdrop, promptBar, screenRect;
     private float aspect = 1.72f;
     private Text prompt;
     private bool leaving;
@@ -45,40 +46,56 @@ public class TitleScreen : MonoBehaviour
         bg.anchorMax = Vector2.one;
         bg.offsetMin = bg.offsetMax = Vector2.zero;
 
-        // Banner fills the screen (cropped at the sides if needed), logo stays in view
-        var banner = UiKit.Rect("Banner", bg, Color.white);
-        banner.anchorMin = banner.anchorMax = new Vector2(0.5f, 0.5f);
-        var image = banner.GetComponent<Image>();
-        image.sprite = UiKit.Art("TitleBanner");
-        image.raycastTarget = false;
-        this.banner = banner;
+        var art = UiKit.Art("TitleBanner");
+        aspect = art.rect.width / art.rect.height;
         screenRect = bg;
-        aspect = image.sprite.rect.width / image.sprite.rect.height;
 
-        var bar = UiKit.Panel("PromptBar", bg, new Color(0.24f, 0.14f, 0.08f, 0.85f), Vector2.zero, new Vector2(760f, 100f), shadow: true);
-        bar.anchorMin = bar.anchorMax = new Vector2(0.5f, 0f);
-        bar.anchoredPosition = new Vector2(0f, 110f);
-        bar.gameObject.AddComponent<Outline>().effectColor = UiKit.Gold;
-        prompt = UiKit.Label(bar, 40, "แตะเพื่อเริ่มเล่น", Vector2.zero, new Vector2(720f, 90f), UiKit.GoldText);
-        prompt.fontStyle = FontStyle.Bold;
+        // Behind: the banner enlarged to cover the screen and darkened, so there are no empty bands
+        backdrop = UiKit.Rect("Backdrop", bg, new Color(0.45f, 0.42f, 0.4f));
+        backdrop.anchorMin = backdrop.anchorMax = new Vector2(0.5f, 0.5f);
+        var back = backdrop.GetComponent<Image>();
+        back.sprite = art;
+        back.raycastTarget = false;
+
+        // In front: the whole banner, fitted to the width so the logo and its tagline are never cut
+        banner = UiKit.Rect("Banner", bg, Color.white);
+        banner.anchorMin = banner.anchorMax = new Vector2(0.5f, 1f);
+        banner.pivot = new Vector2(0.5f, 1f);
+        var image = banner.GetComponent<Image>();
+        image.sprite = art;
+        image.raycastTarget = false;
+        banner.gameObject.AddComponent<Shadow>().effectDistance = new Vector2(0f, -8f);
+
+        // "แตะเพื่อเริ่มเล่น" on a wood sign in the space under the banner
+        promptBar = UiKit.WoodPlate(bg, Vector2.zero, new Vector2(700f, 110f));
+        promptBar.anchorMin = promptBar.anchorMax = new Vector2(0.5f, 0f);
+        prompt = UiKit.Cartoon(UiKit.Label(promptBar, 46, "แตะเพื่อเริ่มเล่น", Vector2.zero, new Vector2(680f, 100f), UiKit.WoodInk), 3f);
 
         var tap = bg.gameObject.AddComponent<Button>();
         tap.transition = Selectable.Transition.None;
         tap.onClick.AddListener(() => { if (!leaving) StartCoroutine(FadeOut()); });
     }
 
-    // Cover the whole screen with the banner (cropping a little top/bottom or left/right)
+    // Lay out for this screen: backdrop covers it, banner fits (top-aligned), prompt centred in what's left
     private void LateUpdate()
     {
         if (banner == null || screenRect == null) return;
         Vector2 p = screenRect.rect.size;
         if (p.x <= 0f || p.y <= 0f) return;
-        banner.sizeDelta = p.x / p.y > aspect ? new Vector2(p.x, p.x / aspect) : new Vector2(p.y * aspect, p.y);
+        backdrop.sizeDelta = p.x / p.y > aspect ? new Vector2(p.x, p.x / aspect) : new Vector2(p.y * aspect, p.y);
+
+        const float promptSpace = 150f; // always leave room for the sign under the banner
+        float w = Mathf.Min(p.x, (p.y - promptSpace) * aspect);
+        banner.sizeDelta = new Vector2(w, w / aspect);
+        float free = p.y - w / aspect;
+        banner.anchoredPosition = new Vector2(0f, -Mathf.Max(0f, free - promptSpace) * 0.25f);
+        float bannerBottom = p.y + banner.anchoredPosition.y - w / aspect;
+        promptBar.anchoredPosition = new Vector2(0f, Mathf.Max(70f, bannerBottom * 0.5f));
     }
 
     private void Update()
     {
-        if (prompt != null && !leaving) prompt.color = Color.Lerp(UiKit.GoldText, Color.white, Mathf.PingPong(Time.unscaledTime, 1f));
+        if (prompt != null && !leaving) prompt.color = Color.Lerp(UiKit.WoodInk, UiKit.GoldText, Mathf.PingPong(Time.unscaledTime, 1f));
     }
 
     private IEnumerator FadeOut()
