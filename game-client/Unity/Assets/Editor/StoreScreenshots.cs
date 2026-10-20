@@ -221,16 +221,13 @@ public static class StoreScreenshots
         var sub = UiKit.Cartoon(UiKit.Label(plate, 52, shot.Subtitle, new Vector2(0f, -78f), new Vector2(1420f, 80f), UiKit.GoldText), 3f);
         sub.horizontalOverflow = HorizontalWrapMode.Overflow;
 
-        var logo = UiKit.Art("Logo");
-        if (logo != null)
-        {
-            var img = UiKit.Rect("Logo", go.transform, Color.white);
-            img.anchorMin = img.anchorMax = new Vector2(1f, 1f);
-            img.pivot = new Vector2(1f, 1f);
-            img.anchoredPosition = new Vector2(-60f, -50f);
-            img.sizeDelta = new Vector2(460f, 460f * logo.rect.height / logo.rect.width);
-            img.GetComponent<Image>().sprite = logo;
-        }
+        // App Store name on a small wood sign top-right (the title-art logo still says the old name)
+        var badge = UiKit.WoodPlate(go.transform, Vector2.zero, new Vector2(470f, 150f));
+        badge.anchorMin = badge.anchorMax = new Vector2(1f, 1f);
+        badge.pivot = new Vector2(1f, 1f);
+        badge.anchoredPosition = new Vector2(-70f, -60f);
+        var name = UiKit.Cartoon(UiKit.Label(badge, 88, "ThaiLife9", Vector2.zero, new Vector2(440f, 130f), UiKit.GoldText), 5f);
+        name.horizontalOverflow = HorizontalWrapMode.Overflow;
         return go;
     }
 }
