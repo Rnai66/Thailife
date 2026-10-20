@@ -9,12 +9,16 @@ public class TravelMenu : MonoBehaviour
 {
     private static TravelMenu instance;
 
-    private GameObject backdrop;
+    private const float Spacing = 360f;
 
-    public static void Show()
+    private GameObject backdrop;
+    private Text title;
+
+    public static void Show(string heading = null)
     {
         if (instance == null)
             instance = new GameObject("TravelMenu").AddComponent<TravelMenu>();
+        instance.title.text = string.IsNullOrEmpty(heading) ? "ป้ายรถสองแถว" : heading;
         instance.backdrop.SetActive(true);
     }
 
@@ -28,18 +32,18 @@ public class TravelMenu : MonoBehaviour
         if (FindAnyObjectByType<EventSystem>() == null)
             Debug.LogWarning("[Travel] No EventSystem in the scene — run Thai Life > Repair Scene.");
 
-        var body = UiKit.PremiumWindow(transform, "TravelCanvas", new Vector2(1500f, 880f), 50, "icon:travel",
-            out backdrop, out var title, out var subtitle, Hide, out _);
+        var all = Locations.All;
+        var body = UiKit.PremiumWindow(transform, "TravelCanvas", new Vector2(Mathf.Max(1500f, all.Count * Spacing + 60f), 880f), 50, "icon:travel",
+            out backdrop, out title, out var subtitle, Hide, out _);
         title.text = "ป้ายรถสองแถว";
         subtitle.text = "เลือกจุดหมายปลายทาง";
 
         // Route line behind the cards
         var route = UiKit.Rect("Route", body, UiKit.Gold);
         route.anchoredPosition = new Vector2(0f, 230f);
-        route.sizeDelta = new Vector2(1100f, 6f);
+        route.sizeDelta = new Vector2((all.Count - 1) * Spacing, 6f);
 
         var current = Locations.Current;
-        var all = Locations.All;
         for (int i = 0; i < all.Count; i++)
             AddStop(body, all[i], i, all.Count, current != null && all[i].Id == current.Id);
 
@@ -48,7 +52,7 @@ public class TravelMenu : MonoBehaviour
 
     private void AddStop(RectTransform body, Location location, int index, int count, bool here)
     {
-        float x = (index - (count - 1) * 0.5f) * 360f;
+        float x = (index - (count - 1) * 0.5f) * Spacing;
 
         // Stop marker on the route
         var dot = UiKit.Rect("Stop", body, here ? UiKit.PayGreen : UiKit.Gold);
@@ -61,7 +65,7 @@ public class TravelMenu : MonoBehaviour
         card.gameObject.AddComponent<Outline>().effectColor = here ? UiKit.PayGreen : UiKit.CardBorder;
 
         // Place picture (บ้าน / อบต. / เมือง)
-        string icon = location.Level == LocationLevel.Village ? "home" : location.Level == LocationLevel.Subdistrict ? "sao"
+        string icon = !string.IsNullOrEmpty(location.Icon) ? location.Icon : location.Level == LocationLevel.Village ? "home" : location.Level == LocationLevel.Subdistrict ? "sao"
             : location.Level == LocationLevel.Beach ? "travel" : "city";
         UiKit.IconTile(card, icon, new Vector2(0f, 82f), new Vector2(180f, 180f));
 

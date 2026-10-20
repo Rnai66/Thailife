@@ -18,6 +18,17 @@ public static class TambonBuilder
     [MenuItem("Thai Life/Build Beach Scene (ทะเล)")]
     private static void BuildBeachFromMenu() => BuildBeach(ask: true);
 
+    [MenuItem("Thai Life/Build Island Scene (เกาะ)")]
+    private static void BuildIslandFromMenu() => BuildIsland(ask: true);
+
+    // เกาะ: Maya Bay-style lagoon with cliffs, tyre swing, beach bars, treasure chests; ferry back to the mainland
+    internal static void BuildIsland(bool ask) => BuildLocation("Assets/Scenes/Island.unity", "Island", 10f, ask, root =>
+    {
+        Island.Build(root);
+        ShopZone(root, new Vector3(-6f, 0f, 2.6f), "beach");                                   // บาร์ริมหาด
+        ShopZone(root, new Vector3(31f, 0f, 1f) + Quaternion.Euler(0f, -12f, 0f) * new Vector3(0f, 0f, 2.3f), "community"); // บาร์กระท่อม: sell fish, buy rods
+    }, road: false);
+
     // ทะเล: beach, longtail boats, fishing pier with sea fishing, umbrellas to rest under
     internal static void BuildBeach(bool ask) => BuildLocation("Assets/Scenes/Beach.unity", "Beach", 10f, ask, root =>
     {
@@ -205,7 +216,7 @@ public static class TambonBuilder
             Nature.Bush(root, pos, 1.2f, (int)(pos.x + pos.z), flowers: true);
     });
 
-    private static void BuildLocation(string scenePath, string rootName, float groundScale, bool ask, Action<Transform> content)
+    private static void BuildLocation(string scenePath, string rootName, float groundScale, bool ask, Action<Transform> content, bool road = true)
     {
         if (ask && File.Exists(scenePath) &&
             !EditorUtility.DisplayDialog("สร้างฉาก", $"{Path.GetFileName(scenePath)} มีอยู่แล้ว ต้องการสร้างใหม่ทับหรือไม่?\n(ไม่กระทบฉากอื่น)", "สร้างใหม่", "ยกเลิก"))
@@ -220,7 +231,7 @@ public static class TambonBuilder
         MobileControlsSetup.EnsureMobileControls();
 
         var root = new GameObject(rootName).transform;
-        MainRoad(root, groundScale * 10f);
+        if (road) MainRoad(root, groundScale * 10f);
         content(root);
 
         Directory.CreateDirectory(Path.GetDirectoryName(scenePath));

@@ -40,6 +40,7 @@ public static class Seaside
 
         Pier(root, new Vector3(25f, 0f, 18f));
         TourBoat(root);
+        Island.FerryStop(root, new Vector3(20f, 0f, 17f), 0f, "เรือไปเกาะ", "ท่าเรือข้ามเกาะ"); // ferry out to the island (อ่าวมาหยา)
 
         // Longtail boats (เรือหางยาว) and a fishing boat moored by the pier
         LongtailBoat(root, new Vector3(-12f, 0f, 30f), 20f, new Color(0.95f, 0.35f, 0.25f));
@@ -507,7 +508,7 @@ public static class Seaside
     // Thai longtail boat (เรือหางยาว): a deep wooden hull whose bow sweeps up high, gunwales, floorboards,
     // bench seats, a canopy, flower garlands and ribbons on the bow, and the car engine on a pivot at the
     // stern driving a long propeller shaft. Bow is +Z. People "sit" by standing low inside the hull.
-    private static Transform LongtailBoat(Transform root, Vector3 pos, float yaw, Color ribbon)
+    internal static Transform LongtailBoat(Transform root, Vector3 pos, float yaw, Color ribbon)
     {
         var b = PrimitiveKit.Group("LongtailBoat_เรือหางยาว", root, pos, yaw).transform;
         var wood = PrimitiveKit.Mat("BoatHullWood", new Color(0.52f, 0.31f, 0.15f));

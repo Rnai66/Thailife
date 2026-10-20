@@ -22,6 +22,7 @@ public static class WorldBuilder
         TambonBuilder.BuildTambon(ask: false);
         TambonBuilder.BuildCity(ask: false);
         TambonBuilder.BuildBeach(ask: false);
+        TambonBuilder.BuildIsland(ask: false);
 
         var village = EditorSceneManager.OpenScene(VillageScene, OpenSceneMode.Single);
         VillageBuilder.Build(ask: false);

@@ -18,6 +18,7 @@ public class Location
     public LocationLevel Level;
     public string Scene;      // null = not built yet ("เร็วๆ นี้")
     public string SpawnId;    // SpawnPoint to arrive at
+    public string Icon;       // Resources/Branding/Icons picture (null = by level)
 
     public bool Available => !string.IsNullOrEmpty(Scene);
 }
@@ -31,6 +32,7 @@ public static class Locations
         new Location { Id = "tambon_khoko", NameTh = "ตำบล · อบต. รพ.สต. โรงเรียน คลองตกปลา", Level = LocationLevel.Subdistrict, Scene = "Tambon", SpawnId = "busstop" },
         new Location { Id = "city", NameTh = "ตัวเมือง · ค่ายมวย หอนาฬิกา", Level = LocationLevel.City, Scene = "City", SpawnId = "busstop" },
         new Location { Id = "beach", NameTh = "ทะเล · ชายหาด ท่าเรือประมง ตกปลาทะเล", Level = LocationLevel.Beach, Scene = "Beach", SpawnId = "busstop" },
+        new Location { Id = "island", NameTh = "เกาะ · อ่าวมาหยา ชิงช้า หาสมบัติ เรือใบ", Level = LocationLevel.Beach, Scene = "Island", SpawnId = "pier", Icon = "island" },
     };
 
     public static string LevelNameTh(LocationLevel level) => level switch
