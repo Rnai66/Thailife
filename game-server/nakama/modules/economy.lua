@@ -39,7 +39,7 @@ local function balance(user_id)
 end
 
 -- Everything sellable (fish + rice from the barn) as a list the client can parse, plus its value
-local function basket(inv, crops)
+local function basket(inv, crops, items)
   local counts = inv.counts or {}
   local list, value = {}, 0
   for _, f in ipairs(FISH_PRICES) do
@@ -52,6 +52,15 @@ local function basket(inv, crops)
     local kg = crops.rice[v] or 0
     table.insert(list, { id = "rice_" .. v, name = r.name .. " (กก.)", count = kg, price = r.price_per_kg })
     value = value + kg * r.price_per_kg
+  end
+  -- Temple-fair prizes (สอยดาว, ปาโป่ง): only listed when you have some
+  for _, id in ipairs(data.GOODS_ORDER) do
+    local n = (items and items.goods[id]) or 0
+    if n > 0 then
+      local g = data.GOODS[id]
+      table.insert(list, { id = "goods_" .. id, name = g.name, count = n, price = g.price })
+      value = value + n * g.price
+    end
   end
   return list, value
 end
@@ -96,8 +105,8 @@ end
 
 local function view(user_id, inv, extra)
   local crops = data.read_barn(user_id)
-  local list, value = basket(inv, crops)
   local items = data.read_items(user_id)
+  local list, value = basket(inv, crops, items)
   local result = {
     baht = balance(user_id), fish = list, total_value = value,
     rod = items.rod, rod_name = data.RODS[items.rod].name, camp_member = items.camp_member,
@@ -118,8 +127,11 @@ local function rpc_sell_fish(context, payload)
   local user_id = context.user_id
   local inv = read_inventory(user_id)
   local crops, rice_kg = data.read_barn(user_id)
-  local _, value = basket(inv, crops)
-  local sold = (inv.total or 0) + rice_kg
+  local items = data.read_items(user_id)
+  local _, value = basket(inv, crops, items)
+  local goods = 0
+  for _, n in pairs(items.goods) do goods = goods + n end
+  local sold = (inv.total or 0) + rice_kg + goods
 
   if value > 0 then
     -- Pay first, then empty the fish basket and the rice barn (keep the biggest-fish record)
@@ -127,6 +139,10 @@ local function rpc_sell_fish(context, payload)
     inv.counts = {}
     inv.total = 0
     for _, v in ipairs(data.RICE_ORDER) do crops.rice[v] = 0 end
+    if goods > 0 then
+      items.goods = {}
+      data.write_items(user_id, items)
+    end
     nk.storage_write({
       { collection = INVENTORY.collection, key = INVENTORY.key, user_id = user_id, value = inv, permission_read = 1, permission_write = 0 },
       { collection = data.CROPS.collection, key = data.CROPS.key, user_id = user_id, value = crops, permission_read = 1, permission_write = 0 },

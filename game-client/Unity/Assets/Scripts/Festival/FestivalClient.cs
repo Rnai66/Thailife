@@ -39,6 +39,13 @@ public class FestivalClient : MonoBehaviour
         public int gained;
         public string[] card;   // มหาลัย ก.ไก่: your 4 letters
         public string[] draws;  // the letters called, in order, until your card was complete
+        public string ticket;   // สอยดาว: the number on the paper you picked
+        public string icon;     // prize picture (Resources/Branding/Icons)
+        public bool big;        // สอยดาว: one of the big prizes
+        public bool[] throws;   // ปาโป่ง: each dart pops a balloon or misses
+        public int pops;
+        public int[] bingo_card; // บิงโก: 25 numbers row by row, 0 = free middle
+        public int[] calls;      // the balls called, in order
     }
 
     [Serializable] private class PlayRequest { public string game; }

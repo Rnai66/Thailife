@@ -105,6 +105,16 @@ public static class StoreScreenshots
         EditorSceneManager.OpenScene("Assets/Scenes/ThaiVillage.unity");
     }
 
+    [MenuItem("Thai Life/Advanced/Preview Soi Dao Stall")]
+    public static void PreviewSoiDao()
+    {
+        if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+        Directory.CreateDirectory(OutDir);
+        Capture(new Shot { File = "preview_soidao", Scene = "Tambon", Title = "สอยดาว", Subtitle = "ซุ้มแยก · ต้นไม้แขวนสลาก",
+            Camera = new Vector3(-29.8f, 2.3f, -23.2f), LookAt = new Vector3(-25f, 1.3f, -20.6f), Fov = 55f }, LoadClips());
+        EditorSceneManager.OpenScene("Assets/Scenes/ThaiVillage.unity");
+    }
+
     private static Dictionary<string, AnimationClip> LoadClips()
     {
         var result = new Dictionary<string, AnimationClip>();

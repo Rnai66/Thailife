@@ -3,8 +3,9 @@ using System.Collections;
 using Nakama;
 using UnityEngine;
 
-// A fair game or show (สอยดาว, บิงโก, ปาเป้า, ชิงช้าสวรรค์, ม้าหมุน, หนังกลางแปลง, ลิเก).
-// Rides seat the player on `seat` for a while; shows and games just roll on the server.
+// A fair game or show (สอยดาว, บิงโก, ปาโป่ง, มหาลัย ก.ไก่, ชิงช้าสวรรค์, ม้าหมุน, หนังกลางแปลง, ลิเก).
+// Rides seat the player on `seat` for a while; สอยดาว, ปาโป่ง and บิงโก open their own game screens;
+// shows just roll on the server.
 [RequireComponent(typeof(Collider))]
 public class FestivalBooth : MonoBehaviour
 {
@@ -30,7 +31,7 @@ public class FestivalBooth : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         if (other.GetComponent<PlayerController>() == null) return;
-        string label = seat != null ? "ขึ้นเล่น" : price == 0 ? "นั่งดู" : "เล่น";
+        string label = seat != null ? "ขึ้นเล่น" : price == 0 ? "นั่งดู" : game == "soidao" ? "สอยดาว" : "เล่น";
         ContextButton.Show(this, label, price > 0 ? $"{title} · {price} บาท" : $"{title} · ดูฟรี", Play);
     }
 
@@ -39,10 +40,29 @@ public class FestivalBooth : MonoBehaviour
         if (other.GetComponent<PlayerController>() != null) ContextButton.Hide(this);
     }
 
+    // Fair games with their own screen: they take the ticket money themselves when you play
+    private bool OwnScreen()
+    {
+        switch (game)
+        {
+            case "soidao": SoiDaoUI.Show(title, price); return true;
+            case "darts": DartsUI.Show(title, price); return true;
+            case "bingo": BingoUI.Show(title, price); return true;
+        }
+        return false;
+    }
+
+    public static string Explain(Exception e, int price) =>
+        e.Message.Contains("baht") ? $"เงินไม่พอ ({price} บาท)"
+        : e.Message.Contains("watched") ? "ดูรอบนี้ไปแล้ว รองานหน้า"
+        : e.Message.Contains("big") ? "มีเฉพาะงานใหญ่ในเมือง"
+        : e.Message.Contains("no festival") ? "ยังไม่มีงานตอนนี้" : "เล่นไม่ได้ตอนนี้";
+
     private async void Play()
     {
         var f = FestivalClient.Instance;
         if (busy || f == null) return;
+        if (OwnScreen()) return;
         busy = true;
         try
         {
@@ -66,10 +86,7 @@ public class FestivalBooth : MonoBehaviour
         }
         catch (ApiResponseException e)
         {
-            UiKit.FloatAbovePlayer(e.Message.Contains("baht") ? $"เงินไม่พอ ({price} บาท)"
-                : e.Message.Contains("watched") ? "ดูรอบนี้ไปแล้ว รองานหน้า"
-                : e.Message.Contains("big") ? "มีเฉพาะงานใหญ่ในเมือง"
-                : e.Message.Contains("no festival") ? "ยังไม่มีงานตอนนี้" : "เล่นไม่ได้ตอนนี้", new Color(1f, 0.5f, 0.4f));
+            UiKit.FloatAbovePlayer(Explain(e, price), new Color(1f, 0.5f, 0.4f));
         }
         catch (Exception e)
         {

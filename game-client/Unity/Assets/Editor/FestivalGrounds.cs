@@ -2,7 +2,7 @@ using UnityEngine;
 
 // Event ground for the traditional festivals (ลานจัดงาน; the งานวัด itself is at the village temple). The arch stays all year and shows the
 // next festival; everything under "Attractions" appears only while a festival of this size is
-// on (FestivalGate): small = tambon (สอยดาว, ปาเป้า, หนังกลางแปลง, ลิเก), big = city
+// on (FestivalGate): small = tambon (สอยดาว, ปาโป่ง, หนังกลางแปลง, ลิเก), big = city
 // (+ บิงโก, ชิงช้าสวรรค์, ม้าหมุน). Built facing local -Z (the entrance), then turned to the road.
 public static class FestivalGrounds
 {
@@ -25,8 +25,8 @@ public static class FestivalGrounds
         root.AddComponent<FestivalGate>().Configure(big ? "big" : "small", banner);
 
         // Game booths down the left side, facing the middle
-        Booth(attractions, new Vector3(-11f, 0f, -9f), "soidao", "สอยดาว", 20, PrimitiveKit.Mat("TentYellow", new Color(0.98f, 0.78f, 0.2f)));
-        Booth(attractions, new Vector3(-11f, 0f, -4f), "darts", "ปาเป้าลูกโป่ง", 10, PrimitiveKit.Mat("TentBlue", new Color(0.2f, 0.45f, 0.8f)));
+        SoiDaoStall(attractions, new Vector3(-11f, 0f, -9.2f));
+        Booth(attractions, new Vector3(-11f, 0f, -4f), "darts", "ปาโป่ง", 10, PrimitiveKit.Mat("TentBlue", new Color(0.2f, 0.45f, 0.8f)));
         Booth(attractions, new Vector3(-11f, 0f, 1f), "kokai", "มหาลัย ก.ไก่", 30, PrimitiveKit.Mat("TentWhite", new Color(0.95f, 0.95f, 0.92f)));
         if (big) Booth(attractions, new Vector3(-11f, 0f, 6f), "bingo", "บิงโก", 30, PrimitiveKit.Mat("TentGreen", new Color(0.25f, 0.62f, 0.35f)));
 
@@ -94,14 +94,136 @@ public static class FestivalGrounds
             PrimitiveKit.Cylinder("Pole", b, new Vector3(x, 1.15f, z), new Vector3(0.06f, 1.15f, 0.06f), pole);
         MeshKit.Place("Canopy", b, MeshKit.Gable("BoothRoof", 2.9f, 0.8f, 2.6f), canopy, new Vector3(0f, 2.3f, -1.3f));
         PrimitiveKit.Box("Counter", b, new Vector3(0f, 0.5f, -0.9f), new Vector3(2.4f, 1f, 0.5f), PrimitiveKit.Mat("WoodPlank", new Color(0.6f, 0.4f, 0.22f)));
-        // Prizes on a back shelf: little coloured dolls and a gold star
-        PrimitiveKit.Box("Shelf", b, new Vector3(0f, 1.2f, 0.9f), new Vector3(2.4f, 0.06f, 0.4f), PrimitiveKit.Mat("WoodPlank", new Color(0.6f, 0.4f, 0.22f)), collider: false);
         Color[] prizes = { new Color(0.95f, 0.5f, 0.6f), new Color(0.5f, 0.75f, 0.95f), new Color(1f, 0.85f, 0.3f), new Color(0.6f, 0.9f, 0.55f) };
-        for (int i = 0; i < 4; i++)
-            MeshKit.Place("Prize", b, MeshKit.Blob("Prize", 61 + i, 0.15f, 1), PrimitiveKit.Mat($"Prize{i}", prizes[i]),
-                new Vector3(-0.9f + i * 0.6f, 1.45f, 0.9f), default, new Vector3(0.35f, 0.45f, 0.3f));
+        if (game == "darts")
+        {
+            // Balloon board: a wooden wall of coloured balloons, a couple of darts stuck in it
+            PrimitiveKit.Box("BalloonBoard", b, new Vector3(0f, 1.45f, 1.05f), new Vector3(2.4f, 1.5f, 0.08f), PrimitiveKit.Mat("WoodPlank", new Color(0.6f, 0.4f, 0.22f)), collider: false);
+            Color[] balloon = { new Color(0.95f, 0.25f, 0.3f), new Color(1f, 0.8f, 0.2f), new Color(0.3f, 0.6f, 1f), new Color(0.4f, 0.85f, 0.4f), new Color(0.9f, 0.4f, 0.9f) };
+            for (int r = 0; r < 3; r++)
+                for (int c = 0; c < 6; c++)
+                    PrimitiveKit.Sphere("Balloon", b, new Vector3(-0.95f + c * 0.38f, 0.95f + r * 0.45f, 0.95f), new Vector3(0.28f, 0.34f, 0.2f),
+                        PrimitiveKit.Mat($"Balloon{(r + c) % 5}", balloon[(r + c) % 5], 0.7f));
+            // Teddy bears for the three-pop prize on the counter
+            for (int i = 0; i < 2; i++)
+                MeshKit.Place("Teddy", b, MeshKit.Blob("Prize", 63, 0.15f, 1), PrimitiveKit.Mat("TeddyBrown", new Color(0.7f, 0.47f, 0.27f)),
+                    new Vector3(-0.8f + i * 1.6f, 1.25f, -0.9f), default, new Vector3(0.3f, 0.4f, 0.28f));
+        }
+        else if (game == "bingo")
+        {
+            // Number board (1-75) and the ball cage on the counter
+            PrimitiveKit.Box("NumberBoard", b, new Vector3(0f, 1.5f, 1.05f), new Vector3(2.4f, 1.3f, 0.06f), PrimitiveKit.Mat("Blackboard", new Color(0.12f, 0.28f, 0.2f)), collider: false);
+            var lit = PrimitiveKit.Glow("BingoLit", new Color(1f, 0.85f, 0.3f), 1.5f);
+            var dim = PrimitiveKit.Mat("BingoDim", new Color(0.85f, 0.85f, 0.8f));
+            for (int r = 0; r < 5; r++)
+                for (int c = 0; c < 15; c++)
+                    PrimitiveKit.Box("Num", b, new Vector3(-1.05f + c * 0.15f, 1.9f - r * 0.2f, 1.01f), new Vector3(0.11f, 0.14f, 0.01f), (r * 7 + c * 3) % 5 == 0 ? lit : dim, collider: false);
+            PrimitiveKit.Sphere("BallCage", b, new Vector3(0.7f, 1.3f, -0.9f), Vector3.one * 0.5f, PrimitiveKit.Mat("SteelFrame", new Color(0.32f, 0.42f, 0.5f)));
+            for (int i = 0; i < 5; i++)
+                PrimitiveKit.Sphere("Ball", b, new Vector3(0.6f + (i % 3) * 0.1f, 1.15f + (i / 3) * 0.1f, -0.9f), Vector3.one * 0.09f, PrimitiveKit.Mat($"Prize{i % 4}", prizes[i % 4]));
+        }
+        else
+        {
+            // Prizes on a back shelf: little coloured dolls
+            PrimitiveKit.Box("Shelf", b, new Vector3(0f, 1.2f, 0.9f), new Vector3(2.4f, 0.06f, 0.4f), PrimitiveKit.Mat("WoodPlank", new Color(0.6f, 0.4f, 0.22f)), collider: false);
+            for (int i = 0; i < 4; i++)
+                MeshKit.Place("Prize", b, MeshKit.Blob("Prize", 61 + i, 0.15f, 1), PrimitiveKit.Mat($"Prize{i}", prizes[i]),
+                    new Vector3(-0.9f + i * 0.6f, 1.45f, 0.9f), default, new Vector3(0.35f, 0.45f, 0.3f));
+        }
         PrimitiveKit.Label(title, b, new Vector3(0f, 2.05f, -1.32f), 0.045f, Color.white);
         Zone(b, new Vector3(0f, 1f, -1.9f), new Vector3(2.6f, 2f, 1.6f)).gameObject.AddComponent<FestivalBooth>().Configure(game, title, price);
+    }
+
+    // สอยดาว stall (its own booth): a dry, leafless tree hung with rolled-up paper tickets tied with
+    // coloured string, and a stepped prize stand behind — temple merit goods at the bottom (มาม่า
+    // ผงซักฟอก กะละมัง…), the big ones on top (หม้อหุงข้าว จักรยาน ทีวี ตู้เย็น). Front faces +X.
+    private static void SoiDaoStall(Transform parent, Vector3 position)
+    {
+        var s = PrimitiveKit.Group("SoiDao_สอยดาว", parent, position, -90f).transform;
+        var pole = PrimitiveKit.Mat("TentPole", new Color(0.85f, 0.85f, 0.85f));
+        var red = PrimitiveKit.Mat("TentRed", new Color(0.85f, 0.2f, 0.18f));
+        var white = PrimitiveKit.Mat("TentWhite", new Color(0.95f, 0.95f, 0.92f));
+        var wood = PrimitiveKit.Mat("WoodPlank", new Color(0.6f, 0.4f, 0.22f));
+        var bark = PrimitiveKit.Mat("DeadWood", new Color(0.45f, 0.38f, 0.32f), 0.1f);
+        var paper = PrimitiveKit.Mat("TicketPaper", new Color(0.98f, 0.95f, 0.86f));
+        var gold = PrimitiveKit.Mat("SignGold", new Color(1f, 0.78f, 0.3f), 0.8f, 0.85f);
+
+        // Tent: striped canopy on four poles
+        foreach (float x in new[] { -2.1f, 2.1f })
+            foreach (float z in new[] { -1.6f, 1.6f })
+                PrimitiveKit.Cylinder("Pole", s, new Vector3(x, 1.35f, z), new Vector3(0.07f, 1.35f, 0.07f), pole);
+        for (int i = 0; i < 6; i++)
+            MeshKit.Place("Canopy", s, MeshKit.Gable("SoiDaoRoof", 0.75f, 0.7f, 3.6f), i % 2 == 0 ? red : white, new Vector3(-1.875f + i * 0.75f, 2.7f, -1.8f));
+        PrimitiveKit.Box("SignBoard", s, new Vector3(0f, 3.25f, -1.85f), new Vector3(2.6f, 0.55f, 0.08f), gold, collider: false);
+        PrimitiveKit.Label("สอยดาว", s, new Vector3(0f, 3.25f, -1.91f), 0.06f, new Color(0.6f, 0.08f, 0.08f));
+        for (int i = 0; i < 9; i++)
+            PrimitiveKit.Sphere("Bulb", s, new Vector3(-2f + i * 0.5f, 2.62f, -1.75f), Vector3.one * 0.09f,
+                i % 2 == 0 ? PrimitiveKit.Glow("BulbRed", new Color(1f, 0.35f, 0.3f), 2.5f) : PrimitiveKit.Glow("BulbWarm", new Color(1f, 0.85f, 0.55f), 2.5f));
+        PrimitiveKit.Box("Counter", s, new Vector3(0f, 0.45f, -1.25f), new Vector3(4f, 0.9f, 0.45f), wood);
+
+        // The dry tree in a pot on the counter's middle, tickets dangling from its twigs
+        var tree = PrimitiveKit.Group("DryTree_ต้นไม้แห้ง", s, new Vector3(-0.9f, 0f, -0.4f)).transform;
+        PrimitiveKit.Cylinder("Pot", tree, new Vector3(0f, 0.25f, 0f), new Vector3(0.6f, 0.25f, 0.6f), red);
+        MeshKit.Place("Trunk", tree, MeshKit.Sweep("DryTrunk", MeshKit.Curve(new Vector3(0f, 0.4f, 0f), new Vector3(0.1f, 1.2f, 0f), new Vector3(0f, 1.9f, 0f), 8), MeshKit.Taper(8, 0.09f, 0.05f), 6), bark, Vector3.zero);
+        var twigs = new[]
+        {
+            (new Vector3(0f, 1.2f, 0f), new Vector3(-0.6f, 1.7f, 0.1f)), (new Vector3(0f, 1.3f, 0f), new Vector3(0.65f, 1.85f, -0.1f)),
+            (new Vector3(0f, 1.6f, 0f), new Vector3(-0.35f, 2.25f, -0.2f)), (new Vector3(0f, 1.7f, 0f), new Vector3(0.4f, 2.3f, 0.2f)),
+            (new Vector3(0f, 1.0f, 0f), new Vector3(0.5f, 1.35f, 0.3f)), (new Vector3(0f, 1.05f, 0f), new Vector3(-0.5f, 1.3f, -0.3f)),
+            (new Vector3(0f, 1.85f, 0f), new Vector3(0.05f, 2.45f, 0f)),
+        };
+        Color[] ties = { new Color(0.95f, 0.35f, 0.55f), new Color(0.3f, 0.7f, 0.4f), new Color(0.3f, 0.55f, 0.95f), new Color(1f, 0.75f, 0.2f) };
+        var stringMat = PrimitiveKit.Mat("RopeWhite", Color.white);
+        int n = 0;
+        for (int i = 0; i < twigs.Length; i++)
+        {
+            var (a, b) = twigs[i];
+            var mid = Vector3.Lerp(a, b, 0.5f) + Vector3.up * 0.08f;
+            MeshKit.Place("Twig", tree, MeshKit.Sweep("DryTwig" + i, MeshKit.Curve(a, mid, b, 5), MeshKit.Taper(5, 0.035f, 0.012f), 5), bark, Vector3.zero);
+            for (int k = 1; k <= 3; k++)
+            {
+                var at = Vector3.Lerp(a, b, 0.3f + k * 0.22f);
+                float drop = 0.1f + ((i + k) % 3) * 0.05f;
+                PrimitiveKit.Box("String", tree, at + Vector3.down * drop * 0.5f, new Vector3(0.008f, drop, 0.008f), stringMat, collider: false);
+                PrimitiveKit.Cylinder("Ticket", tree, at + Vector3.down * (drop + 0.07f), new Vector3(0.035f, 0.07f, 0.035f), paper, collider: false);
+                PrimitiveKit.Cylinder("Tie", tree, at + Vector3.down * (drop + 0.07f), new Vector3(0.04f, 0.012f, 0.04f), PrimitiveKit.Mat($"TicketTie{n % 4}", ties[n % 4]), collider: false);
+                n++;
+            }
+        }
+
+        // Stepped prize stand at the back
+        for (int step = 0; step < 3; step++)
+            PrimitiveKit.Box("Step", s, new Vector3(0.8f, 0.3f + step * 0.45f, 0.4f + step * 0.4f), new Vector3(2.6f, 0.08f, 0.4f), wood, collider: false);
+        PrimitiveKit.Box("StandBack", s, new Vector3(0.8f, 0.8f, 1.3f), new Vector3(2.6f, 1.6f, 0.06f), PrimitiveKit.Mat("TentBlue", new Color(0.2f, 0.45f, 0.8f)));
+        // Bottom: merit goods — instant-noodle packs, detergent boxes, toothpaste, a basin
+        for (int i = 0; i < 4; i++)
+            PrimitiveKit.Box("Mama", s, new Vector3(-0.3f + i * 0.17f, 0.4f + (i % 2) * 0.1f, 0.4f), new Vector3(0.15f, 0.1f, 0.12f), PrimitiveKit.Mat("MamaYellow", new Color(1f, 0.8f, 0.15f)), collider: false);
+        for (int i = 0; i < 3; i++)
+            PrimitiveKit.Box("Detergent", s, new Vector3(0.5f + i * 0.2f, 0.48f, 0.4f), new Vector3(0.16f, 0.26f, 0.1f), PrimitiveKit.Mat("DetergentBlue", new Color(0.2f, 0.45f, 0.9f)), collider: false);
+        MeshKit.Place("Basin", s, MeshKit.Lathe("Basin", new[] { new Vector2(0.12f, 0f), new Vector2(0.2f, 0.12f), new Vector2(0.18f, 0.12f), new Vector2(0.1f, 0.01f) }, 14, false, false),
+            PrimitiveKit.Mat("BasinRed", new Color(0.9f, 0.25f, 0.25f)), new Vector3(1.4f, 0.34f, 0.4f));
+        PrimitiveKit.Box("Toothpaste", s, new Vector3(1.85f, 0.38f, 0.4f), new Vector3(0.22f, 0.06f, 0.06f), PrimitiveKit.Mat("TrimWhite", new Color(0.97f, 0.96f, 0.92f)), collider: false);
+        // Middle: flasks, backpack, rice cooker
+        for (int i = 0; i < 2; i++)
+            PrimitiveKit.Cylinder("Flask", s, new Vector3(-0.3f + i * 0.25f, 0.92f, 0.8f), new Vector3(0.16f, 0.15f, 0.16f), PrimitiveKit.Mat("FlaskBlue", new Color(0.25f, 0.6f, 0.9f)), collider: false);
+        PrimitiveKit.Box("Backpack", s, new Vector3(0.45f, 0.95f, 0.8f), new Vector3(0.32f, 0.38f, 0.2f), red, collider: false);
+        PrimitiveKit.Cylinder("RiceCooker", s, new Vector3(1.1f, 0.9f, 0.8f), new Vector3(0.32f, 0.14f, 0.32f), PrimitiveKit.Mat("TrimWhite", new Color(0.97f, 0.96f, 0.92f)), collider: false);
+        PrimitiveKit.Cylinder("CookerLid", s, new Vector3(1.1f, 1.06f, 0.8f), new Vector3(0.3f, 0.03f, 0.3f), PrimitiveKit.Mat("CookerPink", new Color(0.9f, 0.35f, 0.5f)), collider: false);
+        PrimitiveKit.Box("Futon", s, new Vector3(1.75f, 0.86f, 0.8f), new Vector3(0.5f, 0.12f, 0.3f), PrimitiveKit.Mat("FutonPink", new Color(0.95f, 0.55f, 0.65f)), collider: false);
+        // Top: the big prizes with gold ribbons — TV, fridge, bicycle
+        PrimitiveKit.Box("TV", s, new Vector3(-0.2f, 1.6f, 1.2f), new Vector3(0.6f, 0.4f, 0.08f), PrimitiveKit.Mat("SpeakerBlack", new Color(0.08f, 0.08f, 0.09f)), collider: false);
+        PrimitiveKit.Box("Screen", s, new Vector3(-0.2f, 1.6f, 1.155f), new Vector3(0.54f, 0.34f, 0.01f), PrimitiveKit.Glow("ScreenBlue", new Color(0.3f, 0.6f, 0.95f), 1f), collider: false);
+        PrimitiveKit.Box("Fridge", s, new Vector3(0.55f, 1.9f, 1.2f), new Vector3(0.45f, 1f, 0.35f), PrimitiveKit.Mat("TrimWhite", new Color(0.97f, 0.96f, 0.92f)), collider: false);
+        var bike = PrimitiveKit.Group("Bicycle", s, new Vector3(1.55f, 1.4f, 1.15f), 90f).transform;
+        var tyre = PrimitiveKit.Mat("TyreRubber", new Color(0.1f, 0.1f, 0.11f), 0.35f);
+        foreach (float z in new[] { -0.3f, 0.3f })
+            PrimitiveKit.Cylinder("Wheel", bike, new Vector3(0f, 0.2f, z), new Vector3(0.4f, 0.02f, 0.4f), tyre, new Vector3(0f, 0f, 90f), collider: false);
+        PrimitiveKit.Box("Frame", bike, new Vector3(0f, 0.35f, 0f), new Vector3(0.04f, 0.04f, 0.6f), PrimitiveKit.Mat("BikeRed", new Color(0.85f, 0.15f, 0.15f), 0.6f), collider: false);
+        PrimitiveKit.Box("Seat", bike, new Vector3(0f, 0.48f, -0.12f), new Vector3(0.06f, 0.04f, 0.14f), tyre, collider: false);
+        foreach (var x in new[] { -0.2f, 0.55f, 1.55f })
+            PrimitiveKit.Box("Ribbon", s, new Vector3(x, 2.45f, 1.0f), new Vector3(0.08f, 0.3f, 0.02f), gold, collider: false);
+
+        Zone(s, new Vector3(0f, 1f, -2.1f), new Vector3(3.6f, 2f, 1.4f)).gameObject.AddComponent<FestivalBooth>().Configure("soidao", "สอยดาว", 40);
     }
 
     // หนังกลางแปลง: big white screen on poles, mats on the grass in front

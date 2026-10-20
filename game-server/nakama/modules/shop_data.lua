@@ -51,10 +51,30 @@ M.FOODS = {
   grilled_squid = { name = "ปลาหมึกย่าง",        energy = 22 },
   coconut      = { name = "มะพร้าวน้ำหอม",       energy = 16 },
   seafood_rice = { name = "ข้าวผัดทะเล",         energy = 36 },
+  -- Temple-fair prizes only (สอยดาว)
+  mama         = { name = "มาม่า",                energy = 12 },
 }
 M.FOOD_ORDER = { "soda", "iced_coffee", "moo_ping", "som_tam", "thai_tea", "coffee", "khao_man_gai",
                  "jok", "fruit", "pad_thai", "look_chin", "fried_chicken", "bubble_tea", "mango_sticky",
-                 "noodle_boat", "noodle_tomyum", "kao_lao", "grilled_squid", "coconut", "seafood_rice" }
+                 "noodle_boat", "noodle_tomyum", "kao_lao", "grilled_squid", "coconut", "seafood_rice", "mama" }
+
+-- Household goods won at the temple fair (ของทำบุญวัดที่เอามาเป็นรางวัลสอยดาว): kept in the bag
+-- and sold to the community shop with the fish and rice. price = what the shop pays.
+M.GOODS = {
+  soap        = { name = "สบู่ก้อน",        price = 8 },
+  fish_sauce  = { name = "น้ำปลา",          price = 12 },
+  toothpaste  = { name = "ยาสีฟัน",         price = 15 },
+  detergent   = { name = "ผงซักฟอก",        price = 20 },
+  spoons      = { name = "ช้อนส้อม 1 โหล",   price = 30 },
+  basin       = { name = "กะละมัง",         price = 45 },
+  teddy       = { name = "ตุ๊กตาหมี",         price = 60 },
+  flask       = { name = "กระติกน้ำ",        price = 90 },
+  backpack    = { name = "กระเป๋าเป้",       price = 140 },
+  futon       = { name = "ฟูกนอน",          price = 250 },
+  rice_cooker = { name = "หม้อหุงข้าว",       price = 350 },
+}
+M.GOODS_ORDER = { "soap", "fish_sauce", "toothpaste", "detergent", "spoons", "basin", "teddy", "flask",
+                  "backpack", "futon", "rice_cooker" }
 
 -- Markets keep game-clock hours: the fresh market in the morning, the ตลาดนัด in the evening
 M.MARKETS = {
@@ -183,6 +203,7 @@ function M.read_items(user_id)
   items.instruments = items.instruments or { pin = true }   -- everyone starts with a พิณ
   items.instrument = items.instrument or "pin"
   items.furniture = items.furniture or {}   -- id -> how many owned (placed or stored)
+  items.goods = items.goods or {}           -- id -> count (temple-fair prizes)
   items.food = items.food or {}
   for _, f in ipairs(M.FOOD_ORDER) do items.food[f] = items.food[f] or 0 end
   return items
