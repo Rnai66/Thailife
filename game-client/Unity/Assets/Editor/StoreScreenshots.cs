@@ -82,6 +82,16 @@ public static class StoreScreenshots
         EditorSceneManager.OpenScene("Assets/Scenes/ThaiVillage.unity");
     }
 
+    [MenuItem("Thai Life/Advanced/Preview Signpost")]
+    public static void PreviewSign()
+    {
+        if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+        Directory.CreateDirectory(OutDir);
+        Capture(new Shot { File = "preview_sign", Scene = "Beach", Title = "ป้ายบอกทาง", Subtitle = "ดีไซน์ใหม่",
+            Camera = new Vector3(25.6f, 2.0f, 14.2f), LookAt = new Vector3(27.4f, 1.6f, 18.5f), Fov = 45f }, LoadClips());
+        EditorSceneManager.OpenScene("Assets/Scenes/ThaiVillage.unity");
+    }
+
     private static Dictionary<string, AnimationClip> LoadClips()
     {
         var result = new Dictionary<string, AnimationClip>();
