@@ -118,7 +118,11 @@ public class BoatTour : MonoBehaviour
     // Keep the player sitting at the stern while the boat moves
     private void Seat()
     {
-        if (rider != null && seat != null) rider.transform.SetPositionAndRotation(seat.position, seat.rotation);
+        if (rider == null || seat == null) return;
+        // The seat point is where the feet go; the player's origin is the middle of its capsule
+        var cc = rider.GetComponent<CharacterController>();
+        float foot = cc != null ? cc.center.y - cc.height * 0.5f : -1f;
+        rider.transform.SetPositionAndRotation(seat.position - seat.up * foot, seat.rotation);
     }
 
     private IEnumerator Finish(NakamaConnection conn)
