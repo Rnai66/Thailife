@@ -3,6 +3,7 @@
 # Port 7350 is also open on the LAN so phones on the home Wi-Fi can connect directly.
 #
 #   docker compose -f docker-compose.home.yml --env-file .env.prod up -d
+#   FAIR_ALWAYS_OPEN=true docker compose ... up -d nakama   # test switch (fair open all day); run again without it to switch off
 #   sudo tailscale funnel --bg 7350                       # https://<machine>.<tailnet>.ts.net -> Nakama
 #   sudo tailscale funnel --bg --set-path /privacy "$PWD/site/privacy"   # privacy policy page
 services:
@@ -42,6 +43,10 @@ services:
         --session.token_expiry_sec 7200
         --session.refresh_token_expiry_sec 2592000
         --logger.level INFO
+        --runtime.env "fair_always_open=${FAIR_ALWAYS_OPEN:-false}"
+        --runtime.env "pubs_always_open=${PUBS_ALWAYS_OPEN:-false}"
+        --runtime.env "markets_always_open=${MARKETS_ALWAYS_OPEN:-false}"
+        --runtime.env "boxing_always_open=${BOXING_ALWAYS_OPEN:-false}"
     volumes:
       - ../nakama/modules:/nakama/data/modules:ro
     ports:
