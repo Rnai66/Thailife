@@ -758,6 +758,15 @@ public static class Places
             subLabel.lineSpacing = 1.05f;
             if (font != null) SetFont(subLabel, font);
         }
+
+        // Walk up to it and a detail card pops up on screen
+        var zone = new GameObject("SignZone");
+        zone.transform.SetParent(t, false);
+        zone.transform.localPosition = new Vector3(0f, 1f, 0f);
+        var box = zone.AddComponent<BoxCollider>();
+        box.isTrigger = true;
+        box.size = new Vector3(w + 1.2f, 2f, 3.2f);
+        zone.AddComponent<SignPost>().Configure(title, sub);
         return sign;
     }
 
