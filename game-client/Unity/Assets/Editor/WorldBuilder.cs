@@ -12,12 +12,12 @@ public static class WorldBuilder
     [MenuItem("Thai Life/Build Whole World (all scenes)", priority = 1)]
     private static void BuildAll()
     {
-        if (!EditorUtility.DisplayDialog("สร้างโลกทั้งหมด",
+        if (!Application.isBatchMode && !EditorUtility.DisplayDialog("สร้างโลกทั้งหมด",
                 "จะสร้างฉาก ตำบล และ เมือง ใหม่ แล้วสร้างผังหมู่บ้านใหม่ในฉาก ThaiVillage\n(Player/Network ในหมู่บ้านไม่ถูกลบ)",
                 "สร้าง", "ยกเลิก"))
             return;
 
-        if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+        if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
 
         TambonBuilder.BuildTambon(ask: false);
         TambonBuilder.BuildCity(ask: false);

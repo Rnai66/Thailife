@@ -22,6 +22,9 @@ public class ScenePolish : MonoBehaviour
 
     private static void OnSceneLoaded(Scene scene, LoadSceneMode mode) => Apply();
 
+    // The same look outside Play mode (Editor tools such as the App Store screenshot capture)
+    public static void ApplyNow() => Apply();
+
     private static void Apply()
     {
         if (FindAnyObjectByType<ScenePolish>() != null) return;

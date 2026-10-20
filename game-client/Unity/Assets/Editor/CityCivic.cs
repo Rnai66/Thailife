@@ -47,14 +47,38 @@ public static class CityCivic
         PrimitiveKit.Box("Walls", b, new Vector3(0f, h * 0.5f, 0f), new Vector3(width, h, depth), wallMat);
         PrimitiveKit.Box("Cornice", b, new Vector3(0f, h + 0.15f, 0f), new Vector3(width + 0.3f, 0.3f, depth + 0.3f), trimMat, collider: false);
         int cols = Mathf.Max(2, Mathf.FloorToInt(width / 2.6f));
+        float front = -depth * 0.5f;
+        int pane = objectName.Length;
         for (int f = 0; f < floors; f++)
         for (int c = 0; c < cols; c++)
         {
             float x = (c - (cols - 1) * 0.5f) * (width / cols);
             if (f == 0 && Mathf.Abs(x) < 1.6f) continue; // the door goes here
-            PrimitiveKit.Box("Window", b, new Vector3(x, 1.7f + f * 3.2f, -depth * 0.5f - 0.03f), new Vector3(1.4f, 1.5f, 0.06f), glass, collider: false);
-            PrimitiveKit.Box("Sill", b, new Vector3(x, 0.9f + f * 3.2f, -depth * 0.5f - 0.1f), new Vector3(1.6f, 0.08f, 0.2f), trimMat, collider: false);
+            float wy = 1.7f + f * 3.2f;
+            PrimitiveKit.Box("WindowFrame", b, new Vector3(x, wy, front - 0.02f), new Vector3(1.6f, 1.7f, 0.05f), trimMat, collider: false);
+            PrimitiveKit.Box("Window", b, new Vector3(x, wy, front - 0.05f), new Vector3(1.4f, 1.5f, 0.05f), f == 0 ? glass : BuildingDetail.WindowGlass(pane++), collider: false);
+            PrimitiveKit.Box("Mullion", b, new Vector3(x, wy, front - 0.08f), new Vector3(0.06f, 1.5f, 0.03f), trimMat, collider: false);
+            PrimitiveKit.Box("Sill", b, new Vector3(x, wy - 0.8f, front - 0.1f), new Vector3(1.7f, 0.08f, 0.2f), trimMat, collider: false);
+            PrimitiveKit.Box("Lintel", b, new Vector3(x, wy + 0.9f, front - 0.07f), new Vector3(1.8f, 0.12f, 0.14f), trimMat, collider: false);
+            if (f > 0 && (c + f) % 3 == 1) BuildingDetail.AirCon(b, new Vector3(x + 1.05f, wy - 0.45f, front - 0.2f));
         }
+        // Base plinth, a band between floors, corner pilasters, a drainpipe
+        PrimitiveKit.Box("Plinth", b, new Vector3(0f, 0.25f, front - 0.04f), new Vector3(width + 0.1f, 0.5f, 0.1f), PrimitiveKit.Mat("PlinthGrey", new Color(0.55f, 0.53f, 0.5f)), collider: false);
+        for (int f = 1; f < floors; f++)
+            PrimitiveKit.Box("FloorBand", b, new Vector3(0f, f * 3.2f + 0.05f, front - 0.04f), new Vector3(width, 0.18f, 0.1f), trimMat, collider: false);
+        foreach (float x in new[] { -width * 0.5f + 0.15f, width * 0.5f - 0.15f })
+            PrimitiveKit.Box("CornerPilaster", b, new Vector3(x, h * 0.5f, front - 0.06f), new Vector3(0.35f, h, 0.14f), trimMat, collider: false);
+        BuildingDetail.Drainpipe(b, new Vector3(width * 0.5f - 0.45f, h, front - 0.12f), h);
+
+        // Roof: parapet clutter seen from the street — water tank, condensers, antenna, stair house
+        BuildingDetail.WaterTank(b, new Vector3(-width * 0.25f, h + 0.3f, depth * 0.2f));
+        BuildingDetail.Condenser(b, new Vector3(width * 0.2f, h + 0.3f, -depth * 0.15f));
+        BuildingDetail.Condenser(b, new Vector3(width * 0.2f + 1.1f, h + 0.3f, -depth * 0.15f));
+        BuildingDetail.Antenna(b, new Vector3(width * 0.35f, h + 0.3f, depth * 0.3f));
+        PrimitiveKit.Box("StairHouse", b, new Vector3(width * 0.05f, h + 1.4f, depth * 0.25f), new Vector3(2.4f, 2.2f, 2.2f), wallMat, collider: false);
+        PrimitiveKit.Box("StairHouseRoof", b, new Vector3(width * 0.05f, h + 2.55f, depth * 0.25f), new Vector3(2.6f, 0.12f, 2.4f), trimMat, collider: false);
+        foreach (float x in new[] { -1.9f, 1.9f })
+            BuildingDetail.PottedPlant(b, new Vector3(x + (x < 0 ? -0.6f : 0.6f), 0f, front - 1.9f), (int)(x * 10f) + floors);
         PrimitiveKit.Box("Door", b, new Vector3(0f, 1.25f, -depth * 0.5f - 0.04f), new Vector3(2.2f, 2.5f, 0.06f), door, collider: false);
         PrimitiveKit.Box("Canopy", b, new Vector3(0f, 2.9f, -depth * 0.5f - 1.2f), new Vector3(4.2f, 0.18f, 2.4f), trimMat, collider: false);
         foreach (float x in new[] { -1.9f, 1.9f })

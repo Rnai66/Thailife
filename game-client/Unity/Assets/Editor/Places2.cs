@@ -369,7 +369,9 @@ public static class Places2
             {
                 float wy = 1.6f + floor * 3f;
                 PrimitiveKit.Box("WindowFrame", t, new Vector3(x, wy, -5.04f), new Vector3(3f, 1.6f, 0.06f), trim, collider: false);
-                PrimitiveKit.Box("Window", t, new Vector3(x, wy, -5.08f), new Vector3(2.7f, 1.3f, 0.05f), window, collider: false);
+                PrimitiveKit.Box("Window", t, new Vector3(x, wy, -5.08f), new Vector3(2.7f, 1.3f, 0.05f), BuildingDetail.WindowGlass(i * 3 + floor), collider: false);
+                PrimitiveKit.Box("Mullion", t, new Vector3(x, wy, -5.11f), new Vector3(0.06f, 1.3f, 0.03f), trim, collider: false);
+                if ((i + floor) % 2 == 0) BuildingDetail.AirCon(t, new Vector3(x + 1.75f, wy - 0.35f, -5.25f));
                 PrimitiveKit.Box("WindowSill", t, new Vector3(x, wy - 0.85f, -5.15f), new Vector3(3.1f, 0.1f, 0.3f), trim, collider: false);
             }
             // Second-floor balcony with a rail, a cornice and parapet on top, pilasters between units
@@ -380,6 +382,11 @@ public static class Places2
             PrimitiveKit.Box("Cornice", t, new Vector3(x, 9.1f, -0.1f), new Vector3(unitWidth, 0.3f, 10.5f), trim, collider: false);
             PrimitiveKit.Box("Parapet", t, new Vector3(x, 9.5f, -5.05f), new Vector3(unitWidth - 0.1f, 0.6f, 0.2f), facade, collider: false);
             PrimitiveKit.Box("Pilaster", t, new Vector3(x - unitWidth * 0.5f, 4.5f, -5.05f), new Vector3(0.3f, 9f, 0.25f), trim, collider: false);
+            BuildingDetail.PottedPlant(t, new Vector3(x - 1.3f, 3.62f, -5.45f), i);
+            if (i % 2 == 1) BuildingDetail.PottedPlant(t, new Vector3(x + 1.3f, 3.62f, -5.45f), i + 1);
+            if (i % 2 == 0) BuildingDetail.WaterTank(t, new Vector3(x, 9.25f, 2.5f));
+            else BuildingDetail.Antenna(t, new Vector3(x + 1f, 9.25f, 1.5f));
+            if (i % 3 == 0) BuildingDetail.Drainpipe(t, new Vector3(x + unitWidth * 0.5f - 0.2f, 9f, -5.15f), 9f);
             PrimitiveKit.Box("Awning", t, new Vector3(x, 3.1f, -5.8f), new Vector3(unitWidth - 0.2f, 0.08f, 1.6f), awning, new Vector3(-12f, 0f, 0f), collider: false);
             if (signs != null && i < signs.Length && !string.IsNullOrEmpty(signs[i]))
             {
