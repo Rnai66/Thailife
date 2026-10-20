@@ -40,7 +40,7 @@ public class TrainingTarget : MonoBehaviour, IHittable
 
         if (career.Level < requiredLevel)
         {
-            FloatingText.Spawn(at, $"Lv {requiredLevel}+", LockedColor);
+            FloatingText.Spawn(at, $"ต้องเลเวล {requiredLevel} ก่อน (ตอนนี้ Lv {career.Level})", LockedColor);
             return;
         }
 

@@ -4,6 +4,7 @@
 --                                   paid spots (beach chairs) charge their rent first
 --   life_wake   {}               -> stop sleeping
 --   life_eat    {"food": id}     -> eat one food from the bag, energy goes up (capped at max)
+--   life_exert  {walk_m, punches, kicks, jumps} -> everyday exertion since the last report costs energy
 
 local nk = require("nakama")
 local life = require("life_core")
@@ -104,3 +105,10 @@ nk.register_rpc(function(context, payload)
   if clinic.full_energy then state = life.add_energy(user_id, life.MAX_ENERGY) end
   return view(user_id, state, { treated_at = clinic.name, paid = clinic.price })
 end, "life_heal")
+
+nk.register_rpc(function(context, payload)
+  local ok, req = pcall(nk.json_decode, payload or "")
+  if not ok or type(req) ~= "table" then req = {} end
+  local s = life.exert(context.user_id, tonumber(req.walk_m), tonumber(req.punches), tonumber(req.kicks), tonumber(req.jumps))
+  return nk.json_encode(life.view(s))
+end, "life_exert")

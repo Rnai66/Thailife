@@ -66,7 +66,7 @@ public class LifeClient : MonoBehaviour
         {
             if (Current == null) return 0f;
             float rate = Current.sleeping ? SleepRegenPerSec : PassiveRegenPerSec;
-            return Mathf.Max(0f, Mathf.Min(Current.max_energy, Current.energy + (Time.time - receivedAt) * rate) - predictedSpend);
+            return Mathf.Max(0f, Mathf.Min(Current.max_energy, Current.energy + (Time.time - receivedAt) * rate) - predictedSpend - Exertion.Unconfirmed);
         }
     }
 

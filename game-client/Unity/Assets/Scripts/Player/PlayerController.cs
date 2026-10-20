@@ -26,6 +26,9 @@ public class PlayerController : MonoBehaviour
     // Injured (บาดเจ็บ) after a knockout: slower until treated
     public float InjurySlow { get; set; } = 1f;
 
+    // Out of energy (Exertion): exhausted, walks slowly
+    public float TiredSlow { get; set; } = 1f;
+
     // Owning a motorbike or car (bank.lua) makes getting around faster
     public float VehicleBoost { get; set; } = 1f;
 
@@ -53,6 +56,7 @@ public class PlayerController : MonoBehaviour
     {
         if (!InputEnabled || !controller.isGrounded) return false;
         verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
+        Exertion.Jumped();
         return true;
     }
 
@@ -60,6 +64,7 @@ public class PlayerController : MonoBehaviour
     {
         controller = GetComponent<CharacterController>();
         CharacterModel.Attach(gameObject);
+        if (GetComponent<Exertion>() == null) gameObject.AddComponent<Exertion>(); // walking and fighting cost energy
 
         if (cameraTransform == null && Camera.main != null)
             cameraTransform = Camera.main.transform;
@@ -94,7 +99,7 @@ public class PlayerController : MonoBehaviour
 
         verticalVelocity += gravity * Time.deltaTime;
 
-        Vector3 velocity = move * (moveSpeed * MoveSpeedMultiplier * InjurySlow * VehicleBoost) + impulseVelocity;
+        Vector3 velocity = move * (moveSpeed * MoveSpeedMultiplier * InjurySlow * TiredSlow * VehicleBoost) + impulseVelocity;
         velocity.y = verticalVelocity;
         impulseVelocity = Vector3.Lerp(impulseVelocity, Vector3.zero, 1f - Mathf.Exp(-8f * Time.deltaTime));
 

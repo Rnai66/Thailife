@@ -75,6 +75,7 @@ public class PlayerCombat : MonoBehaviour
         if (IsKnockedOut) return;
 
         bool kick = attack == PlayerAction.Kick;
+        Exertion.Attack(kick); // every punch or kick costs a little energy, hit or miss
         Vector3 point = transform.TransformPoint(kick ? ActionFeedback.KickOffset : ActionFeedback.PunchOffset);
         int count = Physics.OverlapSphereNonAlloc(point, kick ? kickRadius : punchRadius, overlap, ~0, QueryTriggerInteraction.Collide);
 

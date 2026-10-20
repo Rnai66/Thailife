@@ -176,6 +176,28 @@ function M.spend(user_id, amount)
   return s
 end
 
+-- Everyday exertion (walking, punching, kicking, jumping): costs energy but never fails; at 0 you're
+-- just exhausted (the client slows you down). Amounts are capped by what's possible in the time since
+-- the last report, so a tampered client can't drain or skip much.
+M.EXERT = { walk_per_m = 1 / 60, punch = 0.1, kick = 0.15, jump = 0.2 }
+
+function M.exert(user_id, walk_m, punches, kicks, jumps)
+  local now = nk.time()
+  local s = settle(read(user_id), now)
+  local elapsed = math.min(120, math.max(0, (now - (s.exert_ms or now - 10000)) / 1000))
+  s.exert_ms = now
+  if not s.sleep_ms then
+    walk_m = math.min(math.max(0, walk_m or 0), elapsed * 7 + 10)
+    punches = math.min(math.max(0, punches or 0), elapsed * 3 + 5)
+    kicks = math.min(math.max(0, kicks or 0), elapsed * 3 + 5)
+    jumps = math.min(math.max(0, jumps or 0), elapsed * 1.5 + 3)
+    local cost = walk_m * M.EXERT.walk_per_m + punches * M.EXERT.punch + kicks * M.EXERT.kick + jumps * M.EXERT.jump
+    s.energy = math.max(0, s.energy - cost)
+  end
+  write(user_id, s)
+  return s
+end
+
 function M.add_energy(user_id, amount)
   local s = settle(read(user_id), nk.time())
   s.energy = math.min(M.MAX_ENERGY, s.energy + amount)
