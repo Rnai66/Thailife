@@ -384,7 +384,7 @@ public static class Places
             var trigger = plotZone.AddComponent<BoxCollider>();
             trigger.isTrigger = true;
             trigger.size = new Vector3(7.2f, 2f, 6.7f);
-            plotZone.AddComponent<FarmPlot>().Configure(plotId, new Vector2(7.2f, 6.7f));
+            plotZone.AddComponent<FarmPlot>().Configure(plotId, new Vector2(7.5f, 7.0f)); // rice fills the paddy (7.6 x 7.1)
             PrimitiveKit.Box("DikeN", t, new Vector3(x, 0.12f, z + 3.65f), new Vector3(8f, 0.25f, 0.3f), dike);
             PrimitiveKit.Box("DikeS", t, new Vector3(x, 0.12f, z - 3.65f), new Vector3(8f, 0.25f, 0.3f), dike);
             PrimitiveKit.Box("DikeW", t, new Vector3(x - 3.85f, 0.12f, z), new Vector3(0.3f, 0.25f, 7.6f), dike);

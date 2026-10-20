@@ -528,12 +528,10 @@ public static class Seaside
             }
             MeshKit.Place("Gunwale", b, MeshKit.Sweep(side < 0 ? "Boats/GunwaleL" : "Boats/GunwaleR", rail, MeshKit.Taper(rail.Length, 0.05f, 0.03f), 6), dark, Vector3.zero);
         }
-        // Floorboards and bench seats
-        for (float z = -3.2f; z <= 2.6f; z += 0.42f)
-        {
-            float t = HullT(z), w = HullBeam(t) * 1.3f;
-            PrimitiveKit.Box("Floorboard", b, new Vector3(0f, HullKeel(t) + 0.1f, z), new Vector3(w, 0.04f, 0.36f), plank, collider: false);
-        }
+        // Solid plank deck above the waterline (hides the sea inside the hull), with plank seams
+        MeshKit.Place("Deck", b, LongtailDeck(DeckY), plank, Vector3.zero);
+        for (float z = -3.6f; z <= 3.0f; z += 0.45f)
+            PrimitiveKit.Box("DeckSeam", b, new Vector3(0f, DeckY + 0.005f, z), new Vector3(HullHalfWidthAt(HullT(z), DeckY) * 2f, 0.01f, 0.03f), dark, collider: false);
         foreach (float z in new[] { -2.9f, -0.9f, 0.6f, 2.0f })
         {
             float t = HullT(z);
@@ -568,7 +566,14 @@ public static class Seaside
         PrimitiveKit.Cylinder("EnginePost", b, new Vector3(0f, sternY + 0.12f, sternZ + 0.15f), new Vector3(0.12f, 0.15f, 0.12f), dark, collider: false);
         PrimitiveKit.Box("Engine", b, new Vector3(0f, sternY + 0.48f, sternZ - 0.05f), new Vector3(0.5f, 0.42f, 0.75f), PrimitiveKit.Mat("EngineRed", new Color(0.75f, 0.18f, 0.15f)), collider: false);
         PrimitiveKit.Box("EngineHead", b, new Vector3(0f, sternY + 0.76f, sternZ - 0.05f), new Vector3(0.34f, 0.16f, 0.5f), steel, collider: false);
-        PrimitiveKit.Cylinder("Tiller", b, new Vector3(0f, sternY + 0.62f, sternZ + 0.9f), new Vector3(0.04f, 0.65f, 0.04f), steel, new Vector3(80f, 0f, 0f), collider: false);
+        // Tiller (คันบังคับ) from the engine forward to the boatman's hand; his seat right by the engine
+        var tillerFrom = new Vector3(0f, sternY + 0.55f, sternZ + 0.1f);
+        var tillerTo = new Vector3(0.3f, 0.78f, BoatmanZ + 0.32f);
+        var tiller = PrimitiveKit.Cylinder("Tiller", b, (tillerFrom + tillerTo) * 0.5f, new Vector3(0.045f, Vector3.Distance(tillerFrom, tillerTo) * 0.5f, 0.045f), steel, default, collider: false);
+        tiller.transform.localRotation = Quaternion.FromToRotation(Vector3.up, tillerTo - tillerFrom);
+        PrimitiveKit.Cylinder("TillerGrip", b, tillerTo, new Vector3(0.07f, 0.09f, 0.07f), PrimitiveKit.Mat("SpeakerBlack", new Color(0.08f, 0.08f, 0.09f)), new Vector3(90f, 0f, 0f), collider: false);
+        float bt = HullT(BoatmanZ);
+        PrimitiveKit.Box("BoatmanSeat", b, new Vector3(0f, Mathf.Lerp(HullKeel(bt), HullSheer(bt), 0.62f), BoatmanZ), new Vector3(HullBeam(bt) * 1.7f, 0.06f, 0.3f), plank, collider: false);
         var shaftFrom = new Vector3(0f, sternY + 0.35f, sternZ - 0.35f);
         var shaftTo = new Vector3(0f, -0.35f, sternZ - 3.6f);
         var mid = (shaftFrom + shaftTo) * 0.5f;
@@ -580,6 +585,40 @@ public static class Seaside
 
         b.gameObject.AddComponent<Bob>();
         return b;
+    }
+
+    private const float DeckY = 0.07f;      // just above the sea surface (0.025)
+    private const float BoatmanZ = -3.45f;  // the boatman sits right in front of the engine
+
+    // Half-width of the hull at height y in section t (inverse of the section curve below)
+    private static float HullHalfWidthAt(float t, float y)
+    {
+        float keel = Mathf.Min(HullKeel(t), HullSheer(t) - 0.05f), sheer = HullSheer(t);
+        float r = Mathf.Clamp01((y - keel) / (sheer - keel));
+        float a = Mathf.Acos(Mathf.Clamp(1f - Mathf.Pow(r, 1.25f), -1f, 1f));
+        return HullBeam(t) * Mathf.Sin(a) * 0.98f;
+    }
+
+    // Flat deck that fills the hull at height y, from the stern to where the bow rises above it
+    private static Mesh LongtailDeck(float y)
+    {
+        var v = new List<Vector3>();
+        var tri = new List<int>();
+        const int n = 40;
+        for (int i = 0; i <= n; i++)
+        {
+            float t = i / (float)n;
+            if (HullKeel(t) >= y) break;
+            float w = HullHalfWidthAt(t, y);
+            v.Add(new Vector3(-w, y, HullZ(t)));
+            v.Add(new Vector3(w, y, HullZ(t)));
+        }
+        for (int k = 0; k + 3 < v.Count; k += 2) tri.AddRange(new[] { k, k + 2, k + 1, k + 1, k + 2, k + 3 });
+        var mesh = new Mesh { name = "LongtailDeck" };
+        mesh.SetVertices(v);
+        mesh.SetTriangles(tri, 0);
+        mesh.RecalculateNormals();
+        return MeshKit.SaveCombined("Boats/LongtailDeck", mesh);
     }
 
     // Hull shape along its length (t = 0 stern .. 1 bow)
@@ -633,7 +672,7 @@ public static class Seaside
         var boat = PrimitiveKit.Group("TourBoat_เรือพานักท่องเที่ยว", root, dock).transform; // moves along the route
         LongtailBoat(boat, Vector3.zero, 0f, new Color(1f, 0.45f, 0.75f));                     // bobs inside it
         // Boatman at the stern by the tiller; tourists on the benches. Set low so they look seated.
-        var seat = PrimitiveKit.Group("Seat", boat, new Vector3(0f, -0.55f, -2.9f)).transform;
+        var seat = PrimitiveKit.Group("Seat", boat, new Vector3(0.05f, -0.55f, BoatmanZ)).transform;
         int look = 1;
         foreach (var p in new[] { new Vector3(-0.28f, -0.6f, -0.9f), new Vector3(0.3f, -0.6f, 0.6f), new Vector3(-0.2f, -0.55f, 2.0f) })
             PrimitiveKit.Group("Tourist", boat, p).AddComponent<MarketVendor>().Configure(look++);

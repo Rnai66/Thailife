@@ -112,7 +112,7 @@ public static class VillageBuilder
 
         // Villagers out and about in the daytime, monks' alms round at dawn (from the temple along the road)
         Npcs.Crowd(v, new Vector3(2f, 0f, -3f), new Vector2(22f, 4f), 3, "", 7, 19, Npcs.VillageTalk);
-        Npcs.Crowd(v, new Vector3(-12f, 0f, -32f), new Vector2(14f, 4f), 2, "", 6, 17, Npcs.VillageTalk);
+        Npcs.Crowd(v, new Vector3(-14f, 0f, -25f), new Vector2(14f, 3f), 2, "", 6, 17, Npcs.VillageTalk); // beside Kok Nong Na, off the paddies
         Npcs.AlmsRound(v, new Vector3(-32f, 0f, -4.6f), new Vector3(24f, 0f, -4.6f), 3);
 
         // Power line along the north side of the road, lamps over the road, wires to the house and shop

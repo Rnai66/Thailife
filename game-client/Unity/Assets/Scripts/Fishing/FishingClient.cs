@@ -25,6 +25,7 @@ public class FishingClient : MonoBehaviour
     {
         public bool caught;
         public string reason;     // "early" / "late" when not caught
+        public string fish_id;
         public string fish_name;
         public float kg;
         public Inventory inventory;

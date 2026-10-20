@@ -86,7 +86,7 @@ public class FarmPlot : MonoBehaviour
         var rng = new System.Random(17);
         var lv = new System.Collections.Generic.List<Vector3>(); var lt = new System.Collections.Generic.List<int>();
         var ev = new System.Collections.Generic.List<Vector3>(); var et = new System.Collections.Generic.List<int>();
-        const float rowGap = 0.55f, hillGap = 0.48f, margin = 0.35f;
+        const float rowGap = 0.45f, hillGap = 0.4f, margin = 0.12f; // dense rows right up to the dikes
         for (float x = -area.x * 0.5f + margin; x <= area.x * 0.5f - margin; x += rowGap)
             for (float z = -area.y * 0.5f + margin; z <= area.y * 0.5f - margin; z += hillGap)
             {
@@ -184,7 +184,7 @@ public class FarmPlot : MonoBehaviour
 
         float progress = stage == "ripe" ? 1f : farm.ProgressOf(plot);
         float height = Mathf.Lerp(0.22f, 0.95f, Mathf.SmoothStep(0f, 1f, progress));
-        rice.localScale = new Vector3(Mathf.Lerp(0.6f, 1f, progress), height, Mathf.Lerp(0.6f, 1f, progress));
+        rice.localScale = new Vector3(1f, height, 1f); // planted across the whole paddy; only the height grows
         leafMaterial.color = progress < 0.7f ? Color.Lerp(Seedling, Green, progress / 0.7f) : Color.Lerp(Green, Straw, (progress - 0.7f) / 0.3f);
         bool earsOut = progress > 0.55f;
         ears.enabled = earsOut;
