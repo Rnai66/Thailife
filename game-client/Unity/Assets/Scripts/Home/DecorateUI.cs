@@ -190,8 +190,11 @@ public class DecorateUI : MonoBehaviour
                 float x = -400f + (i % 3) * 400f, y = -(i / 3) * 128f;
                 var card = UiKit.Panel("Furniture", listGrid, Color.white, new Vector2(x, y), new Vector2(380f, 116f), shadow: true);
                 card.gameObject.AddComponent<Outline>().effectColor = UiKit.CardBorder;
-                UiKit.Label(card, 28, o.name, new Vector2(-55f, 22f), new Vector2(240f, 40f), UiKit.Ink, TextAnchor.MiddleLeft).fontStyle = FontStyle.Bold;
-                UiKit.Label(card, 22, $"เก็บไว้ {o.Stored} · ในห้อง {o.placed}", new Vector2(-55f, -22f), new Vector2(240f, 34f), UiKit.Muted, TextAnchor.MiddleLeft);
+                bool pic = UiKit.Art("Icons/furn_" + o.item) != null;
+                if (pic) UiKit.IconTile(card, "furn_" + o.item, new Vector2(-138f, 0f), new Vector2(88f, 88f));
+                float tx = pic ? -20f : -55f, tw = pic ? 170f : 240f;
+                UiKit.Label(card, 26, o.name, new Vector2(tx, 22f), new Vector2(tw, 40f), UiKit.Ink, TextAnchor.MiddleLeft).fontStyle = FontStyle.Bold;
+                UiKit.Label(card, 20, $"เก็บไว้ {o.Stored} · ในห้อง {o.placed}", new Vector2(tx, -22f), new Vector2(tw, 34f), UiKit.Muted, TextAnchor.MiddleLeft);
                 UiKit.RoundButton(card, "วาง", new Vector2(125f, 0f), new Vector2(100f, 64f), UiKit.Gold, UiKit.GoldInk, () => StartNew(item.item), 26)
                     .interactable = o.Stored > 0;
                 i++;

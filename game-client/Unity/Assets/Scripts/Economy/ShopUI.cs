@@ -361,7 +361,12 @@ public class ShopUI : MonoBehaviour
             float y = 245f - row * 92f;
             var line = UiKit.Panel("Produce", grid, f.count > 0 ? Color.white : new Color(1f, 1f, 1f, 0.55f), new Vector2(0f, y), new Vector2(1000f, 80f), shadow: f.count > 0);
             line.gameObject.AddComponent<Outline>().effectColor = CardBorder;
-            UiKit.Label(line, 28, f.name, new Vector2(-260f, 0f), new Vector2(440f, 60f), f.count > 0 ? Ink : Muted, TextAnchor.MiddleLeft);
+            if (UiKit.Art("Icons/sell_" + f.id) != null)
+            {
+                var icon = UiKit.IconTile(line, "sell_" + f.id, new Vector2(-452f, 0f), new Vector2(68f, 68f));
+                if (f.count == 0) foreach (var img in icon.GetComponentsInChildren<Image>()) img.color = new Color(1f, 1f, 1f, 0.5f);
+            }
+            UiKit.Label(line, 28, f.name, new Vector2(-220f, 0f), new Vector2(360f, 60f), f.count > 0 ? Ink : Muted, TextAnchor.MiddleLeft);
             UiKit.Label(line, 26, $"{f.count} × {f.price} ฿", new Vector2(120f, 0f), new Vector2(260f, 60f), Muted);
             var sub = UiKit.Label(line, 30, f.count > 0 ? $"{f.count * f.price:N0} ฿" : "-", new Vector2(390f, 0f), new Vector2(180f, 60f), f.count > 0 ? SellGreen : Muted, TextAnchor.MiddleRight);
             sub.fontStyle = FontStyle.Bold;

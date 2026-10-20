@@ -94,8 +94,13 @@ public class FoodUI : MonoBehaviour
         var card = UiKit.Panel("Food", list, Color.white, new Vector2(x, y), new Vector2(370f, 150f), shadow: true);
         card.gameObject.AddComponent<Outline>().effectColor = UiKit.CardBorder;
 
-        var tile = UiKit.Panel("Icon", card, UiKit.Pill, new Vector2(-125f, 0f), new Vector2(90f, 90f));
-        UiKit.Label(tile, 46, food.name.Substring(0, 1), Vector2.zero, new Vector2(86f, 86f), UiKit.Price).fontStyle = FontStyle.Bold;
+        if (UiKit.Art("Icons/food_" + food.id) != null)
+            UiKit.IconTile(card, "food_" + food.id, new Vector2(-125f, 0f), new Vector2(96f, 96f));
+        else
+        {
+            var tile = UiKit.Panel("Icon", card, UiKit.Pill, new Vector2(-125f, 0f), new Vector2(90f, 90f));
+            UiKit.Label(tile, 46, food.name.Substring(0, 1), Vector2.zero, new Vector2(86f, 86f), UiKit.Price).fontStyle = FontStyle.Bold;
+        }
 
         UiKit.Label(card, 26, food.name, new Vector2(45f, 42f), new Vector2(240f, 38f), UiKit.Ink, TextAnchor.MiddleLeft).fontStyle = FontStyle.Bold;
         UiKit.PillLabel(card, $"พลังงาน +{food.energy}", new Vector2(10f, 2f), new Vector2(170f, 34f), UiKit.OkTint, UiKit.OkGreen, 20);
