@@ -1,3 +1,4 @@
+using UnityEditor;
 using UnityEngine;
 
 // Builders for Thai places made from primitives. Each builds under a group whose front faces local -Z.
@@ -675,114 +676,98 @@ public static class Places
         return tree;
     }
 
-    // Premium signpost (ป้ายบอกทาง): two lacquered posts with gold finials on stone feet, a small Thai
-    // roof with gold ridge and chofa tips, a dark wood frame with gold trim, the first line in gold on a
-    // vermilion header band and the rest in brown on a cream panel. The board grows to fit the text.
+    // Signpost (ป้ายบอกทาง): one lacquered post on a stone foot topped by a round medallion with a gold
+    // rim and the place's picture on both faces (no lettering, so it stays small and tidy). Walking up to
+    // it pops the detail card (SignPost → SignCardUI) with the name and the rest of the text.
     public static GameObject Sign(Transform parent, Vector3 position, string text, float yaw)
     {
         var sign = PrimitiveKit.Group("Sign", parent, position, yaw);
         var t = sign.transform;
         var lacquer = PrimitiveKit.Mat("SignLacquer", new Color(0.28f, 0.14f, 0.07f), 0.55f);
-        var cream = PrimitiveKit.Mat("SignCream", new Color(0.98f, 0.93f, 0.8f), 0.2f);
-        var header = PrimitiveKit.Mat("SignVermilion", new Color(0.72f, 0.12f, 0.08f), 0.45f);
         var gold = PrimitiveKit.Mat("SignGold", new Color(1f, 0.78f, 0.3f), 0.8f, 0.85f);
-        var roof = PrimitiveKit.Mat("SignRoof", new Color(0.62f, 0.14f, 0.1f), 0.4f);
         var stone = PrimitiveKit.Mat("SignStone", new Color(0.62f, 0.6f, 0.56f), 0.15f);
+        var cream = PrimitiveKit.Mat("SignCream", new Color(0.98f, 0.93f, 0.8f), 0.2f);
 
         string[] lines = text.Split('\n');
         string title = lines[0];
         string sub = lines.Length > 1 ? string.Join("\n", lines, 1, lines.Length - 1) : "";
 
-        // Size the text and the board to each other
-        float titleSize = 0.042f, subSize = 0.027f;
-        float titleEm = titleSize * 6.4f, subEm = subSize * 6.4f;
-        float titleWidth = GlyphCount(title) * 0.58f * titleEm, subWidth = 0f;
-        for (int i = 1; i < lines.Length; i++) subWidth = Mathf.Max(subWidth, GlyphCount(lines[i]) * 0.58f * subEm);
-        const float maxWidth = 2.7f;
-        if (titleWidth > maxWidth - 0.3f) { titleSize *= (maxWidth - 0.3f) / titleWidth; titleEm = titleSize * 6.4f; titleWidth = maxWidth - 0.3f; }
-        if (subWidth > maxWidth - 0.3f) { subSize *= (maxWidth - 0.3f) / subWidth; subEm = subSize * 6.4f; subWidth = maxWidth - 0.3f; }
-        float w = Mathf.Clamp(Mathf.Max(titleWidth, subWidth) + 0.36f, 1.3f, maxWidth);
-        float headerH = titleEm * 1.3f;
-        float subH = lines.Length > 1 ? (lines.Length - 1) * subEm * 1.3f + 0.1f : 0f;
-        float h = headerH + subH + 0.12f;
-        const float bottom = 1.0f;
-        float top = bottom + h, mid = bottom + h * 0.5f;
+        const float centre = 1.75f, radius = 0.36f;
+        PrimitiveKit.Box("Foot", t, new Vector3(0f, 0.1f, 0f), new Vector3(0.3f, 0.2f, 0.3f), stone);
+        PrimitiveKit.Cylinder("Post", t, new Vector3(0f, (centre - radius) * 0.5f, 0f), new Vector3(0.1f, (centre - radius) * 0.5f, 0.1f), lacquer);
+        PrimitiveKit.Cylinder("Ring", t, new Vector3(0f, 0.3f, 0f), new Vector3(0.13f, 0.02f, 0.13f), gold, collider: false);
+        PrimitiveKit.Cylinder("Collar", t, new Vector3(0f, centre - radius - 0.02f, 0f), new Vector3(0.16f, 0.04f, 0.16f), gold, collider: false);
 
-        // Posts on stone feet, gold finials
+        // Medallion: gold rim, dark lacquer disc, cream face, the picture on both sides
+        PrimitiveKit.Cylinder("Rim", t, new Vector3(0f, centre, 0f), new Vector3(radius * 2f + 0.08f, 0.04f, radius * 2f + 0.08f), gold, new Vector3(90f, 0f, 0f), collider: false);
+        PrimitiveKit.Cylinder("Disc", t, new Vector3(0f, centre, 0f), new Vector3(radius * 2f, 0.05f, radius * 2f), lacquer, new Vector3(90f, 0f, 0f), collider: false);
         foreach (float side in new[] { -1f, 1f })
         {
-            float x = side * (w * 0.5f + 0.08f);
-            PrimitiveKit.Box("Foot", t, new Vector3(x, 0.1f, 0f), new Vector3(0.28f, 0.2f, 0.28f), stone);
-            PrimitiveKit.Cylinder("Post", t, new Vector3(x, (top + 0.12f) * 0.5f, 0f), new Vector3(0.12f, (top + 0.12f) * 0.5f, 0.12f), lacquer);
-            PrimitiveKit.Cylinder("Ring", t, new Vector3(x, 0.32f, 0f), new Vector3(0.15f, 0.025f, 0.15f), gold, collider: false);
-            PrimitiveKit.Cylinder("Ring", t, new Vector3(x, top + 0.02f, 0f), new Vector3(0.15f, 0.025f, 0.15f), gold, collider: false);
-            PrimitiveKit.Sphere("Finial", t, new Vector3(x, top + 0.1f, 0f), Vector3.one * 0.12f, gold);
+            PrimitiveKit.Cylinder("Face", t, new Vector3(0f, centre, side * 0.052f), new Vector3(radius * 1.8f, 0.005f, radius * 1.8f), cream, new Vector3(90f, 0f, 0f), collider: false);
+            var icon = PrimitiveKit.Create(PrimitiveType.Quad, "Icon", t, new Vector3(0f, centre, side * 0.058f), Vector3.one * radius * 1.45f,
+                SignIcon(IconFor(text)), new Vector3(0f, side < 0 ? 0f : 180f, 0f), collider: false);
+            icon.GetComponent<Renderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
         }
+        // Gold finial on top
+        PrimitiveKit.Sphere("Finial", t, new Vector3(0f, centre + radius + 0.1f, 0f), Vector3.one * 0.1f, gold);
+        PrimitiveKit.Box("Chofa", t, new Vector3(0f, centre + radius + 0.22f, 0f), new Vector3(0.035f, 0.16f, 0.035f), gold, collider: false);
 
-        // Frame, panels, gold trim
-        PrimitiveKit.Box("Frame", t, new Vector3(0f, mid, 0f), new Vector3(w + 0.12f, h + 0.12f, 0.1f), lacquer, collider: false);
-        PrimitiveKit.Box("Panel", t, new Vector3(0f, mid, -0.052f), new Vector3(w - 0.08f, h - 0.08f, 0.01f), cream, collider: false);
-        float headerY = top - 0.06f - headerH * 0.5f;
-        PrimitiveKit.Box("Header", t, new Vector3(0f, headerY, -0.058f), new Vector3(w - 0.08f, headerH, 0.01f), header, collider: false);
-        foreach (float y in new[] { bottom + 0.035f, top - 0.035f, headerY - headerH * 0.5f })
-            PrimitiveKit.Box("Trim", t, new Vector3(0f, y, -0.064f), new Vector3(w - 0.02f, 0.025f, 0.01f), gold, collider: false);
-        foreach (float side in new[] { -1f, 1f })
-        {
-            PrimitiveKit.Box("Trim", t, new Vector3(side * (w * 0.5f - 0.035f), mid, -0.064f), new Vector3(0.025f, h - 0.04f, 0.01f), gold, collider: false);
-            // Little gold corner diamonds on the header
-            PrimitiveKit.Box("Corner", t, new Vector3(side * (w * 0.5f - 0.13f), headerY, -0.066f), new Vector3(0.07f, 0.07f, 0.01f), gold, new Vector3(0f, 0f, 45f), collider: false);
-        }
-
-        // Small Thai roof over the board
-        float span = w * 0.5f + 0.3f, pitch = 22f;
-        float run = span * Mathf.Cos(pitch * Mathf.Deg2Rad), rise = span * Mathf.Sin(pitch * Mathf.Deg2Rad);
-        float ridge = top + 0.17f + rise;
-        foreach (float side in new[] { -1f, 1f })
-        {
-            PrimitiveKit.Box("Roof", t, new Vector3(side * run * 0.5f, ridge - rise * 0.5f, 0f), new Vector3(span, 0.05f, 0.42f), roof, new Vector3(0f, 0f, -side * pitch), collider: false);
-            PrimitiveKit.Box("RoofEdge", t, new Vector3(side * run * 0.5f, ridge - rise * 0.5f + 0.035f, -0.2f), new Vector3(span, 0.035f, 0.04f), gold, new Vector3(0f, 0f, -side * pitch), collider: false);
-            // Chofa-style upturned gold tips at the eaves
-            PrimitiveKit.Box("Tip", t, new Vector3(side * (run + 0.05f), ridge - rise + 0.06f, 0f), new Vector3(0.05f, 0.18f, 0.05f), gold, new Vector3(0f, 0f, -side * 30f), collider: false);
-        }
-        PrimitiveKit.Box("Ridge", t, new Vector3(0f, ridge + 0.03f, 0f), new Vector3(0.12f, 0.06f, 0.46f), gold, collider: false);
-        PrimitiveKit.Box("Chofa", t, new Vector3(0f, ridge + 0.14f, 0f), new Vector3(0.05f, 0.2f, 0.05f), gold, collider: false);
-
-        // Text in the game font
-        var font = Resources.Load<Font>("Fonts/Mitr-SemiBold");
-        var titleLabel = PrimitiveKit.Label(title, t, new Vector3(0f, headerY, -0.075f), titleSize, new Color(1f, 0.88f, 0.5f));
-        if (font != null) SetFont(titleLabel, font);
-        if (sub.Length > 0)
-        {
-            float subY = bottom + 0.06f + subH * 0.5f;
-            var subLabel = PrimitiveKit.Label(sub, t, new Vector3(0f, subY, -0.075f), subSize, new Color(0.32f, 0.18f, 0.08f));
-            subLabel.lineSpacing = 1.05f;
-            if (font != null) SetFont(subLabel, font);
-        }
-
-        // Walk up to it and a detail card pops up on screen
+        // Walk up to it and the detail card pops up on screen
         var zone = new GameObject("SignZone");
         zone.transform.SetParent(t, false);
         zone.transform.localPosition = new Vector3(0f, 1f, 0f);
         var box = zone.AddComponent<BoxCollider>();
         box.isTrigger = true;
-        box.size = new Vector3(w + 1.2f, 2f, 3.2f);
+        box.size = new Vector3(2.4f, 2f, 3f);
         zone.AddComponent<SignPost>().Configure(title, sub);
         return sign;
     }
 
-    private static void SetFont(TextMesh mesh, Font font)
+    // Which picture a sign shows, from what it says
+    private static string IconFor(string text)
     {
-        mesh.font = font;
-        mesh.GetComponent<MeshRenderer>().sharedMaterial = font.material;
+        (string icon, string[] words)[] rules =
+        {
+            ("travel", new[] { "ป้ายรถ" }),
+            ("boxing", new[] { "มวย", "กระสอบ", "ซ้อมเตะ" }),
+            ("fair", new[] { "ประกวด", "งานวัด" }),
+            ("koknongna", new[] { "โคกหนองนา" }),
+            ("farm", new[] { "เล้าไก่", "ยุ้งข้าว", "วัว", "ฟาร์ม", "นา" }),
+            ("market", new[] { "ตลาด" }),
+            ("music", new[] { "ผับ", "ดนตรี" }),
+            ("shop", new[] { "รับซื้อ", "ร้าน" }),
+            ("island", new[] { "เกาะ", "อ่าวมาหยา", "ชิงช้า", "สมบัติ", "สระบัว" }),
+            ("fishing", new[] { "ท่าเรือ", "ตกปลา", "คลอง", "ปลา" }),
+            ("sao", new[] { "ตำบล", "อบต" }),
+            ("hospital", new[] { "รพ.", "อนามัย" }),
+            ("school", new[] { "โรงเรียน" }),
+            ("temple", new[] { "วัด" }),
+        };
+        foreach (var rule in rules)
+            foreach (var w in rule.words)
+                if (text.Contains(w)) return rule.icon;
+        return "travel";
     }
 
-    // Visible characters in a line (Thai vowel and tone marks above/below take no width)
-    private static int GlyphCount(string line)
+    // Unlit, alpha-clipped picture material for a sign icon (saved per icon so it ships in the build)
+    private static Material SignIcon(string icon)
     {
-        int n = 0;
-        foreach (char c in line)
-            if (!(c == '\u0E31' || (c >= '\u0E34' && c <= '\u0E3A') || (c >= '\u0E47' && c <= '\u0E4E'))) n++;
-        return n;
+        string path = $"Assets/Art/Materials/SignIcon_{icon}.mat";
+        var material = AssetDatabase.LoadAssetAtPath<Material>(path);
+        if (material == null)
+        {
+            material = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
+            AssetDatabase.CreateAsset(material, path);
+        }
+        var tex = AssetDatabase.LoadAssetAtPath<Texture2D>($"Assets/Resources/Branding/Icons/{icon}.png");
+        material.SetTexture("_BaseMap", tex);
+        material.SetColor("_BaseColor", Color.white);
+        material.SetFloat("_AlphaClip", 1f);
+        material.SetFloat("_Cutoff", 0.5f);
+        material.EnableKeyword("_ALPHATEST_ON");
+        material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.AlphaTest;
+        EditorUtility.SetDirty(material);
+        return material;
     }
 
     // Two pillars and a beam with the place name, open in the middle
