@@ -5,7 +5,8 @@ using UnityEngine.UI;
 // Detail card for a signpost (ป้ายบอกทาง): pops up at the bottom of the screen while you stand by the
 // sign — a vermilion header with the place name in gold, flowers at the corners, and the sign's text
 // on cream underneath, big enough to read on a phone. Display only (no touches), so the joystick and
-// buttons keep working. One shared instance.
+// buttons keep working. While a place's own window is open (e.g. the chicken contest, which already
+// shows the same name and details) the card steps aside, so only one popup is on screen. One shared instance.
 public class SignCardUI : MonoBehaviour
 {
     private static SignCardUI instance;
@@ -16,6 +17,7 @@ public class SignCardUI : MonoBehaviour
     private Text title, body;
     private object owner;
     private Coroutine anim;
+    private bool suppressed; // hidden because a window is open
 
     public static void Show(object who, string heading, string text)
     {
@@ -101,9 +103,29 @@ public class SignCardUI : MonoBehaviour
         rt.offsetMax = new Vector2(-sideInset, -vertical);
     }
 
+    private void Update()
+    {
+        if (owner == null) return;
+        bool window = UiKit.AnyWindowOpen;
+        if (window && !suppressed)
+        {
+            suppressed = true;
+            if (anim != null) StopCoroutine(anim);
+            anim = StartCoroutine(Pop(false));
+        }
+        else if (!window && suppressed)
+        {
+            suppressed = false;
+            card.gameObject.SetActive(true);
+            if (anim != null) StopCoroutine(anim);
+            anim = StartCoroutine(Pop(true));
+        }
+    }
+
     private void Open(object who, string heading, string text)
     {
         owner = who;
+        suppressed = UiKit.AnyWindowOpen;
         title.text = heading;
         body.text = text;
         bool hasBody = !string.IsNullOrEmpty(text);
@@ -111,6 +133,7 @@ public class SignCardUI : MonoBehaviour
         int lines = hasBody ? text.Split('\n').Length : 0;
         float width = Mathf.Clamp(Mathf.Max(heading.Length * 34f, LongestLine(text) * 22f) + 220f, 640f, 1100f);
         card.sizeDelta = new Vector2(width, 116f + (hasBody ? lines * 48f + 36f : 0f));
+        if (suppressed) return;
         card.gameObject.SetActive(true);
         if (anim != null) StopCoroutine(anim);
         anim = StartCoroutine(Pop(true));
@@ -120,6 +143,7 @@ public class SignCardUI : MonoBehaviour
     private void Close()
     {
         owner = null;
+        suppressed = false;
         if (anim != null) StopCoroutine(anim);
         anim = StartCoroutine(Pop(false));
     }

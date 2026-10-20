@@ -254,6 +254,19 @@ public static class UiKit
     }
 
     // Full-screen overlay canvas with a dimmed backdrop and a centred card; returns the card
+    // Every window's backdrop, so other popups (the signpost card) can step aside while one is open
+    private static readonly System.Collections.Generic.List<GameObject> windows = new System.Collections.Generic.List<GameObject>();
+
+    public static bool AnyWindowOpen
+    {
+        get
+        {
+            windows.RemoveAll(w => w == null);
+            foreach (var w in windows) if (w.activeInHierarchy) return true;
+            return false;
+        }
+    }
+
     public static RectTransform Window(Transform owner, string name, Vector2 cardSize, int sortingOrder, out GameObject backdrop)
     {
         var canvasGo = new GameObject(name, typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
@@ -271,6 +284,7 @@ public static class UiKit
         dim.anchorMax = Vector2.one;
         dim.offsetMin = dim.offsetMax = Vector2.zero;
         backdrop = dim.gameObject;
+        windows.Add(backdrop);
 
         var card = Rect("Card", dim, Paper);
         card.sizeDelta = cardSize;
