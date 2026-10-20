@@ -40,7 +40,7 @@ public static class Seaside
 
         Pier(root, new Vector3(25f, 0f, 18f));
         TourBoat(root);
-        Island.FerryStop(root, new Vector3(20f, 0f, 17f), 0f, "เรือไปเกาะ", "ท่าเรือข้ามเกาะ"); // ferry out to the island (อ่าวมาหยา)
+        Island.FerryStop(root, new Vector3(20f, 0f, 17f), 0f, "เรือพาเที่ยวเกาะ", "เรือพาเที่ยวเกาะ"); // the only way to the island (อ่าวมาหยา)
 
         // Longtail boats (เรือหางยาว) and a fishing boat moored by the pier
         LongtailBoat(root, new Vector3(-12f, 0f, 30f), 20f, new Color(0.95f, 0.35f, 0.25f));

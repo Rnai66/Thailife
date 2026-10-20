@@ -179,12 +179,8 @@ public static class Island
         }
         Blocker(p, new Vector3(0f, 1f, 20.3f), new Vector3(3.6f, 2f, 0.4f));
 
-        // Arrival point at the landward end, facing the beach
-        var spawn = PrimitiveKit.Group("SpawnPoint", p, new Vector3(0f, 0.3f, 7f), 180f);
-        spawn.AddComponent<SpawnPoint>().Configure("pier");
-
         // Ferry stop half way along: the travel map, titled for the boat
-        FerryStop(p, new Vector3(0f, 0.3f, 12.5f), 0f, "ท่าเรือ · กลับฝั่ง", "ท่าเรือข้ามฝั่ง");
+        FerryStop(p, new Vector3(0f, 0.3f, 12.5f), 0f, "ท่าเรือ · กลับฝั่ง", "เรือกลับฝั่ง");
         Seaside.LongtailBoat(root, start + new Vector3(3.6f, 0f, 13f), 0f, new Color(1f, 0.85f, 0.2f)); // the ferry, moored alongside
 
         foreach (float x in new[] { -0.8f, 0.8f })
@@ -221,7 +217,10 @@ public static class Island
         var box = zone.AddComponent<BoxCollider>();
         box.isTrigger = true;
         box.size = new Vector3(2.8f, 2f, 1.6f);
-        zone.AddComponent<TravelStop>().Configure(title);
+        zone.AddComponent<TravelStop>().Configure(title, boatPier: true);
+        // Arriving by boat: step off just in front of the shelter, facing away from it
+        var spawn = PrimitiveKit.Group("SpawnPoint", ferry.transform, new Vector3(0f, 0f, -2.6f), 180f);
+        spawn.AddComponent<SpawnPoint>().Configure("ferry");
     }
 
     // ── Thatched cabana (ซุ้มหลังคาจาก) with two deck chairs; lie down to rest (paid) ──

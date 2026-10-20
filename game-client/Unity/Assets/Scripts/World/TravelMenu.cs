@@ -4,6 +4,7 @@ using UnityEngine.UI;
 
 // Travel map at a songthaew stop (ป้ายรถสองแถว), premium layout: one card per destination
 // (หมู่บ้าน → ตำบล → เมือง) joined by a route line; the current location is marked "อยู่ที่นี่".
+// The boat pier (ท่าเรือ) shows only the sea trips (ทะเล ⇄ เกาะ); the island is not on the road map.
 // Built at runtime; one instance per scene.
 public class TravelMenu : MonoBehaviour
 {
@@ -11,13 +12,24 @@ public class TravelMenu : MonoBehaviour
 
     private const float Spacing = 360f;
 
+    private static bool building; // mode for the instance being built (read in Awake)
+
     private GameObject backdrop;
     private Text title;
+    private bool boat;
 
-    public static void Show(string heading = null)
+    public static void Show(string heading = null, bool boat = false)
     {
+        if (instance != null && instance.boat != boat)
+        {
+            Destroy(instance.gameObject);
+            instance = null;
+        }
         if (instance == null)
-            instance = new GameObject("TravelMenu").AddComponent<TravelMenu>();
+        {
+            building = boat;
+            instance = new GameObject(boat ? "BoatMenu" : "TravelMenu").AddComponent<TravelMenu>();
+        }
         instance.title.text = string.IsNullOrEmpty(heading) ? "ป้ายรถสองแถว" : heading;
         instance.backdrop.SetActive(true);
     }
@@ -32,11 +44,14 @@ public class TravelMenu : MonoBehaviour
         if (FindAnyObjectByType<EventSystem>() == null)
             Debug.LogWarning("[Travel] No EventSystem in the scene — run Thai Life > Repair Scene.");
 
-        var all = Locations.All;
+        boat = building;
+        var all = new System.Collections.Generic.List<Location>();
+        foreach (var l in Locations.All)
+            if (boat ? l.Level == LocationLevel.Beach : !l.BoatOnly) all.Add(l);
         var body = UiKit.PremiumWindow(transform, "TravelCanvas", new Vector2(Mathf.Max(1500f, all.Count * Spacing + 60f), 880f), 50, "icon:travel",
             out backdrop, out title, out var subtitle, Hide, out _);
         title.text = "ป้ายรถสองแถว";
-        subtitle.text = "เลือกจุดหมายปลายทาง";
+        subtitle.text = boat ? "นั่งเรือหางยาวข้ามทะเล" : "เลือกจุดหมายปลายทาง";
 
         // Route line behind the cards
         var route = UiKit.Rect("Route", body, UiKit.Gold);
@@ -92,7 +107,7 @@ public class TravelMenu : MonoBehaviour
         {
             var target = location;
             var go = UiKit.RoundButton(card, location.Available ? "ไปที่นี่" : "เร็วๆ นี้", new Vector2(0f, -175f), new Vector2(290f, 76f),
-                UiKit.Gold, UiKit.GoldInk, () => Locations.TravelTo(target), 32);
+                UiKit.Gold, UiKit.GoldInk, () => Locations.TravelTo(target, boat ? "ferry" : null), 32);
             go.interactable = location.Available;
         }
     }
