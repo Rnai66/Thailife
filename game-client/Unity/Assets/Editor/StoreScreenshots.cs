@@ -92,6 +92,16 @@ public static class StoreScreenshots
         EditorSceneManager.OpenScene("Assets/Scenes/ThaiVillage.unity");
     }
 
+    [MenuItem("Thai Life/Advanced/Preview School")]
+    public static void PreviewSchool()
+    {
+        if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+        Directory.CreateDirectory(OutDir);
+        Capture(new Shot { File = "preview_school", Scene = "Tambon", Title = "โรงเรียน", Subtitle = "ห้องเรียน · เวทีมวย",
+            Camera = new Vector3(4f, 9f, -5f), LookAt = new Vector3(-3f, 0f, -23f), Fov = 60f }, LoadClips());
+        EditorSceneManager.OpenScene("Assets/Scenes/ThaiVillage.unity");
+    }
+
     private static Dictionary<string, AnimationClip> LoadClips()
     {
         var result = new Dictionary<string, AnimationClip>();

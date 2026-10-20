@@ -60,10 +60,20 @@ public static class TambonBuilder
         FestivalGrounds.Build(root, new Vector3(-36f, 0f, -30f), 180f, big: false);
         Lane(root, -36f, -17.5f, -10f);
 
-        // Tambon event boxing ring (เวทีมวยงานตำบล), entrance facing the road
-        Places.BoxingRing(root, new Vector3(38f, 0f, 18f), 0f, "เวทีมวยงานตำบล", "tambon");
+        // Motorbike repair shop (skilled job: ช่าง) where the boxing ring used to be
+        Schooling.RepairShop(root, new Vector3(38f, 0f, 18f), 0f);
         StreetFurniture.LampPost(root, new Vector3(34.5f, 0f, 13.2f));
         StreetFurniture.LampPost(root, new Vector3(41.5f, 0f, 13.2f));
+
+        // School grounds: the tambon event boxing ring (also the sports class ring), the classroom
+        // and the school jobs (โค้ชกีฬา by the football field, ติวเตอร์ by the classrooms)
+        Places.BoxingRing(root, new Vector3(6f, 0f, -24f), 180f, "เวทีมวยงานตำบล", "tambon");
+        Lane(root, 6f, -19.5f, -10f);
+        StreetFurniture.LampPost(root, new Vector3(2f, 0f, -19f));
+        StreetFurniture.LampPost(root, new Vector3(10f, 0f, -19f));
+        Schooling.ClassroomDoor(root, new Vector3(-10f, 0f, -23.6f), 180f);
+        Schooling.JobSpot(root, new Vector3(-21f, 0f, -14.5f), 180f, "coach", "โค้ชกีฬาโรงเรียน\nค่าจ้าง 300 ฿ · ต้องมี เลเวล 8 · กีฬา Lv 4");
+        Schooling.JobSpot(root, new Vector3(-15.5f, 0f, -23.4f), 180f, "tutor", "ติวเตอร์ตรรกะ\nค่าจ้าง 380 ฿ · ต้องมี เลเวล 10 · ตรรกะ Lv 5");
 
         // ตลาดนัด south of the road, entrance facing it (evening market, 16:00-22:00)
         Markets.FleaMarket(root, new Vector3(28f, 0f, -28f), "ตลาดนัด", "16:00-22:00", 180f);
@@ -130,12 +140,15 @@ public static class TambonBuilder
     {
         // ตัวเมือง (อำเภอ/จังหวัด): clock tower roundabout, shophouses, boxing camp (career tier 3)
         Places2.ClockTower(root, new Vector3(0f, 0f, 14f));
-        Places2.Shophouses(root, new Vector3(-20f, 0f, 2f), 0f, 5, new[] { "ร้านทอง", "ร้านขายยา", "", "ร้านข้าวมันไก่", "ร้านโทรศัพท์" });
-        Places2.Shophouses(root, new Vector3(22f, 0f, 2f), 0f, 4, new[] { "ร้านกาแฟ", "", "ร้านตัดผม", "ร้านเครื่องดนตรี" });
+        Places2.Shophouses(root, new Vector3(-20f, 0f, 2f), 0f, 5, new[] { "ร้านทอง", "ร้านขายยา", "ออฟฟิศไอที", "ร้านข้าวมันไก่", "ร้านโทรศัพท์" });
+        Places2.Shophouses(root, new Vector3(22f, 0f, 2f), 0f, 4, new[] { "ร้านกาแฟ", "บริษัทซอฟต์แวร์", "ร้านตัดผม", "ร้านเครื่องดนตรี" });
         // Walk up to ร้านข้าวมันไก่ (left row, 4th unit) or ร้านกาแฟ (right row, 1st unit) to buy food
         FoodCounter(root, new Vector3(-15.5f, 0f, -4.4f));
         FoodCounter(root, new Vector3(15.25f, 0f, -4.4f));
         ShopZone(root, new Vector3(28.75f, 0f, -4.4f), "music");   // ร้านเครื่องดนตรี (right row, 4th unit)
+        // Skilled office jobs in the two spare shophouse units (คอมพิวเตอร์ / ตรรกะ from the school)
+        Schooling.JobSpot(root, new Vector3(-20f, 0f, -4.4f), 180f, "office", "พนักงานคอมพิวเตอร์\nค่าจ้าง 320 ฿ · ต้องมี เลเวล 8 · คอมพิวเตอร์ Lv 4");
+        Schooling.JobSpot(root, new Vector3(19.75f, 0f, -4.4f), 180f, "programmer", "โปรแกรมเมอร์\nค่าจ้าง 650 ฿ · เลเวล 15 · คอมพิวเตอร์ Lv 8 · ตรรกะ Lv 6");
 
         // Music venues: city event stage by the clock tower (Lv 8) and the pub (Lv 10, night)
         Places2.MusicStage(root, new Vector3(10f, 0f, 22f), 90f, "city_event", "เวทีอีเวนต์เมือง", new Color(0.15f, 0.3f, 0.6f));
@@ -195,8 +208,6 @@ public static class TambonBuilder
             new Vector3(-22f, 0f, 18.5f), new Vector3(-36f, 0f, 18.5f), new Vector3(26f, 0f, 20.5f),
         })
             StreetFurniture.LampPost(root, p);
-        StreetFurniture.HangingLight(root, new Vector3(35f, 3.6f, 11f));
-        StreetFurniture.HangingLight(root, new Vector3(43f, 3.6f, 11f));
 
         // Paved town centre with street palms in planters along both streets
         PrimitiveKit.Box("Pavement", root, new Vector3(0f, 0.008f, 19f), new Vector3(96f, 0.012f, 49f),

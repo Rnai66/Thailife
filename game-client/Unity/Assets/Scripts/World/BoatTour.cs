@@ -47,7 +47,7 @@ public class BoatTour : MonoBehaviour
     private void Offer(PlayerController player, string message = null)
     {
         ContextButton.Show(this, "พานักท่องเที่ยวนั่งเรือ",
-            message ?? "ขับเรือหางยาวรอบอ่าว · ใช้พลังงาน 10 · ค่าเรือ 180 บาท + ทิป", () => StartTour(player));
+            message ?? "ขับเรือหางยาวรอบอ่าว · ใช้พลังงาน 10 · ค่าเรือ 180 บาท + ทิป\nต้องมี เลเวล 5 · ช่าง Lv 2", () => StartTour(player));
     }
 
     private static NakamaConnection Connection()
@@ -78,7 +78,8 @@ public class BoatTour : MonoBehaviour
         }
         catch (ApiResponseException e)
         {
-            Offer(player, e.Message.Contains("energy") ? "พลังงานไม่พอ — พักก่อนแล้วค่อยออกเรือ" : "ออกเรือไม่ได้ ลองใหม่");
+            Offer(player, e.Message.Contains("skill") ? Education.Explain(e) + " (เรียนช่างที่โรงเรียน)"
+                : e.Message.Contains("energy") ? "พลังงานไม่พอ — พักก่อนแล้วค่อยออกเรือ" : "ออกเรือไม่ได้ ลองใหม่");
         }
         catch (Exception)
         {

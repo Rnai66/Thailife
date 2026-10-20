@@ -729,6 +729,11 @@ public static class Places
         (string icon, string[] words)[] rules =
         {
             ("travel", new[] { "ป้ายรถ" }),
+            ("school", new[] { "ห้องเรียน" }),
+            ("subj_craft", new[] { "ช่างซ่อม" }),
+            ("subj_sports", new[] { "โค้ช" }),
+            ("subj_logic", new[] { "ติวเตอร์" }),
+            ("subj_computer", new[] { "คอมพิวเตอร์", "โปรแกรมเมอร์" }),
             ("boxing", new[] { "มวย", "กระสอบ", "ซ้อมเตะ" }),
             ("fair", new[] { "ประกวด", "งานวัด" }),
             ("koknongna", new[] { "โคกหนองนา" }),

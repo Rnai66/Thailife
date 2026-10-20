@@ -31,6 +31,7 @@ end
 
 nk.register_rpc(function(context, payload)
   local user_id = context.user_id
+  require("education").check(user_id, "boat_tour") -- skilled job: main level + ช่าง (engine) skill
   life.spend(user_id, TOUR_ENERGY)
   write(user_id, { start_ms = nk.time() })
   return nk.json_encode({ fare = FARE, energy = TOUR_ENERGY })

@@ -25,8 +25,9 @@ M.POOL = {
   train        = { title = "ซ้อมมวย ชก 30 ครั้ง",            need = 30, reward = 30, hint = "ต้นกล้วยข้างบ้าน" },
   eat          = { title = "กินอาหาร 1 มื้อ",                need = 1,  reward = 15, hint = "ปุ่ม กิน ข้างแถบพลังงาน" },
   shop         = { title = "ซื้อของที่ร้าน 1 ครั้ง",          need = 1,  reward = 15, hint = "ร้านค้าชุมชน" },
+  study        = { title = "เข้าเรียนที่โรงเรียน 1 คาบ",       need = 1,  reward = 30, hint = "โรงเรียนในตำบล" },
 }
-M.ORDER = { "fish", "sell_produce", "plant", "harvest", "feed", "sell_eggs", "music", "train", "eat", "shop" }
+M.ORDER = { "fish", "sell_produce", "plant", "harvest", "feed", "sell_eggs", "music", "train", "eat", "shop", "study" }
 
 local function has_chickens(user_id)
   return #chickens.read(user_id).chickens > 0
