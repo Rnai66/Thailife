@@ -10,16 +10,21 @@ public class FarmPlot : MonoBehaviour
     [SerializeField] private int plotId = 1;
     [SerializeField] private Vector2 size = new Vector2(7f, 6.5f);
 
-    private Transform crop;
+    private Transform crop;          // mud block shown after ploughing
     private Renderer cropRenderer;
     private Material cropMaterial;
+    private Transform rice;          // rows of rice clumps (leaves + ears)
+    private Renderer leaves, ears;
+    private Material leafMaterial, earMaterial;
     private bool playerInside;
     private bool busy;
 
     private static readonly Color Soil = new Color(0.35f, 0.24f, 0.15f);
-    private static readonly Color Seedling = new Color(0.45f, 0.8f, 0.3f);
-    private static readonly Color Green = new Color(0.25f, 0.6f, 0.2f);
-    private static readonly Color Golden = new Color(0.95f, 0.78f, 0.25f);
+    private static readonly Color Seedling = new Color(0.55f, 0.85f, 0.32f);
+    private static readonly Color Green = new Color(0.22f, 0.52f, 0.16f);
+    private static readonly Color Straw = new Color(0.8f, 0.68f, 0.3f);
+    private static readonly Color EarGreen = new Color(0.62f, 0.74f, 0.3f);
+    private static readonly Color Golden = new Color(0.95f, 0.76f, 0.24f);
 
     public void Configure(int id, Vector2 plotSize)
     {
@@ -44,6 +49,105 @@ public class FarmPlot : MonoBehaviour
         cropMaterial = template != null ? new Material(template.sharedMaterial) : cropRenderer.material;
         cropRenderer.sharedMaterial = cropMaterial;
         cropRenderer.enabled = false;
+
+        // Rice planted in rows (ดำนาเป็นแถว): one mesh of leaf blades, one of drooping ears
+        rice = new GameObject("Rice").transform;
+        rice.SetParent(transform, false);
+        rice.localPosition = new Vector3(0f, -1f, 0f);
+        leafMaterial = new Material(cropMaterial);
+        leafMaterial.SetFloat("_Cull", 0f); // blades are single sheets: show both faces
+        earMaterial = new Material(leafMaterial);
+        leaves = MakePart("Leaves", RiceMeshes(size).leaves, leafMaterial);
+        ears = MakePart("Ears", RiceMeshes(size).ears, earMaterial);
+        rice.gameObject.SetActive(false);
+    }
+
+    private Renderer MakePart(string name, Mesh mesh, Material material)
+    {
+        var go = new GameObject(name, typeof(MeshFilter), typeof(MeshRenderer));
+        go.transform.SetParent(rice, false);
+        go.GetComponent<MeshFilter>().sharedMesh = mesh;
+        var r = go.GetComponent<MeshRenderer>();
+        r.sharedMaterial = material;
+        r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        return r;
+    }
+
+    // ── Rice clump meshes (built once per paddy size, shared by all paddies) ──────────
+    private static readonly System.Collections.Generic.Dictionary<Vector2, (Mesh leaves, Mesh ears)> meshCache =
+        new System.Collections.Generic.Dictionary<Vector2, (Mesh, Mesh)>();
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetStatics() => meshCache.Clear();
+
+    private static (Mesh leaves, Mesh ears) RiceMeshes(Vector2 area)
+    {
+        if (meshCache.TryGetValue(area, out var cached) && cached.leaves != null) return cached;
+        var rng = new System.Random(17);
+        var lv = new System.Collections.Generic.List<Vector3>(); var lt = new System.Collections.Generic.List<int>();
+        var ev = new System.Collections.Generic.List<Vector3>(); var et = new System.Collections.Generic.List<int>();
+        const float rowGap = 0.55f, hillGap = 0.48f, margin = 0.35f;
+        for (float x = -area.x * 0.5f + margin; x <= area.x * 0.5f - margin; x += rowGap)
+            for (float z = -area.y * 0.5f + margin; z <= area.y * 0.5f - margin; z += hillGap)
+            {
+                var basePos = new Vector3(x + (float)(rng.NextDouble() - 0.5) * 0.06f, 0.02f, z + (float)(rng.NextDouble() - 0.5) * 0.06f);
+                int blades = 7;
+                for (int b = 0; b < blades; b++)
+                {
+                    float ang = (b / (float)blades + (float)rng.NextDouble() * 0.1f) * Mathf.PI * 2f;
+                    var dir = new Vector3(Mathf.Cos(ang), 0f, Mathf.Sin(ang));
+                    float lean = 0.12f + (float)rng.NextDouble() * 0.16f, tall = 0.85f + (float)rng.NextDouble() * 0.25f;
+                    AddBlade(lv, lt, basePos, dir, lean, tall, 0.035f);
+                }
+                for (int e = 0; e < 3; e++)
+                {
+                    float ang = (e / 3f + (float)rng.NextDouble() * 0.2f) * Mathf.PI * 2f;
+                    AddEar(ev, et, basePos, new Vector3(Mathf.Cos(ang), 0f, Mathf.Sin(ang)));
+                }
+            }
+        var leafMesh = new Mesh { name = "RiceLeaves", indexFormat = UnityEngine.Rendering.IndexFormat.UInt32 };
+        leafMesh.SetVertices(lv); leafMesh.SetTriangles(lt, 0); leafMesh.RecalculateNormals();
+        var earMesh = new Mesh { name = "RiceEars", indexFormat = UnityEngine.Rendering.IndexFormat.UInt32 };
+        earMesh.SetVertices(ev); earMesh.SetTriangles(et, 0); earMesh.RecalculateNormals();
+        meshCache[area] = (leafMesh, earMesh);
+        return (leafMesh, earMesh);
+    }
+
+    // A leaf blade: narrow strip rising from the hill and arching outward, pointed tip (height 1 = full grown)
+    private static void AddBlade(System.Collections.Generic.List<Vector3> v, System.Collections.Generic.List<int> t, Vector3 basePos, Vector3 dir, float lean, float tall, float width)
+    {
+        var side = Vector3.Cross(Vector3.up, dir).normalized * width;
+        int start = v.Count;
+        for (int k = 0; k <= 3; k++)
+        {
+            float u = k / 3f;
+            var p = basePos + dir * (lean * u * u) + Vector3.up * (tall * (u - 0.12f * u * u * u));
+            float w = 1f - u * 0.85f;
+            v.Add(p - side * w); v.Add(p + side * w);
+        }
+        v.Add(basePos + dir * (lean * 1.15f) + Vector3.up * tall * 0.9f); // tip
+        for (int k = 0; k < 3; k++)
+        {
+            int a = start + k * 2;
+            t.AddRange(new[] { a, a + 2, a + 1, a + 1, a + 2, a + 3 });
+        }
+        int last = start + 6;
+        t.AddRange(new[] { last, start + 8, last + 1 });
+    }
+
+    // A rice ear (รวงข้าว): stalk out of the clump, then a string of grains drooping down at the end
+    private static void AddEar(System.Collections.Generic.List<Vector3> v, System.Collections.Generic.List<int> t, Vector3 basePos, Vector3 dir)
+    {
+        var side = Vector3.Cross(Vector3.up, dir).normalized * 0.03f;
+        for (int k = 0; k < 7; k++)
+        {
+            float u = k / 6f;
+            var c = basePos + dir * (0.12f + u * 0.28f) + Vector3.up * (1.02f + 0.1f * Mathf.Sin(u * Mathf.PI) - u * u * 0.35f);
+            float r = 0.035f * (1f - u * 0.5f);
+            int s0 = v.Count;
+            v.Add(c + Vector3.up * r); v.Add(c + side * 1.4f); v.Add(c - Vector3.up * r); v.Add(c - side * 1.4f);
+            t.AddRange(new[] { s0, s0 + 1, s0 + 2, s0, s0 + 2, s0 + 3 });
+        }
     }
 
     private void Update()
@@ -61,18 +165,35 @@ public class FarmPlot : MonoBehaviour
         if (stage == "empty")
         {
             cropRenderer.enabled = false;
+            rice.gameObject.SetActive(false);
             return;
         }
 
-        float progress = farm.ProgressOf(plot);
-        float height = stage == "plowed" ? 0.06f : Mathf.Lerp(0.15f, 0.8f, progress);
-        Color color = stage == "plowed" ? Soil : stage == "ripe" ? Golden : Color.Lerp(Seedling, Green, progress);
+        // Ploughed: wet mud over the paddy; planted: rows of rice that grow and ripen
+        if (stage == "plowed")
+        {
+            crop.localPosition = new Vector3(0f, -1f + 0.03f, 0f);
+            crop.localScale = new Vector3(size.x, 0.06f, size.y);
+            cropMaterial.color = Soil;
+            cropRenderer.enabled = true;
+            rice.gameObject.SetActive(false);
+            return;
+        }
+        cropRenderer.enabled = false;
+        rice.gameObject.SetActive(true);
 
-        // Local space of the zone (which sits 1 m above the ground)
-        crop.localPosition = new Vector3(0f, -1f + height * 0.5f, 0f);
-        crop.localScale = new Vector3(size.x, height, size.y);
-        cropMaterial.color = color;
-        cropRenderer.enabled = true;
+        float progress = stage == "ripe" ? 1f : farm.ProgressOf(plot);
+        float height = Mathf.Lerp(0.22f, 0.95f, Mathf.SmoothStep(0f, 1f, progress));
+        rice.localScale = new Vector3(Mathf.Lerp(0.6f, 1f, progress), height, Mathf.Lerp(0.6f, 1f, progress));
+        leafMaterial.color = progress < 0.7f ? Color.Lerp(Seedling, Green, progress / 0.7f) : Color.Lerp(Green, Straw, (progress - 0.7f) / 0.3f);
+        bool earsOut = progress > 0.55f;
+        ears.enabled = earsOut;
+        if (earsOut)
+        {
+            float k = Mathf.InverseLerp(0.55f, 1f, progress);
+            ears.transform.localScale = new Vector3(1f, Mathf.Lerp(0.85f, 1f, k), 1f);
+            earMaterial.color = Color.Lerp(EarGreen, Golden, k);
+        }
     }
 
     private void Offer(FarmClient farm, FarmClient.Plot plot)

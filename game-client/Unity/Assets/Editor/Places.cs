@@ -363,7 +363,8 @@ public static class Places
     {
         var farm = PrimitiveKit.Group("KokNongNa_โคกหนองนา", parent, position);
         var t = farm.transform;
-        var rice = PrimitiveKit.Mat("RicePaddy", new Color(0.55f, 0.75f, 0.25f));
+        // Flooded paddy: muddy water with a green film of duckweed (แหน), shiny like water
+        var rice = PrimitiveKit.Mat("PaddyWater", new Color(0.58f, 0.64f, 0.36f), 0.82f);
         var dike = PrimitiveKit.Mat("Dirt", new Color(0.55f, 0.42f, 0.28f));
         var water = PrimitiveKit.Mat("Water", new Color(0.25f, 0.5f, 0.75f));
         var earth = PrimitiveKit.Mat("Earth", new Color(0.5f, 0.38f, 0.24f));

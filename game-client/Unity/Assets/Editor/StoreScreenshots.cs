@@ -71,6 +71,17 @@ public static class StoreScreenshots
         Debug.Log($"[ThaiLife] App Store screenshots written to {Path.GetFullPath(OutDir)}");
     }
 
+    // Quick look at the tour boat at the pier (Builds/StoreScreenshots/preview_boat.png); not a store shot
+    [MenuItem("Thai Life/Advanced/Preview Longtail Boat")]
+    public static void PreviewBoat()
+    {
+        if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+        Directory.CreateDirectory(OutDir);
+        Capture(new Shot { File = "preview_boat", Scene = "Beach", Title = "เรือหางยาว", Subtitle = "ตัวเรือใหม่ · นั่งในเรือ",
+            Camera = new Vector3(15f, 3.6f, 31f), LookAt = new Vector3(21.3f, 0.6f, 26f), Fov = 50f }, LoadClips());
+        EditorSceneManager.OpenScene("Assets/Scenes/ThaiVillage.unity");
+    }
+
     private static Dictionary<string, AnimationClip> LoadClips()
     {
         var result = new Dictionary<string, AnimationClip>();

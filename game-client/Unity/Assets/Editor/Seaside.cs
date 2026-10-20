@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 // New places from the game art: the beach (ทะเล), the cow farm (ฟาร์มวัว), the city noodle shop
@@ -503,21 +504,126 @@ public static class Seaside
         StreetFurniture.LampPost(p, new Vector3(1.2f, 0.3f, 18.3f));
     }
 
+    // Thai longtail boat (เรือหางยาว): a deep wooden hull whose bow sweeps up high, gunwales, floorboards,
+    // bench seats, a canopy, flower garlands and ribbons on the bow, and the car engine on a pivot at the
+    // stern driving a long propeller shaft. Bow is +Z. People "sit" by standing low inside the hull.
     private static Transform LongtailBoat(Transform root, Vector3 pos, float yaw, Color ribbon)
     {
         var b = PrimitiveKit.Group("LongtailBoat_เรือหางยาว", root, pos, yaw).transform;
-        var hull = PrimitiveKit.Mat("BoatWood", new Color(0.55f, 0.32f, 0.15f));
-        var path = MeshKit.Curve(new Vector3(0f, 0.15f, -3.5f), new Vector3(0f, -0.1f, 0f), new Vector3(0f, 0.9f, 3.8f), 10);
-        MeshKit.Place("Hull", b, MeshKit.Sweep("LongtailHull", path, new[] { 0.45f, 0.6f, 0.7f, 0.72f, 0.7f, 0.65f, 0.55f, 0.4f, 0.25f, 0.08f }, 10), hull, Vector3.zero, default, new Vector3(1.3f, 0.6f, 1f));
-        PrimitiveKit.Box("Seat", b, new Vector3(0f, 0.35f, 0f), new Vector3(1.2f, 0.06f, 0.4f), PrimitiveKit.Mat("WoodPlank", Wood), collider: false);
-        PrimitiveKit.Box("Engine", b, new Vector3(0f, 0.5f, -3.2f), new Vector3(0.4f, 0.4f, 0.6f), PrimitiveKit.Mat("SteelFrame", new Color(0.32f, 0.42f, 0.5f)), collider: false);
-        PrimitiveKit.Cylinder("LongTail", b, new Vector3(0f, 0.35f, -4.6f), new Vector3(0.06f, 1.2f, 0.06f), PrimitiveKit.Mat("SteelFrame", new Color(0.32f, 0.42f, 0.5f)), new Vector3(75f, 0f, 0f), collider: false);
-        // Colourful ribbons tied to the bow (ผ้าสามสี)
+        var wood = PrimitiveKit.Mat("BoatHullWood", new Color(0.52f, 0.31f, 0.15f));
+        wood.SetFloat("_Cull", 0f); // both faces: the inside of the hull is visible from above
+        var dark = PrimitiveKit.Mat("DarkWood", new Color(0.36f, 0.22f, 0.12f));
+        var plank = PrimitiveKit.Mat("WoodPlank", Wood);
+        var steel = PrimitiveKit.Mat("SteelFrame", new Color(0.32f, 0.42f, 0.5f));
+        MeshKit.Place("Hull", b, LongtailHull(), wood, Vector3.zero);
+
+        // Gunwale rails along the top edge, and a painted band just under them
+        foreach (float side in new[] { -1f, 1f })
+        {
+            var rail = new Vector3[16];
+            for (int i = 0; i < rail.Length; i++)
+            {
+                float t = i / (rail.Length - 1f) * 0.97f;
+                rail[i] = new Vector3(side * HullBeam(t), HullSheer(t), HullZ(t));
+            }
+            MeshKit.Place("Gunwale", b, MeshKit.Sweep(side < 0 ? "Boats/GunwaleL" : "Boats/GunwaleR", rail, MeshKit.Taper(rail.Length, 0.05f, 0.03f), 6), dark, Vector3.zero);
+        }
+        // Floorboards and bench seats
+        for (float z = -3.2f; z <= 2.6f; z += 0.42f)
+        {
+            float t = HullT(z), w = HullBeam(t) * 1.3f;
+            PrimitiveKit.Box("Floorboard", b, new Vector3(0f, HullKeel(t) + 0.1f, z), new Vector3(w, 0.04f, 0.36f), plank, collider: false);
+        }
+        foreach (float z in new[] { -2.9f, -0.9f, 0.6f, 2.0f })
+        {
+            float t = HullT(z);
+            PrimitiveKit.Box("Bench", b, new Vector3(0f, Mathf.Lerp(HullKeel(t), HullSheer(t), 0.62f), z), new Vector3(HullBeam(t) * 1.85f, 0.06f, 0.32f), plank, collider: false);
+        }
+        // Canopy over the passengers
+        var tarp = PrimitiveKit.Mat($"Canopy{(int)(ribbon.r * 10)}", Color.Lerp(ribbon, Color.white, 0.45f));
+        foreach (float z in new[] { -1.2f, 2.3f })
+            foreach (float side in new[] { -1f, 1f })
+            {
+                float t = HullT(z);
+                PrimitiveKit.Cylinder("CanopyPole", b, new Vector3(side * HullBeam(t) * 0.8f, (HullSheer(t) + 2.25f) * 0.5f, z), new Vector3(0.05f, (2.25f - HullSheer(t)) * 0.5f, 0.05f), dark, collider: false);
+            }
+        PrimitiveKit.Box("Canopy", b, new Vector3(0f, 2.28f, 0.55f), new Vector3(1.55f, 0.05f, 3.9f), tarp, collider: false);
+        foreach (float side in new[] { -1f, 1f })
+            PrimitiveKit.Box("CanopyEdge", b, new Vector3(side * 0.78f, 2.2f, 0.55f), new Vector3(0.04f, 0.16f, 3.9f), PrimitiveKit.Mat($"Ribbon0", ribbon), collider: false);
+
+        // Bow: flower garland (พวงมาลัย) and three-colour ribbons (ผ้าสามสี) on the raised prow
+        float tip = HullSheer(0.985f), tipZ = HullZ(0.985f);
+        for (int i = 0; i < 10; i++)
+        {
+            float a = i / 10f * Mathf.PI * 2f;
+            Color c = i % 3 == 0 ? new Color(1f, 0.85f, 0.2f) : i % 3 == 1 ? Color.white : new Color(0.95f, 0.3f, 0.45f);
+            PrimitiveKit.Sphere("Garland", b, new Vector3(Mathf.Cos(a) * 0.14f, tip - 0.35f + Mathf.Sin(a) * 0.08f, tipZ - 0.12f + Mathf.Sin(a) * 0.1f), Vector3.one * 0.1f, PrimitiveKit.Mat($"Garland{i % 3}", c));
+        }
         for (int i = 0; i < 3; i++)
-            PrimitiveKit.Box("Ribbon", b, new Vector3(0f, 1.05f - i * 0.08f, 3.65f), new Vector3(0.25f, 0.07f, 0.04f),
-                PrimitiveKit.Mat($"Ribbon{i}", i == 0 ? ribbon : i == 1 ? Color.white : new Color(1f, 0.85f, 0.2f)), new Vector3(0f, 0f, 15f * (i - 1)), collider: false);
+            PrimitiveKit.Box("Ribbon", b, new Vector3(0f, tip - 0.1f - i * 0.1f, tipZ + 0.02f), new Vector3(0.32f, 0.09f, 0.04f),
+                PrimitiveKit.Mat($"Ribbon{i}", i == 0 ? ribbon : i == 1 ? Color.white : new Color(1f, 0.85f, 0.2f)), new Vector3(0f, 0f, 18f * (i - 1)), collider: false);
+
+        // Stern: engine on its pivot post, tiller, long shaft angled into the water, propeller
+        float sternT = 0.02f, sternZ = HullZ(sternT), sternY = HullSheer(sternT);
+        PrimitiveKit.Cylinder("EnginePost", b, new Vector3(0f, sternY + 0.12f, sternZ + 0.15f), new Vector3(0.12f, 0.15f, 0.12f), dark, collider: false);
+        PrimitiveKit.Box("Engine", b, new Vector3(0f, sternY + 0.48f, sternZ - 0.05f), new Vector3(0.5f, 0.42f, 0.75f), PrimitiveKit.Mat("EngineRed", new Color(0.75f, 0.18f, 0.15f)), collider: false);
+        PrimitiveKit.Box("EngineHead", b, new Vector3(0f, sternY + 0.76f, sternZ - 0.05f), new Vector3(0.34f, 0.16f, 0.5f), steel, collider: false);
+        PrimitiveKit.Cylinder("Tiller", b, new Vector3(0f, sternY + 0.62f, sternZ + 0.9f), new Vector3(0.04f, 0.65f, 0.04f), steel, new Vector3(80f, 0f, 0f), collider: false);
+        var shaftFrom = new Vector3(0f, sternY + 0.35f, sternZ - 0.35f);
+        var shaftTo = new Vector3(0f, -0.35f, sternZ - 3.6f);
+        var mid = (shaftFrom + shaftTo) * 0.5f;
+        float len = Vector3.Distance(shaftFrom, shaftTo);
+        var shaft = PrimitiveKit.Cylinder("LongTail", b, mid, new Vector3(0.06f, len * 0.5f, 0.06f), steel, default, collider: false);
+        shaft.transform.localRotation = Quaternion.FromToRotation(Vector3.up, shaftFrom - shaftTo);
+        foreach (float a in new[] { 0f, 120f, 240f })
+            PrimitiveKit.Box("Propeller", b, shaftTo, new Vector3(0.05f, 0.34f, 0.02f), steel, new Vector3(0f, 0f, a), collider: false);
+
         b.gameObject.AddComponent<Bob>();
         return b;
+    }
+
+    // Hull shape along its length (t = 0 stern .. 1 bow)
+    private const float HullStern = -4.3f, HullLength = 9.4f;
+    private static float HullZ(float t) => HullStern + HullLength * t;
+    private static float HullT(float z) => Mathf.Clamp01((z - HullStern) / HullLength);
+    private static float HullBeam(float t) =>
+        t < 0.35f ? Mathf.Lerp(0.5f, 0.8f, Mathf.Sin(t / 0.35f * Mathf.PI * 0.5f))
+                  : 0.8f * Mathf.Pow(Mathf.Max(0f, Mathf.Cos((t - 0.35f) / 0.65f * Mathf.PI * 0.5f)), 0.85f) + 0.03f; // Max: cos(90°) is a hair below 0 → NaN
+    private static float HullSheer(float t) => 0.6f + (t > 0.7f ? Mathf.Pow((t - 0.7f) / 0.3f, 2.2f) * 1.15f : 0f) + (t < 0.1f ? (0.1f - t) * 0.8f : 0f);
+    private static float HullKeel(float t) => -0.22f + (t > 0.72f ? Mathf.Pow((t - 0.72f) / 0.28f, 2f) * 1.3f : 0f) + (t < 0.06f ? (0.06f - t) * 2f : 0f);
+
+    // The hull skin: U-shaped sections lofted from stern to bow, plus the flat transom at the stern
+    private static Mesh LongtailHull()
+    {
+        const int n = 32, m = 12;
+        var verts = new List<Vector3>();
+        var tris = new List<int>();
+        for (int i = 0; i <= n; i++)
+        {
+            float t = i / (float)n, beam = HullBeam(t), sheer = HullSheer(t), keel = Mathf.Min(HullKeel(t), sheer - 0.05f);
+            for (int j = 0; j <= m; j++)
+            {
+                float a = (-1f + 2f * j / m) * Mathf.PI * 0.5f;
+                float y = keel + (sheer - keel) * Mathf.Pow(1f - Mathf.Cos(a), 0.8f);
+                verts.Add(new Vector3(beam * Mathf.Sin(a), y, HullZ(t)));
+            }
+        }
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < m; j++)
+            {
+                int a = i * (m + 1) + j, b = a + m + 1;
+                tris.AddRange(new[] { a, b, a + 1, a + 1, b, b + 1 });
+            }
+        // Transom: fan from the middle of the first section
+        int centre = verts.Count;
+        verts.Add(new Vector3(0f, (HullSheer(0f) + HullKeel(0f)) * 0.5f, HullZ(0f)));
+        for (int j = 0; j < m; j++) tris.AddRange(new[] { centre, j + 1, j });
+        var mesh = new Mesh { name = "LongtailHull" };
+        mesh.SetVertices(verts);
+        mesh.SetTriangles(tris, 0);
+        mesh.RecalculateNormals();
+        mesh.RecalculateBounds();
+        return MeshKit.SaveCombined("Boats/LongtailHull", mesh);
     }
 
     // The tour boat moored at the pier (งานพิเศษ: พานักท่องเที่ยวนั่งเรือหางยาวรอบอ่าว)
@@ -526,10 +632,11 @@ public static class Seaside
         var dock = new Vector3(21.3f, 0f, 26f);
         var boat = PrimitiveKit.Group("TourBoat_เรือพานักท่องเที่ยว", root, dock).transform; // moves along the route
         LongtailBoat(boat, Vector3.zero, 0f, new Color(1f, 0.45f, 0.75f));                     // bobs inside it
-        var seat = PrimitiveKit.Group("Seat", boat, new Vector3(0f, 0.45f, -2.4f)).transform;
+        // Boatman at the stern by the tiller; tourists on the benches. Set low so they look seated.
+        var seat = PrimitiveKit.Group("Seat", boat, new Vector3(0f, -0.55f, -2.9f)).transform;
         int look = 1;
-        foreach (float z in new[] { 0.4f, 1.6f })
-            PrimitiveKit.Group("Tourist", boat, new Vector3(0f, 0.3f, z)).AddComponent<MarketVendor>().Configure(look++);
+        foreach (var p in new[] { new Vector3(-0.28f, -0.6f, -0.9f), new Vector3(0.3f, -0.6f, 0.6f), new Vector3(-0.2f, -0.55f, 2.0f) })
+            PrimitiveKit.Group("Tourist", boat, p).AddComponent<MarketVendor>().Configure(look++);
 
         var zone = new GameObject("BoatTourZone");
         zone.transform.SetParent(root, false);
