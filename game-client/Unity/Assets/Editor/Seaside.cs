@@ -389,7 +389,7 @@ public static class Seaside
 
     // The light show (ConcertLights animates it): moving heads with visible beams on the front truss,
     // uplights along the stage lip, a fan of lasers from behind the band and a strobe
-    private static void ConcertRig(Transform show)
+    internal static void ConcertRig(Transform show)
     {
         var housing = PrimitiveKit.Mat("SpeakerBlack", new Color(0.08f, 0.08f, 0.09f));
         var beamDown = MeshKit.Lathe("LightBeamCone", new[] { new Vector2(0.12f, 0f), new Vector2(2.6f, 14f) }, 20, capTop: false, capBottom: false);

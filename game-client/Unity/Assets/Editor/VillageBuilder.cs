@@ -93,6 +93,8 @@ public static class VillageBuilder
 
         // Places around the village, each reached by a dirt lane from the main road
         Places.Temple(v, new Vector3(-32f, 0f, 21f), "วัด");
+        // ลานอเนกประสงค์ across the road from the temple: open ground; movie, ferris wheel and หมอลำ on fair nights
+        TempleFairGround.Build(v, new Vector3(-46.5f, 0f, -31f), new Vector2(23f, 38f));
         Lane(v, -32f, -6f, 7f);
         Places2.VillageHall(v, new Vector3(28f, 0f, 16f), "ศาลากลางบ้าน");
         Lane(v, 28f, -6f, 11.5f);
@@ -104,7 +106,7 @@ public static class VillageBuilder
         Places.Sign(v, new Vector3(17f, 0f, -11f), "ไปตำบล / เมือง\n(ยืนใต้ป้ายรถ)", 180f);
 
         foreach (var pos in new[] { new Vector3(-18f, 0f, -2f), new Vector3(16f, 0f, -3f), new Vector3(-6f, 0f, 16f), new Vector3(3f, 0f, 15f),
-                     new Vector3(-48f, 0f, -20f), new Vector3(48f, 0f, 2f), new Vector3(-20f, 0f, 42f), new Vector3(10f, 0f, 45f), new Vector3(45f, 0f, -45f) })
+                     new Vector3(-50f, 0f, -55f), new Vector3(48f, 0f, 2f), new Vector3(-20f, 0f, 42f), new Vector3(10f, 0f, 45f), new Vector3(45f, 0f, -45f) })
             Places.ShadeTree(v, pos);
 
         DressNature(v);
@@ -184,6 +186,7 @@ public static class VillageBuilder
             new Vector4(20f, 8f, 36f, 24f),            // village hall
             new Vector4(-32f, -56f, 8f, -20f),         // Kok Nong Na paddies and pond
             new Vector4(-11f, -16.5f, -3f, -7f),       // shop
+            new Vector4(-58.5f, -50.5f, -34.5f, -11.5f), // fair ground across from the temple
             new Vector4(6f, -6f, 8f, 3f),              // lane to the house
             new Vector4(-33.3f, -6f, -30.7f, 8f), new Vector4(26.7f, -6f, 29.3f, 12f), new Vector4(-13.3f, -21f, -10.7f, -10f));
     }

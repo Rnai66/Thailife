@@ -47,13 +47,12 @@ public static class Places
         PrimitiveKit.Box("FairPath", t, new Vector3(-22.5f, 0.012f, -14f), new Vector3(2f, 0.02f, 22f), dirt, collider: false);
         StreetFurniture.LampPost(t, new Vector3(-19.5f, 0f, -12f));
         TempleFairLights(t);
-        // สอยดาว and มหาลัย ก.ไก่ pens on the open ground east of the temple wall (festival days only),
-        // entrances facing the village
+        // สอยดาว and มหาลัย ก.ไก่ pens in front of the temple, right of the gate path, gates facing the
+        // road (festival days only)
         var games = FairLights.Gated(t, "TempleFairGames", "any");
-        FestivalGrounds.SoiDaoPen(games, new Vector3(19.5f, 0f, -2f), "any");
-        FestivalGrounds.KokaiPen(games, new Vector3(19.5f, 0f, 6.2f), "any");
-        Sign(games, new Vector3(17f, 0f, -15.5f), "สอยดาว · มหาลัย ก.ไก่\nข้างกำแพงวัด เดินไปทางนี้", 0f);
-        Npcs.Crowd(t, new Vector3(-6f, 0f, -20.5f), new Vector2(38f, 5f), 10, "any", 0, 24, Npcs.FairTalk);
+        FestivalGrounds.KokaiPen(PrimitiveKit.Group("KokaiSpot", games, new Vector3(10.5f, 0f, -22f), 90f).transform, Vector3.zero, "any");
+        FestivalGrounds.SoiDaoPen(PrimitiveKit.Group("SoiDaoSpot", games, new Vector3(20.8f, 0f, -22f), 90f).transform, Vector3.zero, "any");
+        Npcs.Crowd(t, new Vector3(-10f, 0f, -20.5f), new Vector2(30f, 5f), 10, "any", 0, 24, Npcs.FairTalk); // left of the pens
 
         // Low white boundary wall with a gate in the front (-Z)
         PrimitiveKit.Box("WallBack", t, new Vector3(0f, 0.5f, 14f), new Vector3(30f, 1f, 0.3f), white);
@@ -269,7 +268,8 @@ public static class Places
         Places2.MusicStage(t, new Vector3(0f, 0f, 5.2f), 0f, "temple_fair", "ดนตรีงานวัด", new Color(0.75f, 0.15f, 0.12f));
 
         // Fair stalls (ซุ้มงานวัด) with striped roofs, both sides of the gate path in front of the wall
-        var stallSpots = new[] { new Vector3(-13.5f, 0f, -1.5f), new Vector3(-17f, 0f, -1.5f), new Vector3(16.5f, 0f, -1.5f), new Vector3(20f, 0f, -1.5f), new Vector3(23.5f, 0f, -1.5f) };
+        // (right of the gate is the สอยดาว and ก.ไก่ pens' ground)
+        var stallSpots = new[] { new Vector3(-13.5f, 0f, -1.5f), new Vector3(-17f, 0f, -1.5f) };
         for (int i = 0; i < stallSpots.Length; i++)
         {
             var stall = PrimitiveKit.Group("FairStall", t, stallSpots[i]);

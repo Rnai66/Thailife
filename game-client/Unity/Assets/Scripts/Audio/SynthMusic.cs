@@ -25,6 +25,7 @@ public static class SynthMusic
     public static float[] Make(string name)
     {
         if (name == "concert") return Concert();
+        if (name == "morlam") return MorLam();
         if (!name.StartsWith("bgm") || !int.TryParse(name.Substring(3), out int i) || i < 0 || i >= Tracks.Length) return null;
         return Render(Tracks[i]);
     }
@@ -105,6 +106,46 @@ public static class SynthMusic
                 if (s % 2 == 0) Pluck(d, at, root * 2f * Semis(chord + riff[(s / 2 + bar) % riff.Length] - 12f), 0.18f, 0.95f, rng, 0.994f);
             }
         }
+        float max = 0.0001f;
+        foreach (float v in d) max = Mathf.Max(max, Mathf.Abs(v));
+        for (int i = 0; i < d.Length; i++) d[i] *= 0.7f / max;
+        return d;
+    }
+
+    // หมอลำซิ่ง: a fast khaen drone (reedy fifths), a phin riff in the minor pentatonic, a driving
+    // kick on every beat, ฉิ่ง (small cymbals) on the off-beats
+    private static float[] MorLam()
+    {
+        const float bpm = 140f;
+        const int bars = 8, steps = 16;
+        float step = 60f / bpm / 4f;
+        int length = Mathf.CeilToInt(bars * steps * step * Rate);
+        var d = new float[length];
+        var rng = new System.Random(77);
+        float root = 146.83f; // D
+        int[] riff = { 12, 15, 17, 19, 22, 19, 17, 15, 12, 10, 12, 15, 17, 15, 12, 7 };
+        // Khaen: reedy drone of root, fifth and octave, breathing with each bar
+        for (int i = 0; i < length; i++)
+        {
+            float t = (float)i / Rate;
+            float breath = 0.75f + 0.25f * Mathf.Sin(2f * Mathf.PI * t * bpm / 60f / 4f);
+            float v = 0f;
+            foreach (float r in new[] { 1f, 1.5f, 2f })
+            {
+                float ph = (t * root * r) % 1f;
+                v += (ph * 2f - 1f) * 0.5f + Mathf.Sin(2f * Mathf.PI * root * r * 1.004f * t) * 0.4f;
+            }
+            d[i] += v * breath * 0.035f;
+        }
+        for (int bar = 0; bar < bars; bar++)
+            for (int s = 0; s < steps; s++)
+            {
+                int at = (int)((bar * steps + s) * step * Rate);
+                if (s % 4 == 0) Kick(d, at);
+                if (s % 4 == 2) Hat(d, at, rng, 0.16f);                              // ฉิ่ง
+                if (s == 6 || s == 14) Snare(d, at, rng);
+                Pluck(d, at, root * Semis(riff[(s + bar * 3) % riff.Length]), s % 2 == 0 ? 0.3f : 0.16f, 0.9f, rng, 0.992f); // พิณ
+            }
         float max = 0.0001f;
         foreach (float v in d) max = Mathf.Max(max, Mathf.Abs(v));
         for (int i = 0; i < d.Length; i++) d[i] *= 0.7f / max;

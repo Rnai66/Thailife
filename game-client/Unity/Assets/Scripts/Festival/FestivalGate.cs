@@ -6,16 +6,19 @@ public class FestivalGate : MonoBehaviour
 {
     [SerializeField] private string scale = "small"; // "small" = tambon, "big" = city, "any" = the village temple fair
     [SerializeField] private TextMesh banner;
+    [SerializeField] private string stageMusic; // a stage plays this loop nearby while it's on ("concert", "morlam")
 
     private GameObject attractions;
     private float nextCheck;
 
     public string Scale => scale;
+    public string StageMusic => string.IsNullOrEmpty(stageMusic) ? (scale == "beach" ? "concert" : null) : stageMusic;
 
-    public void Configure(string venueScale, TextMesh bannerText)
+    public void Configure(string venueScale, TextMesh bannerText, string music = null)
     {
         scale = venueScale;
         banner = bannerText;
+        stageMusic = music;
     }
 
     private void Awake()

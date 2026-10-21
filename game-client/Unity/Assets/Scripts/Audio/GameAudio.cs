@@ -121,6 +121,7 @@ public class GameAudio : MonoBehaviour
         nextScan = 0f;
         beach = scene.name == "Beach";
         if (beach) SynthSounds.Prepare("concert");
+        stageNearest = null;
         city = scene.name == "City";
         AmbientPlaces.Attach(scene);
     }
@@ -136,6 +137,8 @@ public class GameAudio : MonoBehaviour
                 player = pc.transform;
                 body = pc.GetComponent<CharacterController>();
                 gates = FindObjectsByType<FestivalGate>(FindObjectsSortMode.None);
+                foreach (var g in gates)
+                    if (g.StageMusic != null) SynthSounds.Prepare(g.StageMusic); // stage loops are made ahead
             }
         }
 
@@ -201,19 +204,26 @@ public class GameAudio : MonoBehaviour
         return beach ? "step_sand" : city ? "step_concrete" : "step_grass";
     }
 
-    // The beach concert's band loop (made on a worker thread the first time)
+    // The loudest stage's band loop (beach concert, temple-fair หมอลำ), made on a worker thread the first time
+    private string stageTrack;
+
     private void Concert(float target, float dt)
     {
-        if (concertMusic.clip == null)
+        if (target > 0f && stageNearest != null && stageNearest != stageTrack)
         {
-            if (target <= 0f) return;
-            var clip = SynthSounds.TryGet("concert");
-            if (clip == null) return;
-            concertMusic.clip = clip;
-            concertMusic.Play();
+            var clip = SynthSounds.TryGet(stageNearest);
+            if (clip != null)
+            {
+                stageTrack = stageNearest;
+                concertMusic.clip = clip;
+                concertMusic.Play();
+            }
         }
+        if (concertMusic.clip == null) return;
         Fade(concertMusic, target, dt);
     }
+
+    private string stageNearest;
 
     // Loudest when standing among the stalls (or in front of the concert stage) of an event that's on, silent 45 m away
     private float FairVolume(bool concert)
@@ -222,11 +232,13 @@ public class GameAudio : MonoBehaviour
         float best = 0f;
         foreach (var g in gates)
         {
-            if (g == null || (g.Scale == "beach") != concert) continue;
+            if (g == null || (g.StageMusic != null) != concert) continue;
             var attractions = g.transform.Find("Attractions");
             if (attractions == null || !attractions.gameObject.activeInHierarchy) continue;
-            float d = Vector3.Distance(player.position, attractions.position);
-            best = Mathf.Max(best, Mathf.Clamp01(1f - (d - 10f) / 35f));
+            float d = Vector3.Distance(player.position, g.transform.position);
+            float v = Mathf.Clamp01(1f - (d - 10f) / 35f);
+            if (concert && v > best) stageNearest = g.StageMusic;
+            best = Mathf.Max(best, v);
         }
         return best * 0.45f;
     }

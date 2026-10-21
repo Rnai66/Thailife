@@ -391,7 +391,7 @@ public static class FestivalGrounds
     }
 
     // ชิงช้าสวรรค์: wheel turning about X on an A-frame, eight cabins that stay level
-    private static void FerrisWheel(Transform parent, Vector3 position)
+    internal static void FerrisWheel(Transform parent, Vector3 position, string game = "ferris")
     {
         var f = PrimitiveKit.Group("FerrisWheel_ชิงช้าสวรรค์", parent, position).transform;
         var steel = PrimitiveKit.Mat("SteelFrame", new Color(0.32f, 0.42f, 0.5f));
@@ -449,7 +449,7 @@ public static class FestivalGrounds
             PrimitiveKit.Box("Roof", cabin, new Vector3(0f, -0.15f, 0f), new Vector3(1.4f, 0.12f, 1.2f), steel, collider: false);
             if (i == 6) seat = PrimitiveKit.Group("Seat", cabin, new Vector3(0f, -1.1f, 0f)).transform; // bottom cabin at the start
         }
-        Zone(f, new Vector3(-2.6f, 1f, 0f), new Vector3(2f, 2f, 3f)).gameObject.AddComponent<FestivalBooth>().Configure("ferris", "ชิงช้าสวรรค์", 20, seat, 26f);
+        Zone(f, new Vector3(-2.6f, 1f, 0f), new Vector3(2f, 2f, 3f)).gameObject.AddComponent<FestivalBooth>().Configure(game, "ชิงช้าสวรรค์", 20, seat, 26f);
     }
 
     // ม้าหมุน: turning platform with horses on poles under a striped roof

@@ -31,7 +31,7 @@ public class FestivalBooth : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         if (other.GetComponent<PlayerController>() == null) return;
-        string label = seat != null ? "ขึ้นเล่น" : price == 0 ? "นั่งดู" : game == "soidao" ? "สอยดาว" : "เล่น";
+        string label = seat != null ? "ขึ้นเล่น" : price == 0 ? (game == "morlam" ? "ดูหมอลำ" : "นั่งดู") : game == "soidao" ? "สอยดาว" : "เล่น";
         ContextButton.Show(this, label, price > 0 ? $"{title} · {price} บาท" : $"{title} · ดูฟรี", Play);
     }
 

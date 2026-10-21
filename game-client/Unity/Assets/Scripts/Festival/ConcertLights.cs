@@ -155,6 +155,7 @@ public class ConcertLights : MonoBehaviour
     private void Tint(Renderer r, int property, Color c)
     {
         if (r == null) return;
+        if (block == null) block = new MaterialPropertyBlock();
         r.GetPropertyBlock(block);
         block.SetColor(property, c);
         r.SetPropertyBlock(block);
