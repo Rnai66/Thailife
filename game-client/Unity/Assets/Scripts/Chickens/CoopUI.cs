@@ -167,6 +167,7 @@ public class CoopUI : MonoBehaviour
         var coop = CoopClient.Instance;
         if (busy || coop == null) return;
         busy = true;
+        if (action == "feed") ActivityPose.Do("scatter", 1.8f); // throw the feed for the hens
         try
         {
             var r = await coop.ActAsync(action, chicken);

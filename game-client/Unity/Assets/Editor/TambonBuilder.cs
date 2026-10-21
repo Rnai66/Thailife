@@ -81,7 +81,7 @@ public static class TambonBuilder
         Places.BusStop(root, new Vector3(16f, 0f, -11.5f), 180f);
         Places.Sign(root, new Vector3(19f, 0f, -11f), "ไปหมู่บ้าน / เมือง\n(ยืนใต้ป้ายรถ)", 180f);
         Places.Sign(root, new Vector3(-3f, 0f, -4.5f), "ตำบล", 0f);
-        Places.Sign(root, new Vector3(8f, 0f, 27f), "คลอง\nมีปลาให้ตก", 0f);
+        Places.Sign(root, new Vector3(14f, 0f, 27.6f), "คลอง · ตกปลา\nยืนบนท่าน้ำแล้วกดตกปลา", 0f); // one sign for all four landings
 
         foreach (var pos in new[] { new Vector3(-12f, 0f, -44f), new Vector3(40f, 0f, -22f), new Vector3(-42f, 0f, 20f), new Vector3(42f, 0f, 24f), new Vector3(14f, 0f, -30f) })
             Places.ShadeTree(root, pos);

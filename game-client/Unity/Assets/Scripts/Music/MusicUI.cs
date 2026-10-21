@@ -205,6 +205,8 @@ public class MusicUI : MonoBehaviour
 
     private void BeginGame()
     {
+        ActivityPose.Hold("instrument");
+        ActivityPose.Do("strum", chart.duration_ms / 1000f + 1f); // play along while the notes run
         foreach (Transform child in card) child.gameObject.SetActive(child == game);
         game.gameObject.SetActive(true);
 
@@ -302,6 +304,7 @@ public class MusicUI : MonoBehaviour
     private async void EndGame()
     {
         playing = false;
+        ActivityPose.Clear();
         if (frozenPlayer != null) frozenPlayer.InputEnabled = true;
         frozenPlayer = null;
 

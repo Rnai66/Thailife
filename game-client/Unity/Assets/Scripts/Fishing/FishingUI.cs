@@ -34,6 +34,7 @@ public class FishingUI : MonoBehaviour
         string rod = WalletClient.Instance != null ? WalletClient.Instance.RodName : null;
         instance.SetState(State.Idle, $"ยืนริมคลองแล้ว กด ตกปลา (F){(string.IsNullOrEmpty(rod) ? "" : $" · ใช้{rod}")}");
         instance.root.SetActive(true);
+        ActivityPose.Hold("rod", fishingSpot.BobberPosition); // rod in hand, facing the water
     }
 
     public static void Exit(FishingSpot fishingSpot)
@@ -43,6 +44,7 @@ public class FishingUI : MonoBehaviour
         instance.RemoveBobber();
         instance.state = State.Idle;
         instance.root.SetActive(false);
+        ActivityPose.Clear();
     }
 
     private void Awake() => Build();
@@ -87,6 +89,7 @@ public class FishingUI : MonoBehaviour
             {
                 case State.Idle:
                     SetState(State.Casting, "เหวี่ยงเบ็ด...");
+                    ActivityPose.Do("cast", 0.8f, spot.BobberPosition);
                     float biteIn = await client.CastAsync(spot.Water);
                     if (spot == null) return; // walked away meanwhile
                     biteTime = Time.time + biteIn;
@@ -97,6 +100,7 @@ public class FishingUI : MonoBehaviour
                 case State.Waiting:
                 case State.Bite:
                     SetState(State.Reeling, "ดึง!");
+                    ActivityPose.Do("reel", 1f);
                     var result = await client.ReelAsync();
                     RemoveBobber();
                     ShowResult(result);
@@ -178,11 +182,13 @@ public class FishingUI : MonoBehaviour
             ? -0.12f + Mathf.Sin(Time.time * 25f) * 0.05f   // dipping and shaking
             : Mathf.Sin(Time.time * 2f) * 0.03f;            // gentle float
         bobber.transform.position = basePos + new Vector3(0f, y, 0f);
+        ActivityPose.LineTo(bobber.transform.position + Vector3.up * 0.1f); // the line runs from the rod tip
     }
 
     private void RemoveBobber()
     {
         if (bobber != null) Destroy(bobber);
+        ActivityPose.LineTo(null);
         bobber = null;
     }
 

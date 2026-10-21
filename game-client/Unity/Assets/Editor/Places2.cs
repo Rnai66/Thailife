@@ -329,7 +329,6 @@ public static class Places2
         {
             var spot = PrimitiveKit.Group("FishingSpot_ท่าน้ำ", t, new Vector3(x, 0f, -width * 0.5f - 1.6f));
             PrimitiveKit.Box("Landing", spot.transform, new Vector3(0f, 0.08f, 0f), new Vector3(2.4f, 0.16f, 2f), wood);
-            PrimitiveKit.Box("Pole", spot.transform, new Vector3(1f, 0.9f, 0.8f), new Vector3(0.08f, 1.6f, 0.08f), wood, collider: false);
 
             var bobber = PrimitiveKit.Group("BobberPoint", spot.transform, new Vector3(0f, 0.1f, 4f));
             var zone = new GameObject("FishingZone");
@@ -340,7 +339,6 @@ public static class Places2
             box.size = new Vector3(2.6f, 2f, 2.2f);
             zone.AddComponent<FishingSpot>().Configure(bobber.transform);
 
-            Places.Sign(spot.transform, new Vector3(-1.8f, 0f, -0.6f), "ตกปลาตรงนี้\n(กด F / ปุ่มตกปลา)", 0f);
         }
         return canal;
     }

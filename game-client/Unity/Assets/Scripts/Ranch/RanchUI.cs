@@ -149,6 +149,7 @@ public class RanchUI : MonoBehaviour
         if (busy || ranch == null || action == null) return;
         busy = true;
         Render();
+        if (mode == "pen" && index == 0) ActivityPose.Do("milk", 2f); // milking into the bucket
         try
         {
             var r = await action(ranch);

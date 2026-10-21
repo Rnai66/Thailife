@@ -237,6 +237,9 @@ public class FarmPlot : MonoBehaviour
         var farm = FarmClient.Instance;
         if (busy || farm == null) return;
         busy = true;
+        // Work the paddy: hoe to plough, seedlings to plant, can to water, sickle to harvest
+        string motion = action == "plow" ? "chop" : action == "plant" ? "plant" : action == "water" ? "pour" : action == "harvest" ? "sweep" : null;
+        if (motion != null) ActivityPose.Do(motion, 1.8f, transform.position);
         try
         {
             var state = await farm.ActAsync(plotId, action, variety);
