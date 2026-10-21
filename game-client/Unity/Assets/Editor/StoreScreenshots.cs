@@ -123,7 +123,9 @@ public static class StoreScreenshots
             Camera = new Vector3(-31f, 9f, -9f), LookAt = new Vector3(-27f, 2.5f, 15f), Fov = 62f, Night = true }, clips);
         Capture(new Shot { File = "preview_contest_ring", Scene = "ThaiVillage", Title = "ประกวดไก่สวย", Subtitle = "ข้างเวทีมวยงานวัด",
             Camera = new Vector3(-41f, 7f, 3f), LookAt = new Vector3(-53f, 1.5f, 15f), Fov = 60f, Night = true }, clips);
-        Capture(new Shot { File = "preview_village_fairground", Scene = "ThaiVillage", Title = "ลานอเนกประสงค์", Subtitle = "หนังกลางแปลง · ชิงช้าสวรรค์ · หมอลำ",
+        Capture(new Shot { File = "preview_ramwong", Scene = "ThaiVillage", Title = "เวทีรำวงชาวบ้าน", Subtitle = "ซื้อบัตร 20 บาท ขึ้นไปรำรอบโต๊ะดอกไม้",
+            Camera = new Vector3(-43f, 4.2f, -33f), LookAt = new Vector3(-54f, 2.2f, -29.5f), Fov = 58f, Night = true }, clips);
+        Capture(new Shot { File = "preview_village_fairground", Scene = "ThaiVillage", Title = "ลานอเนกประสงค์", Subtitle = "หนังกลางแปลง · ชิงช้าสวรรค์ · เวทีรำวง",
             Camera = new Vector3(-30f, 11f, -9f), LookAt = new Vector3(-47f, 2f, -33f), Fov = 62f, Night = true }, clips);
         EditorSceneManager.OpenScene("Assets/Scenes/ThaiVillage.unity");
     }

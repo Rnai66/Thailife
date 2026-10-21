@@ -26,6 +26,7 @@ public static class SynthMusic
     {
         if (name == "concert") return Concert();
         if (name == "morlam") return MorLam();
+        if (name == "ramwong") return Ramwong();
         if (!name.StartsWith("bgm") || !int.TryParse(name.Substring(3), out int i) || i < 0 || i >= Tracks.Length) return null;
         return Render(Tracks[i]);
     }
@@ -146,6 +147,39 @@ public static class SynthMusic
                 if (s == 6 || s == 14) Snare(d, at, rng);
                 Pluck(d, at, root * Semis(riff[(s + bar * 3) % riff.Length]), s % 2 == 0 ? 0.3f : 0.16f, 0.9f, rng, 0.992f); // พิณ
             }
+        float max = 0.0001f;
+        foreach (float v in d) max = Mathf.Max(max, Mathf.Abs(v));
+        for (int i = 0; i < d.Length; i++) d[i] *= 0.7f / max;
+        return d;
+    }
+
+    // รำวง: an easy 2/4 sway — กลองโทน on the beats, ฉิ่ง-ฉับ ticking, a sweet ระนาด/พิณ tune over a
+    // soft pad; unhurried so the circle can walk and turn its hands
+    private static float[] Ramwong()
+    {
+        const float bpm = 104f;
+        const int bars = 8, steps = 8; // eighth notes
+        float step = 60f / bpm / 2f;
+        int length = Mathf.CeilToInt(bars * steps * step * Rate);
+        var d = new float[length];
+        var rng = new System.Random(19);
+        float root = 261.63f; // C
+        int[] tune = { 0, 2, 4, 7, 9, 7, 4, 2, 4, 7, 9, 12, 9, 7, 4, 7, 9, 7, 4, 2, 0, 2, 4, 2, 0, -3, 0, 2, 4, 2, 0, 0 };
+        float[] chords = { 0, 0, 5, 7, 0, 9, 5, 7 };
+        for (int bar = 0; bar < bars; bar++)
+        {
+            int barStart = (int)(bar * steps * step * Rate);
+            Pad(d, barStart, (int)(steps * step * Rate), root * 0.25f * Semis(chords[bar]));
+            for (int s = 0; s < steps; s++)
+            {
+                int at = (int)((bar * steps + s) * step * Rate);
+                if (s % 4 == 0) Kick(d, at);                                   // ตุ้ม (low tone drum)
+                if (s % 4 == 2) Snare(d, at, rng);                             // ป๊ะ
+                Hat(d, at, rng, s % 2 == 0 ? 0.12f : 0.06f);                   // ฉิ่ง-ฉับ
+                if (s % 2 == 0)
+                    Pluck(d, at, root * Semis(tune[(bar * 4 + s / 2) % tune.Length]), 0.32f, 0.85f, rng, 0.993f);
+            }
+        }
         float max = 0.0001f;
         foreach (float v in d) max = Mathf.Max(max, Mathf.Abs(v));
         for (int i = 0; i < d.Length; i++) d[i] *= 0.7f / max;

@@ -27,7 +27,8 @@ local GAMES = {
   likay    = { name = "ลิเก",            price = 0,  energy = 12, once = true },
   -- the village temple fair ground (ลานอเนกประสงค์ across from the temple)
   ferris_village = { name = "ชิงช้าสวรรค์",  price = 20, energy = 10 },
-  morlam   = { name = "หมอลำ · กันตรึม",    price = 0,  energy = 15, once = true },
+  morlam   = { name = "หมอลำ · กันตรึม",    price = 0,  energy = 15, once = true }, -- older app versions
+  ramwong  = { name = "รำวง",            price = 20, energy = 8 },  -- a round on the village rum wong stage
 }
 
 -- สอยดาว: pick a folded paper ticket off the dry tree; the number on it wins one of the prizes
