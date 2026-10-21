@@ -113,8 +113,25 @@ public class LifeClient : MonoBehaviour
 
     private async void OnConnected(NakamaConnection conn)
     {
-        try { await CallAsync("life_get"); }
+        try
+        {
+            await CallAsync("life_get");
+            await WakeIfStuck();
+        }
         catch (Exception e) { Debug.LogWarning($"[Life] Could not load: {e.Message}"); }
+    }
+
+    // The server still has us asleep but nobody is lying down here (the app was closed mid-nap,
+    // or the scene changed): wake up, or training, fishing and work all refuse.
+    private async Task WakeIfStuck()
+    {
+        if (Current == null || !Current.sleeping || SleepSpot.LocalSleeping) return;
+        try
+        {
+            await WakeAsync();
+            Debug.Log("[Life] Woke a sleep left over from last time");
+        }
+        catch (Exception e) { Debug.LogWarning($"[Life] Wake failed: {e.Message}"); }
     }
 
     private void Update()
@@ -126,7 +143,11 @@ public class LifeClient : MonoBehaviour
 
     private async Task RefreshQuietly()
     {
-        try { await CallAsync("life_get"); }
+        try
+        {
+            await CallAsync("life_get");
+            await WakeIfStuck();
+        }
         catch (Exception) { /* next poll will retry */ }
     }
 

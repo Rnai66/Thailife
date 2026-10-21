@@ -14,6 +14,8 @@ public class TrainingTarget : MonoBehaviour, IHittable
     private static readonly Color LockedColor = new Color(0.75f, 0.75f, 0.75f);
     private static readonly Color TiredColor = new Color(1f, 0.55f, 0.35f);
 
+    private static float nextNudge;
+
     public string TargetId => targetId;
     public int RequiredLevel => requiredLevel;
 
@@ -60,7 +62,13 @@ public class TrainingTarget : MonoBehaviour, IHittable
             FloatingText.Spawn(at, "บาดเจ็บ! ไปรักษาก่อน", TiredColor);
             return;
         }
-        if (life != null && life.IsOnline && (life.IsSleeping || life.Energy < cost))
+        if (life != null && life.IsOnline && life.IsSleeping)
+        {
+            FloatingText.Spawn(at, "กำลังนอนพักอยู่", TiredColor);
+            if (Time.time > nextNudge) { nextNudge = Time.time + 3f; life.Refresh(); } // wakes a leftover nap if we're not in bed
+            return;
+        }
+        if (life != null && life.IsOnline && life.Energy < cost)
         {
             FloatingText.Spawn(at, "เหนื่อยแล้ว!", TiredColor);
             return;

@@ -34,6 +34,17 @@ public class SleepSpot : MonoBehaviour
 
     private void Reset() => GetComponent<Collider>().isTrigger = true;
 
+    // Is the local player lying in any bed / chair / hammock right now?
+    public static bool LocalSleeping
+    {
+        get
+        {
+            foreach (var s in FindObjectsByType<SleepSpot>(FindObjectsSortMode.None))
+                if (s.sleeper != null) return true;
+            return false;
+        }
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         var player = other.GetComponent<PlayerController>();
@@ -137,6 +148,7 @@ public class SleepSpot : MonoBehaviour
         {
             sleeper.InputEnabled = true;
             sleeper.enabled = true;
+            _ = LifeClient.Instance?.WakeAsync(); // left the scene while asleep: wake on the server too
         }
         ContextButton.Hide(this);
     }
