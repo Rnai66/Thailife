@@ -15,7 +15,16 @@ public static class IOSBuild
     private const string OutputPath = "Builds/iOS";
 
     [MenuItem("Thai Life/Build iOS (Xcode project)")]
-    private static void Build()
+    private static void Build() => Build(release: false);
+
+    // Release build for TestFlight / the App Store: no development player, a fresh build number
+    // (yyyyMMddHH, always higher than the last upload). Archive and upload it from Xcode.
+    [MenuItem("Thai Life/Build iOS Release (TestFlight)")]
+    private static void BuildRelease() => Build(release: true);
+
+    public static void BuildReleaseBatch() => Build(release: true); // -executeMethod IOSBuild.BuildReleaseBatch
+
+    private static void Build(bool release)
     {
         if (EditorApplication.isCompiling || EditorApplication.isUpdating)
         {
@@ -23,7 +32,7 @@ public static class IOSBuild
             return;
         }
 
-        if (!UnityEditor.SceneManagement.EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+        if (!Application.isBatchMode && !UnityEditor.SceneManagement.EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
 
         if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.iOS &&
             !EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.iOS, BuildTarget.iOS))
@@ -33,13 +42,18 @@ public static class IOSBuild
         }
 
         Configure();
+        if (release)
+        {
+            PlayerSettings.iOS.buildNumber = System.DateTime.Now.ToString("yyyyMMddHH");
+            Debug.Log($"[ThaiLife] Release build {PlayerSettings.bundleVersion} ({PlayerSettings.iOS.buildNumber})");
+        }
 
         var options = new BuildPlayerOptions
         {
             scenes = BuildScenes(),
             locationPathName = OutputPath,
             target = BuildTarget.iOS,
-            options = BuildOptions.Development // allows http to the local Nakama server
+            options = release ? BuildOptions.None : BuildOptions.Development // development allows http to a local Nakama
         };
 
         BuildReport report = BuildPipeline.BuildPlayer(options);
@@ -104,6 +118,8 @@ public static class IOSBuild
         var ats = root["NSAppTransportSecurity"] as UnityEditor.iOS.Xcode.PlistElementDict
                   ?? root.CreateDict("NSAppTransportSecurity");
         ats.SetBoolean("NSAllowsLocalNetworking", true);
+        // Only standard HTTPS/TLS: no export-compliance questions on every TestFlight upload
+        root.SetBoolean("ITSAppUsesNonExemptEncryption", false);
 
         plist.WriteToFile(plistPath);
     }
