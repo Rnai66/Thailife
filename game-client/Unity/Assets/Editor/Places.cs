@@ -47,6 +47,7 @@ public static class Places
         PrimitiveKit.Box("FairPath", t, new Vector3(-22.5f, 0.012f, -14f), new Vector3(2f, 0.02f, 22f), dirt, collider: false);
         StreetFurniture.LampPost(t, new Vector3(-19.5f, 0f, -12f));
         TempleFairLights(t);
+        TempleDecorLights(t);
         // สอยดาว and มหาลัย ก.ไก่ pens in front of the temple either side of the gate path, gates
         // facing the road (festival days only)
         var games = FairLights.Gated(t, "TempleFairGames", "any");
@@ -64,6 +65,46 @@ public static class Places
         Gate(t, new Vector3(0f, 0f, -14f), name, white, gold, new Color(0.6f, 0.1f, 0.1f));
 
         return temple;
+    }
+
+    // Festival lights inside the temple grounds: bulbs outlining the ubosot's plinth, strings from its
+    // front gable to the gate and the front corners, and strings fanning down from the chedi's spire
+    private static void TempleDecorLights(Transform t)
+    {
+        var deco = FairLights.Gated(t, "TempleDecorLights", "any");
+        // Ubosot (at 0, 3; plinth 11.4 x 17.4)
+        int n = 0;
+        for (float x = -5.6f; x <= 5.61f; x += 0.8f)
+            foreach (float z in new[] { 3f - 8.6f, 3f + 8.6f }) Bulb(deco, new Vector3(x, 0.78f, z), n++);
+        for (float z = 3f - 8.6f; z <= 3f + 8.61f; z += 0.8f)
+            foreach (float x in new[] { -5.6f, 5.6f }) Bulb(deco, new Vector3(x, 0.78f, z), n++);
+        var gable = new Vector3(0f, 7.2f, -4.4f);
+        FairLights.Festoon(deco, gable, new Vector3(-2.2f, 3.4f, -14f), 0.6f);
+        FairLights.Festoon(deco, gable, new Vector3(2.2f, 3.4f, -14f), 0.6f);
+        foreach (float x in new[] { -14.4f, 14.4f })
+        {
+            FairLights.Pole(deco, new Vector3(x, 0f, -13.4f), 3f);
+            FairLights.Festoon(deco, gable, new Vector3(x, 2.9f, -13.4f), 1f);
+        }
+        foreach (float x in new[] { -1.1f, 1.1f }) // hanging off the two gate strings
+            FairLights.Lantern(deco, new Vector3(x, 4.9f, -9.2f), x < 0f ? 0 : 2);
+        // Chedi (at 9, 9; spire tip ~7.2 m): six strings down to poles round it
+        var tip = new Vector3(9f, 6.8f, 9f);
+        for (int i = 0; i < 6; i++)
+        {
+            float a = i * 60f * Mathf.Deg2Rad + 0.3f;
+            var foot = new Vector3(9f + Mathf.Cos(a) * 4.4f, 0f, 9f + Mathf.Sin(a) * 4.4f);
+            FairLights.Pole(deco, foot, 3.2f);
+            FairLights.Festoon(deco, tip, foot + Vector3.up * 3.1f, 0.35f, 0.5f);
+        }
+    }
+
+    // One glowing festival bulb (colours cycle with i)
+    private static void Bulb(Transform parent, Vector3 at, int i)
+    {
+        Color[] colors = { new Color(1f, 0.85f, 0.55f), new Color(1f, 0.35f, 0.3f), new Color(0.4f, 0.8f, 1f), new Color(1f, 0.8f, 0.2f), new Color(0.5f, 1f, 0.5f) };
+        var b = PrimitiveKit.Sphere("Bulb", parent, at, Vector3.one * 0.13f, PrimitiveKit.Glow($"DecoBulb{i % colors.Length}", colors[i % colors.Length], 12f, 0.3f));
+        b.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
     }
 
     // ประดับไฟงานวัด: zig-zag bulb strings over the fair in front of the wall, bunting along the
@@ -249,9 +290,10 @@ public static class Places
         var pink = PrimitiveKit.Mat("FlowerPink", new Color(1f, 0.45f, 0.7f));
         var blue = PrimitiveKit.Mat("BusStopBlue", new Color(0.2f, 0.4f, 0.75f));
 
-        // Inside the temple grounds, right of the path to the ubosot, both facing the path:
-        // the chicken beauty contest stage (เวทีประกวดไก่สวย) and the folk music stage (ดนตรีพื้นบ้าน)
-        var contestStage = PrimitiveKit.Group("ContestStage_เวทีประกวดไก่", temple, new Vector3(10.6f, 0f, -10f), 90f).transform;
+        // The chicken beauty contest stage (เวทีประกวดไก่สวย) beside the temple-fair boxing ring outside
+        // the west wall, facing the path to the ring; the folk music stage (ดนตรีพื้นบ้าน) inside the
+        // grounds, right of the path to the ubosot
+        var contestStage = PrimitiveKit.Group("ContestStage_เวทีประกวดไก่", temple, new Vector3(-19f, 0f, -9f), 90f).transform;
         PrimitiveKit.Box("ContestStage", contestStage, new Vector3(0f, 0.2f, 0f), new Vector3(3.6f, 0.4f, 3f), red);
         foreach (float x in new[] { -1.7f, 1.7f })
             PrimitiveKit.Cylinder("BannerPole", contestStage, new Vector3(x, 1.6f, 1.4f), new Vector3(0.08f, 1.6f, 0.08f), wood, collider: false);
@@ -266,8 +308,27 @@ public static class Places
         box.size = new Vector3(3.6f, 2f, 1.6f);
         contest.AddComponent<WindowSpot>().Configure(WindowSpot.Window.Contest);
         Sign(contestStage, new Vector3(-2.6f, 0f, -2.2f), "ประกวดไก่สวย\nช่วงงานวัดตามประเพณี", 0f);
+        // Festival lights: bulbs along the banner and up the poles
+        var contestLights = FairLights.Gated(contestStage, "ContestLights", "any");
+        for (int i = 0; i < 9; i++)
+            Bulb(contestLights, new Vector3(-1.8f + i * 0.45f, 3.27f, 1.4f), i);
+        foreach (float x in new[] { -1.7f, 1.7f })
+            for (int i = 0; i < 6; i++)
+                Bulb(contestLights, new Vector3(x, 0.5f + i * 0.45f, 1.32f), i + 1);
+        FairLights.Lantern(contestLights, new Vector3(-1.7f, 3.3f, 1.4f), 1);
+        FairLights.Lantern(contestLights, new Vector3(1.7f, 3.3f, 1.4f), 2);
 
-        Places2.MusicStage(temple, new Vector3(11.2f, 0f, -2.2f), 90f, "temple_fair", "ดนตรีพื้นบ้าน", new Color(0.75f, 0.15f, 0.12f));
+        var music = Places2.MusicStage(temple, new Vector3(11.2f, 0f, -2.2f), 90f, "temple_fair", "ดนตรีพื้นบ้าน", new Color(0.75f, 0.15f, 0.12f)).transform;
+        var musicLights = FairLights.Gated(music, "MusicLights", "any");
+        for (int i = 0; i < 11; i++)
+            Bulb(musicLights, new Vector3(-2.5f + i * 0.5f, 3.82f, 1.22f), i);
+        foreach (float x in new[] { -2.5f, 2.5f })
+            for (int i = 0; i < 7; i++)
+                Bulb(musicLights, new Vector3(x, 0.6f + i * 0.47f, 1.18f), i + 2);
+        FairLights.Festoon(musicLights, new Vector3(-2.5f, 3.9f, 1.3f), new Vector3(-3f, 2.6f, -3.5f), 0.4f, 0.5f);
+        FairLights.Festoon(musicLights, new Vector3(2.5f, 3.9f, 1.3f), new Vector3(3f, 2.6f, -3.5f), 0.4f, 0.5f);
+        foreach (float x in new[] { -3f, 3f })
+            FairLights.Pole(musicLights, new Vector3(x, 0f, -3.5f), 2.7f);
 
         // Fair stalls (ซุ้มงานวัด) with striped roofs, both sides of the gate path in front of the wall
         // (right of the gate is the สอยดาว and ก.ไก่ pens' ground)
