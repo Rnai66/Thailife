@@ -47,6 +47,12 @@ public static class Places
         PrimitiveKit.Box("FairPath", t, new Vector3(-22.5f, 0.012f, -14f), new Vector3(2f, 0.02f, 22f), dirt, collider: false);
         StreetFurniture.LampPost(t, new Vector3(-19.5f, 0f, -12f));
         TempleFairLights(t);
+        // สอยดาว and มหาลัย ก.ไก่ pens on the open ground east of the temple wall (festival days only),
+        // entrances facing the village
+        var games = FairLights.Gated(t, "TempleFairGames", "any");
+        FestivalGrounds.SoiDaoPen(games, new Vector3(19.5f, 0f, -2f), "any");
+        FestivalGrounds.KokaiPen(games, new Vector3(19.5f, 0f, 6.2f), "any");
+        Sign(games, new Vector3(17f, 0f, -15.5f), "สอยดาว · มหาลัย ก.ไก่\nข้างกำแพงวัด เดินไปทางนี้", 0f);
         Npcs.Crowd(t, new Vector3(-6f, 0f, -20.5f), new Vector2(38f, 5f), 10, "any", 0, 24, Npcs.FairTalk);
 
         // Low white boundary wall with a gate in the front (-Z)
@@ -870,7 +876,7 @@ public static class Places
             ("subj_logic", new[] { "ติวเตอร์" }),
             ("subj_computer", new[] { "คอมพิวเตอร์", "โปรแกรมเมอร์" }),
             ("boxing", new[] { "มวย", "กระสอบ", "ซ้อมเตะ" }),
-            ("fair", new[] { "ประกวด", "งานวัด" }),
+            ("fair", new[] { "ประกวด", "งานวัด", "สอยดาว", "ก.ไก่" }),
             ("koknongna", new[] { "โคกหนองนา" }),
             ("farm", new[] { "เล้าไก่", "ยุ้งข้าว", "วัว", "ฟาร์ม", "นา" }),
             ("market", new[] { "ตลาด" }),

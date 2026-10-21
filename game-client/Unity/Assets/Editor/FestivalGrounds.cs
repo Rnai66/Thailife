@@ -178,7 +178,7 @@ public static class FestivalGrounds
     // with rolled paper tickets tied with coloured string; prize stands round the fence — temple merit
     // goods (มาม่า ผงซักฟอก กะละมัง…) and a raised podium of big prizes (ทีวี ตู้เย็น จักรยาน).
     // Villagers mill about inside trying their luck. Walk up to the tree to pick a ticket. Front faces +X.
-    private static void SoiDaoPen(Transform parent, Vector3 position, string scale)
+    internal static void SoiDaoPen(Transform parent, Vector3 position, string scale)
     {
         var s = PrimitiveKit.Group("SoiDao_สอยดาว", parent, position, -90f).transform;
         const float W = 6.6f, D = 6f, Gap = 2f;
@@ -286,7 +286,7 @@ public static class FestivalGrounds
     // มหาลัย ก.ไก่ pen: set out like an open-air classroom under a tent — a blackboard at the back with
     // the called letters chalked on it, the host's desk with the letter drum (กลองหมุน), and rows of
     // benches with players hunched over their letter cards. Take the seat in the aisle to play.
-    private static void KokaiPen(Transform parent, Vector3 position, string scale)
+    internal static void KokaiPen(Transform parent, Vector3 position, string scale)
     {
         var k = PrimitiveKit.Group("Kokai_มหาลัยก.ไก่", parent, position, -90f).transform;
         const float W = 6.6f, D = 6.6f, Gap = 1.8f;

@@ -116,6 +116,9 @@ public static class StoreScreenshots
             Camera = new Vector3(-33f, 5.5f, -21.8f), LookAt = new Vector3(-25.5f, 0.8f, -21.8f), Fov = 60f }, clips);
         Capture(new Shot { File = "preview_kokai", Scene = "Tambon", Title = "มหาลัย ก.ไก่", Subtitle = "คอกห้องเรียน · กระดานดำ",
             Camera = new Vector3(-31.5f, 5.2f, -30.2f), LookAt = new Vector3(-25f, 0.8f, -30.2f), Fov = 60f, HideUpper = true }, clips);
+        // Village temple fair: both pens east of the temple wall (temple at -32, 21)
+        Capture(new Shot { File = "preview_village_pens", Scene = "ThaiVillage", Title = "งานวัดหมู่บ้าน", Subtitle = "คอกสอยดาว · คอก ก.ไก่",
+            Camera = new Vector3(-1f, 7f, 23f), LookAt = new Vector3(-12.5f, 0.5f, 23f), Fov = 62f, HideUpper = true }, clips);
         EditorSceneManager.OpenScene("Assets/Scenes/ThaiVillage.unity");
     }
 
