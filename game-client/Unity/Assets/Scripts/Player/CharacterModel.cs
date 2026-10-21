@@ -16,7 +16,10 @@ public class CharacterModel : MonoBehaviour
     private Vector3 lastPosition;
     private float speed;
     private int skin = -1;
+    private string lookCode;
     private ProfileClient profile;
+
+    public Look CurrentLook { get; private set; }
 
     public bool HasModel => animator != null;
 
@@ -48,7 +51,7 @@ public class CharacterModel : MonoBehaviour
 
     private void Awake()
     {
-        SetSkin(0);
+        if (model == null) SetSkin(0);
         lastPosition = transform.position;
     }
 
@@ -58,23 +61,30 @@ public class CharacterModel : MonoBehaviour
         if (GetComponent<PlayerController>() == null) return;
         profile = ProfileClient.Instance;
         if (profile == null) return;
-        profile.SkinChanged += SetSkin;
-        SetSkin(profile.Skin);
+        profile.LookChanged += SetLook;
+        SetLook(profile.Look);
     }
 
     private void OnDestroy()
     {
-        if (profile != null) profile.SkinChanged -= SetSkin;
+        if (profile != null) profile.LookChanged -= SetLook;
     }
 
-    public void SetSkin(int index)
+    // NPCs: one of the body models as it comes
+    public void SetSkin(int index) => SetLook(Look.FromSkin(index));
+
+    // Body model plus hairstyle and clothes colours (CharacterLook)
+    public void SetLook(Look look)
     {
-        if (index == skin && model != null) return;
+        if (look.Code == lookCode && model != null) return;
+        int index = look.Skin;
         var prefab = Resources.Load<GameObject>(SkinPath(index))
                      ?? Resources.Load<GameObject>(SkinPath(0))
                      ?? Resources.Load<GameObject>(PrefabPath);
         if (prefab == null) return; // keep the capsule
         skin = index;
+        lookCode = look.Code;
+        CurrentLook = look;
 
         bool blocking = animator != null && animator.GetBool("Block");
         if (model != null) Destroy(model);
@@ -102,6 +112,8 @@ public class CharacterModel : MonoBehaviour
         }
         if (animator == null || animator.runtimeAnimatorController == null)
             Debug.LogWarning("[Character] Model has no Animator controller — run Thai Life > Setup Character (not in Play mode)");
+
+        CharacterLook.Apply(model, skin, look);
 
         var placeholder = GetComponent<MeshRenderer>();
         if (placeholder != null) placeholder.enabled = false;

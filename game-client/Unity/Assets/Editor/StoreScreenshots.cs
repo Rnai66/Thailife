@@ -17,7 +17,7 @@ public static class StoreScreenshots
     private const int Width = 2868, Height = 1320;
     private const string OutDir = "Builds/StoreScreenshots";
 
-    private struct Person { public Vector3 Pos; public float Yaw; public int Skin; public string Clip; public float Time; }
+    private struct Person { public Vector3 Pos; public float Yaw; public int Skin; public string Clip; public float Time; public string Look; }
 
     private class Shot
     {
@@ -119,6 +119,61 @@ public static class StoreScreenshots
         EditorSceneManager.OpenScene("Assets/Scenes/ThaiVillage.unity");
     }
 
+    // The four character models side by side, plus a log of their parts (meshes and materials)
+    [MenuItem("Thai Life/Advanced/Preview Character Models")]
+    public static void PreviewSkins()
+    {
+        if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+        Directory.CreateDirectory(OutDir);
+        var log = new System.Text.StringBuilder();
+        for (int i = 0; i < 8; i++)
+        {
+            var prefab = Resources.Load<GameObject>($"Characters/Skin_{i}");
+            if (prefab == null) break;
+            log.AppendLine($"Skin_{i}:");
+            foreach (var r in prefab.GetComponentsInChildren<Renderer>(true))
+            {
+                var mesh = r is SkinnedMeshRenderer sm ? sm.sharedMesh : null;
+                log.AppendLine($"  {r.name} sub={(mesh != null ? mesh.subMeshCount : 0)} bounds={r.bounds.size} mats=" +
+                               string.Join(",", r.sharedMaterials.Select(m => m != null ? m.name : "null")));
+            }
+        }
+        File.WriteAllText($"{OutDir}/character_parts.txt", log.ToString());
+        Capture(new Shot { File = "preview_skins", Scene = "Beach", Title = "ตัวละคร", Subtitle = "Skin 0 · 1 · 2 · 3",
+            Camera = new Vector3(0f, 1.3f, 5.2f), LookAt = new Vector3(0f, 1f, 10f), Fov = 45f,
+            People = new[]
+            {
+                new Person { Skin = 0, Pos = new Vector3(-2.1f, 0f, 10f), Yaw = 180f, Clip = "Idle" },
+                new Person { Skin = 1, Pos = new Vector3(-0.7f, 0f, 10f), Yaw = 180f, Clip = "Idle" },
+                new Person { Skin = 2, Pos = new Vector3(0.7f, 0f, 10f), Yaw = 180f, Clip = "Idle" },
+                new Person { Skin = 3, Pos = new Vector3(2.1f, 0f, 10f), Yaw = 180f, Clip = "Idle" },
+            } }, LoadClips());
+        EditorSceneManager.OpenScene("Assets/Scenes/ThaiVillage.unity");
+    }
+
+    // Hairstyles and outfit colours on each body model (Builds/StoreScreenshots/preview_looks_*.png)
+    [MenuItem("Thai Life/Advanced/Preview Looks")]
+    public static void PreviewLooks()
+    {
+        if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+        Directory.CreateDirectory(OutDir);
+        var clips = LoadClips();
+        string[][] sets =
+        {
+            new[] { "0.0.0.0.0.0", "0.0.1.0.3.2", "0.0.2.2.4.1", "0.1.0.0.0.0", "0.1.8.0.6.10", "0.1.9.4.2.2" },
+            new[] { "1.0.0.0.0.0", "1.0.3.3.7.1", "1.0.4.4.11.2", "1.1.0.0.0.0", "1.1.5.2.5.4", "1.1.6.5.1.8" },
+        };
+        for (int s = 0; s < sets.Length; s++)
+        {
+            var people = new Person[sets[s].Length];
+            for (int i = 0; i < people.Length; i++)
+                people[i] = new Person { Look = sets[s][i], Pos = new Vector3(-2.75f + i * 1.1f, 0f, 10f), Yaw = 180f, Clip = "Idle" };
+            Capture(new Shot { File = "preview_looks_" + s, Scene = "Beach", Title = s == 0 ? "ตัวละครชาย" : "ตัวละครหญิง", Subtitle = "ทรงผม · สีชุด",
+                Camera = new Vector3(0f, 1.3f, 5.6f), LookAt = new Vector3(0f, 1.05f, 10f), Fov = 42f, People = people }, clips);
+        }
+        EditorSceneManager.OpenScene("Assets/Scenes/ThaiVillage.unity");
+    }
+
     private static Dictionary<string, AnimationClip> LoadClips()
     {
         var result = new Dictionary<string, AnimationClip>();
@@ -167,10 +222,12 @@ public static class StoreScreenshots
         {
             foreach (var p in shot.People)
             {
-                var prefab = Resources.Load<GameObject>($"Characters/Skin_{p.Skin}");
+                var look = string.IsNullOrEmpty(p.Look) ? global::Look.FromSkin(p.Skin) : global::Look.Parse("look:" + p.Look);
+                var prefab = Resources.Load<GameObject>($"Characters/Skin_{look.Skin}");
                 if (prefab == null) continue;
                 var go = Object.Instantiate(prefab, p.Pos, Quaternion.Euler(0f, p.Yaw, 0f));
                 people.Add(go);
+                CharacterLook.Apply(go, look.Skin, look);
                 var animator = go.GetComponentInChildren<Animator>();
                 if (animator != null && clips.TryGetValue(p.Clip, out var clip))
                 {

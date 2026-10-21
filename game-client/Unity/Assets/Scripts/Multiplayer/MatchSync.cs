@@ -68,7 +68,7 @@ public class MatchSync : MonoBehaviour
         connection.Connected += OnConnected;
         if (localActions != null) localActions.Performed += OnLocalAction;
         if (localCombat != null) localCombat.HealthChanged += OnLocalHealthChanged;
-        if (profile != null) { profile.NameChanged += OnLocalNameChanged; profile.SkinChanged += OnLocalSkinChanged; }
+        if (profile != null) { profile.NameChanged += OnLocalNameChanged; profile.LookChanged += OnLocalLookChanged; }
         if (connection.IsConnected) OnConnected(connection);
     }
 
@@ -77,7 +77,7 @@ public class MatchSync : MonoBehaviour
         connection.Connected -= OnConnected;
         if (localActions != null) localActions.Performed -= OnLocalAction;
         if (localCombat != null) localCombat.HealthChanged -= OnLocalHealthChanged;
-        if (profile != null) { profile.NameChanged -= OnLocalNameChanged; profile.SkinChanged -= OnLocalSkinChanged; }
+        if (profile != null) { profile.NameChanged -= OnLocalNameChanged; profile.LookChanged -= OnLocalLookChanged; }
         if (connection.Socket != null)
         {
             connection.Socket.ReceivedMatchState -= OnMatchState;
@@ -275,7 +275,7 @@ public class MatchSync : MonoBehaviour
         var info = await profile.GetInfoAsync(remote.UserId, remote.Presence.Username);
         if (remote == null) return;
         remote.SetDisplayName(info.Name);
-        remote.SetSkin(info.Skin);
+        remote.SetLook(info.Look);
     }
 
     // Say a preset phrase: bubble over our head here and on everyone else's screen
@@ -287,7 +287,7 @@ public class MatchSync : MonoBehaviour
     }
 
     private void OnLocalNameChanged(string name) => _ = SendAsync(OpProfile, new byte[] { 1 });
-    private void OnLocalSkinChanged(int skin) => _ = SendAsync(OpProfile, new byte[] { 1 });
+    private void OnLocalLookChanged(Look look) => _ = SendAsync(OpProfile, new byte[] { 1 });
 
     private async Task SendAsync(long opCode, byte[] data)
     {

@@ -863,6 +863,8 @@ public static class Places
         {
             ("travel", new[] { "ป้ายรถ" }),
             ("school", new[] { "ห้องเรียน" }),
+            ("barber", new[] { "ร้านตัดผม" }),
+            ("tailor", new[] { "ร้านเสื้อผ้า" }),
             ("subj_craft", new[] { "ช่างซ่อม" }),
             ("subj_sports", new[] { "โค้ช" }),
             ("subj_logic", new[] { "ติวเตอร์" }),

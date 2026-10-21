@@ -1,10 +1,16 @@
 -- Player profile: character name (ชื่อตัวละคร), stored as the account's display name, and
--- the character look (หน้าตา), stored as the avatar url "skin:N".
+-- the character look (หน้าตา), stored as the avatar url "look:g.f.h.c.t.b"
+-- (gender, face, hairstyle, hair colour, top colour, bottom colour; old accounts "skin:N").
 --   profile_set_name  {"name": "..."}  -> {name}
---   profile_set_skin  {"skin": 0..7}   -> {skin}
+--   profile_get_look  {}               -> {code, created, level}
+--   profile_set_look  {"code": "g.f.h.c.t.b", "place": "create" | "barber" | "tailor"} -> {code, paid}
+--       create: once, free options only · barber (ร้านตัดผม): hairstyle + colour ·
+--       tailor (ร้านเสื้อผ้า): top + bottom colours. Paid options need the money and the level.
+--   profile_set_skin  {"skin": 0..7}   -> {skin}   (older app versions)
 -- Other players read both with GetUsers, so they can't be spoofed through match messages.
 
 local nk = require("nakama")
+local data = require("shop_data")
 
 local GRPC_INVALID_ARGUMENT = 3
 local MIN_CHARS, MAX_CHARS = 2, 16
@@ -51,3 +57,101 @@ nk.register_rpc(function(context, payload)
   nk.account_update_id(context.user_id, nil, nil, nil, nil, nil, nil, "skin:" .. skin)
   return nk.json_encode({ skin = skin })
 end, "profile_set_skin")
+
+-- ── Looks ───────────────────────────────────────────────────────────────────
+-- { price, level } per option; index 0 first. Mirrors Look.cs (names and colours live there).
+local HAIR_STYLES = { [0] = { 0, 1 }, { 0, 1 }, { 0, 1 }, { 0, 1 }, { 0, 1 }, { 0, 1 },
+                      { 150, 2 }, { 300, 3 }, { 400, 5 }, { 600, 7 }, { 100, 2 } }
+local HAIR_COLORS = { [0] = { 0, 1 }, { 0, 1 }, { 0, 1 }, { 150, 3 }, { 200, 4 }, { 300, 5 }, { 300, 5 }, { 300, 5 }, { 500, 8 } }
+local CLOTH_COLORS = { [0] = { 0, 1 }, { 0, 1 }, { 0, 1 }, { 0, 1 }, { 0, 1 }, { 100, 2 }, { 100, 2 }, { 150, 3 }, { 150, 3 },
+                       { 150, 3 }, { 200, 4 }, { 200, 4 }, { 1000, 10 } }
+local SERVICE = { barber = 40, tailor = 60 } -- the haircut or the sewing, on top of the option's price
+local LOOK = { collection = "profile", key = "look" }
+
+local function count(t) local n = -1 for k, _ in pairs(t) do if k > n then n = k end end return n + 1 end
+
+local function parse(code)
+  local p = {}
+  for v in tostring(code or ""):gmatch("[^%.]+") do table.insert(p, math.floor(tonumber(v) or -1)) end
+  if #p ~= 6 then return nil end
+  local l = { g = p[1], f = p[2], h = p[3], c = p[4], t = p[5], b = p[6] }
+  if l.g < 0 or l.g > 1 or l.f < 0 or l.f > 1 then return nil end
+  if l.h < 0 or l.h >= count(HAIR_STYLES) or l.c < 0 or l.c >= count(HAIR_COLORS) then return nil end
+  if l.t < 0 or l.t >= count(CLOTH_COLORS) or l.b < 0 or l.b >= count(CLOTH_COLORS) then return nil end
+  return l
+end
+
+local function code_of(l) return table.concat({ l.g, l.f, l.h, l.c, l.t, l.b }, ".") end
+
+local function current(user_id)
+  local account = nk.account_get_id(user_id)
+  local url = account.user.avatar_url or ""
+  local l = parse(url:match("^look:(.+)$"))
+  if l then return l end
+  local skin = tonumber(url:match("^skin:(%d+)$") or "0") or 0
+  return { g = skin >= 2 and 1 or 0, f = skin % 2, h = 0, c = 0, t = 0, b = 0 }
+end
+
+local function level_of(user_id)
+  local objects = nk.storage_read({ { collection = "career", key = "stats", user_id = user_id } })
+  return (#objects > 0 and objects[1].value.level) or 1
+end
+
+local function created(user_id)
+  local objects = nk.storage_read({ { collection = LOOK.collection, key = LOOK.key, user_id = user_id } })
+  return #objects > 0 and objects[1].value.created == true
+end
+
+local function err(msg, code) error({ msg, code or 9 }) end
+
+nk.register_rpc(function(context, payload)
+  local l = current(context.user_id)
+  return nk.json_encode({ code = code_of(l), created = created(context.user_id), level = level_of(context.user_id) })
+end, "profile_get_look")
+
+nk.register_rpc(function(context, payload)
+  local user_id = context.user_id
+  local ok, req = pcall(nk.json_decode, payload or "")
+  if not ok or type(req) ~= "table" then err("invalid payload", GRPC_INVALID_ARGUMENT) end
+  local new = parse(req.code)
+  if not new then err("invalid look", GRPC_INVALID_ARGUMENT) end
+  local old = current(user_id)
+  local place = req.place
+  local cost, need = 0, 1
+  local function take(opt) cost = cost + opt[1]; if opt[2] > need then need = opt[2] end end
+
+  if place == "create" then
+    if created(user_id) then err("already created") end
+    for _, opt in ipairs({ HAIR_STYLES[new.h], HAIR_COLORS[new.c], CLOTH_COLORS[new.t], CLOTH_COLORS[new.b] }) do
+      if opt[1] > 0 or opt[2] > 1 then err("shop only") end
+    end
+  elseif place == "barber" then
+    if new.g ~= old.g or new.f ~= old.f or new.t ~= old.t or new.b ~= old.b then err("barber does hair only") end
+    if new.h == old.h and new.c == old.c then err("no change") end
+    cost = SERVICE.barber
+    if new.h ~= old.h then take(HAIR_STYLES[new.h]) end
+    if new.c ~= old.c then take(HAIR_COLORS[new.c]) end
+  elseif place == "tailor" then
+    if new.g ~= old.g or new.f ~= old.f or new.h ~= old.h or new.c ~= old.c then err("tailor does clothes only") end
+    if new.t == old.t and new.b == old.b then err("no change") end
+    cost = SERVICE.tailor
+    if new.t ~= old.t then take(CLOTH_COLORS[new.t]) end
+    if new.b ~= old.b then take(CLOTH_COLORS[new.b]) end
+  else
+    err("unknown place", GRPC_INVALID_ARGUMENT)
+  end
+
+  if need > level_of(user_id) then err("level " .. need) end
+  if cost > 0 then
+    local account = nk.account_get_id(user_id)
+    local w = account.wallet or {}
+    if type(w) == "string" then w = nk.json_decode(w) end
+    if (w[data.CURRENCY] or 0) < cost then err("not enough baht") end
+    nk.wallet_update(user_id, { [data.CURRENCY] = -cost }, { reason = "look_" .. place }, true)
+  end
+  local code = code_of(new)
+  nk.account_update_id(user_id, nil, nil, nil, nil, nil, nil, "look:" .. code)
+  nk.storage_write({ { collection = LOOK.collection, key = LOOK.key, user_id = user_id, value = { created = true },
+                       permission_read = 1, permission_write = 0 } })
+  return nk.json_encode({ code = code, created = true, paid = cost })
+end, "profile_set_look")

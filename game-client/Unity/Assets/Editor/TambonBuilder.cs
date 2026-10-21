@@ -138,12 +138,17 @@ public static class TambonBuilder
     {
         // ตัวเมือง (อำเภอ/จังหวัด): clock tower roundabout, shophouses, boxing camp (career tier 3)
         Places2.ClockTower(root, new Vector3(0f, 0f, 14f));
-        Places2.Shophouses(root, new Vector3(-20f, 0f, 2f), 0f, 5, new[] { "ร้านทอง", "ร้านขายยา", "ออฟฟิศไอที", "ร้านข้าวมันไก่", "ร้านโทรศัพท์" });
+        Places2.Shophouses(root, new Vector3(-20f, 0f, 2f), 0f, 5, new[] { "ร้านทอง", "ร้านขายยา", "ออฟฟิศไอที", "ร้านข้าวมันไก่", "ร้านเสื้อผ้า" });
         Places2.Shophouses(root, new Vector3(22f, 0f, 2f), 0f, 4, new[] { "ร้านกาแฟ", "บริษัทซอฟต์แวร์", "ร้านตัดผม", "ร้านเครื่องดนตรี" });
         // Walk up to ร้านข้าวมันไก่ (left row, 4th unit) or ร้านกาแฟ (right row, 1st unit) to buy food
         FoodCounter(root, new Vector3(-15.5f, 0f, -4.4f));
         FoodCounter(root, new Vector3(15.25f, 0f, -4.4f));
         ShopZone(root, new Vector3(28.75f, 0f, -4.4f), "music");   // ร้านเครื่องดนตรี (right row, 4th unit)
+        // Barber (ร้านตัดผม, right row 3rd unit) and clothes shop (ร้านเสื้อผ้า, left row 5th unit): change your look
+        LookShop(root, new Vector3(24.25f, 0f, -4.4f), barber: true);
+        LookShop(root, new Vector3(-11f, 0f, -4.4f), barber: false);
+        Places.Sign(root, new Vector3(26.4f, 0f, -5.4f), "ร้านตัดผม\nเปลี่ยนทรงผม · ย้อมสีผม", 180f);
+        Places.Sign(root, new Vector3(-8.9f, 0f, -5.4f), "ร้านเสื้อผ้า\nเปลี่ยนสีเสื้อและกางเกง", 180f);
         // Skilled office jobs in the two spare shophouse units (คอมพิวเตอร์ / ตรรกะ from the school)
         Schooling.JobSpot(root, new Vector3(-20f, 0f, -4.4f), 180f, "office", "พนักงานคอมพิวเตอร์\nค่าจ้าง 320 ฿ · ต้องมี เลเวล 8 · คอมพิวเตอร์ Lv 4");
         Schooling.JobSpot(root, new Vector3(19.75f, 0f, -4.4f), 180f, "programmer", "โปรแกรมเมอร์\nค่าจ้าง 650 ฿ · เลเวล 15 · คอมพิวเตอร์ Lv 8 · ตรรกะ Lv 6");
@@ -257,6 +262,17 @@ public static class TambonBuilder
         PrimitiveKit.Box("Road", root, new Vector3(0f, 0.02f, -8f), new Vector3(length, 0.04f, 4f), asphalt);
         for (float x = -length * 0.5f + 2f; x <= length * 0.5f - 2f; x += 4f)
             PrimitiveKit.Box("Dash", root, new Vector3(x, 0.045f, -8f), new Vector3(1.6f, 0.01f, 0.15f), paint, collider: false);
+    }
+
+    private static void LookShop(Transform parent, Vector3 position, bool barber)
+    {
+        var zone = new GameObject(barber ? "Barber_ร้านตัดผม" : "Tailor_ร้านเสื้อผ้า");
+        zone.transform.SetParent(parent, false);
+        zone.transform.localPosition = position + Vector3.up;
+        var box = zone.AddComponent<BoxCollider>();
+        box.isTrigger = true;
+        box.size = new Vector3(3.6f, 2f, 2f);
+        zone.AddComponent<global::LookShop>().Configure(barber);
     }
 
     private static void FoodCounter(Transform parent, Vector3 position) => ShopZone(parent, position, "city_food");
