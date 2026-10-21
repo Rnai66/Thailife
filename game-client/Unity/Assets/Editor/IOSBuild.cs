@@ -18,7 +18,7 @@ public static class IOSBuild
     private static void Build() => Build(release: false);
 
     // Release build for TestFlight / the App Store: no development player, a fresh build number
-    // (yyyyMMddHH, always higher than the last upload). Archive and upload it from Xcode.
+    // (yyMMddHHmm, always higher than the last upload). Archive and upload it from Xcode.
     [MenuItem("Thai Life/Build iOS Release (TestFlight)")]
     private static void BuildRelease() => Build(release: true);
 
@@ -44,7 +44,7 @@ public static class IOSBuild
         Configure();
         if (release)
         {
-            PlayerSettings.iOS.buildNumber = System.DateTime.Now.ToString("yyyyMMddHH");
+            PlayerSettings.iOS.buildNumber = System.DateTime.Now.ToString("yyMMddHHmm"); // to the minute, above the first upload (2026102114)
             Debug.Log($"[ThaiLife] Release build {PlayerSettings.bundleVersion} ({PlayerSettings.iOS.buildNumber})");
         }
 
