@@ -47,12 +47,13 @@ public static class Places
         PrimitiveKit.Box("FairPath", t, new Vector3(-22.5f, 0.012f, -14f), new Vector3(2f, 0.02f, 22f), dirt, collider: false);
         StreetFurniture.LampPost(t, new Vector3(-19.5f, 0f, -12f));
         TempleFairLights(t);
-        // สอยดาว and มหาลัย ก.ไก่ pens in front of the temple, right of the gate path, gates facing the
-        // road (festival days only)
+        // สอยดาว and มหาลัย ก.ไก่ pens in front of the temple either side of the gate path, gates
+        // facing the road (festival days only)
         var games = FairLights.Gated(t, "TempleFairGames", "any");
-        FestivalGrounds.KokaiPen(PrimitiveKit.Group("KokaiSpot", games, new Vector3(10.5f, 0f, -22f), 90f).transform, Vector3.zero, "any");
-        FestivalGrounds.SoiDaoPen(PrimitiveKit.Group("SoiDaoSpot", games, new Vector3(20.8f, 0f, -22f), 90f).transform, Vector3.zero, "any");
-        Npcs.Crowd(t, new Vector3(-10f, 0f, -20.5f), new Vector2(30f, 5f), 10, "any", 0, 24, Npcs.FairTalk); // left of the pens
+        // สอยดาว left of the gate (where the contest stage used to be), มหาลัย ก.ไก่ right of it
+        FestivalGrounds.SoiDaoPen(PrimitiveKit.Group("SoiDaoSpot", games, new Vector3(-9.5f, 0f, -21.5f), 90f).transform, Vector3.zero, "any");
+        FestivalGrounds.KokaiPen(PrimitiveKit.Group("KokaiSpot", games, new Vector3(10.5f, 0f, -21.5f), 90f).transform, Vector3.zero, "any");
+        Npcs.Crowd(t, new Vector3(0f, 0f, -20.5f), new Vector2(9f, 4f), 8, "any", 0, 24, Npcs.FairTalk); // the gate path between the pens
 
         // Low white boundary wall with a gate in the front (-Z)
         PrimitiveKit.Box("WallBack", t, new Vector3(0f, 0.5f, 14f), new Vector3(30f, 1f, 0.3f), white);

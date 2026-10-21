@@ -118,7 +118,7 @@ public static class StoreScreenshots
             Camera = new Vector3(-31.5f, 5.2f, -30.2f), LookAt = new Vector3(-25f, 0.8f, -30.2f), Fov = 60f, HideUpper = true }, clips);
         // Village temple fair: both pens east of the temple wall (temple at -32, 21)
         Capture(new Shot { File = "preview_village_pens", Scene = "ThaiVillage", Title = "งานวัดหมู่บ้าน", Subtitle = "คอกสอยดาว · คอก ก.ไก่ หน้าวัด",
-            Camera = new Vector3(-6f, 6.5f, -10f), LookAt = new Vector3(-8f, 0.5f, 1f), Fov = 62f, HideUpper = true }, clips);
+            Camera = new Vector3(-26f, 7f, -11f), LookAt = new Vector3(-32f, 1.5f, 0f), Fov = 64f, HideUpper = true }, clips);
         Capture(new Shot { File = "preview_temple_stages", Scene = "ThaiVillage", Title = "ในวัด", Subtitle = "เวทีประกวดไก่ · ดนตรีพื้นบ้าน",
             Camera = new Vector3(-31f, 6f, 3f), LookAt = new Vector3(-21f, 1f, 14f), Fov = 60f }, clips);
         Capture(new Shot { File = "preview_village_fairground", Scene = "ThaiVillage", Title = "ลานอเนกประสงค์", Subtitle = "หนังกลางแปลง · ชิงช้าสวรรค์ · หมอลำ",

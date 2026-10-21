@@ -198,8 +198,10 @@ public static class FestivalGrounds
         FairLights.Festoon(s, new Vector3(-W * 0.5f, 3.3f, D * 0.5f), new Vector3(Gap * 0.5f + 0.1f, 3.2f, -D * 0.5f), 0.5f);
         FairLights.Festoon(s, new Vector3(W * 0.5f, 3.3f, D * 0.5f), new Vector3(-Gap * 0.5f - 0.1f, 3.2f, -D * 0.5f), 0.5f);
 
-        // ต้นสอยดาว: dry tree on a round dais in the middle
+        // ต้นสอยดาว: a big dry tree on a round dais in the middle, a glowing gold star on its crown
+        // and twinkling bulbs at the twig tips so it stands out across the fair
         var tree = PrimitiveKit.Group("DryTree_ต้นสอยดาว", s, new Vector3(0f, 0f, 0.2f)).transform;
+        tree.localScale = Vector3.one * 1.6f;
         PrimitiveKit.Cylinder("Dais", tree, new Vector3(0f, 0.15f, 0f), new Vector3(1.6f, 0.15f, 1.6f), wood);
         PrimitiveKit.Cylinder("DaisCloth", tree, new Vector3(0f, 0.31f, 0f), new Vector3(1.62f, 0.02f, 1.62f), red, collider: false);
         var trunkPath = MeshKit.Curve(new Vector3(0f, 0.3f, 0f), new Vector3(0.15f, 1.6f, -0.05f), new Vector3(0f, 2.9f, 0f), 10);
@@ -218,6 +220,8 @@ public static class FestivalGrounds
             var fork = Vector3.Lerp(a, b, 0.6f);
             var twig = fork + new Vector3(Mathf.Cos(yaw + 0.8f) * 0.4f, 0.35f, Mathf.Sin(yaw + 0.8f) * 0.4f);
             MeshKit.Place("Twig", tree, MeshKit.Sweep("SoiDaoTwig" + i, MeshKit.Curve(fork, (fork + twig) * 0.5f + Vector3.up * 0.05f, twig, 4), MeshKit.Taper(4, 0.025f, 0.01f), 4), bark, Vector3.zero);
+            PrimitiveKit.Sphere("TipBulb", tree, twig + Vector3.up * 0.03f, Vector3.one * 0.07f,
+                i % 2 == 0 ? PrimitiveKit.Glow("BulbWarm", new Color(1f, 0.85f, 0.55f), 2.5f) : PrimitiveKit.Glow("BulbRed", new Color(1f, 0.35f, 0.3f), 2.5f));
             foreach (var at in new[] { Vector3.Lerp(a, b, 0.45f), Vector3.Lerp(a, b, 0.75f), b, twig })
             {
                 float drop = 0.12f + (n % 3) * 0.07f;
@@ -227,7 +231,20 @@ public static class FestivalGrounds
                 n++;
             }
         }
-        Zone(s, new Vector3(0f, 1f, 0.2f), new Vector3(3.8f, 2f, 3.8f)).gameObject.AddComponent<FestivalBooth>().Configure("soidao", "สอยดาว", 40);
+        // The star (ดาว) on top: two gold points crossed, glowing, with a warm light
+        var star = PrimitiveKit.Group("Star_ดาว", tree, new Vector3(0f, 3.65f, 0f)).transform;
+        var starGlow = PrimitiveKit.Glow("StarGold", new Color(1f, 0.82f, 0.25f), 3.5f);
+        for (int k = 0; k < 5; k++)
+            PrimitiveKit.Box("StarPoint", star, Quaternion.Euler(0f, 0f, k * 72f) * new Vector3(0f, 0.13f, 0f), new Vector3(0.1f, 0.28f, 0.05f), starGlow, new Vector3(0f, 0f, k * 72f), collider: false);
+        PrimitiveKit.Sphere("StarCore", star, Vector3.zero, Vector3.one * 0.14f, starGlow);
+        var starLight = new GameObject("StarLight").AddComponent<Light>();
+        starLight.transform.SetParent(star, false);
+        starLight.type = LightType.Point;
+        starLight.color = new Color(1f, 0.85f, 0.5f);
+        starLight.range = 7f;
+        starLight.intensity = 3f;
+        starLight.shadows = LightShadows.None;
+        Zone(s, new Vector3(0f, 1f, 0.2f), new Vector3(4.6f, 2f, 4.6f)).gameObject.AddComponent<FestivalBooth>().Configure("soidao", "สอยดาว", 40);
 
         // Back: stepped stand of merit goods
         for (int step = 0; step < 3; step++)
