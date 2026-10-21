@@ -38,8 +38,8 @@ public static class Places
 
         BigTree(t, new Vector3(-9f, 0f, 9f), "BodhiTree_ต้นโพธิ์", 1.4f);
 
-        // Temple fair (งานวัด) outside the walls: contest + music stage and stalls in front of
-        // the temple either side of the gate path, the boxing ring along the west wall
+        // Temple fair (งานวัด): contest and folk music stages inside the grounds, stalls and the game
+        // pens in front of the wall, the boxing ring along the west wall
         TempleFair(t);
         BoxingRing(t, new Vector3(-22.5f, 0f, 2f), 0f, "เวทีมวยงานวัด", "fair");
         var dirt = PrimitiveKit.Mat("Dirt", new Color(0.55f, 0.42f, 0.28f));
@@ -248,24 +248,25 @@ public static class Places
         var pink = PrimitiveKit.Mat("FlowerPink", new Color(1f, 0.45f, 0.7f));
         var blue = PrimitiveKit.Mat("BusStopBlue", new Color(0.2f, 0.4f, 0.75f));
 
-        // Contest stage (เวทีประกวดไก่สวย)
-        PrimitiveKit.Box("ContestStage", t, new Vector3(0f, 0.2f, 0f), new Vector3(3.6f, 0.4f, 3f), red);
+        // Inside the temple grounds, right of the path to the ubosot, both facing the path:
+        // the chicken beauty contest stage (เวทีประกวดไก่สวย) and the folk music stage (ดนตรีพื้นบ้าน)
+        var contestStage = PrimitiveKit.Group("ContestStage_เวทีประกวดไก่", temple, new Vector3(10.6f, 0f, -10f), 90f).transform;
+        PrimitiveKit.Box("ContestStage", contestStage, new Vector3(0f, 0.2f, 0f), new Vector3(3.6f, 0.4f, 3f), red);
         foreach (float x in new[] { -1.7f, 1.7f })
-            PrimitiveKit.Cylinder("BannerPole", t, new Vector3(x, 1.6f, 1.4f), new Vector3(0.08f, 1.6f, 0.08f), wood, collider: false);
-        PrimitiveKit.Box("Banner", t, new Vector3(0f, 2.9f, 1.4f), new Vector3(3.6f, 0.6f, 0.06f), banner, collider: false);
-        PrimitiveKit.Label("ประกวดไก่สวย", t, new Vector3(0f, 2.9f, 1.36f), 0.06f, new Color(0.7f, 0.1f, 0.1f));
+            PrimitiveKit.Cylinder("BannerPole", contestStage, new Vector3(x, 1.6f, 1.4f), new Vector3(0.08f, 1.6f, 0.08f), wood, collider: false);
+        PrimitiveKit.Box("Banner", contestStage, new Vector3(0f, 2.9f, 1.4f), new Vector3(3.6f, 0.6f, 0.06f), banner, collider: false);
+        PrimitiveKit.Label("ประกวดไก่สวย", contestStage, new Vector3(0f, 2.9f, 1.36f), 0.06f, new Color(0.7f, 0.1f, 0.1f));
 
         var contest = new GameObject("ContestZone");
-        contest.transform.SetParent(t, false);
+        contest.transform.SetParent(contestStage, false);
         contest.transform.localPosition = new Vector3(0f, 1f, -2.3f);
         var box = contest.AddComponent<BoxCollider>();
         box.isTrigger = true;
         box.size = new Vector3(3.6f, 2f, 1.6f);
         contest.AddComponent<WindowSpot>().Configure(WindowSpot.Window.Contest);
-        Sign(t, new Vector3(-2.6f, 0f, -2.2f), "ประกวดไก่สวย\nช่วงงานวัดตามประเพณี", 0f);
+        Sign(contestStage, new Vector3(-2.6f, 0f, -2.2f), "ประกวดไก่สวย\nช่วงงานวัดตามประเพณี", 0f);
 
-        // Music stage behind the contest stage (folk instruments shine here); keeps the gate path clear
-        Places2.MusicStage(t, new Vector3(0f, 0f, 5.2f), 0f, "temple_fair", "ดนตรีงานวัด", new Color(0.75f, 0.15f, 0.12f));
+        Places2.MusicStage(temple, new Vector3(11.2f, 0f, -2.2f), 90f, "temple_fair", "ดนตรีพื้นบ้าน", new Color(0.75f, 0.15f, 0.12f));
 
         // Fair stalls (ซุ้มงานวัด) with striped roofs, both sides of the gate path in front of the wall
         // (right of the gate is the สอยดาว and ก.ไก่ pens' ground)

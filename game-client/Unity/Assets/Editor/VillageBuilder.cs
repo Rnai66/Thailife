@@ -171,7 +171,7 @@ public static class VillageBuilder
             new Vector3(0.2f, 0f, 2.2f), new Vector3(11.5f, 0f, 1f), new Vector3(5.2f, 0f, -3.8f), new Vector3(9f, 0f, -3.6f),
             new Vector3(-8f, 0f, 3f), new Vector3(-1f, 0f, 7f), new Vector3(-34.5f, 0f, 5.5f), new Vector3(-29.5f, 0f, 5.5f),
             new Vector3(25.5f, 0f, 6f), new Vector3(30.5f, 0f, 6f), new Vector3(-14f, 0f, -19f), new Vector3(-10f, 0f, -19f),
-            new Vector3(18f, 0f, 12f), new Vector3(-22f, 0f, 10f),
+            new Vector3(18f, 0f, 12f), new Vector3(-18.6f, 0f, 8.4f), // clear of the contest stage in the temple
         };
         for (int i = 0; i < bushes.Length; i++) Nature.Bush(v, bushes[i], 0.9f + (i % 3) * 0.25f, i, flowers: i % 3 == 0);
 

@@ -24,7 +24,7 @@ local GRPC_FAILED_PRECONDITION = 9
 -- Venues: base tips, required level, which instruments get +20%, when it's open
 local VENUES = {
   village_hall = { name = "ศาลากลางหมู่บ้าน", level = 1,  base = 40,  bonus = "folk" },
-  temple_fair  = { name = "งานวัด",    level = 1,  base = 120, bonus = "folk", fair = true },
+  temple_fair  = { name = "ดนตรีพื้นบ้าน", level = 1,  base = 120, bonus = "folk", fair = true },
   tambon_event = { name = "เวทีอีเวนต์ตำบล",   level = 5,  base = 150, bonus = "any" },
   city_event   = { name = "เวทีอีเวนต์เมือง",   level = 8,  base = 220, bonus = "modern" },
   beach_concert = { name = "เวทีคอนเสิร์ตริมหาด", level = 12, base = 500, bonus = "modern", concert = true },
