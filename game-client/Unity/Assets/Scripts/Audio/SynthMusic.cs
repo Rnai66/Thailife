@@ -1,36 +1,40 @@
 using UnityEngine;
 
-// Soft background music (เพลงบรรเลง) made in code: a plucked khim-like melody on the Thai pentatonic
-// scale over a gentle bass and pad. Notes are written with wrap-around so every loop is seamless.
-// Everything sits in D around 115 BPM, the key and tempo of the recorded ลายไทย tune (Thaimusic),
-// so switching tracks or walking past a stage never clashes with it.
+// Background music made in code, one loop per place (the village plays the recorded ลายไทย tune):
+//   bgm_tambon  ตำบล — a plucked khim-like melody on the Thai pentatonic over bass and pad
+//   bgm_city    เมือง — lo-fi city beat: swung drums, electric-piano 7th chords, walking bass
+//   bgm_sea     ทะเล — tropical: steel-pan tune, off-beat strums, shaker, bouncy bass
+//   bgm_island  เกาะ — dreamy and slow: soft pads and a bell arpeggio, no drums
+// plus the stage loops (concert, morlam, ramwong). Notes wrap around so every loop is seamless.
+// Everything sits in D, the key of the recorded tune (Thaimusic), so nothing clashes when
+// one track fades into another or a stage plays nearby.
 public static class SynthMusic
 {
     private const int Rate = SynthSounds.Rate;
+    private const float D3 = 146.83f, D4 = 293.66f;
 
-    public struct Track
+    private struct Track
     {
-        public string Name;
         public float Root, Bpm;
         public int Seed;
         public float Brightness; // pluck tone: 0 mellow … 1 bright
     }
 
-    public static readonly Track[] Tracks =
-    {
-        new Track { Name = "ทุ่งนายามเช้า", Root = 293.66f, Bpm = 115f, Seed = 3, Brightness = 0.5f },
-        new Track { Name = "ลมเย็นริมคลอง", Root = 440f, Bpm = 86.25f, Seed = 8, Brightness = 0.8f },
-        new Track { Name = "ราตรีหมู่บ้าน", Root = 293.66f, Bpm = 57.5f, Seed = 21, Brightness = 0.25f },
-    };
+    private static readonly Track Tambon = new Track { Root = D4, Bpm = 108f, Seed = 3, Brightness = 0.5f };
 
-    // "bgm0", "bgm1", … and "concert" (the beach stage)
     public static float[] Make(string name)
     {
-        if (name == "concert") return Concert();
-        if (name == "morlam") return MorLam();
-        if (name == "ramwong") return Ramwong();
-        if (!name.StartsWith("bgm") || !int.TryParse(name.Substring(3), out int i) || i < 0 || i >= Tracks.Length) return null;
-        return Render(Tracks[i]);
+        switch (name)
+        {
+            case "concert": return Concert();
+            case "morlam": return MorLam();
+            case "ramwong": return Ramwong();
+            case "bgm_tambon": return Render(Tambon);
+            case "bgm_city": return City();
+            case "bgm_sea": return Sea();
+            case "bgm_island": return Island();
+            default: return null;
+        }
     }
 
     private static float[] Render(Track track)
@@ -186,6 +190,175 @@ public static class SynthMusic
         foreach (float v in d) max = Mathf.Max(max, Mathf.Abs(v));
         for (int i = 0; i < d.Length; i++) d[i] *= 0.7f / max;
         return d;
+    }
+
+    // Chords as semitones from D4: Dmaj7 – Bm7 – Gmaj7 – A7 (I – vi – IV – V, with sevenths)
+    private static readonly float[][] Sevenths =
+    {
+        new float[] { 0, 4, 7, 11 }, new float[] { -3, 0, 4, 7 }, new float[] { -7, -3, 0, 4 }, new float[] { -5, -1, 2, 5 },
+    };
+    private static readonly float[] SeventhRoots = { 0, -3, -7, -5 };
+
+    // เมือง: lo-fi beat at 84 BPM — lazy swung hats, a soft kick and snare, Rhodes-like chord stabs
+    private static float[] City()
+    {
+        const float bpm = 84f;
+        const int bars = 8, steps = 16;
+        float step = 60f / bpm / 4f;
+        int length = Mathf.CeilToInt(bars * steps * step * Rate);
+        var d = new float[length];
+        var rng = new System.Random(31);
+        float[] scale = { 0, 2, 4, 7, 9, 12, 14, 16 };
+        for (int bar = 0; bar < bars; bar++)
+        {
+            var chord = Sevenths[bar % 4];
+            float bass = D3 * 0.5f * Semis(SeventhRoots[bar % 4]);
+            for (int s = 0; s < steps; s++)
+            {
+                float swing = s % 2 == 1 ? 0.3f * step : 0f;                     // late off-beats
+                int at = (int)(((bar * steps + s) * step + swing) * Rate);
+                if (s == 0 || s == 7 || s == 10) Kick(d, at);
+                if (s == 4 || s == 12) Snare(d, at, rng);
+                if (s % 2 == 0 || s == 15) Hat(d, at, rng, s % 4 == 0 ? 0.05f : 0.09f);
+                if (s == 0 || s == 10) Keys(d, at, chord, D4, s == 0 ? 0.12f : 0.08f, (int)(step * 6 * Rate));
+                if (s == 0 || s == 6 || s == 8 || s == 14)
+                    Pluck(d, at, bass * (s == 14 ? Semis(7) : 1f), 0.32f, 0.2f, rng, 0.995f);
+                if ((bar % 2 == 1) && s % 4 == 2 && rng.NextDouble() < 0.6)                  // a few lazy lead notes
+                    Pluck(d, at, D4 * 2f * Semis(scale[rng.Next(scale.Length)] - 12f), 0.12f, 0.6f, rng, 0.996f);
+            }
+        }
+        return Normalize(d, 0.6f);
+    }
+
+    // ทะเล: tropical at 115 BPM — steel pan tune, off-beat strums, shaker, bouncy bass
+    private static float[] Sea()
+    {
+        const float bpm = 115f;
+        const int bars = 8, steps = 16;
+        float step = 60f / bpm / 4f;
+        int length = Mathf.CeilToInt(bars * steps * step * Rate);
+        var d = new float[length];
+        var rng = new System.Random(57);
+        float[] roots = { 0, 5, 7, 0, 0, 5, 7, 7 };                   // D – G – A – D
+        float[] scale = { 0, 2, 4, 7, 9, 12, 14, 16, 19 };
+        int[] tune = { 4, 5, 6, 5, 4, 3, 2, -1, 3, 4, 5, 7, 6, 5, 4, -1, 5, 6, 7, 8, 7, 6, 5, 4, 3, 4, 3, 2, 1, 2, 0, -1 };
+        for (int bar = 0; bar < bars; bar++)
+        {
+            float root = roots[bar];
+            float bass = D3 * 0.5f * Semis(root);
+            for (int s = 0; s < steps; s++)
+            {
+                int at = (int)((bar * steps + s) * step * Rate);
+                if (s == 0 || s == 8) Kick(d, at);
+                Hat(d, at, rng, s % 4 == 2 ? 0.08f : 0.035f);                                  // shaker
+                if (s % 4 == 2)                                                                 // off-beat strum
+                    foreach (float n in new[] { 0f, 4f, 7f })
+                        Pluck(d, at + (int)(n * 0.002f * Rate), D4 * Semis(root + n), 0.09f, 0.85f, rng, 0.985f);
+                if (s == 0 || s == 3 || s == 8 || s == 11)
+                    Pluck(d, at, bass * (s == 11 ? Semis(7) : 1f), 0.3f, 0.3f, rng, 0.994f);
+                if (s % 2 == 0)
+                {
+                    int note = tune[(bar % 4) * 8 + s / 2];
+                    if (bar >= 4 && bar % 2 == 1 && s >= 8) note = note < 0 ? -1 : Mathf.Min(note + 2, scale.Length - 1); // answer phrase
+                    if (note >= 0) Pan(d, at, D4 * 2f * Semis(scale[note]), 0.18f);
+                }
+            }
+        }
+        return Normalize(d, 0.6f);
+    }
+
+    // เกาะ: dreamy at 66 BPM — soft chord pads and a slow bell arpeggio, like a warm evening on the sand
+    private static float[] Island()
+    {
+        const float bpm = 66f;
+        const int bars = 8, steps = 8;
+        float step = 60f / bpm / 2f;
+        int length = Mathf.CeilToInt(bars * steps * step * Rate);
+        var d = new float[length];
+        int[] order = { 0, 1, 2, 3, 2, 1, 3, 2 };
+        for (int bar = 0; bar < bars; bar++)
+        {
+            var chord = Sevenths[(bar / 2) % 4];
+            int barStart = (int)(bar * steps * step * Rate);
+            if (bar % 2 == 0) Swell(d, barStart, (int)(2 * steps * step * Rate), chord, D3);
+            for (int s = 0; s < steps; s++)
+            {
+                int at = barStart + (int)(s * step * Rate);
+                float n = chord[order[s]] + (s >= 4 ? 12f : 0f);
+                Bell(d, at, D4 * Semis(n), s == 0 ? 0.16f : 0.1f);
+            }
+        }
+        return Normalize(d, 0.55f);
+    }
+
+    private static float[] Normalize(float[] d, float peak)
+    {
+        float max = 0.0001f;
+        foreach (float v in d) max = Mathf.Max(max, Mathf.Abs(v));
+        for (int i = 0; i < d.Length; i++) d[i] *= peak / max;
+        return d;
+    }
+
+    // Electric-piano chord: sines with a bell-ish second partial and a slow tremolo
+    private static void Keys(float[] d, int start, float[] chord, float root, float amp, int len)
+    {
+        for (int i = 0; i < len; i++)
+        {
+            float t = (float)i / Rate;
+            float env = Mathf.Exp(-t * 1.6f) * Mathf.Min(1f, t * 200f) * Mathf.Min(1f, (len - i) / (0.05f * Rate));
+            float trem = 0.85f + 0.15f * Mathf.Sin(2f * Mathf.PI * 4.5f * t);
+            float v = 0f;
+            foreach (float n in chord)
+            {
+                float f = root * Semis(n);
+                v += Mathf.Sin(2f * Mathf.PI * f * t) + 0.25f * Mathf.Sin(2f * Mathf.PI * f * 2f * t) * Mathf.Exp(-t * 6f);
+            }
+            d[(start + i) % d.Length] += v * env * trem * amp * 0.5f;
+        }
+    }
+
+    // Steel pan: fundamental, octave and a touch of the twelfth, quick bright attack
+    private static void Pan(float[] d, int start, float f, float amp)
+    {
+        int len = (int)(0.9f * Rate);
+        for (int i = 0; i < len; i++)
+        {
+            float t = (float)i / Rate;
+            float v = Mathf.Sin(2f * Mathf.PI * f * t) * Mathf.Exp(-t * 3.5f)
+                    + 0.5f * Mathf.Sin(2f * Mathf.PI * f * 2f * t) * Mathf.Exp(-t * 6f)
+                    + 0.2f * Mathf.Sin(2f * Mathf.PI * f * 3f * t) * Mathf.Exp(-t * 12f);
+            d[(start + i) % d.Length] += v * amp * Mathf.Min(1f, t * 300f);
+        }
+    }
+
+    // Soft glass bell with a long tail
+    private static void Bell(float[] d, int start, float f, float amp)
+    {
+        int len = (int)(2.4f * Rate);
+        for (int i = 0; i < len; i++)
+        {
+            float t = (float)i / Rate;
+            float v = Mathf.Sin(2f * Mathf.PI * f * t) * Mathf.Exp(-t * 1.6f)
+                    + 0.3f * Mathf.Sin(2f * Mathf.PI * f * 2.76f * t) * Mathf.Exp(-t * 4f);
+            d[(start + i) % d.Length] += v * amp * Mathf.Min(1f, t * 150f);
+        }
+    }
+
+    // Slow pad on a whole chord, rising and falling over its length, slightly detuned for width
+    private static void Swell(float[] d, int start, int len, float[] chord, float root)
+    {
+        for (int i = 0; i < len; i++)
+        {
+            float t = (float)i / Rate;
+            float env = Mathf.Sin(Mathf.PI * i / len);
+            float v = 0f;
+            foreach (float n in chord)
+            {
+                float f = root * Semis(n);
+                v += Mathf.Sin(2f * Mathf.PI * f * t) + 0.6f * Mathf.Sin(2f * Mathf.PI * f * 1.004f * t);
+            }
+            d[(start + i) % d.Length] += v * env * env * 0.05f;
+        }
     }
 
     private static void Kick(float[] d, int start)

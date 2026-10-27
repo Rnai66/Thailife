@@ -37,10 +37,10 @@ public class SoundUI : MonoBehaviour
         var body = UiKit.PremiumWindow(transform, "SoundCanvas", new Vector2(1200f, 980f), 56, "icon:settings",
             out backdrop, out var title, out var subtitle, Close, out _);
         title.text = "ตั้งค่า";
-        subtitle.text = "เพลงบรรเลง · ความดังเสียง · คุณภาพภาพ";
+        subtitle.text = "เพลงประจำสถานที่ · ความดังเสียง · คุณภาพภาพ";
 
         // Music choice: off + each track
-        UiKit.Label(body, 30, "เพลงบรรเลง", new Vector2(-380f, 270f), new Vector2(320f, 50f), UiKit.Ink, TextAnchor.MiddleLeft).fontStyle = FontStyle.Bold;
+        UiKit.Label(body, 30, "เพลงประจำสถานที่", new Vector2(-380f, 270f), new Vector2(320f, 50f), UiKit.Ink, TextAnchor.MiddleLeft).fontStyle = FontStyle.Bold;
         var names = new List<string> { "ปิดเพลง" };
         for (int t = 0; t < GameAudio.TrackCount; t++) names.Add(GameAudio.TrackName(t));
         float gap = Mathf.Min(270f, 1080f / names.Count);

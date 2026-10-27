@@ -7,30 +7,49 @@ using UnityEngine.SceneManagement;
 // fair that's on, and each place's own sound (AmbientZone). Created automatically, kept across scenes.
 public class GameAudio : MonoBehaviour
 {
-    private const string TrackKey = "audio.track", MusicKey = "audio.music", SfxKey = "audio.sfx";
+    private const string TrackKey = "audio.place_music", MusicKey = "audio.music", SfxKey = "audio.sfx";
 
     private static GameAudio instance;
 
     public static Transform Player => instance != null ? instance.player : null;
 
-    // -1 = no music; 0 = the recorded ลายไทย tune (Resources/Audio/Music); 1… = SynthMusic.Tracks
+    // Each place has its own music: the village plays the recorded ลายไทย tune (Resources/Audio/Music),
+    // the others a loop made in code (SynthMusic). Places[i] = scene, name in the settings, music.
+    private static readonly (string scene, string name, string music)[] Places =
+    {
+        ("ThaiVillage", "หมู่บ้าน", null),
+        ("Tambon", "ตำบล", "bgm_tambon"),
+        ("City", "เมือง", "bgm_city"),
+        ("Beach", "ทะเล", "bgm_sea"),
+        ("Island", "เกาะ", "bgm_island"),
+    };
+
+    // The player's choice: -1 = no music, 0 = each place's own music, 1… = always Places[choice - 1]
     public static int Track
     {
         get => PlayerPrefs.GetInt(TrackKey, 0);
-        set { PlayerPrefs.SetInt(TrackKey, value); PlayerPrefs.Save(); PrepareTrack(value); if (instance != null) instance.wantedTrack = value; }
+        set { PlayerPrefs.SetInt(TrackKey, value); PlayerPrefs.Save(); if (instance != null) instance.Choose(); }
     }
 
-    public static int TrackCount => 1 + SynthMusic.Tracks.Length;
+    public static int TrackCount => 1 + Places.Length;
 
-    public static string TrackName(int track) => track == 0 ? "ลายไทยบรรเลง" : SynthMusic.Tracks[track - 1].Name;
+    public static string TrackName(int track) => track == 0 ? "ตามสถานที่" : Places[track - 1].name;
 
-    // The synth tracks are made on a worker thread: null until ready
-    private static AudioClip TrackClip(int track) =>
-        track == 0 ? Resources.Load<AudioClip>("Audio/Music/ThaiMusic") : SynthSounds.TryGet("bgm" + (track - 1));
+    // The synth loops are made on a worker thread: null until ready
+    private static AudioClip PlaceClip(int place) =>
+        Places[place].music == null ? Resources.Load<AudioClip>("Audio/Music/ThaiMusic") : SynthSounds.TryGet(Places[place].music);
 
-    private static void PrepareTrack(int track)
+    private static void PreparePlace(int place)
     {
-        if (track > 0) SynthSounds.Prepare("bgm" + (track - 1));
+        if (place >= 0 && Places[place].music != null) SynthSounds.Prepare(Places[place].music);
+    }
+
+    // The place music to play now (-1 = none), from the player's choice and the scene they're in
+    private void Choose()
+    {
+        int choice = Mathf.Clamp(Track, -1, TrackCount - 1);
+        wantedTrack = choice < 0 ? -1 : choice == 0 ? scenePlace : choice - 1;
+        PreparePlace(wantedTrack);
     }
 
     public static float MusicVolume
@@ -50,7 +69,7 @@ public class GameAudio : MonoBehaviour
     private CharacterController body;
     private FestivalGate[] gates = new FestivalGate[0];
     private float nextStep, nextScan, music = 0.5f, sfx = 0.8f;
-    private int playingTrack = -2, wantedTrack;
+    private int playingTrack = -2, wantedTrack, scenePlace;
     private bool beach, city;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -119,8 +138,6 @@ public class GameAudio : MonoBehaviour
         crickets.Play();
         waves.Play();
         fairMusic.Play();
-        wantedTrack = Mathf.Min(Track, TrackCount - 1);
-        PrepareTrack(wantedTrack);
         SceneManager.sceneLoaded += OnSceneLoaded;
         OnSceneLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
     }
@@ -132,10 +149,13 @@ public class GameAudio : MonoBehaviour
         player = null;
         body = null;
         nextScan = 0f;
-        beach = scene.name == "Beach";
+        beach = scene.name == "Beach" || scene.name == "Island"; // waves and sand underfoot
         if (beach) SynthSounds.Prepare("concert");
         stageNearest = null;
         city = scene.name == "City";
+        scenePlace = System.Array.FindIndex(Places, p => p.scene == scene.name);
+        if (scenePlace < 0) scenePlace = 0; // title screen and anything else: the village tune
+        Choose();
         AmbientPlaces.Attach(scene);
     }
 
@@ -179,7 +199,7 @@ public class GameAudio : MonoBehaviour
             }
             else
             {
-                var clip = TrackClip(wantedTrack);
+                var clip = PlaceClip(wantedTrack);
                 if (clip != null)
                 {
                     bgm.clip = clip;
@@ -189,8 +209,8 @@ public class GameAudio : MonoBehaviour
                 }
             }
         }
-        // The recording is mastered louder than the synth tracks
-        float level = playingTrack == 0 ? 0.3f : 0.4f;
+        // The recording is mastered louder than the synth loops
+        float level = playingTrack >= 0 && Places[playingTrack].music == null ? 0.3f : 0.4f;
         float target = playingTrack >= 0 ? level * music * (1f - Mathf.Clamp01(fair * 2f)) : 0f;
         bgm.volume = Mathf.MoveTowards(bgm.volume, target, dt * 0.4f);
     }
