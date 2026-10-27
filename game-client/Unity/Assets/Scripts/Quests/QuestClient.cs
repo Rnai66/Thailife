@@ -1,10 +1,10 @@
 using System;
-using System.Threading.Tasks;
 using UnityEngine;
 
-// Daily quests (ภารกิจประจำวัน) from quests.lua. The server counts progress when the player
-// fishes, farms, feeds chickens, plays music, trains...; this client polls it, tells the player
-// when a quest is finished, and claims rewards.
+// Daily quests (ภารกิจประจำวัน) and level quests (ภารกิจตามเลเวล, one chapter at levels 1, 10, 25,
+// 50, 75, 100) from quests.lua. The server counts progress when the player fishes, farms, feeds
+// chickens, plays music, trains...; this client polls it, tells the player when a quest is
+// finished or a chapter opens, and claims rewards.
 [RequireComponent(typeof(NakamaConnection))]
 public class QuestClient : MonoBehaviour
 {
@@ -23,6 +23,28 @@ public class QuestClient : MonoBehaviour
     }
 
     [Serializable]
+    public class Task
+    {
+        public string kind;
+        public string title;
+        public int need;
+        public int have;
+    }
+
+    [Serializable]
+    public class Chapter
+    {
+        public int level;
+        public string title;
+        public string story;
+        public int reward;
+        public Task[] tasks;
+        public bool unlocked;
+        public bool done;
+        public bool claimed;
+    }
+
+    [Serializable]
     public class State
     {
         public int day;
@@ -32,6 +54,8 @@ public class QuestClient : MonoBehaviour
         public bool bonus_claimed;
         public int resets_in_s;
         public int earned;
+        public Chapter[] chapters;
+        public int level;
     }
 
     [Serializable]
@@ -39,6 +63,7 @@ public class QuestClient : MonoBehaviour
     {
         public int quest;
         public bool bonus;
+        public int chapter;
     }
 
     private const float PollInterval = 10f;
@@ -66,7 +91,18 @@ public class QuestClient : MonoBehaviour
         {
             if (Current?.quests == null) return false;
             foreach (var q in Current.quests) if (q.done && !q.claimed) return true;
+            if (LevelRewardReady) return true;
             return Current.all_done && !Current.bonus_claimed;
+        }
+    }
+
+    // A level chapter is finished but its reward not claimed yet
+    public bool LevelRewardReady
+    {
+        get
+        {
+            if (Current?.chapters != null) foreach (var c in Current.chapters) if (c.done && !c.claimed) return true;
+            return false;
         }
     }
 
@@ -109,16 +145,17 @@ public class QuestClient : MonoBehaviour
         _ = RefreshQuietly();
     }
 
-    private async Task RefreshQuietly()
+    private async System.Threading.Tasks.Task RefreshQuietly()
     {
         try { await CallAsync("quests_get"); }
         catch (Exception e) { Debug.LogWarning($"[Quests] {e.Message}"); }
     }
 
-    public Task<State> ClaimAsync(int questId) => CallAsync("quests_claim", JsonUtility.ToJson(new ClaimRequest { quest = questId }));
-    public Task<State> ClaimBonusAsync() => CallAsync("quests_claim", JsonUtility.ToJson(new ClaimRequest { bonus = true }));
+    public System.Threading.Tasks.Task<State> ClaimAsync(int questId) => CallAsync("quests_claim", JsonUtility.ToJson(new ClaimRequest { quest = questId }));
+    public System.Threading.Tasks.Task<State> ClaimChapterAsync(int level) => CallAsync("quests_claim", JsonUtility.ToJson(new ClaimRequest { chapter = level }));
+    public System.Threading.Tasks.Task<State> ClaimBonusAsync() => CallAsync("quests_claim", JsonUtility.ToJson(new ClaimRequest { bonus = true }));
 
-    private async Task<State> CallAsync(string rpc, string payload = "{}")
+    private async System.Threading.Tasks.Task<State> CallAsync(string rpc, string payload = "{}")
     {
         var result = await connection.Client.RpcAsync(connection.Session, rpc, payload);
         var state = JsonUtility.FromJson<State>(result.Payload);
@@ -130,9 +167,19 @@ public class QuestClient : MonoBehaviour
         return state;
     }
 
-    // Pop a message over the player when a quest gets finished
+    // Pop a message over the player when a quest gets finished or a level chapter opens
     private static void Announce(State before, State after)
     {
+        if (before?.chapters != null && after?.chapters != null)
+            foreach (var c in after.chapters)
+                foreach (var old in before.chapters)
+                    if (old.level == c.level)
+                    {
+                        if (c.unlocked && !old.unlocked)
+                            UiKit.FloatAbovePlayer($"ภารกิจเลเวล {c.level} เปิดแล้ว! {c.title}", new Color(1f, 0.85f, 0.3f));
+                        else if (c.done && !old.done)
+                            UiKit.FloatAbovePlayer($"ภารกิจเลเวล {c.level} สำเร็จ! ไปรับรางวัลได้เลย", new Color(1f, 0.85f, 0.3f));
+                    }
         if (before?.quests == null || after?.quests == null || before.day != after.day) return;
         foreach (var q in after.quests)
         {

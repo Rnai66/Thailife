@@ -1,4 +1,5 @@
--- Daily quests (ภารกิจประจำวัน), shared rules (no RPCs here; quests.lua has them).
+-- Daily quests (ภารกิจประจำวัน) and level quests (ภารกิจตามเลเวล), shared rules (no RPCs here;
+-- quests.lua has them).
 -- Every game day (24 real minutes) each player gets 3 quests picked from the jobs they can
 -- actually do. Other modules report what happened with quest.progress(user_id, kind, amount);
 -- progress only counts for today's quests, and rewards are claimed through quests_claim.
@@ -28,6 +29,84 @@ M.POOL = {
   study        = { title = "เข้าเรียนที่โรงเรียน 1 คาบ",       need = 1,  reward = 30, hint = "โรงเรียนในตำบล" },
 }
 M.ORDER = { "fish", "sell_produce", "plant", "harvest", "feed", "sell_eggs", "music", "train", "eat", "shop", "study" }
+
+-- ── Level quests (ภารกิจตามเลเวล) ───────────────────────────────────────────────────────────
+-- One chapter per milestone level (career level, 1..100). A chapter opens when the player reaches its
+-- level; from then on the same actions that count for daily quests count toward its tasks. Finish
+-- every task to claim the chapter's big reward, once per player.
+M.LEVEL_STATE = { collection = "quests", key = "levels" }
+
+-- What each kind of task says, with %d for how many
+M.TASK_TEXT = {
+  fish = "ตกปลา %d ตัว", sell_produce = "ขายปลาหรือข้าว %d ครั้ง", plant = "ปลูกข้าว %d แปลง",
+  harvest = "เกี่ยวข้าว %d แปลง", feed = "ให้อาหารไก่ %d ครั้ง", sell_eggs = "ขายไข่ไก่ %d ฟอง",
+  music = "เล่นดนตรี %d เพลง", train = "ซ้อมมวย ชก %d ครั้ง", eat = "กินอาหาร %d มื้อ",
+  shop = "ซื้อของที่ร้าน %d ครั้ง", study = "เข้าเรียน %d คาบ",
+}
+
+M.CHAPTERS = {
+  { level = 1,   title = "ก้าวแรกในหมู่บ้าน", story = "เริ่มชีวิตใหม่ ทำความรู้จักหมู่บ้าน", reward = 150,
+    tasks = { { "eat", 1 }, { "shop", 1 }, { "fish", 3 }, { "train", 30 } } },
+  { level = 10,  title = "ลูกชาวนาขยัน", story = "ลงนา ปลูกข้าว เข้าโรงเรียน", reward = 600,
+    tasks = { { "plant", 3 }, { "harvest", 3 }, { "sell_produce", 3 }, { "study", 3 } } },
+  { level = 25,  title = "หัวหน้าครอบครัว", story = "เลี้ยงไก่ หาปลา หาเงินเข้าบ้าน", reward = 1500,
+    tasks = { { "fish", 30 }, { "feed", 10 }, { "sell_eggs", 30 }, { "music", 5 } } },
+  { level = 50,  title = "ปราชญ์ชาวบ้าน", story = "เก่งทั้งวิชา งานนา และดนตรี", reward = 4000,
+    tasks = { { "study", 20 }, { "harvest", 15 }, { "music", 15 }, { "train", 1000 } } },
+  { level = 75,  title = "เศรษฐีประจำตำบล", story = "ค้าขายจนเป็นที่รู้จักทั้งตำบล", reward = 8000,
+    tasks = { { "fish", 100 }, { "sell_produce", 30 }, { "shop", 30 }, { "sell_eggs", 100 } } },
+  { level = 100, title = "ตำนานแห่งตำบล", story = "สุดยอดคนเก่งที่ทุกคนเล่าขาน", reward = 20000,
+    tasks = { { "train", 5000 }, { "study", 50 }, { "harvest", 50 }, { "music", 50 } } },
+}
+
+function M.player_level(user_id)
+  local objects = nk.storage_read({ { collection = "career", key = "stats", user_id = user_id } })
+  return ((#objects > 0) and objects[1].value.level) or 1
+end
+
+-- { ["10"] = { have = { plant = 2, ... }, claimed = false }, ... } keyed by chapter level
+function M.read_levels(user_id)
+  local objects = nk.storage_read({ { collection = M.LEVEL_STATE.collection, key = M.LEVEL_STATE.key, user_id = user_id } })
+  return (#objects > 0) and objects[1].value or {}
+end
+
+function M.write_levels(user_id, s)
+  nk.storage_write({ {
+    collection = M.LEVEL_STATE.collection, key = M.LEVEL_STATE.key, user_id = user_id, value = s,
+    permission_read = 1, permission_write = 0,
+  } })
+end
+
+function M.chapter_done(c, entry)
+  for _, t in ipairs(c.tasks) do
+    if ((entry and entry.have and entry.have[t[1]]) or 0) < t[2] then return false end
+  end
+  return true
+end
+
+-- Count an action toward every open, unclaimed chapter that has a task of that kind
+local function level_progress(user_id, kind, amount)
+  local level = M.player_level(user_id)
+  local s = M.read_levels(user_id)
+  local changed = false
+  for _, c in ipairs(M.CHAPTERS) do
+    if level >= c.level then
+      local key = tostring(c.level)
+      local entry = s[key] or { have = {}, claimed = false }
+      if not entry.claimed then
+        for _, t in ipairs(c.tasks) do
+          local have = entry.have[t[1]] or 0
+          if t[1] == kind and have < t[2] then
+            entry.have[t[1]] = math.min(t[2], have + amount)
+            s[key] = entry
+            changed = true
+          end
+        end
+      end
+    end
+  end
+  if changed then M.write_levels(user_id, s) end
+end
 
 local function has_chickens(user_id)
   return #chickens.read(user_id).chickens > 0
@@ -89,6 +168,7 @@ function M.progress(user_id, kind, amount)
       end
     end
     if changed then M.write(user_id, s) end
+    level_progress(user_id, kind, amount)
   end)
   if not ok then nk.logger_warn("quest progress failed: " .. tostring(err)) end
 end
