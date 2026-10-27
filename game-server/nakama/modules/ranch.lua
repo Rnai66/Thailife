@@ -13,6 +13,7 @@
 local nk = require("nakama")
 local data = require("shop_data")
 local life = require("life_core")
+local trade = require("trade_core")
 
 local HERD = { collection = "ranch", key = "herd" }
 local CURRENCY = data.CURRENCY
@@ -131,6 +132,7 @@ rpc("ranch_buy", function(user_id, h)
   if wallet(user_id) < COW_PRICE then err("not enough baht") end
   pay(user_id, -COW_PRICE, "buy_cow")
   table.insert(h.cows, { g = 0 })
+  trade.gain(user_id, "cattle", 30)
   return "ซื้อวัว 1 ตัว " .. COW_PRICE .. " บาท"
 end)
 
@@ -142,6 +144,7 @@ rpc("ranch_feed", function(user_id, h, req)
   if wallet(user_id) < cost then err("not enough baht") end
   pay(user_id, -cost, "cow_feed")
   h.feed = h.feed + packs * FEED_PACK
+  trade.gain(user_id, "cattle", 4 * packs)
   return "ซื้ออาหารวัว " .. (packs * FEED_PACK) .. " ถุง " .. cost .. " บาท"
 end)
 
@@ -152,6 +155,7 @@ rpc("ranch_milk", function(user_id, h)
   local bottles = h.milk
   pay(user_id, earned, "sell_milk")
   h.milk = 0
+  trade.gain_many(user_id, { cattle = 8 * bottles, merchant = bottles }, true)
   return "รีดนม " .. bottles .. " ขวด ขายให้สหกรณ์ได้ " .. earned .. " บาท"
 end)
 
@@ -163,5 +167,6 @@ rpc("ranch_sell", function(user_id, h)
   if not best_i or best < GROWN_DAYS then err("not grown") end
   table.remove(h.cows, best_i)
   pay(user_id, GROWN_PRICE, "sell_cow")
+  trade.gain_many(user_id, { cattle = 80, merchant = 20 }, true)
   return "ขายวัวโตเต็มที่ 1 ตัว ได้ " .. GROWN_PRICE .. " บาท"
 end)

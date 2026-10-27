@@ -7,6 +7,7 @@
 local nk = require("nakama")
 local life = require("life_core")
 local chickens = require("chicken_core")
+local trade = require("trade_core")
 
 local M = {}
 
@@ -171,6 +172,7 @@ function M.progress(user_id, kind, amount)
     level_progress(user_id, kind, amount)
   end)
   if not ok then nk.logger_warn("quest progress failed: " .. tostring(err)) end
+  trade.from_kind(user_id, kind, amount) -- profession XP for the same action
 end
 
 return M

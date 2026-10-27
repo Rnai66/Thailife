@@ -125,9 +125,10 @@ public class HealthHud : MonoBehaviour
         }
 
         bool maxed = stats.xp_to_next <= 0;
+        string title = CareerClient.TitleOf(stats);
         careerLabel.text = maxed
-            ? $"Lv {stats.level} {CareerClient.RankFor(stats.level)} · MAX"
-            : $"Lv {stats.level} {CareerClient.RankFor(stats.level)} · XP {stats.xp}/{stats.xp_to_next}";
+            ? $"Lv {stats.level} {title} · MAX  (แตะดูอาชีพ)"
+            : $"Lv {stats.level} {title} · XP {stats.xp}/{stats.xp_to_next}  (แตะดูอาชีพ)";
         xpFill.anchorMax = new Vector2(maxed ? 1f : (float)stats.xp / stats.xp_to_next, 1f);
     }
 
@@ -192,8 +193,14 @@ public class HealthHud : MonoBehaviour
         careerRect.anchorMin = careerRect.anchorMax = new Vector2(0f, 1f);
         careerRect.pivot = new Vector2(0f, 1f);
         careerRect.anchoredPosition = new Vector2(120f, -120f);
-        careerRect.sizeDelta = new Vector2(900f, 44f);
+        careerRect.sizeDelta = new Vector2(620f, 44f); // clear of the right column when the phone is upright
+        careerLabel.resizeTextForBestFit = true;
+        careerLabel.resizeTextMinSize = 18;
+        careerLabel.resizeTextMaxSize = 30;
         careerLabel.gameObject.AddComponent<Shadow>();
+        // Tap the level line to see every profession (อาชีพ) and pick the title to show
+        careerLabel.raycastTarget = true;
+        careerLabel.gameObject.AddComponent<Button>().onClick.AddListener(ProfessionUI.Toggle);
 
         fishLabel = CreateText("Fish", canvasGo.transform, font, 26, TextAnchor.MiddleLeft);
         var fishRect = fishLabel.rectTransform;

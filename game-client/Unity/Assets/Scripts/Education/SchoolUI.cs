@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 
-// Classroom window (ห้องเรียน) at the tambon school: four subjects (คอมพิวเตอร์ กีฬา ช่าง ตรรกะ), each
+// Classroom window (ห้องเรียน) at the tambon school: five subjects (คอมพิวเตอร์ กีฬา ช่าง ตรรกะ สุขภาพ), each
 // with its level and XP bar, the fee and energy, and a "เข้าเรียน" button. A class lasts 30 s (the server
 // times it); the progress bar fills, then the class ends by itself and the XP is shown. Underneath, the
 // skilled jobs each subject opens up, ticked when you qualify.
@@ -23,14 +23,15 @@ public class SchoolUI : MonoBehaviour
     private GameObject backdrop;
     private Text title, subtitle, toast, classText, jobsText;
     private RectTransform progressFill, progressBar;
-    private readonly Card[] cards = new Card[4];
+    private readonly Card[] cards = new Card[5];
     private Education.State state;
     private Coroutine toastRun;
     private float classEndsAt;
     private bool busy, finishing, library;
     private float classLength = 30f;
 
-    private static readonly string[] SubjectIds = { "computer", "sports", "craft", "logic" };
+    private static readonly string[] SubjectIds = { "computer", "sports", "craft", "logic", "health" };
+    private const float CardWidth = 276f, CardStep = 288f;
 
     public static void Show(bool library = false)
     {
@@ -54,7 +55,7 @@ public class SchoolUI : MonoBehaviour
         subtitle.text = "เรียนเพื่อเพิ่มเลเวล และเปิดอาชีพใหม่";
 
         for (int i = 0; i < cards.Length; i++)
-            cards[i] = BuildCard(body, SubjectIds[i], new Vector2(-540f + i * 360f, 95f));
+            cards[i] = BuildCard(body, SubjectIds[i], new Vector2((i - (cards.Length - 1) * 0.5f) * CardStep, 95f));
 
         // Class in progress
         progressBar = UiKit.Panel("Progress", body, new Color(0.9f, 0.86f, 0.78f), new Vector2(0f, -178f), new Vector2(1100f, 34f));
@@ -80,22 +81,23 @@ public class SchoolUI : MonoBehaviour
     private Card BuildCard(RectTransform body, string id, Vector2 at)
     {
         var c = new Card();
-        var card = UiKit.Panel("Subject", body, Color.white, at, new Vector2(340f, 430f), shadow: true);
+        float w = CardWidth;
+        var card = UiKit.Panel("Subject", body, Color.white, at, new Vector2(w, 430f), shadow: true);
         card.gameObject.AddComponent<Outline>().effectColor = UiKit.CardBorder;
-        UiKit.IconTile(card, "subj_" + id, new Vector2(0f, 128f), new Vector2(140f, 140f));
-        c.name = UiKit.Label(card, 34, "", new Vector2(0f, 30f), new Vector2(320f, 46f), UiKit.Ink);
+        UiKit.IconTile(card, id == "health" ? "hospital" : "subj_" + id, new Vector2(0f, 128f), new Vector2(140f, 140f));
+        c.name = UiKit.Label(card, 34, "", new Vector2(0f, 30f), new Vector2(w - 20f, 46f), UiKit.Ink);
         c.name.font = ThaiFont.Display;
         c.level = UiKit.PillLabel(card, "", new Vector2(0f, -14f), new Vector2(150f, 36f), UiKit.Pill, UiKit.Price, 22);
-        var bar = UiKit.Panel("XpBar", card, new Color(0.9f, 0.86f, 0.78f), new Vector2(0f, -48f), new Vector2(280f, 14f));
+        var bar = UiKit.Panel("XpBar", card, new Color(0.9f, 0.86f, 0.78f), new Vector2(0f, -48f), new Vector2(w - 60f, 14f));
         c.xpFill = UiKit.Rect("Fill", bar, UiKit.Gold);
         c.xpFill.anchorMin = new Vector2(0f, 0f);
         c.xpFill.anchorMax = new Vector2(0f, 1f);
         c.xpFill.pivot = new Vector2(0f, 0.5f);
         c.xpFill.offsetMin = c.xpFill.offsetMax = Vector2.zero;
-        c.desc = UiKit.Label(card, 19, "", new Vector2(0f, -84f), new Vector2(310f, 50f), UiKit.Muted);
-        c.cost = UiKit.Label(card, 19, "", new Vector2(0f, -124f), new Vector2(320f, 46f), UiKit.Ink);
+        c.desc = UiKit.Label(card, 19, "", new Vector2(0f, -84f), new Vector2(w - 24f, 50f), UiKit.Muted);
+        c.cost = UiKit.Label(card, 19, "", new Vector2(0f, -124f), new Vector2(w - 14f, 46f), UiKit.Ink);
         string subject = id;
-        c.button = UiKit.RoundButton(card, "เข้าเรียน", new Vector2(0f, -180f), new Vector2(290f, 64f), UiKit.Gold, UiKit.GoldInk, () => StartClass(subject), 26);
+        c.button = UiKit.RoundButton(card, "เข้าเรียน", new Vector2(0f, -180f), new Vector2(w - 40f, 64f), UiKit.Gold, UiKit.GoldInk, () => StartClass(subject), 26);
         c.buttonText = c.button.GetComponentInChildren<Text>();
         return c;
     }

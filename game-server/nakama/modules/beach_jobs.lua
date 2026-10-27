@@ -47,6 +47,7 @@ nk.register_rpc(function(context, payload)
   if elapsed > TOUR_MAX_MS then err("trip expired") end
   local tip = math.random(0, MAX_TIP)
   nk.wallet_update(user_id, { [data.CURRENCY] = FARE + tip }, { reason = "boat_tour" }, true)
+  require("trade_core").gain(user_id, "guide", 35)
   return nk.json_encode({ fare = FARE, tip = tip, earned = FARE + tip,
                           done = "พานักท่องเที่ยวเที่ยวทะเลเสร็จ ได้ค่าเรือ " .. FARE .. " + ทิป " .. tip .. " บาท" })
 end, "tour_finish")

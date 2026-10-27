@@ -598,6 +598,48 @@ public static class Places
         PrimitiveKit.Box("PondRim", t, new Vector3(11f, 0.01f, -3f), new Vector3(9f, 0.02f, 11f), earth, collider: false);
         PrimitiveKit.Box("Pond", t, new Vector3(11f, 0.025f, -3f), new Vector3(8f, 0.02f, 10f), water, collider: false);
 
+        // เลี้ยงปลาในกระชัง: three floating net cages off a little jetty on the west bank; the fish in a
+        // cage show while it's stocked (FishPond toggles them)
+        var bamboo = PrimitiveKit.Mat("Bamboo", new Color(0.72f, 0.66f, 0.38f));
+        var net = PrimitiveKit.Mat("CageNet", new Color(0.2f, 0.3f, 0.28f));
+        var fishSkin = PrimitiveKit.Mat("FishSkin", new Color(0.55f, 0.6f, 0.62f));
+        PrimitiveKit.Box("Jetty", t, new Vector3(7.6f, 0.12f, -3f), new Vector3(2.4f, 0.08f, 1.4f), wood, collider: false);
+        foreach (float z in new[] { -3.6f, -2.4f })
+            PrimitiveKit.Cylinder("JettyPost", t, new Vector3(8.6f, 0.05f, z), new Vector3(0.12f, 0.12f, 0.12f), wood, collider: false);
+        var cageFish = new GameObject[3];
+        float[] cageZ = { -6.2f, -3f, 0.2f };
+        for (int i = 0; i < 3; i++)
+        {
+            var cage = PrimitiveKit.Group($"FishCage_{i + 1}", t, new Vector3(10.6f, 0f, cageZ[i]));
+            var ct = cage.transform;
+            PrimitiveKit.Box("Net", ct, new Vector3(0f, 0.035f, 0f), new Vector3(2.2f, 0.01f, 2.2f), net, collider: false);
+            foreach (float s in new[] { -1.1f, 1.1f })
+            {
+                PrimitiveKit.Cylinder("FloatX", ct, new Vector3(0f, 0.09f, s), new Vector3(0.14f, 1.15f, 0.14f), bamboo, new Vector3(0f, 0f, 90f), collider: false);
+                PrimitiveKit.Cylinder("FloatZ", ct, new Vector3(s, 0.09f, 0f), new Vector3(0.14f, 1.15f, 0.14f), bamboo, new Vector3(90f, 0f, 0f), collider: false);
+                foreach (float u in new[] { -1.1f, 1.1f })
+                    PrimitiveKit.Cylinder("Pole", ct, new Vector3(s, 0.35f, u), new Vector3(0.06f, 0.35f, 0.06f), bamboo, collider: false);
+            }
+            PrimitiveKit.Label($"กระชัง {i + 1}", ct, new Vector3(0f, 0.9f, 0f), 0.05f, Color.white, 90f);
+            var fishGroup = PrimitiveKit.Group("Fish", ct, Vector3.zero);
+            for (int f = 0; f < 5; f++)
+            {
+                float a = f * 72f + i * 20f;
+                var p = Quaternion.Euler(0f, a, 0f) * new Vector3(0.55f + 0.1f * (f % 2), 0.06f, 0f);
+                PrimitiveKit.Box("Fish", fishGroup.transform, p, new Vector3(0.12f, 0.06f, 0.36f), fishSkin, new Vector3(0f, a, 0f), collider: false);
+            }
+            fishGroup.SetActive(false);
+            cageFish[i] = fishGroup;
+        }
+        var bank = new GameObject("FishPondZone");
+        bank.transform.SetParent(t, false);
+        bank.transform.localPosition = new Vector3(6.6f, 1f, -3f);
+        var bankZone = bank.AddComponent<BoxCollider>();
+        bankZone.isTrigger = true;
+        bankZone.size = new Vector3(2.6f, 2f, 9f);
+        bank.AddComponent<FishPond>().Configure(cageFish);
+        Sign(t, new Vector3(5.4f, 0f, 2.6f), "เลี้ยงปลาในกระชัง\nเดินไปท่าน้ำริมสระ", 180f);
+
         // โคก: terraced mound with fruit trees
         PrimitiveKit.Box("Mound1", t, new Vector3(11f, 0.15f, 8f), new Vector3(10f, 0.3f, 7f), earth);
         PrimitiveKit.Box("Mound2", t, new Vector3(11f, 0.45f, 8.5f), new Vector3(7f, 0.3f, 5f), earth);
@@ -636,7 +678,7 @@ public static class Places
         restZone.size = new Vector3(3f, 2f, 1.6f);
         rest.AddComponent<SleepSpot>().Configure("เถียงนาโคกหนองนา", "พักผ่อน", bed.transform);
 
-        Sign(t, new Vector3(2f, 0f, 14f), "โคก หนอง นา\nเดินเข้าแปลงเพื่อทำนา", 180f);
+        Sign(t, new Vector3(2f, 0f, 14f), "โคก หนอง นา\nทำนา · เลี้ยงปลาในกระชัง", 180f);
         return farm;
     }
 

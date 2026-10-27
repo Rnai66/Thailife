@@ -10,6 +10,7 @@ local nk = require("nakama")
 local data = require("shop_data")
 local quest = require("quest_core")
 local life = require("life_core")
+local trade = require("trade_core")
 
 local COLLECTION = "career"
 local KEY = "stats"
@@ -53,7 +54,7 @@ local function write_stats(user_id, stats)
   } })
 end
 
-local function view(stats, accepted, energy)
+local function view(stats, accepted, energy, user_id)
   local result = {
     level = stats.level,
     xp = stats.xp,
@@ -66,11 +67,16 @@ local function view(stats, accepted, energy)
     result.max_energy = life.MAX_ENERGY
     result.tired = energy.tired
   end
+  -- The title by the player's name: their picked or best profession's rank (trade_core)
+  if user_id then
+    result.title, result.trade, result.trade_level = trade.title(user_id)
+    result.trade_name = trade.TRADES[result.trade].name
+  end
   return nk.json_encode(result)
 end
 
 local function rpc_get(context, payload)
-  return view(read_stats(context.user_id))
+  return view(read_stats(context.user_id), nil, nil, context.user_id)
 end
 
 local function rpc_train(context, payload)
@@ -126,7 +132,7 @@ local function rpc_train(context, payload)
 
   write_stats(context.user_id, stats)
   quest.progress(context.user_id, "train", accepted)
-  return view(stats, accepted, { energy = body.energy, tired = tired })
+  return view(stats, accepted, { energy = body.energy, tired = tired }, context.user_id)
 end
 
 nk.register_rpc(rpc_get, "career_get")

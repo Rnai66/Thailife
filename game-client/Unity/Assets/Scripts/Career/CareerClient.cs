@@ -19,7 +19,14 @@ public class CareerClient : MonoBehaviour
         public int energy;      // พลังงาน left after this training report (0 max_energy = not sent)
         public int max_energy;
         public bool tired;      // some hits didn't count: out of energy
+        // The title shown by the name: the picked (or best) profession's rank (trade_core.lua)
+        public string title;
+        public string trade;
+        public string trade_name;
+        public int trade_level;
     }
+
+    public static string TitleOf(Stats s) => s == null ? "" : !string.IsNullOrEmpty(s.title) ? s.title : RankFor(s.level);
 
     // Energy per hit by training target (same numbers as career.lua; the server's are the real ones)
     public static float EnergyPerHit(string target) => target == "camp" ? 0.5f : target == "bag" ? 0.4f : 0.3f;
@@ -44,8 +51,9 @@ public class CareerClient : MonoBehaviour
 
     private NakamaConnection connection;
     private readonly Dictionary<string, int> pendingHits = new Dictionary<string, int>();
-    private float nextFlushTime;
+    private float nextFlushTime, nextReload;
     private bool flushing;
+    private const float ReloadInterval = 30f;
 
     public static string RankFor(int level) =>
         level >= 100 ? "ตำนานมวยไทย" :
@@ -104,6 +112,12 @@ public class CareerClient : MonoBehaviour
 
     private void Update()
     {
+        // Professions rise from fishing, farming, jobs...: re-read the title now and then
+        if (connection.IsConnected && Time.time >= nextReload)
+        {
+            nextReload = Time.time + ReloadInterval;
+            if (Current != null) Reload();
+        }
         if (flushing || pendingHits.Count == 0 || !connection.IsConnected || Time.time < nextFlushTime) return;
         nextFlushTime = Time.time + flushInterval;
         Flush();
@@ -159,9 +173,13 @@ public class CareerClient : MonoBehaviour
             if (previous != null && combat != null)
             {
                 FloatingText.Spawn(combat.transform.position + Vector3.up * 2f, $"LEVEL UP! Lv {stats.level}", new Color(1f, 0.85f, 0.2f));
-                Debug.Log($"[Career] Level up → {stats.level} ({RankFor(stats.level)})");
+                Debug.Log($"[Career] Level up → {stats.level} ({TitleOf(stats)})");
             }
         }
+
+        if (previous != null && combat != null && !string.IsNullOrEmpty(stats.title) && !string.IsNullOrEmpty(previous.title)
+            && previous.title != stats.title && previous.trade == stats.trade)
+            FloatingText.Spawn(combat.transform.position + Vector3.up * 2.4f, $"ฉายาใหม่! {stats.title}", new Color(1f, 0.7f, 0.3f));
 
         StatsChanged?.Invoke(previous, stats);
     }

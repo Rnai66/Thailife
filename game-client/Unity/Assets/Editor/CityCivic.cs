@@ -117,6 +117,8 @@ public static class CityCivic
         box.size = new Vector3(4.2f, 2f, 2.4f);
         zone.AddComponent<HealSpot>().Configure("hospital", "โรงพยาบาล", 200);
         StreetFurniture.LampPost(b, new Vector3(-3.2f, 0f, -8.5f));
+        // Doctor's shifts (หมออนามัย, education.lua): beside the entrance, clear of the treatment desk
+        Schooling.JobSpot(b, new Vector3(-6.4f, 0f, -8.2f), 0f, "doctor", "หมออนามัย\nค่าจ้าง 800 ฿ · เลเวล 20 · สุขภาพ Lv 8 · ตรรกะ Lv 4");
     }
 
     private static void Hotel(Transform root, Vector3 p, float yaw)
