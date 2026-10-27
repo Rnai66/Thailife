@@ -48,7 +48,7 @@ public class DartsUI : MonoBehaviour
 
     private void Awake()
     {
-        body = UiKit.PremiumWindow(transform, "DartsCanvas", new Vector2(1540f, 900f), 58, "icon:fair",
+        body = UiKit.PremiumWindow(transform, "DartsCanvas", UiKit.WindowSize(new Vector2(1540f, 900f), 1460f), 58, "icon:fair",
             out backdrop, out title, out subtitle, Close, out _);
         subtitle.text = "ปาลูกดอกให้ลูกโป่งแตก แตกมากได้รางวัลใหญ่";
 
@@ -97,6 +97,12 @@ public class DartsUI : MonoBehaviour
         buyButton = UiKit.RoundButton(side, "", new Vector2(0f, -260f), new Vector2(300f, 76f), UiKit.Gold, UiKit.GoldInk, Buy, 24);
 
         toast = UiKit.ToastBar(body, new Vector2(0f, -320f), 900f);
+        if (UiKit.Portrait) // upright: the balloon board on top, darts and prizes underneath
+        {
+            UiKit.Stack(board, new Vector2(0f, 421f), 0.66f);
+            UiKit.Stack(side, new Vector2(0f, -210f), 1.25f);
+            UiKit.Stack((RectTransform)toast.transform.parent, new Vector2(0f, 200f));
+        }
         backdrop.SetActive(false);
     }
 

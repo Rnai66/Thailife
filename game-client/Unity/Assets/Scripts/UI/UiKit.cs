@@ -185,6 +185,22 @@ public static class UiKit
             Label(badge, 40, logo, Vector2.zero, badge.sizeDelta - new Vector2(6f, 6f), GoldInk).fontStyle = FontStyle.Bold;
     }
 
+    // Phone held upright: windows are built narrow and tall (PortraitWidth wide, body 40 less) and
+    // ScreenFit scales them up to fill the screen width, so everything reads larger.
+    public static bool Portrait => ScreenFit.Portrait;
+    public const float PortraitWidth = 760f;
+
+    // Upright re-layout of a window built for landscape: move a pane (and shrink it to fit the width)
+    public static void Stack(RectTransform pane, Vector2 position, float scale = 1f)
+    {
+        pane.anchoredPosition = position;
+        pane.localScale = new Vector3(scale, scale, 1f);
+    }
+
+    // A window size: the landscape one, or PortraitWidth by the given height when upright
+    public static Vector2 WindowSize(Vector2 landscape, float portraitHeight) =>
+        Portrait ? new Vector2(PortraitWidth, portraitHeight) : landscape;
+
     public static RectTransform PremiumWindow(Transform owner, string name, Vector2 size, int sortingOrder,
         string logo, out GameObject backdrop, out Text title, out Text subtitle, UnityAction onClose, out RectTransform header)
     {
@@ -204,8 +220,10 @@ public static class UiKit
         float left = -size.x * 0.5f;
         var badge = Panel("Logo", header, Gold, new Vector2(left + 70f, 0f), new Vector2(76f, 76f));
         Badge(badge, logo);
-        title = Cartoon(Label(header, 40, "", new Vector2(left + 360f, 14f), new Vector2(520f, 54f), WoodInk, TextAnchor.MiddleLeft), 3f);
-        subtitle = Label(header, 24, "", new Vector2(left + 360f, -26f), new Vector2(520f, 34f), new Color32(0xFF, 0xE2, 0xA8, 0xFF), TextAnchor.MiddleLeft);
+        float titleWidth = Mathf.Min(Portrait ? 900f : 520f, size.x - 250f); // between the badge and the close button
+        float titleX = left + 120f + titleWidth * 0.5f;
+        title = Cartoon(Label(header, 40, "", new Vector2(titleX, 14f), new Vector2(titleWidth, 54f), WoodInk, TextAnchor.MiddleLeft), 3f);
+        subtitle = Label(header, 24, "", new Vector2(titleX, -26f), new Vector2(titleWidth, 34f), new Color32(0xFF, 0xE2, 0xA8, 0xFF), TextAnchor.MiddleLeft);
         subtitle.gameObject.AddComponent<Outline>().effectColor = WoodEdge;
         if (onClose != null)
             RoundButton(header, "X", new Vector2(-left - 60f, 0f), new Vector2(70f, 70f), new Color32(0x5A, 0x3A, 0x26, 0xFF), HeaderText, onClose, 32, circle: true);
@@ -224,6 +242,7 @@ public static class UiKit
     // Pop-in message bar used by every window (create once, call Toast to show)
     public static Text ToastBar(Transform parent, Vector2 position, float width)
     {
+        if (Portrait) width = Mathf.Min(width, PortraitWidth - 80f);
         var bar = Panel("Toast", parent, PayGreen, position, new Vector2(width, 70f), shadow: true);
         var text = Label(bar, 28, "", Vector2.zero, new Vector2(width - 20f, 64f), Color.white);
         text.fontStyle = FontStyle.Bold;

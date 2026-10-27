@@ -65,15 +65,15 @@ public class BoxingUI : MonoBehaviour
 
     private void Awake()
     {
-        var body = UiKit.PremiumWindow(transform, "BoxingCanvas", new Vector2(1400f, 900f), 55, "icon:boxing",
+        var body = UiKit.PremiumWindow(transform, "BoxingCanvas", UiKit.WindowSize(new Vector2(1400f, 900f), 1450f), 55, "icon:boxing",
             out backdrop, out titleText, out subtitleText, Close, out _);
-        list = UiKit.Container(body, new Vector2(0f, 255f));
-        toastText = UiKit.ToastBar(body, new Vector2(0f, -340f), 760f);
+        list = UiKit.Container(body, new Vector2(0f, UiKit.Portrait ? 520f : 255f));
+        toastText = UiKit.ToastBar(body, new Vector2(0f, UiKit.Portrait ? -560f : -340f), 760f);
         backdrop.SetActive(false);
 
-        var rbody = UiKit.PremiumWindow(transform, "FightResult", new Vector2(1000f, 640f), 60, "ผ",
+        var rbody = UiKit.PremiumWindow(transform, "FightResult", UiKit.WindowSize(new Vector2(1000f, 640f), 700f), 60, "ผ",
             out resultBackdrop, out resultTitle, out resultSub, () => resultBackdrop.SetActive(false), out _);
-        resultBody = UiKit.Label(rbody, 40, "", new Vector2(0f, 40f), new Vector2(900f, 300f), UiKit.Ink);
+        resultBody = UiKit.Label(rbody, 40, "", new Vector2(0f, 40f), new Vector2(UiKit.Portrait ? 680f : 900f, 300f), UiKit.Ink);
         resultBody.fontStyle = FontStyle.Bold;
         UiKit.RoundButton(rbody, "ตกลง", new Vector2(0f, -170f), new Vector2(300f, 90f), UiKit.Gold, UiKit.GoldInk,
             () => resultBackdrop.SetActive(false), 34);
@@ -117,24 +117,27 @@ public class BoxingUI : MonoBehaviour
 
     private void AddCard(BoxingClient.Event e, int index)
     {
-        var card = UiKit.Panel("Event", list, Color.white, new Vector2(0f, -index * 175f), new Vector2(1300f, 160f), shadow: true);
+        // Upright: a narrower, taller card with the button under the details on the right
+        bool P = UiKit.Portrait;
+        var card = UiKit.Panel("Event", list, Color.white, new Vector2(0f, -index * (P ? 245f : 175f)), P ? new Vector2(690f, 230f) : new Vector2(1300f, 160f), shadow: true);
+        float tx = P ? -10f : -260f, tw = P ? 650f : 700f;
         card.gameObject.AddComponent<Outline>().effectColor = e.open && e.unlocked && !e.fought ? UiKit.Gold : UiKit.CardBorder;
 
-        UiKit.Label(card, 32, e.name, new Vector2(-260f, 45f), new Vector2(700f, 46f), UiKit.Ink, TextAnchor.MiddleLeft).fontStyle = FontStyle.Bold;
+        UiKit.Label(card, 32, e.name, new Vector2(tx, P ? 80f : 45f), new Vector2(tw, 46f), UiKit.Ink, TextAnchor.MiddleLeft).fontStyle = FontStyle.Bold;
         string need = $"ต้อง Lv {e.level}+" + (e.member ? " · สมาชิกค่าย" : "") + $" · พลังงาน {e.energy}";
-        UiKit.Label(card, 22, need, new Vector2(-260f, 5f), new Vector2(700f, 32f), UiKit.Muted, TextAnchor.MiddleLeft);
-        UiKit.Label(card, 22, e.when, new Vector2(-260f, -30f), new Vector2(700f, 32f), UiKit.Muted, TextAnchor.MiddleLeft);
+        UiKit.Label(card, 22, need, new Vector2(tx, P ? 42f : 5f), new Vector2(tw, 32f), UiKit.Muted, TextAnchor.MiddleLeft);
+        UiKit.Label(card, 22, e.when, new Vector2(tx, P ? 8f : -30f), new Vector2(tw, 32f), UiKit.Muted, TextAnchor.MiddleLeft);
         string reward = e.pads ? "XP ตามจำนวนครั้งที่เป๊ะ" : e.purse_win > 0 ? $"ชนะ {e.purse_win:N0}฿ · แพ้ {e.purse_lose:N0}฿ · XP {e.xp_win}" : $"XP {e.xp_win}";
-        UiKit.PillLabel(card, reward, new Vector2(-260f, -63f), new Vector2(700f, 32f), UiKit.Pill, UiKit.Price, 20);
+        UiKit.PillLabel(card, reward, P ? new Vector2(-120f, -65f) : new Vector2(-260f, -63f), new Vector2(P ? 420f : 700f, P ? 56f : 32f), UiKit.Pill, UiKit.Price, 20);
 
         string status = !e.unlocked ? (e.member ? "ต้อง Lv และสมาชิกค่าย" : $"ล็อค (Lv {e.level})")
             : !e.open ? "ยังไม่เปิด" : e.fought ? "ชกครั้งนี้ไปแล้ว" : null;
         if (status != null)
-            UiKit.PillLabel(card, status, new Vector2(440f, 0f), new Vector2(330f, 70f), UiKit.DangerTint, UiKit.Danger, 26);
+            UiKit.PillLabel(card, status, P ? new Vector2(220f, -65f) : new Vector2(440f, 0f), new Vector2(P ? 220f : 330f, 70f), UiKit.DangerTint, UiKit.Danger, P ? 22 : 26);
         else
         {
             var id = e.id;
-            UiKit.RoundButton(card, e.pads ? "เริ่มซ้อม" : "ขึ้นชก", new Vector2(440f, 0f), new Vector2(330f, 90f), UiKit.Gold, UiKit.GoldInk,
+            UiKit.RoundButton(card, e.pads ? "เริ่มซ้อม" : "ขึ้นชก", P ? new Vector2(220f, -65f) : new Vector2(440f, 0f), new Vector2(P ? 220f : 330f, P ? 80f : 90f), UiKit.Gold, UiKit.GoldInk,
                 () => Begin(id), 34).interactable = !busy;
         }
     }

@@ -27,7 +27,7 @@ public class SchoolUI : MonoBehaviour
     private Education.State state;
     private Coroutine toastRun;
     private float classEndsAt;
-    private bool busy, finishing, library;
+    private bool busy, finishing, library, portrait;
     private float classLength = 30f;
 
     private static readonly string[] SubjectIds = { "computer", "sports", "craft", "logic", "health" };
@@ -49,32 +49,35 @@ public class SchoolUI : MonoBehaviour
 
     private void Awake()
     {
-        var body = UiKit.PremiumWindow(transform, "SchoolCanvas", new Vector2(1520f, 900f), 55, "icon:school",
+        portrait = UiKit.Portrait;
+        var body = UiKit.PremiumWindow(transform, "SchoolCanvas", UiKit.WindowSize(new Vector2(1520f, 900f), 1450f), 55, "icon:school",
             out backdrop, out title, out subtitle, Hide, out _);
         title.text = "ห้องเรียน · โรงเรียนตำบล";
         subtitle.text = "เรียนเพื่อเพิ่มเลเวล และเปิดอาชีพใหม่";
 
+        // Landscape: five cards side by side. Upright: one row per subject.
         for (int i = 0; i < cards.Length; i++)
-            cards[i] = BuildCard(body, SubjectIds[i], new Vector2((i - (cards.Length - 1) * 0.5f) * CardStep, 95f));
+            cards[i] = portrait ? BuildRow(body, SubjectIds[i], new Vector2(0f, 547f - i * 180f))
+                : BuildCard(body, SubjectIds[i], new Vector2((i - (cards.Length - 1) * 0.5f) * CardStep, 95f));
 
         // Class in progress
-        progressBar = UiKit.Panel("Progress", body, new Color(0.9f, 0.86f, 0.78f), new Vector2(0f, -178f), new Vector2(1100f, 34f));
+        progressBar = UiKit.Panel("Progress", body, new Color(0.9f, 0.86f, 0.78f), new Vector2(0f, portrait ? -335f : -178f), new Vector2(portrait ? 680f : 1100f, 34f));
         progressFill = UiKit.Rect("Fill", progressBar, UiKit.PayGreen);
         progressFill.anchorMin = new Vector2(0f, 0f);
         progressFill.anchorMax = new Vector2(0f, 1f);
         progressFill.pivot = new Vector2(0f, 0.5f);
         progressFill.offsetMin = progressFill.offsetMax = Vector2.zero;
-        classText = UiKit.Label(body, 26, "", new Vector2(0f, -140f), new Vector2(1200f, 40f), UiKit.Ink);
+        classText = UiKit.Label(body, 26, "", new Vector2(0f, portrait ? -290f : -140f), new Vector2(portrait ? 680f : 1200f, 40f), UiKit.Ink);
         classText.font = ThaiFont.Display;
 
         // Jobs the subjects open up
-        var jobsCard = UiKit.Panel("Jobs", body, Color.white, new Vector2(0f, -290f), new Vector2(1420f, 140f), shadow: true);
+        var jobsCard = UiKit.Panel("Jobs", body, Color.white, new Vector2(0f, portrait ? -495f : -290f), new Vector2(portrait ? 690f : 1420f, portrait ? 270f : 140f), shadow: true);
         jobsCard.gameObject.AddComponent<Outline>().effectColor = UiKit.CardBorder;
-        UiKit.Label(jobsCard, 24, "อาชีพที่ต้องใช้วิชา", new Vector2(0f, 48f), new Vector2(1380f, 34f), UiKit.Price).fontStyle = FontStyle.Bold;
-        jobsText = UiKit.Label(jobsCard, 21, "", new Vector2(0f, -14f), new Vector2(1380f, 90f), UiKit.Ink);
+        UiKit.Label(jobsCard, 24, "อาชีพที่ต้องใช้วิชา", new Vector2(0f, portrait ? 112f : 48f), new Vector2(portrait ? 660f : 1380f, 34f), UiKit.Price).fontStyle = FontStyle.Bold;
+        jobsText = UiKit.Label(jobsCard, 21, "", new Vector2(0f, portrait ? -18f : -14f), new Vector2(portrait ? 660f : 1380f, portrait ? 220f : 90f), UiKit.Ink);
         jobsText.lineSpacing = 1.15f;
 
-        toast = UiKit.ToastBar(body, new Vector2(0f, -178f), 1000f);
+        toast = UiKit.ToastBar(body, new Vector2(0f, portrait ? -335f : -178f), 1000f);
         backdrop.SetActive(false);
     }
 
@@ -98,6 +101,30 @@ public class SchoolUI : MonoBehaviour
         c.cost = UiKit.Label(card, 19, "", new Vector2(0f, -124f), new Vector2(w - 14f, 46f), UiKit.Ink);
         string subject = id;
         c.button = UiKit.RoundButton(card, "เข้าเรียน", new Vector2(0f, -180f), new Vector2(w - 40f, 64f), UiKit.Gold, UiKit.GoldInk, () => StartClass(subject), 26);
+        c.buttonText = c.button.GetComponentInChildren<Text>();
+        return c;
+    }
+
+    // Upright: a wide row — picture, name and level, XP bar, what it teaches and costs, then the button
+    private Card BuildRow(RectTransform body, string id, Vector2 at)
+    {
+        var c = new Card();
+        var card = UiKit.Panel("Subject", body, Color.white, at, new Vector2(690f, 166f), shadow: true);
+        card.gameObject.AddComponent<Outline>().effectColor = UiKit.CardBorder;
+        UiKit.IconTile(card, id == "health" ? "hospital" : "subj_" + id, new Vector2(-273f, 0f), new Vector2(120f, 120f));
+        c.name = UiKit.Label(card, 32, "", new Vector2(-110f, 52f), new Vector2(190f, 44f), UiKit.Ink, TextAnchor.MiddleLeft);
+        c.name.font = ThaiFont.Display;
+        c.level = UiKit.PillLabel(card, "", new Vector2(50f, 52f), new Vector2(110f, 34f), UiKit.Pill, UiKit.Price, 22);
+        var bar = UiKit.Panel("XpBar", card, new Color(0.9f, 0.86f, 0.78f), new Vector2(-55f, 22f), new Vector2(300f, 12f));
+        c.xpFill = UiKit.Rect("Fill", bar, UiKit.Gold);
+        c.xpFill.anchorMin = new Vector2(0f, 0f);
+        c.xpFill.anchorMax = new Vector2(0f, 1f);
+        c.xpFill.pivot = new Vector2(0f, 0.5f);
+        c.xpFill.offsetMin = c.xpFill.offsetMax = Vector2.zero;
+        c.desc = UiKit.Label(card, 20, "", new Vector2(-55f, -10f), new Vector2(300f, 36f), UiKit.Muted, TextAnchor.MiddleLeft);
+        c.cost = UiKit.Label(card, 20, "", new Vector2(-55f, -55f), new Vector2(300f, 52f), UiKit.Ink, TextAnchor.MiddleLeft);
+        string subject = id;
+        c.button = UiKit.RoundButton(card, "เข้าเรียน", new Vector2(240f, 0f), new Vector2(180f, 96f), UiKit.Gold, UiKit.GoldInk, () => StartClass(subject), 26);
         c.buttonText = c.button.GetComponentInChildren<Text>();
         return c;
     }
@@ -140,7 +167,7 @@ public class SchoolUI : MonoBehaviour
         {
             var j = s.jobs[i];
             lines.Append($"{(j.unlocked ? "<color=#2E8B57>" : "<color=#88877F>")}{j.name} ({j.place}) {(j.unlocked ? "ทำได้แล้ว" : j.missing)}</color>");
-            lines.Append(i % 2 == 0 ? "      " : "\n");
+            lines.Append(!portrait && i % 2 == 0 ? "      " : "\n");
         }
         jobsText.supportRichText = true;
         jobsText.text = lines.ToString().TrimEnd();

@@ -10,13 +10,13 @@ public class TravelMenu : MonoBehaviour
 {
     private static TravelMenu instance;
 
-    private const float Spacing = 360f;
+    private const float Spacing = 360f, PortraitStep = 230f;
 
     private static bool building; // mode for the instance being built (read in Awake)
 
     private GameObject backdrop;
     private Text title;
-    private bool boat;
+    private bool boat, portrait;
 
     public static void Show(string heading = null, bool boat = false)
     {
@@ -48,15 +48,17 @@ public class TravelMenu : MonoBehaviour
         var all = new System.Collections.Generic.List<Location>();
         foreach (var l in Locations.All)
             if (boat ? l.Level == LocationLevel.Beach : !l.BoatOnly) all.Add(l);
-        var body = UiKit.PremiumWindow(transform, "TravelCanvas", new Vector2(Mathf.Max(1500f, all.Count * Spacing + 60f), 880f), 50, "icon:travel",
+        portrait = UiKit.Portrait;
+        var size = portrait ? new Vector2(UiKit.PortraitWidth, all.Count * PortraitStep + 220f) : new Vector2(Mathf.Max(1500f, all.Count * Spacing + 60f), 880f);
+        var body = UiKit.PremiumWindow(transform, "TravelCanvas", size, 50, "icon:travel",
             out backdrop, out title, out var subtitle, Hide, out _);
         title.text = "ป้ายรถสองแถว";
         subtitle.text = boat ? "นั่งเรือหางยาวข้ามทะเล" : "เลือกจุดหมายปลายทาง";
 
-        // Route line behind the cards
+        // Route line behind the cards (upright: down the left side)
         var route = UiKit.Rect("Route", body, UiKit.Gold);
-        route.anchoredPosition = new Vector2(0f, 230f);
-        route.sizeDelta = new Vector2((all.Count - 1) * Spacing, 6f);
+        route.anchoredPosition = portrait ? new Vector2(-325f, 0f) : new Vector2(0f, 230f);
+        route.sizeDelta = portrait ? new Vector2(6f, (all.Count - 1) * PortraitStep) : new Vector2((all.Count - 1) * Spacing, 6f);
 
         var current = Locations.Current;
         for (int i = 0; i < all.Count; i++)
@@ -67,6 +69,7 @@ public class TravelMenu : MonoBehaviour
 
     private void AddStop(RectTransform body, Location location, int index, int count, bool here)
     {
+        if (portrait) { AddStopRow(body, location, index, count, here); return; }
         float x = (index - (count - 1) * 0.5f) * Spacing;
 
         // Stop marker on the route
@@ -110,6 +113,53 @@ public class TravelMenu : MonoBehaviour
                 UiKit.Gold, UiKit.GoldInk, () => Locations.TravelTo(target, boat ? "ferry" : null), 32);
             go.interactable = location.Available;
         }
+    }
+
+    // Upright: one row per stop, top to bottom — picture, name and places, then the button
+    private void AddStopRow(RectTransform body, Location location, int index, int count, bool here)
+    {
+        float y = ((count - 1) * 0.5f - index) * PortraitStep;
+        var dot = UiKit.Rect("Stop", body, here ? UiKit.PayGreen : UiKit.Gold);
+        dot.GetComponent<Image>().sprite = UiKit.CircleSprite;
+        dot.anchoredPosition = new Vector2(-325f, y);
+        dot.sizeDelta = new Vector2(40f, 40f);
+
+        var card = UiKit.Panel("Destination", body, here ? (Color)new Color32(0xF3, 0xFA, 0xEC, 0xFF) : Color.white,
+            new Vector2(30f, y), new Vector2(640f, PortraitStep - 16f), shadow: true);
+        card.gameObject.AddComponent<Outline>().effectColor = here ? UiKit.PayGreen : UiKit.CardBorder;
+        UiKit.IconTile(card, IconOf(location), new Vector2(-235f, 0f), new Vector2(150f, 150f));
+
+        SplitName(location, out string name, out string places);
+        UiKit.PillLabel(card, Locations.LevelNameTh(location.Level), new Vector2(-55f, 58f), new Vector2(150f, 36f),
+            here ? UiKit.OkTint : UiKit.Pill, here ? UiKit.OkGreen : UiKit.Price, 22);
+        UiKit.Label(card, 36, name, new Vector2(-15f, 10f), new Vector2(230f, 50f), UiKit.Ink, TextAnchor.MiddleLeft).fontStyle = FontStyle.Bold;
+        UiKit.Label(card, 21, places, new Vector2(-15f, -48f), new Vector2(230f, 60f), UiKit.Muted, TextAnchor.UpperLeft);
+
+        var at = new Vector2(212f, 0f);
+        var size = new Vector2(190f, 84f);
+        if (here)
+            UiKit.RoundButton(card, "อยู่ที่นี่", at, size, UiKit.OkTint, UiKit.OkGreen, () => { }, 30).interactable = false;
+        else
+        {
+            var target = location;
+            UiKit.RoundButton(card, location.Available ? "ไปที่นี่" : "เร็วๆ นี้", at, size,
+                UiKit.Gold, UiKit.GoldInk, () => Locations.TravelTo(target, boat ? "ferry" : null), 32).interactable = location.Available;
+        }
+    }
+
+    private static string IconOf(Location location) =>
+        !string.IsNullOrEmpty(location.Icon) ? location.Icon : location.Level == LocationLevel.Village ? "home" : location.Level == LocationLevel.Subdistrict ? "sao"
+            : location.Level == LocationLevel.Beach ? "travel" : "city";
+
+    // "ตำบล · อบต. รพ.สต. …" → name on top, places underneath
+    private static void SplitName(Location location, out string name, out string places)
+    {
+        name = location.NameTh;
+        places = "";
+        int dotIndex = name.IndexOf('·');
+        if (dotIndex <= 0) return;
+        places = name.Substring(dotIndex + 1).Trim();
+        name = name.Substring(0, dotIndex).Trim();
     }
 
     private void OnDestroy()

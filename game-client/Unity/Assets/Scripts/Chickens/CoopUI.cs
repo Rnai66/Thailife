@@ -35,7 +35,7 @@ public class CoopUI : MonoBehaviour
 
     private void Awake()
     {
-        var body = UiKit.PremiumWindow(transform, "CoopCanvas", new Vector2(1640f, 940f), 50, "icon:farm",
+        var body = UiKit.PremiumWindow(transform, "CoopCanvas", UiKit.WindowSize(new Vector2(1640f, 940f), 1590f), 50, "icon:farm",
             out backdrop, out titleText, out subtitleText, Hide, out _);
         titleText.text = "เล้าไก่";
 
@@ -43,7 +43,15 @@ public class CoopUI : MonoBehaviour
         sellEggsButton = StatusCard(body, 0f, "ไข่ไก่", out eggValue, out eggNote, "ขายไข่ทั้งหมด", UiKit.PayGreen, Color.white, () => Act("sell_eggs"));
         hatchButton = StatusCard(body, 540f, "ไข่มีเชื้อ (ไข่แม่พันธุ์)", out fertileValue, out fertileNote, "ฟักไข่ 1 ฟอง", new Color32(0x37, 0x8A, 0xDD, 0xFF), Color.white, () => Act("hatch"));
 
-        UiKit.Label(body, 30, "ไก่ในเล้า", new Vector2(-640f, 165f), new Vector2(300f, 44f), UiKit.Ink, TextAnchor.MiddleLeft).fontStyle = FontStyle.Bold;
+        var heading = UiKit.Label(body, 30, "ไก่ในเล้า", new Vector2(-640f, 165f), new Vector2(300f, 44f), UiKit.Ink, TextAnchor.MiddleLeft);
+        heading.fontStyle = FontStyle.Bold;
+        if (UiKit.Portrait) // upright: the three status cards stacked, the chickens in two columns below
+        {
+            UiKit.Stack((RectTransform)feedButton.transform.parent, new Vector2(0f, 588f), 1.2f);
+            UiKit.Stack((RectTransform)sellEggsButton.transform.parent, new Vector2(0f, 348f), 1.2f);
+            UiKit.Stack((RectTransform)hatchButton.transform.parent, new Vector2(0f, 108f), 1.2f);
+            UiKit.Stack(heading.rectTransform, new Vector2(-190f, -38f));
+        }
         list = UiKit.Container(body, new Vector2(0f, 0f));
         toastText = UiKit.ToastBar(body, new Vector2(0f, -340f), 760f);
 
@@ -121,7 +129,7 @@ public class CoopUI : MonoBehaviour
         if (s.chickens == null || s.chickens.Length == 0)
         {
             UiKit.Label(list, 30, "ยังไม่มีไก่ — ซื้อแม่ไก่ พ่อไก่ และอาหารไก่ได้ที่ร้านค้าชุมชน (แท็บเลี้ยงไก่)",
-                new Vector2(0f, 20f), new Vector2(1400f, 60f), UiKit.Muted);
+                UiKit.Portrait ? new Vector2(0f, -300f) : new Vector2(0f, 20f), UiKit.Portrait ? new Vector2(660f, 120f) : new Vector2(1400f, 60f), UiKit.Muted);
             return;
         }
         for (int i = 0; i < s.chickens.Length; i++)
@@ -131,9 +139,11 @@ public class CoopUI : MonoBehaviour
     // Four cards per row, two rows (the coop holds 8)
     private void AddChickenCard(CoopClient.Chicken c, int index, float age)
     {
-        float x = -585f + (index % 4) * 390f;
-        float y = 75f - (index / 4) * 175f;
+        bool upright = UiKit.Portrait; // upright: two per row, four rows
+        float x = upright ? (index % 2 == 0 ? -177f : 177f) : -585f + (index % 4) * 390f;
+        float y = upright ? -125f - (index / 2) * 160f : 75f - (index / 4) * 175f;
         var card = UiKit.Panel("Chicken", list, Color.white, new Vector2(x, y), new Vector2(370f, 160f), shadow: true);
+        if (upright) card.localScale = new Vector3(0.92f, 0.92f, 1f);
         card.gameObject.AddComponent<Outline>().effectColor = UiKit.CardBorder;
 
         // Feather colour disc

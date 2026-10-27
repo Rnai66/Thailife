@@ -39,7 +39,7 @@ public class RanchUI : MonoBehaviour
 
     private void Awake()
     {
-        var body = UiKit.PremiumWindow(transform, "RanchCanvas", new Vector2(1300f, 780f), 55, "icon:farm",
+        var body = UiKit.PremiumWindow(transform, "RanchCanvas", UiKit.WindowSize(new Vector2(1300f, 780f), 920f), 55, "icon:farm",
             out backdrop, out titleText, out subtitleText, Hide, out _);
         var card = UiKit.Panel("Herd", body, Color.white, new Vector2(0f, 150f), new Vector2(1180f, 230f), shadow: true);
         card.gameObject.AddComponent<Outline>().effectColor = UiKit.CardBorder;
@@ -56,6 +56,22 @@ public class RanchUI : MonoBehaviour
             labels[i] = buttons[i].GetComponentInChildren<Text>();
         }
         toastText = UiKit.ToastBar(body, new Vector2(0f, -230f), 900f);
+        if (UiKit.Portrait) // upright: the herd card on top, the three buttons stacked under it
+        {
+            card.sizeDelta = new Vector2(690f, 300f);
+            UiKit.Stack(card, new Vector2(0f, 217f));
+            herdText.rectTransform.sizeDelta = new Vector2(650f, 56f);
+            UiKit.Stack(herdText.rectTransform, new Vector2(0f, 100f));
+            infoText.rectTransform.sizeDelta = new Vector2(650f, 100f);
+            UiKit.Stack(infoText.rectTransform, new Vector2(0f, 20f));
+            UiKit.Stack(growthRow, new Vector2(0f, -95f));
+            for (int i = 0; i < buttons.Length; i++)
+            {
+                ((RectTransform)buttons[i].transform).sizeDelta = new Vector2(640f, 96f);
+                UiKit.Stack((RectTransform)buttons[i].transform, new Vector2(0f, -1f - i * 110f));
+            }
+            UiKit.Stack((RectTransform)toastText.transform.parent, new Vector2(0f, -320f));
+        }
         backdrop.SetActive(false);
         var ranch = RanchClient.Instance;
         if (ranch != null) ranch.Changed += _ => { if (backdrop != null && backdrop.activeSelf) Render(); };
@@ -117,12 +133,13 @@ public class RanchUI : MonoBehaviour
         if (s.growth != null)
             for (int i = 0; i < s.growth.Length; i++)
             {
-                float x = (i - (s.growth.Length - 1) * 0.5f) * 130f;
-                var track = UiKit.Panel("Track", growthRow, UiKit.CardBorder, new Vector2(x, 0f), new Vector2(110f, 18f));
-                var fillBar = UiKit.Panel("Fill", track, s.growth[i] >= s.grown_days ? UiKit.Gold : UiKit.PayGreen, Vector2.zero, new Vector2(110f * s.growth[i] / s.grown_days, 18f));
+                float step = UiKit.Portrait ? 80f : 130f, bar = step - 20f; // eight cows fit across the narrow upright card
+                float x = (i - (s.growth.Length - 1) * 0.5f) * step;
+                var track = UiKit.Panel("Track", growthRow, UiKit.CardBorder, new Vector2(x, 0f), new Vector2(bar, 18f));
+                var fillBar = UiKit.Panel("Fill", track, s.growth[i] >= s.grown_days ? UiKit.Gold : UiKit.PayGreen, Vector2.zero, new Vector2(bar * s.growth[i] / s.grown_days, 18f));
                 fillBar.anchorMin = fillBar.anchorMax = new Vector2(0f, 0.5f);
                 fillBar.pivot = new Vector2(0f, 0.5f);
-                UiKit.Label(growthRow, 18, s.growth[i] >= s.grown_days ? "โตแล้ว" : $"{s.growth[i]}/{s.grown_days}", new Vector2(x, -24f), new Vector2(120f, 26f), UiKit.Muted);
+                UiKit.Label(growthRow, 18, s.growth[i] >= s.grown_days ? "โตแล้ว" : $"{s.growth[i]}/{s.grown_days}", new Vector2(x, -24f), new Vector2(step - 4f, 26f), UiKit.Muted);
             }
 
         if (mode == "pen")

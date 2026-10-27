@@ -27,25 +27,28 @@ public class FoodUI : MonoBehaviour
 
     private void Close() => backdrop.SetActive(false);
 
+    private static float TrackWidth => UiKit.Portrait ? 380f : 760f;
+
     private void Awake()
     {
-        var body = UiKit.PremiumWindow(transform, "FoodCanvas", new Vector2(1300f, 860f), 55, "icon:food",
+        var body = UiKit.PremiumWindow(transform, "FoodCanvas", UiKit.WindowSize(new Vector2(1300f, 860f), 1250f), 55, "icon:food",
             out backdrop, out titleText, out subtitleText, Close, out _);
         titleText.text = "กระเป๋าอาหาร";
         subtitleText.text = "กินแล้วพลังงานเพิ่ม · ซื้อเพิ่มได้ที่ร้านค้าชุมชนและร้านอาหารในเมือง";
 
-        var bar = UiKit.Panel("EnergyCard", body, Color.white, new Vector2(0f, 250f), new Vector2(1180f, 110f), shadow: true);
+        bool upright = UiKit.Portrait; // upright: a shorter energy bar, two food cards per row
+        var bar = UiKit.Panel("EnergyCard", body, Color.white, new Vector2(0f, upright ? 485f : 250f), new Vector2(upright ? 690f : 1180f, 110f), shadow: true);
         bar.gameObject.AddComponent<Outline>().effectColor = UiKit.CardBorder;
-        UiKit.Label(bar, 26, "พลังงาน", new Vector2(-470f, 0f), new Vector2(200f, 50f), UiKit.Ink, TextAnchor.MiddleLeft).fontStyle = FontStyle.Bold;
-        var track = UiKit.Panel("Track", bar, new Color32(0xF1, 0xEF, 0xE8, 0xFF), new Vector2(60f, 0f), new Vector2(760f, 30f));
+        UiKit.Label(bar, 26, "พลังงาน", new Vector2(upright ? -260f : -470f, 0f), new Vector2(upright ? 130f : 200f, 50f), UiKit.Ink, TextAnchor.MiddleLeft).fontStyle = FontStyle.Bold;
+        var track = UiKit.Panel("Track", bar, new Color32(0xF1, 0xEF, 0xE8, 0xFF), new Vector2(upright ? 30f : 60f, 0f), new Vector2(TrackWidth, 30f));
         energyFill = UiKit.Panel("Fill", track, UiKit.Gold, Vector2.zero, new Vector2(0f, 30f));
         energyFill.anchorMin = energyFill.anchorMax = new Vector2(0f, 0.5f);
         energyFill.pivot = new Vector2(0f, 0.5f);
-        energyText = UiKit.Label(bar, 30, "", new Vector2(510f, 0f), new Vector2(150f, 50f), UiKit.Price, TextAnchor.MiddleRight);
+        energyText = UiKit.Label(bar, 30, "", new Vector2(upright ? 275f : 510f, 0f), new Vector2(upright ? 120f : 150f, 50f), UiKit.Price, TextAnchor.MiddleRight);
         energyText.fontStyle = FontStyle.Bold;
 
-        list = UiKit.Container(body, new Vector2(0f, 90f));
-        toastText = UiKit.ToastBar(body, new Vector2(0f, -310f), 760f);
+        list = UiKit.Container(body, new Vector2(0f, upright ? 350f : 90f));
+        toastText = UiKit.ToastBar(body, new Vector2(0f, upright ? -420f : -310f), 760f);
 
         backdrop.SetActive(false);
         if (LifeClient.Instance != null) LifeClient.Instance.Changed += _ => { if (backdrop.activeSelf) Render(); };
@@ -70,7 +73,7 @@ public class FoodUI : MonoBehaviour
 
         float max = life.Current.max_energy;
         energyText.text = $"{life.Energy:0}/{max:0}";
-        energyFill.sizeDelta = new Vector2(760f * Mathf.Clamp01(life.Energy / max), 30f);
+        energyFill.sizeDelta = new Vector2(TrackWidth * Mathf.Clamp01(life.Energy / max), 30f);
 
         int index = 0;
         if (life.Current.foods != null)
@@ -83,15 +86,17 @@ public class FoodUI : MonoBehaviour
         }
         if (index == 0)
             UiKit.Label(list, 28, "ยังไม่มีของกินในกระเป๋า\nซื้อได้ที่ร้านค้าชุมชน (แท็บของกิน) หรือร้านข้าวมันไก่/ร้านกาแฟในเมือง",
-                new Vector2(0f, -100f), new Vector2(1100f, 110f), UiKit.Muted);
+                new Vector2(0f, UiKit.Portrait ? -200f : -100f), new Vector2(UiKit.Portrait ? 660f : 1100f, 160f), UiKit.Muted);
     }
 
     // Three cards per row
     private void AddFoodCard(LifeClient.Food food, int index)
     {
-        float x = -390f + (index % 3) * 390f;
-        float y = -(index / 3) * 165f;
+        bool upright = UiKit.Portrait; // upright: two per row
+        float x = upright ? (index % 2 == 0 ? -177f : 177f) : -390f + (index % 3) * 390f;
+        float y = -(index / (upright ? 2 : 3)) * 165f;
         var card = UiKit.Panel("Food", list, Color.white, new Vector2(x, y), new Vector2(370f, 150f), shadow: true);
+        if (upright) card.localScale = new Vector3(0.92f, 0.92f, 1f);
         card.gameObject.AddComponent<Outline>().effectColor = UiKit.CardBorder;
 
         if (UiKit.Art("Icons/food_" + food.id) != null)

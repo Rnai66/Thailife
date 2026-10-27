@@ -35,7 +35,7 @@ public class HotelUI : MonoBehaviour
 
     private void Awake()
     {
-        var body = UiKit.PremiumWindow(transform, "HotelCanvas", new Vector2(1400f, 860f), 55, "icon:hotel",
+        var body = UiKit.PremiumWindow(transform, "HotelCanvas", UiKit.WindowSize(new Vector2(1400f, 860f), 1400f), 55, "icon:hotel",
             out backdrop, out titleText, out subtitleText, Hide, out _);
         subtitleText.text = "จองห้องพัก 1 วันในเกม (24 นาที) · นอนในห้องฟรีตลอดการจอง";
         var status = UiKit.Panel("Status", body, Color.white, new Vector2(0f, 290f), new Vector2(1300f, 90f), shadow: true);
@@ -45,6 +45,17 @@ public class HotelUI : MonoBehaviour
         enterButton = UiKit.RoundButton(status, "เข้าห้องพัก", new Vector2(480f, 0f), new Vector2(300f, 70f), UiKit.PayGreen, Color.white, EnterRoom, 28);
         cards = UiKit.Container(body, new Vector2(0f, -40f));
         toastText = UiKit.ToastBar(body, new Vector2(0f, -340f), 900f);
+        if (UiKit.Portrait) // upright: a taller status card on top, the three rooms stacked under it
+        {
+            status.sizeDelta = new Vector2(690f, 150f);
+            UiKit.Stack(status, new Vector2(0f, 530f));
+            statusText.rectTransform.sizeDelta = new Vector2(650f, 60f);
+            UiKit.Stack(statusText.rectTransform, new Vector2(0f, 32f));
+            ((RectTransform)enterButton.transform).sizeDelta = new Vector2(400f, 64f);
+            UiKit.Stack((RectTransform)enterButton.transform, new Vector2(0f, -36f));
+            UiKit.Stack(cards, new Vector2(0f, 70f));
+            UiKit.Stack((RectTransform)toastText.transform.parent, new Vector2(0f, -400f));
+        }
         backdrop.SetActive(false);
     }
 
@@ -91,15 +102,18 @@ public class HotelUI : MonoBehaviour
         for (int i = 0; i < tiers.Length; i++)
         {
             var t = tiers[i];
-            float x = (i - 1) * 440f;
-            var card = UiKit.Panel("Room", cards, tints[i % tints.Length], new Vector2(x, 0f), new Vector2(410f, 400f), shadow: true);
+            // Landscape: three cards side by side. Upright: one wide card per room, the button on the right.
+            bool upright = UiKit.Portrait;
+            var at = upright ? new Vector2(0f, 260f - i * 260f) : new Vector2((i - 1) * 440f, 0f);
+            var card = UiKit.Panel("Room", cards, tints[i % tints.Length], at, upright ? new Vector2(690f, 245f) : new Vector2(410f, 400f), shadow: true);
             card.gameObject.AddComponent<Outline>().effectColor = i == 2 ? UiKit.Gold : UiKit.CardBorder;
-            UiKit.Label(card, 30, t.name, new Vector2(0f, 140f), new Vector2(380f, 50f), UiKit.Ink).fontStyle = FontStyle.Bold;
-            UiKit.Label(card, 40, $"{t.price:N0} บาท", new Vector2(0f, 70f), new Vector2(380f, 60f), UiKit.Price).fontStyle = FontStyle.Bold;
-            UiKit.Label(card, 22, t.perks, new Vector2(0f, -15f), new Vector2(360f, 100f), UiKit.Muted);
+            float tx = upright ? -120f : 0f;
+            UiKit.Label(card, 30, t.name, new Vector2(tx, upright ? 80f : 140f), new Vector2(380f, 50f), UiKit.Ink).fontStyle = FontStyle.Bold;
+            UiKit.Label(card, 40, $"{t.price:N0} บาท", new Vector2(tx, upright ? 25f : 70f), new Vector2(380f, 60f), UiKit.Price).fontStyle = FontStyle.Bold;
+            UiKit.Label(card, 22, t.perks, new Vector2(tx, upright ? -60f : -15f), new Vector2(upright ? 410f : 360f, 100f), UiKit.Muted);
             string tier = t.id;
-            var b = UiKit.RoundButton(card, booked ? "จองแล้ว" : "จองห้องนี้", new Vector2(0f, -140f), new Vector2(300f, 76f), UiKit.Gold, UiKit.GoldInk,
-                () => Book(tier), 28);
+            var b = UiKit.RoundButton(card, booked ? "จองแล้ว" : "จองห้องนี้", upright ? new Vector2(230f, 0f) : new Vector2(0f, -140f),
+                upright ? new Vector2(190f, 96f) : new Vector2(300f, 76f), UiKit.Gold, UiKit.GoldInk, () => Book(tier), 28);
             b.interactable = !booked && !busy;
         }
     }

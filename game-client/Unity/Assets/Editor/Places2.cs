@@ -47,6 +47,19 @@ public static class Places2
         music.AddComponent<MusicSpot>().Configure("village_hall");
         Places.Sign(t, new Vector3(5.6f, 0f, -4.6f), "เล่นดนตรีรับทิป\nยืนตรงมุมนี้", 0f);
 
+        // Ballot box by the notice board: campaign (หาเสียง) and vote in the อบต. election
+        var ballot = new GameObject("ElectionBallot");
+        ballot.transform.SetParent(t, false);
+        ballot.transform.localPosition = new Vector3(-4.6f, 1.3f, -2.6f);
+        var ballotZone = ballot.AddComponent<BoxCollider>();
+        ballotZone.isTrigger = true;
+        ballotZone.size = new Vector3(2.4f, 2f, 2.4f);
+        ballot.AddComponent<ElectionSpot>().Configure("hall");
+        PrimitiveKit.Box("BallotTable", t, new Vector3(-4.8f, 0.7f, -3f), new Vector3(1.4f, 0.8f, 0.7f), wood);
+        PrimitiveKit.Box("BallotBox", t, new Vector3(-4.8f, 1.3f, -3f), new Vector3(0.6f, 0.45f, 0.45f), PrimitiveKit.Mat("BallotWhite", new Color(0.95f, 0.95f, 0.97f)), collider: false);
+        PrimitiveKit.Box("BallotSlot", t, new Vector3(-4.8f, 1.53f, -3f), new Vector3(0.35f, 0.02f, 0.06f), dark, collider: false);
+        Places.Sign(t, new Vector3(-5.6f, 0f, -4.6f), "เลือกตั้ง อบต.\nหาเสียง · ลงคะแนน", 0f);
+
         // หอกระจายข่าว: pole with horn speakers
         var tower = PrimitiveKit.Group("BroadcastTower_หอกระจายข่าว", t, new Vector3(7.5f, 0f, -3f));
         PrimitiveKit.Cylinder("Pole", tower.transform, new Vector3(0f, 4f, 0f), new Vector3(0.2f, 4f, 0.2f), metal);
@@ -238,6 +251,17 @@ public static class Places2
         cowDesk.AddComponent<RanchCounter>().Configure("sao");
         PrimitiveKit.Box("CowDesk", t, new Vector3(4.6f, 0.45f, -5.4f), new Vector3(1.8f, 0.9f, 0.7f), PrimitiveKit.Mat("WoodPlank", new Color(0.6f, 0.4f, 0.22f)));
         Places.Sign(t, new Vector3(6.2f, 0f, -6.6f), "รับวัวฟรี 1 ตัว\nโครงการ อบต.", 0f);
+
+        // Election desk: register as a candidate (ส.อบต. / นายก อบต.) and, once elected, draw the salary
+        var electionDesk = new GameObject("ElectionDesk");
+        electionDesk.transform.SetParent(t, false);
+        electionDesk.transform.localPosition = new Vector3(-4.6f, 1f, -6.2f);
+        var electionZone = electionDesk.AddComponent<BoxCollider>();
+        electionZone.isTrigger = true;
+        electionZone.size = new Vector3(2.4f, 2f, 2f);
+        electionDesk.AddComponent<ElectionSpot>().Configure("sao");
+        PrimitiveKit.Box("ElectionTable", t, new Vector3(-4.6f, 0.45f, -5.4f), new Vector3(1.8f, 0.9f, 0.7f), PrimitiveKit.Mat("WoodPlank", new Color(0.6f, 0.4f, 0.22f)));
+        Places.Sign(t, new Vector3(-6.2f, 0f, -6.6f), "สมัครเลือกตั้ง\nส.อบต. · นายก อบต.", 0f);
         return office;
     }
 

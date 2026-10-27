@@ -31,7 +31,7 @@ public class KokaiUI : MonoBehaviour
 
     private void Awake()
     {
-        var body = UiKit.PremiumWindow(transform, "KokaiCanvas", new Vector2(1400f, 860f), 58, "icon:fair",
+        var body = UiKit.PremiumWindow(transform, "KokaiCanvas", UiKit.WindowSize(new Vector2(1400f, 860f), 1400f), 58, "icon:fair",
             out backdrop, out titleText, out subtitleText, Close, out _);
         titleText.text = "มหาลัย ก.ไก่";
         subtitleText.text = "อักษรบนกระดาษครบ 4 ตัวเร็ว ได้รางวัลใหญ่";
@@ -48,7 +48,15 @@ public class KokaiUI : MonoBehaviour
 
         resultText = UiKit.Label(body, 34, "", new Vector2(0f, -280f), new Vector2(1200f, 60f), UiKit.Ink);
         resultText.fontStyle = FontStyle.Bold;
-        UiKit.RoundButton(body, "ปิด", new Vector2(560f, -280f), new Vector2(160f, 64f), UiKit.Pill, UiKit.Price, Close, 28);
+        var close = UiKit.RoundButton(body, "ปิด", new Vector2(560f, -280f), new Vector2(160f, 64f), UiKit.Pill, UiKit.Price, Close, 28);
+        if (UiKit.Portrait) // upright: your paper, the blackboard under it, then the result
+        {
+            UiKit.Stack(paper, new Vector2(0f, 362f));
+            UiKit.Stack(slate, new Vector2(0f, -136f), 0.85f);
+            UiKit.Stack(resultText.rectTransform, new Vector2(0f, -430f));
+            resultText.rectTransform.sizeDelta = new Vector2(680f, 90f);
+            UiKit.Stack((RectTransform)close.transform, new Vector2(0f, -540f));
+        }
         backdrop.SetActive(false);
     }
 

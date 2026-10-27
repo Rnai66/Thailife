@@ -42,21 +42,23 @@ public class AccountUI : MonoBehaviour
 
     private void Awake()
     {
-        var body = UiKit.PremiumWindow(transform, "AccountCanvas", new Vector2(1200f, 900f), 60, "บ",
+        bool P = UiKit.Portrait; // upright: one column, the recover button under the code field
+        float w = P ? 680f : 1100f;
+        var body = UiKit.PremiumWindow(transform, "AccountCanvas", UiKit.WindowSize(new Vector2(1200f, 900f), 1150f), 60, "บ",
             out backdrop, out var title, out var subtitle, Close, out _);
         title.text = "บัญชีผู้เล่น";
         subtitle.text = "เปลี่ยนมือถือหรือลบแอป ก็ยังเล่นต่อได้ด้วยรหัสกู้คืน";
 
-        UiKit.Label(body, 28, "รหัสกู้คืนบัญชีของคุณ (จดเก็บไว้ อย่าบอกใคร)", new Vector2(0f, 290f), new Vector2(1100f, 44f), UiKit.Ink).fontStyle = FontStyle.Bold;
-        var codeBox = UiKit.Panel("Code", body, new Color32(0xFF, 0xF6, 0xDF, 0xFF), new Vector2(0f, 210f), new Vector2(760f, 100f), shadow: true);
+        UiKit.Label(body, 28, "รหัสกู้คืนบัญชีของคุณ (จดเก็บไว้ อย่าบอกใคร)", new Vector2(0f, P ? 440f : 290f), new Vector2(w, P ? 76f : 44f), UiKit.Ink).fontStyle = FontStyle.Bold;
+        var codeBox = UiKit.Panel("Code", body, new Color32(0xFF, 0xF6, 0xDF, 0xFF), new Vector2(0f, P ? 355f : 210f), new Vector2(P ? 680f : 760f, 100f), shadow: true);
         codeBox.gameObject.AddComponent<Outline>().effectColor = UiKit.Gold;
-        codeText = UiKit.Label(codeBox, 48, "", Vector2.zero, new Vector2(740f, 90f), UiKit.Ink);
+        codeText = UiKit.Label(codeBox, 48, "", Vector2.zero, new Vector2(P ? 660f : 740f, 90f), UiKit.Ink);
         codeText.fontStyle = FontStyle.Bold;
-        newCodeButton = UiKit.RoundButton(body, "สร้างรหัสใหม่", new Vector2(0f, 105f), new Vector2(340f, 70f), UiKit.Gold, UiKit.GoldInk, NewCode, 26);
+        newCodeButton = UiKit.RoundButton(body, "สร้างรหัสใหม่", new Vector2(0f, P ? 255f : 105f), new Vector2(340f, 70f), UiKit.Gold, UiKit.GoldInk, NewCode, 26);
         newCodeLabel = newCodeButton.GetComponentInChildren<Text>();
 
-        UiKit.Label(body, 28, "ย้ายมาจากเครื่องเก่า: ใส่รหัสกู้คืนของบัญชีเดิม", new Vector2(0f, -10f), new Vector2(1100f, 44f), UiKit.Ink).fontStyle = FontStyle.Bold;
-        var field = UiKit.Panel("CodeInput", body, Color.white, new Vector2(-150f, -95f), new Vector2(620f, 90f), shadow: true);
+        UiKit.Label(body, 28, "ย้ายมาจากเครื่องเก่า: ใส่รหัสกู้คืนของบัญชีเดิม", new Vector2(0f, P ? 160f : -10f), new Vector2(w, P ? 76f : 44f), UiKit.Ink).fontStyle = FontStyle.Bold;
+        var field = UiKit.Panel("CodeInput", body, Color.white, P ? new Vector2(0f, 70f) : new Vector2(-150f, -95f), new Vector2(620f, 90f), shadow: true);
         field.gameObject.AddComponent<Outline>().effectColor = UiKit.CardBorder;
         var text = UiKit.Label(field, 36, "", Vector2.zero, new Vector2(580f, 80f), UiKit.Ink, TextAnchor.MiddleLeft);
         text.supportRichText = false;
@@ -66,12 +68,12 @@ public class AccountUI : MonoBehaviour
         input.placeholder = placeholder;
         input.characterLimit = 24;
         input.lineType = InputField.LineType.SingleLine;
-        var recover = UiKit.RoundButton(body, "กู้คืนบัญชี", new Vector2(330f, -95f), new Vector2(280f, 90f), UiKit.PayGreen, Color.white, Recover, 28);
+        var recover = UiKit.RoundButton(body, "กู้คืนบัญชี", P ? new Vector2(0f, -40f) : new Vector2(330f, -95f), new Vector2(P ? 360f : 280f, P ? 80f : 90f), UiKit.PayGreen, Color.white, Recover, 28);
         recoverLabel = recover.GetComponentInChildren<Text>();
         UiKit.Label(body, 22, "การกู้คืนจะเปลี่ยนเครื่องนี้ไปใช้บัญชีเดิม (ความคืบหน้าที่เล่นในเครื่องนี้จะไม่ถูกใช้อีก)",
-            new Vector2(0f, -175f), new Vector2(1100f, 40f), UiKit.Muted);
-        messageText = UiKit.Label(body, 26, "", new Vector2(0f, -245f), new Vector2(1100f, 60f), UiKit.Muted);
-        var delete = UiKit.RoundButton(body, "ลบบัญชี", new Vector2(0f, -320f), new Vector2(300f, 64f), UiKit.DangerTint, UiKit.Danger, DeleteAccount, 24);
+            new Vector2(0f, P ? -130f : -175f), new Vector2(w, P ? 70f : 40f), UiKit.Muted);
+        messageText = UiKit.Label(body, 26, "", new Vector2(0f, P ? -215f : -245f), new Vector2(w, 60f), UiKit.Muted);
+        var delete = UiKit.RoundButton(body, "ลบบัญชี", new Vector2(0f, P ? -310f : -320f), new Vector2(300f, 64f), UiKit.DangerTint, UiKit.Danger, DeleteAccount, 24);
         deleteLabel = delete.GetComponentInChildren<Text>();
         backdrop.SetActive(false);
     }

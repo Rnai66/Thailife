@@ -23,7 +23,7 @@ public class FishPondUI : MonoBehaviour
     private RectTransform speciesRow;
     private Coroutine toast;
     private string picked = "tilapia";
-    private bool busy;
+    private bool busy, portrait;
     private float nextTick;
 
     public static void Show()
@@ -41,18 +41,21 @@ public class FishPondUI : MonoBehaviour
 
     private void Awake()
     {
-        var body = UiKit.PremiumWindow(transform, "FishPondCanvas", new Vector2(1400f, 860f), 55, "icon:farm",
+        portrait = UiKit.Portrait;
+        var body = UiKit.PremiumWindow(transform, "FishPondCanvas", UiKit.WindowSize(new Vector2(1400f, 860f), 1260f), 55, "icon:farm",
             out backdrop, out titleText, out subtitleText, Hide, out _);
         titleText.text = "เลี้ยงปลาในกระชัง · สระโคกหนองนา";
         subtitleText.text = "ปล่อยลูกปลา ให้อาหารวันละครั้ง พอโตแล้วจับขายให้แม่ค้าปลา";
 
+        // Landscape: three cages side by side. Upright: one wide row per cage, the fry picker in a 2x2 grid.
         for (int i = 0; i < cages.Length; i++)
-            cages[i] = BuildCage(body, i + 1, new Vector2((i - 1) * 430f, 140f));
+            cages[i] = portrait ? BuildCageRow(body, i + 1, new Vector2(0f, 427f - i * 230f))
+                : BuildCage(body, i + 1, new Vector2((i - 1) * 430f, 140f));
 
-        pickText = UiKit.Label(body, 24, "", new Vector2(0f, -120f), new Vector2(1300f, 36f), UiKit.Price);
+        pickText = UiKit.Label(body, 24, "", new Vector2(0f, portrait ? -180f : -120f), new Vector2(portrait ? 680f : 1300f, 36f), UiKit.Price);
         pickText.fontStyle = FontStyle.Bold;
-        speciesRow = UiKit.Container(body, new Vector2(0f, -200f));
-        toastText = UiKit.ToastBar(body, new Vector2(0f, -300f), 1000f);
+        speciesRow = UiKit.Container(body, new Vector2(0f, portrait ? -260f : -200f));
+        toastText = UiKit.ToastBar(body, new Vector2(0f, portrait ? -490f : -300f), 1000f);
         backdrop.SetActive(false);
         PondClient.Changed += OnChanged;
     }
@@ -86,6 +89,28 @@ public class FishPondUI : MonoBehaviour
         c.info = UiKit.Label(card, 21, "", new Vector2(0f, -30f), new Vector2(370f, 120f), UiKit.Muted);
         c.info.lineSpacing = 1.15f;
         c.button = UiKit.RoundButton(card, "", new Vector2(0f, -145f), new Vector2(340f, 72f), UiKit.Gold, UiKit.GoldInk, () => Act(id), 24);
+        c.buttonText = c.button.GetComponentInChildren<Text>();
+        return c;
+    }
+
+    private CageCard BuildCageRow(RectTransform body, int id, Vector2 at)
+    {
+        var c = new CageCard();
+        var card = UiKit.Panel("Cage", body, Color.white, at, new Vector2(690f, 220f), shadow: true);
+        card.gameObject.AddComponent<Outline>().effectColor = UiKit.CardBorder;
+        c.title = UiKit.Label(card, 28, $"กระชัง {id}", new Vector2(-185f, 78f), new Vector2(280f, 40f), UiKit.Ink, TextAnchor.MiddleLeft);
+        c.title.font = ThaiFont.Display;
+        c.status = UiKit.Label(card, 26, "", new Vector2(-105f, 38f), new Vector2(440f, 38f), UiKit.Price, TextAnchor.MiddleLeft);
+        c.status.fontStyle = FontStyle.Bold;
+        var track = UiKit.Panel("Track", card, new Color(0.9f, 0.86f, 0.78f), new Vector2(-105f, 6f), new Vector2(440f, 16f));
+        c.fill = UiKit.Rect("Fill", track, UiKit.PayGreen);
+        c.fill.anchorMin = new Vector2(0f, 0f);
+        c.fill.anchorMax = new Vector2(0f, 1f);
+        c.fill.pivot = new Vector2(0f, 0.5f);
+        c.fill.offsetMin = c.fill.offsetMax = Vector2.zero;
+        c.info = UiKit.Label(card, 21, "", new Vector2(-105f, -56f), new Vector2(440f, 84f), UiKit.Muted, TextAnchor.UpperLeft);
+        c.info.lineSpacing = 1.15f;
+        c.button = UiKit.RoundButton(card, "", new Vector2(232f, -10f), new Vector2(200f, 110f), UiKit.Gold, UiKit.GoldInk, () => Act(id), 24);
         c.buttonText = c.button.GetComponentInChildren<Text>();
         return c;
     }
@@ -142,7 +167,8 @@ public class FishPondUI : MonoBehaviour
             string label = sp.unlocked
                 ? $"{sp.name} · {sp.price} ฿\nโต {Mathf.RoundToInt(sp.grow_s / 60f)} นาที · กก.ละ {sp.per_kg} ฿"
                 : $"{sp.name}\nต้องเลี้ยงปลา Lv {sp.level}";
-            var b = UiKit.RoundButton(speciesRow, label, new Vector2((i - (s.species.Length - 1) * 0.5f) * 320f, 0f), new Vector2(300f, 96f),
+            var at = portrait ? new Vector2(i % 2 == 0 ? -172f : 172f, -(i / 2) * 110f) : new Vector2((i - (s.species.Length - 1) * 0.5f) * 320f, 0f);
+            var b = UiKit.RoundButton(speciesRow, label, at, new Vector2(portrait ? 334f : 300f, 96f),
                 on ? UiKit.OkTint : UiKit.Pill, on ? UiKit.OkGreen : UiKit.GoldInk, () => { picked = id; Render(); }, 20);
             b.interactable = sp.unlocked && !busy;
         }

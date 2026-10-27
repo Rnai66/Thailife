@@ -17,7 +17,7 @@ M.MAX_LEVEL = 100
 M.TIERS = { 1, 10, 25, 50, 75, 100 }
 
 M.ORDER = { "boxer", "fisher", "farmer", "fishpond", "chicken", "cattle", "musician", "merchant",
-            "repair", "computer", "teacher", "programmer", "doctor", "guide" }
+            "repair", "computer", "teacher", "programmer", "doctor", "guide", "politician" }
 
 -- main = also gives main-level XP (false where the source already gives it: training, classes)
 M.TRADES = {
@@ -49,6 +49,8 @@ M.TRADES = {
                  ranks = { "นักเรียนแพทย์", "ผู้ช่วยพยาบาล", "หมออนามัย", "แพทย์ประจำโรงพยาบาล", "แพทย์ผู้เชี่ยวชาญ", "หมอเทวดา" } },
   guide      = { name = "ไกด์นำเที่ยว", how = "พานักท่องเที่ยวนั่งเรือ",
                  ranks = { "ไกด์ฝึกหัด", "คนขับเรือ", "ไกด์นำเที่ยว", "ไกด์มืออาชีพ", "เจ้าของบริษัททัวร์", "ไกด์ระดับโลก" } },
+  politician = { name = "นักการเมือง", how = "สมัครเลือกตั้งที่ อบต. หาเสียงที่ศาลา",
+                 ranks = { "ผู้สมัครหน้าใหม่", "ผู้นำชุมชน", "สมาชิกสภา อบต.", "นายก อบต.", "นายกเทศมนตรี", "รัฐบุรุษ" } },
 }
 
 -- Daily-quest action kinds (quest_core.progress) -> XP per unit for each profession

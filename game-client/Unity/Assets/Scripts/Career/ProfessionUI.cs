@@ -31,7 +31,7 @@ public class ProfessionUI : MonoBehaviour
     {
         { "boxer", "มวย" }, { "fisher", "ปลา" }, { "farmer", "นา" }, { "fishpond", "บ่อ" }, { "chicken", "ไก่" },
         { "cattle", "วัว" }, { "musician", "ดนตรี" }, { "merchant", "ค้า" }, { "repair", "ช่าง" }, { "computer", "คอม" },
-        { "teacher", "ครู" }, { "programmer", "โค้ด" }, { "doctor", "หมอ" }, { "guide", "เรือ" },
+        { "teacher", "ครู" }, { "programmer", "โค้ด" }, { "doctor", "หมอ" }, { "guide", "เรือ" }, { "politician", "สภา" },
     };
 
     private static ProfessionUI instance;
@@ -42,7 +42,7 @@ public class ProfessionUI : MonoBehaviour
     private Button autoButton;
     private State state;
     private Coroutine toast;
-    private bool busy;
+    private bool busy, portrait;
 
     public static void Toggle()
     {
@@ -62,17 +62,19 @@ public class ProfessionUI : MonoBehaviour
 
     private void Awake()
     {
-        var body = UiKit.PremiumWindow(transform, "ProfessionCanvas", new Vector2(1500f, 960f), 56, "icon:school",
+        portrait = UiKit.Portrait;
+        var body = UiKit.PremiumWindow(transform, "ProfessionCanvas", UiKit.WindowSize(new Vector2(1500f, 1000f), 1720f), 56, "icon:school",
             out backdrop, out titleText, out subtitleText, Close, out _);
         titleText.text = "อาชีพของฉัน";
         subtitleText.text = "ทำงานไหนบ่อย อาชีพนั้นเลเวลขึ้น · ฉายาเปลี่ยนที่ Lv 10 · 25 · 50 · 75 · 100";
 
-        shownText = UiKit.Label(body, 26, "", new Vector2(-170f, 362f), new Vector2(1000f, 44f), UiKit.Ink, TextAnchor.MiddleLeft);
+        float top = portrait ? 712f : 362f;
+        shownText = UiKit.Label(body, 26, "", new Vector2(portrait ? -120f : -170f, top), new Vector2(portrait ? 460f : 1000f, 44f), UiKit.Ink, TextAnchor.MiddleLeft);
         shownText.fontStyle = FontStyle.Bold;
-        autoButton = UiKit.RoundButton(body, "อัตโนมัติ (สูงสุด)", new Vector2(540f, 362f), new Vector2(300f, 54f), UiKit.Pill, UiKit.GoldInk,
+        autoButton = UiKit.RoundButton(body, "อัตโนมัติ (สูงสุด)", new Vector2(portrait ? 230f : 540f, top), new Vector2(portrait ? 220f : 300f, 54f), UiKit.Pill, UiKit.GoldInk,
             () => Show(""), 22);
         list = UiKit.Container(body, Vector2.zero);
-        toastText = UiKit.ToastBar(body, new Vector2(0f, -360f), 900f);
+        toastText = UiKit.ToastBar(body, new Vector2(0f, portrait ? -745f : -385f), 900f);
         backdrop.SetActive(false);
     }
 
@@ -88,7 +90,7 @@ public class ProfessionUI : MonoBehaviour
         shownText.text = $"ฉายาที่แสดง: {state.title}" + (state.picked ? "" : "  (อาชีพที่เลเวลสูงสุด)");
         autoButton.interactable = state.picked && !busy;
         for (int i = 0; i < state.trades.Length; i++)
-            Card(state.trades[i], new Vector2(i % 2 == 0 ? -360f : 360f, 300f - (i / 2) * 100f));
+            Card(state.trades[i], portrait ? new Vector2(0f, 650f - i * 96f) : new Vector2(i % 2 == 0 ? -360f : 360f, 300f - (i / 2) * 92f));
     }
 
     private void Card(Trade t, Vector2 at)

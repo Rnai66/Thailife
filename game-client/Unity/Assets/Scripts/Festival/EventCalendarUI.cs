@@ -14,6 +14,7 @@ public class EventCalendarUI : MonoBehaviour
     private RectTransform list;
     private Text emptyText;
     private float nextTick;
+    private bool portrait;
 
     public static void Toggle()
     {
@@ -34,12 +35,13 @@ public class EventCalendarUI : MonoBehaviour
 
     private void Awake()
     {
-        var body = UiKit.PremiumWindow(transform, "CalendarCanvas", new Vector2(1500f, 930f), 56, "icon:fair",
+        portrait = UiKit.Portrait;
+        var body = UiKit.PremiumWindow(transform, "CalendarCanvas", UiKit.WindowSize(new Vector2(1500f, 930f), 1480f), 56, "icon:fair",
             out backdrop, out var title, out var subtitle, Close, out _);
         title.text = "ปฏิทินงานและอีเวนต์";
         subtitle.text = "งานวัด · งานประจำเดือน · คอนเสิร์ตระดับประเทศ";
         list = UiKit.Container(body, Vector2.zero);
-        emptyText = UiKit.Label(body, 28, "ต้องออนไลน์ก่อนจึงจะเห็นปฏิทิน", Vector2.zero, new Vector2(900f, 60f), UiKit.Muted);
+        emptyText = UiKit.Label(body, 28, "ต้องออนไลน์ก่อนจึงจะเห็นปฏิทิน", Vector2.zero, new Vector2(680f, 60f), UiKit.Muted);
         backdrop.SetActive(false);
         if (FestivalClient.Instance != null) FestivalClient.Instance.Changed += _ => { if (backdrop.activeSelf) Render(); };
     }
@@ -59,6 +61,7 @@ public class EventCalendarUI : MonoBehaviour
         if (entries == null) return;
 
         float elapsed = FestivalClient.Instance.SecondsSinceRefresh;
+        if (portrait) { RenderPortrait(entries, elapsed); return; }
         for (int i = 0; i < entries.Length && i < Rows; i++)
         {
             var e = entries[i];
@@ -78,6 +81,28 @@ public class EventCalendarUI : MonoBehaviour
         }
         UiKit.Label(list, 20, "เวลาเป็นเวลาจริง (1 วันในเกม = 24 นาที) · งานประเพณีจัดทั้งที่วัดในหมู่บ้านและในเมือง/ตำบล",
             new Vector2(0f, 300f - Rows * 68f), new Vector2(1400f, 40f), UiKit.Muted);
+    }
+
+    // Upright: one card per event, three lines (date + kind / name / place + countdown)
+    private void RenderPortrait(FestivalClient.CalendarEntry[] entries, float elapsed)
+    {
+        for (int i = 0; i < entries.Length && i < Rows; i++)
+        {
+            var e = entries[i];
+            float y = 570f - i * 118f;
+            var row = UiKit.Panel("Row", list, e.open ? new Color32(0xFF, 0xF3, 0xD0, 0xFF) : Color.white, new Vector2(0f, y), new Vector2(690f, 108f));
+            row.gameObject.AddComponent<Outline>().effectColor = e.open ? UiKit.Gold : UiKit.CardBorder;
+
+            UiKit.Label(row, 24, e.date, new Vector2(-200f, 32f), new Vector2(260f, 36f), UiKit.Ink, TextAnchor.MiddleLeft).fontStyle = FontStyle.Bold;
+            UiKit.PillLabel(row, e.kind, new Vector2(245f, 32f), new Vector2(170f, 36f), KindColor(e.kind), Color.white, 20);
+            UiKit.Label(row, 28, e.name, new Vector2(0f, -2f), new Vector2(660f, 38f), UiKit.Ink, TextAnchor.MiddleLeft).fontStyle = FontStyle.Bold;
+            UiKit.Label(row, 21, e.where, new Vector2(-150f, -36f), new Vector2(360f, 32f), UiKit.Muted, TextAnchor.MiddleLeft);
+            string status = e.open ? $"กำลังจัด! เหลือ {Duration(e.ends_s - elapsed)}" : $"อีก {Duration(e.in_s - elapsed)}";
+            UiKit.Label(row, 22, status, new Vector2(160f, -36f), new Vector2(340f, 32f), e.open ? UiKit.PayGreen : UiKit.Price, TextAnchor.MiddleRight).fontStyle = FontStyle.Bold;
+        }
+        var note = UiKit.Label(list, 20, "เวลาเป็นเวลาจริง (1 วันในเกม = 24 นาที)\nงานประเพณีจัดทั้งที่วัดในหมู่บ้านและในเมือง/ตำบล",
+            new Vector2(0f, 570f - Rows * 118f + 20f), new Vector2(680f, 60f), UiKit.Muted);
+        note.lineSpacing = 1.1f;
     }
 
     private static Color KindColor(string kind) =>

@@ -33,21 +33,22 @@ public class NameUI : MonoBehaviour
 
     private void Awake()
     {
-        var body = UiKit.PremiumWindow(transform, "NameCanvas", new Vector2(1100f, 880f), 80, "ช",
+        var body = UiKit.PremiumWindow(transform, "NameCanvas", UiKit.WindowSize(new Vector2(1100f, 880f), 880f), 80, "ช",
             out backdrop, out var header, out var sub, null, out _);
         header.text = "ชื่อตัวละคร";
         sub.text = "หมู่บ้าน";
-        titleText = UiKit.Label(body, 40, "", new Vector2(0f, 270f), new Vector2(980f, 100f), UiKit.Ink);
+        float w = UiKit.Portrait ? 680f : 980f; // text width (upright window is narrower)
+        titleText = UiKit.Label(body, 40, "", new Vector2(0f, 270f), new Vector2(w, 100f), UiKit.Ink);
         titleText.fontStyle = FontStyle.Bold;
 
         // Text input (legacy InputField opens the phone keyboard, Thai input included)
 
-        var field = UiKit.Panel("NameInput", body, Color.white, new Vector2(0f, 0f), new Vector2(760f, 110f), shadow: true);
+        var field = UiKit.Panel("NameInput", body, Color.white, new Vector2(0f, 0f), new Vector2(Mathf.Min(760f, w), 110f), shadow: true);
         field.gameObject.AddComponent<Outline>().effectColor = UiKit.Gold;
-        var text = UiKit.Label(field, 44, "", Vector2.zero, new Vector2(700f, 96f), UiKit.Ink, TextAnchor.MiddleLeft);
+        var text = UiKit.Label(field, 44, "", Vector2.zero, new Vector2(Mathf.Min(760f, w) - 60f, 96f), UiKit.Ink, TextAnchor.MiddleLeft);
         text.supportRichText = false;
         text.resizeTextForBestFit = false;
-        var placeholder = UiKit.Label(field, 40, "พิมพ์ชื่อตรงนี้", Vector2.zero, new Vector2(700f, 96f), UiKit.Muted, TextAnchor.MiddleLeft);
+        var placeholder = UiKit.Label(field, 40, "พิมพ์ชื่อตรงนี้", Vector2.zero, new Vector2(Mathf.Min(760f, w) - 60f, 96f), UiKit.Muted, TextAnchor.MiddleLeft);
         placeholder.fontStyle = FontStyle.Italic;
         input = field.gameObject.AddComponent<InputField>();
         input.textComponent = text;
@@ -55,7 +56,7 @@ public class NameUI : MonoBehaviour
         input.characterLimit = MaxChars;
         input.lineType = InputField.LineType.SingleLine;
 
-        messageText = UiKit.Label(body, 26, "", new Vector2(0f, -95f), new Vector2(980f, 60f), UiKit.Muted);
+        messageText = UiKit.Label(body, 26, "", new Vector2(0f, -95f), new Vector2(w, 60f), UiKit.Muted);
         UiKit.RoundButton(body, "ตกลง", new Vector2(-150f, -230f), new Vector2(270f, 90f), UiKit.PayGreen, Color.white, Save, 38);
         closeButton = UiKit.RoundButton(body, "ยกเลิก", new Vector2(150f, -230f), new Vector2(270f, 90f), UiKit.Pill, UiKit.Danger, Close, 38);
         backdrop.SetActive(false);

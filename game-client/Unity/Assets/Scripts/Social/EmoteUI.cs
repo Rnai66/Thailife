@@ -21,27 +21,28 @@ public class EmoteUI : MonoBehaviour
 
     private void Awake()
     {
-        var body = UiKit.PremiumWindow(transform, "EmoteCanvas", new Vector2(1200f, 900f), 55, "ท",
+        bool P = UiKit.Portrait; // upright: the same two columns, narrower
+        var body = UiKit.PremiumWindow(transform, "EmoteCanvas", UiKit.WindowSize(new Vector2(1200f, 900f), 1150f), 55, "ท",
             out backdrop, out var title, out var subtitle, Close, out _);
         title.text = "ทักทาย";
         subtitle.text = "ผู้เล่นที่อยู่ใกล้ๆ จะเห็นท่าทางและข้อความของคุณ";
 
-        UiKit.RoundButton(body, "ไหว้ สวัสดี", new Vector2(-280f, 250f), new Vector2(520f, 120f), UiKit.Gold, UiKit.GoldInk,
+        UiKit.RoundButton(body, "ไหว้ สวัสดี", new Vector2(P ? -172f : -280f, P ? 400f : 250f), new Vector2(P ? 335f : 520f, 120f), UiKit.Gold, UiKit.GoldInk,
             () => Do(PlayerAction.Wai, QuickChat.Hello), 40);
-        UiKit.RoundButton(body, "โบกมือ", new Vector2(280f, 250f), new Vector2(520f, 120f), UiKit.Teak, UiKit.GoldText,
+        UiKit.RoundButton(body, "โบกมือ", new Vector2(P ? 172f : 280f, P ? 400f : 250f), new Vector2(P ? 335f : 520f, 120f), UiKit.Teak, UiKit.GoldText,
             () => Do(PlayerAction.Wave, -1), 40);
 
-        UiKit.Label(body, 26, "ข้อความสั้น", new Vector2(-430f, 150f), new Vector2(300f, 40f), UiKit.Muted, TextAnchor.MiddleLeft);
+        UiKit.Label(body, 26, "ข้อความสั้น", new Vector2(P ? -190f : -430f, P ? 300f : 150f), new Vector2(300f, 40f), UiKit.Muted, TextAnchor.MiddleLeft);
         for (int i = 1; i < QuickChat.Phrases.Length; i++)
         {
             int phrase = i, slot = i - 1;
-            var pos = new Vector2(slot % 2 == 0 ? -280f : 280f, 75f - (slot / 2) * 100f);
-            var b = UiKit.Panel("Phrase", body, Color.white, pos, new Vector2(520f, 84f), shadow: true);
+            var pos = new Vector2(slot % 2 == 0 ? (P ? -172f : -280f) : (P ? 172f : 280f), (P ? 225f : 75f) - (slot / 2) * 100f);
+            var b = UiKit.Panel("Phrase", body, Color.white, pos, new Vector2(P ? 335f : 520f, 84f), shadow: true);
             b.gameObject.AddComponent<Outline>().effectColor = UiKit.CardBorder;
             var button = b.gameObject.AddComponent<Button>();
             button.onClick.AddListener(() => Do(null, phrase));
             b.gameObject.AddComponent<PressScale>();
-            UiKit.Label(b, 32, QuickChat.Phrases[i], Vector2.zero, new Vector2(500f, 76f), UiKit.Ink).fontStyle = FontStyle.Bold;
+            UiKit.Label(b, 32, QuickChat.Phrases[i], Vector2.zero, new Vector2(P ? 315f : 500f, 76f), UiKit.Ink).fontStyle = FontStyle.Bold;
         }
         backdrop.SetActive(false);
     }

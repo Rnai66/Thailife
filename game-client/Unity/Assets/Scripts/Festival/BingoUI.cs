@@ -50,7 +50,7 @@ public class BingoUI : MonoBehaviour
 
     private void Awake()
     {
-        body = UiKit.PremiumWindow(transform, "BingoCanvas", new Vector2(1540f, 900f), 58, "icon:fair",
+        body = UiKit.PremiumWindow(transform, "BingoCanvas", UiKit.WindowSize(new Vector2(1540f, 900f), 1530f), 58, "icon:fair",
             out backdrop, out title, out subtitle, Close, out _);
         subtitle.text = "ครบแถวเร็ว ได้รางวัลใหญ่ · แจ็กพอต 500 บาท";
 
@@ -95,6 +95,12 @@ public class BingoUI : MonoBehaviour
         buyButton = UiKit.RoundButton(caller, "", new Vector2(0f, -270f), new Vector2(320f, 76f), UiKit.Gold, UiKit.GoldInk, Buy, 26);
 
         toast = UiKit.ToastBar(body, new Vector2(0f, -320f), 900f);
+        if (UiKit.Portrait) // upright: the card on top, the caller underneath
+        {
+            UiKit.Stack(card, new Vector2(0f, 340f));
+            UiKit.Stack(caller, new Vector2(0f, -330f));
+            UiKit.Stack((RectTransform)toast.transform.parent, new Vector2(0f, 5f));
+        }
         Blank();
         backdrop.SetActive(false);
     }

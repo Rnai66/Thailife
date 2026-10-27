@@ -39,7 +39,7 @@ public class ContestUI : MonoBehaviour
 
     private void Awake()
     {
-        var body = UiKit.PremiumWindow(transform, "ContestCanvas", new Vector2(1500f, 900f), 50, "icon:fair",
+        var body = UiKit.PremiumWindow(transform, "ContestCanvas", UiKit.WindowSize(new Vector2(1500f, 900f), 1480f), 50, "icon:fair",
             out backdrop, out titleText, out subtitleText, Hide, out _);
         titleText.text = "ประกวดไก่สวย";
         subtitleText.text = "งานวัดตามประเพณี · สงกรานต์ ออกพรรษา กฐิน ลอยกระทง ฯลฯ";
@@ -80,6 +80,13 @@ public class ContestUI : MonoBehaviour
         board = UiKit.Container(boardPanel, new Vector2(0f, 200f));
 
         toastText = UiKit.ToastBar(body, new Vector2(0f, -330f), 800f);
+        if (UiKit.Portrait) // upright: the left column moves to the top centre, the results board goes under it
+        {
+            var toastBar = toastText.transform.parent;
+            foreach (RectTransform child in body)
+                if (child != boardPanel && child != toastBar) child.anchoredPosition += new Vector2(370f, 322f);
+            UiKit.Stack(boardPanel, new Vector2(0f, -315f));
+        }
         backdrop.SetActive(false);
         ShowBoardHint();
     }

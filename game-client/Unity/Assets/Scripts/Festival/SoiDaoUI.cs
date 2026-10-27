@@ -52,7 +52,7 @@ public class SoiDaoUI : MonoBehaviour
 
     private void Awake()
     {
-        body = UiKit.PremiumWindow(transform, "SoiDaoCanvas", new Vector2(1540f, 900f), 58, "icon:fair",
+        body = UiKit.PremiumWindow(transform, "SoiDaoCanvas", UiKit.WindowSize(new Vector2(1540f, 900f), 1440f), 58, "icon:fair",
             out backdrop, out title, out subtitle, Close, out _);
         subtitle.text = "สอยสลากจากต้นไม้ ลุ้นของรางวัลจากงานบุญ";
 
@@ -107,6 +107,10 @@ public class SoiDaoUI : MonoBehaviour
         }
 
         toast = UiKit.ToastBar(body, new Vector2(0f, -320f), 900f);
+        if (UiKit.Portrait) // upright: the tree on top, the prize shelves underneath
+        {
+            UiKit.Stack(tree, new Vector2(0f, 334f), 0.9f);
+            UiKit.Stack(board, new Vector2(0f, -292f));        }
         backdrop.SetActive(false);
     }
 

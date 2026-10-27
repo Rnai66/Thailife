@@ -14,6 +14,7 @@ public class ScreenFit : MonoBehaviour
     public const float PortraitWidth = 1240f;
     private const float LandscapeInset = 120f, PortraitInset = 24f;
     private const float UnderHud = 240f; // top-centre banners drop below the HUD's two top columns
+    private const float MaxPortraitScale = 1.7f;
 
     public static bool Portrait => Screen.height > Screen.width;
 
@@ -89,12 +90,14 @@ public class ScreenFit : MonoBehaviour
         float unitsPerPixel = portrait ? PortraitWidth / Mathf.Max(1, Screen.width) : 1f;
         PinEdges(portrait, unitsPerPixel);
 
+        // Windows built for portrait (UiKit.Portrait, ~760 wide) are scaled up to fill the width, so
+        // their text reads at phone size; wide landscape windows still shrink to fit.
         float width = PortraitWidth - 40f;
         float height = Screen.height * unitsPerPixel * 0.92f;
         cards.RemoveAll(c => c == null);
         foreach (var card in cards)
         {
-            float scale = portrait ? Mathf.Min(1f, width / card.sizeDelta.x, height / card.sizeDelta.y) : 1f;
+            float scale = portrait ? Mathf.Min(MaxPortraitScale, width / card.sizeDelta.x, height / card.sizeDelta.y) : 1f;
             card.localScale = Vector3.one * scale;
         }
     }

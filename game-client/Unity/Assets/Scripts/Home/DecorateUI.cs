@@ -94,11 +94,11 @@ public class DecorateUI : MonoBehaviour
         toastText = UiKit.ToastBar(canvasGo.transform, new Vector2(0f, -240f), 700f);
 
         // "เพิ่มของ" list
-        var body = UiKit.PremiumWindow(transform, "FurnitureList", new Vector2(1300f, 860f), 56, "icon:home",
+        var body = UiKit.PremiumWindow(transform, "FurnitureList", UiKit.WindowSize(new Vector2(1300f, 860f), 1400f), 56, "icon:home",
             out listBackdrop, out var title, out var subtitle, () => listBackdrop.SetActive(false), out _);
         title.text = "ของในบ้าน";
         subtitle.text = "เลือกของที่จะวาง · ซื้อเพิ่มที่ร้านค้าชุมชน แท็บแต่งบ้าน";
-        listGrid = UiKit.Container(body, new Vector2(0f, 270f));
+        listGrid = UiKit.Container(body, new Vector2(0f, UiKit.Portrait ? 540f : 270f));
         listBackdrop.SetActive(false);
 
         // Gold ring under the selected piece
@@ -187,8 +187,10 @@ public class DecorateUI : MonoBehaviour
             foreach (var o in owned)
             {
                 var item = o;
-                float x = -400f + (i % 3) * 400f, y = -(i / 3) * 128f;
+                bool upright = UiKit.Portrait; // upright: two per row, a little smaller
+                float x = upright ? (i % 2 == 0 ? -172f : 172f) : -400f + (i % 3) * 400f, y = -(i / (upright ? 2 : 3)) * (upright ? 116f : 128f);
                 var card = UiKit.Panel("Furniture", listGrid, Color.white, new Vector2(x, y), new Vector2(380f, 116f), shadow: true);
+                if (upright) card.localScale = new Vector3(0.88f, 0.88f, 1f);
                 card.gameObject.AddComponent<Outline>().effectColor = UiKit.CardBorder;
                 bool pic = UiKit.Art("Icons/furn_" + o.item) != null;
                 if (pic) UiKit.IconTile(card, "furn_" + o.item, new Vector2(-138f, 0f), new Vector2(88f, 88f));
@@ -201,7 +203,7 @@ public class DecorateUI : MonoBehaviour
             }
         }
         if (i == 0)
-            UiKit.Label(listGrid, 28, "ยังไม่มีเฟอร์นิเจอร์\nซื้อได้ที่ร้านค้าชุมชน แท็บ แต่งบ้าน", new Vector2(0f, -200f), new Vector2(900f, 110f), UiKit.Muted);
+            UiKit.Label(listGrid, 28, "ยังไม่มีเฟอร์นิเจอร์\nซื้อได้ที่ร้านค้าชุมชน แท็บ แต่งบ้าน", new Vector2(0f, -200f), new Vector2(UiKit.Portrait ? 660f : 900f, 110f), UiKit.Muted);
         listBackdrop.SetActive(true);
     }
 

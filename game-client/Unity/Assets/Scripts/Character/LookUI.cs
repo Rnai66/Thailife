@@ -44,7 +44,7 @@ public class LookUI : MonoBehaviour
 
     private void Awake()
     {
-        body = UiKit.PremiumWindow(transform, "LookCanvas", new Vector2(1640f, 920f), 85, "icon:home",
+        body = UiKit.PremiumWindow(transform, "LookCanvas", UiKit.WindowSize(new Vector2(1640f, 920f), 1560f), 85, "icon:home",
             out backdrop, out title, out subtitle, Close, out _);
         var stage = UiKit.Panel("Stage", body, new Color(0.98f, 0.93f, 0.82f), new Vector2(-560f, 10f), new Vector2(460f, 660f), shadow: true);
         stage.gameObject.AddComponent<Outline>().effectColor = UiKit.Gold;
@@ -56,9 +56,18 @@ public class LookUI : MonoBehaviour
         rowsRoot = UiKit.Container(body, new Vector2(230f, 0f));
         costText = UiKit.Label(body, 28, "", new Vector2(230f, -300f), new Vector2(960f, 44f), UiKit.Ink);
         costText.font = ThaiFont.Display;
-        UiKit.RoundButton(body, "สุ่ม", new Vector2(-10f, -360f), new Vector2(200f, 70f), UiKit.Pill, UiKit.Price, Shuffle, 28);
+        var shuffle = UiKit.RoundButton(body, "สุ่ม", new Vector2(-10f, -360f), new Vector2(200f, 70f), UiKit.Pill, UiKit.Price, Shuffle, 28);
         confirm = UiKit.RoundButton(body, "ยืนยัน", new Vector2(420f, -360f), new Vector2(360f, 76f), UiKit.PayGreen, Color.white, Confirm, 32);
         toast = UiKit.ToastBar(body, new Vector2(0f, 300f), 900f);
+        if (UiKit.Portrait) // upright: the character on top, the option rows (shrunk to fit) under it, buttons at the bottom
+        {
+            UiKit.Stack(stage, new Vector2(0f, 407f), 0.85f);
+            UiKit.Stack(rowsRoot, new Vector2(0f, -120f), 0.72f);
+            costText.rectTransform.sizeDelta = new Vector2(680f, 44f);
+            UiKit.Stack(costText.rectTransform, new Vector2(0f, -400f));
+            UiKit.Stack((RectTransform)shuffle.transform, new Vector2(-180f, -490f));
+            UiKit.Stack((RectTransform)confirm.transform, new Vector2(120f, -490f));
+        }
         backdrop.SetActive(false);
     }
 
