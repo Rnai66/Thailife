@@ -208,12 +208,12 @@ public class FishingUI : MonoBehaviour
 
         var font = ThaiFont.Display; // rounded cartoon lettering (Mitr)
 
-        // Big round button above the A/B/C/D diamond
+        // Big round button above the action cluster
         var buttonGo = new GameObject("FishButton", typeof(RectTransform), typeof(Image), typeof(Button));
         var rt = (RectTransform)buttonGo.transform;
         rt.SetParent(canvasGo.transform, false);
         rt.anchorMin = rt.anchorMax = new Vector2(1f, 0f);
-        rt.anchoredPosition = new Vector2(-300f, 600f);
+        rt.anchoredPosition = new Vector2(-300f, 650f); // above the action cluster
         rt.sizeDelta = new Vector2(220f, 220f);
         buttonImage = buttonGo.GetComponent<Image>();
         button = buttonGo.GetComponent<Button>();

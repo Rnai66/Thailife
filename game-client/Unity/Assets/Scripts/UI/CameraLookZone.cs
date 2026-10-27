@@ -42,8 +42,10 @@ public class CameraLookZone : MonoBehaviour, IPointerDownHandler, IPointerUpHand
             return;
         }
 
-        cameraFollow.Rotate(eventData.delta.x / Screen.width * degreesPerScreenWidth);
-        cameraFollow.Tilt(-eventData.delta.y / Screen.height * degreesPerScreenHeight); // drag up = look from lower
+        // Measured against the long and short sides so a drag turns the same amount upright or sideways
+        float wide = Mathf.Max(Screen.width, Screen.height), narrow = Mathf.Min(Screen.width, Screen.height);
+        cameraFollow.Rotate(eventData.delta.x / wide * degreesPerScreenWidth);
+        cameraFollow.Tilt(-eventData.delta.y / narrow * degreesPerScreenHeight); // drag up = look from lower
     }
 
     private float PinchDistance()

@@ -2,6 +2,8 @@ using UnityEngine;
 
 // Soft background music (เพลงบรรเลง) made in code: a plucked khim-like melody on the Thai pentatonic
 // scale over a gentle bass and pad. Notes are written with wrap-around so every loop is seamless.
+// Everything sits in D around 115 BPM, the key and tempo of the recorded ลายไทย tune (Thaimusic),
+// so switching tracks or walking past a stage never clashes with it.
 public static class SynthMusic
 {
     private const int Rate = SynthSounds.Rate;
@@ -16,9 +18,9 @@ public static class SynthMusic
 
     public static readonly Track[] Tracks =
     {
-        new Track { Name = "ทุ่งนายามเช้า", Root = 293.66f, Bpm = 84f, Seed = 3, Brightness = 0.5f },
-        new Track { Name = "ลมเย็นริมคลอง", Root = 392f, Bpm = 72f, Seed = 8, Brightness = 0.8f },
-        new Track { Name = "ราตรีหมู่บ้าน", Root = 220f, Bpm = 60f, Seed = 21, Brightness = 0.25f },
+        new Track { Name = "ทุ่งนายามเช้า", Root = 293.66f, Bpm = 115f, Seed = 3, Brightness = 0.5f },
+        new Track { Name = "ลมเย็นริมคลอง", Root = 440f, Bpm = 86.25f, Seed = 8, Brightness = 0.8f },
+        new Track { Name = "ราตรีหมู่บ้าน", Root = 293.66f, Bpm = 57.5f, Seed = 21, Brightness = 0.25f },
     };
 
     // "bgm0", "bgm1", … and "concert" (the beach stage)
@@ -85,13 +87,13 @@ public static class SynthMusic
     // Upbeat band loop for the beach concerts: kick, snare, hi-hat, bass and a bright plucked riff
     private static float[] Concert()
     {
-        const float bpm = 124f;
+        const float bpm = 115f;
         const int bars = 8, steps = 16; // sixteenth notes
         float step = 60f / bpm / 4f;
         int length = Mathf.CeilToInt(bars * steps * step * Rate);
         var d = new float[length];
         var rng = new System.Random(42);
-        float root = 110f;
+        float root = 146.83f; // D
         float[] chords = { 0, 9, 5, 7 };               // I – vi – IV – V
         int[] riff = { 12, 16, 19, 16, 21, 19, 16, 14 }; // pentatonic, over the chord root
         for (int bar = 0; bar < bars; bar++)
@@ -117,7 +119,7 @@ public static class SynthMusic
     // kick on every beat, ฉิ่ง (small cymbals) on the off-beats
     private static float[] MorLam()
     {
-        const float bpm = 140f;
+        const float bpm = 138f; // 1.2 × 115
         const int bars = 8, steps = 16;
         float step = 60f / bpm / 4f;
         int length = Mathf.CeilToInt(bars * steps * step * Rate);
@@ -157,13 +159,13 @@ public static class SynthMusic
     // soft pad; unhurried so the circle can walk and turn its hands
     private static float[] Ramwong()
     {
-        const float bpm = 104f;
+        const float bpm = 115f;
         const int bars = 8, steps = 8; // eighth notes
         float step = 60f / bpm / 2f;
         int length = Mathf.CeilToInt(bars * steps * step * Rate);
         var d = new float[length];
         var rng = new System.Random(19);
-        float root = 261.63f; // C
+        float root = 293.66f; // D
         int[] tune = { 0, 2, 4, 7, 9, 7, 4, 2, 4, 7, 9, 12, 9, 7, 4, 7, 9, 7, 4, 2, 0, 2, 4, 2, 0, -3, 0, 2, 4, 2, 0, 0 };
         float[] chords = { 0, 0, 5, 7, 0, 9, 5, 7 };
         for (int bar = 0; bar < bars; bar++)

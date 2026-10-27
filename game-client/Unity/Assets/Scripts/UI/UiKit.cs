@@ -288,6 +288,7 @@ public static class UiKit
 
         var card = Rect("Card", dim, Paper);
         card.sizeDelta = cardSize;
+        ScreenFit.FitCard(card); // shrinks to the screen width when the phone is upright
         return card;
     }
 

@@ -181,7 +181,7 @@ public static class SynthSounds
     // Loop: ranat ek melody in octaves over ching (ฉิ่ง) and a klong drum, 8 bars of 8 eighth notes
     private static float[] Ranat()
     {
-        const float beat = 0.2f; // one eighth note
+        const float beat = 60f / 230f; // one eighth note at 115 BPM, the recorded tune's tempo
         const int steps = 64;
         var d = Buffer(beat * steps);
         // Thai pentatonic (do re mi sol la) across two octaves, as scale degrees
@@ -193,7 +193,7 @@ public static class SynthSounds
             5, 6, 7, 8, 9, 8, 7, 6,   5, 6, 7, 6, 5, 4, 3, -1,
             2, 3, 4, 5, 4, 3, 2, 1,   0, 2, 1, 2, 3, 2, 0, -1,
         };
-        const float root = 440f;
+        const float root = 587.33f; // D, the recorded tune's key
         for (int s = 0; s < steps; s++)
         {
             int start = (int)(s * beat * Rate);

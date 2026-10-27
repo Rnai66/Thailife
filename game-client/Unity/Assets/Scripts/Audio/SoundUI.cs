@@ -42,12 +42,13 @@ public class SoundUI : MonoBehaviour
         // Music choice: off + each track
         UiKit.Label(body, 30, "เพลงบรรเลง", new Vector2(-380f, 270f), new Vector2(320f, 50f), UiKit.Ink, TextAnchor.MiddleLeft).fontStyle = FontStyle.Bold;
         var names = new List<string> { "ปิดเพลง" };
-        foreach (var t in SynthMusic.Tracks) names.Add(t.Name);
+        for (int t = 0; t < GameAudio.TrackCount; t++) names.Add(GameAudio.TrackName(t));
+        float gap = Mathf.Min(270f, 1080f / names.Count);
         for (int i = 0; i < names.Count; i++)
         {
             int track = i - 1;
-            var b = UiKit.RoundButton(body, names[i], new Vector2(-405f + i * 270f, 190f), new Vector2(250f, 80f), Color.white, UiKit.Ink,
-                () => { GameAudio.Track = track; Render(); }, 26);
+            var b = UiKit.RoundButton(body, names[i], new Vector2((i - (names.Count - 1) * 0.5f) * gap, 190f), new Vector2(gap - 16f, 80f), Color.white, UiKit.Ink,
+                () => { GameAudio.Track = track; Render(); }, 24);
             b.gameObject.AddComponent<Outline>().effectColor = UiKit.CardBorder;
             trackButtons.Add(b.GetComponent<Image>());
         }

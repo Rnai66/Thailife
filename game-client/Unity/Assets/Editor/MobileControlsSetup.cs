@@ -9,7 +9,8 @@ using UnityEngine.InputSystem.UI;
 
 // Menu: Thai Life > Add Mobile Controls
 // Adds a screen-space canvas with a floating joystick (left half), a camera drag zone (right half)
-// and A/B/C/D action buttons in a PlayStation-style diamond at the bottom right.
+// and a PUBG-style action cluster at the bottom right (big punch button, kick / block / jump around it).
+// Works held sideways or upright: ScreenFit re-scales the canvas for portrait.
 public static class MobileControlsSetup
 {
     private const string CanvasName = "MobileControls";
@@ -17,10 +18,11 @@ public static class MobileControlsSetup
     [MenuItem("Thai Life/Add Mobile Controls")]
     private static void AddMobileControls() => Build(askBeforeReplace: true);
 
-    // Adds the controls only if they are missing (used by Repair Scene)
+    // Adds the controls if they are missing or still the old A/B/C/D diamond (scene builders, Repair Scene)
     internal static void EnsureMobileControls()
     {
-        if (GameObject.Find(CanvasName) == null) Build(askBeforeReplace: false);
+        var existing = GameObject.Find(CanvasName);
+        if (existing == null || existing.transform.Find("ActionButtons/Button_Punch") == null) Build(askBeforeReplace: false);
     }
 
     private static void Build(bool askBeforeReplace)
@@ -46,7 +48,7 @@ public static class MobileControlsSetup
         var actions = player.GetComponent<PlayerActions>();
         if (actions == null) actions = Undo.AddComponent<PlayerActions>(player.gameObject);
 
-        // Canvas scaled for phones in landscape
+        // Canvas laid out for 1920x1080 landscape; ScreenFit adapts it in portrait
         var canvasGo = new GameObject(CanvasName, typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
         Undo.RegisterCreatedObjectUndo(canvasGo, "Add Mobile Controls");
         var canvas = canvasGo.GetComponent<Canvas>();
@@ -87,59 +89,45 @@ public static class MobileControlsSetup
         Debug.Log("[ThaiLife] Mobile controls added. Save (Cmd+S), press Play, drag on the left half to walk and the right half to turn the camera.");
     }
 
+    // PUBG-style cluster at the bottom right: a big punch button with kick, block and jump in an arc
+    // around it, each a round glass button with an icon (looks built at runtime by ActionButton).
+    // The group is pinned 120 units in from the corner; ScreenFit moves it to the edge in portrait.
     private static void CreateActionButtons(Transform canvas, PlayerActions actions, Sprite circle)
     {
         var group = new GameObject("ActionButtons", typeof(RectTransform));
         var rt = (RectTransform)group.transform;
         rt.SetParent(canvas, false);
         rt.anchorMin = rt.anchorMax = new Vector2(1f, 0f);
-        rt.pivot = new Vector2(0.5f, 0.5f);
-        rt.sizeDelta = new Vector2(440f, 440f);
-        rt.anchoredPosition = new Vector2(-300f, 280f);
+        rt.pivot = new Vector2(1f, 0f);
+        rt.sizeDelta = new Vector2(560f, 500f);
+        rt.anchoredPosition = new Vector2(-120f, 40f);
 
-        const float spacing = 140f;
-        CreateActionButton(rt, "A", "Jump",  ActionInput.Jump,  new Vector2(0f, -spacing), new Color(0.35f, 0.55f, 1f),  actions, circle);
-        CreateActionButton(rt, "B", "Kick",  ActionInput.Kick,  new Vector2(spacing, 0f),  new Color(1f, 0.35f, 0.35f),  actions, circle);
-        CreateActionButton(rt, "C", "Punch", ActionInput.Punch, new Vector2(-spacing, 0f), new Color(1f, 0.5f, 0.85f),   actions, circle);
-        CreateActionButton(rt, "D", "Block", ActionInput.Block, new Vector2(0f, spacing),  new Color(0.35f, 0.85f, 0.5f), actions, circle);
+        var main = new Vector2(-160f, 170f);
+        const float arc = 225f;
+        Vector2 Around(float degrees) => main + arc * new Vector2(Mathf.Cos(degrees * Mathf.Deg2Rad), Mathf.Sin(degrees * Mathf.Deg2Rad));
+
+        CreateActionButton(rt, "Punch", ActionInput.Punch, main,        230f, "ctl_punch", "ต่อย",    new Color(1f, 0.42f, 0.32f), actions, circle);
+        CreateActionButton(rt, "Kick",  ActionInput.Kick,  Around(180f), 150f, "ctl_kick",  "เตะ",     new Color(1f, 0.7f, 0.25f),  actions, circle);
+        CreateActionButton(rt, "Block", ActionInput.Block, Around(135f), 134f, "ctl_block", "ป้องกัน", new Color(0.4f, 0.85f, 0.55f), actions, circle);
+        CreateActionButton(rt, "Jump",  ActionInput.Jump,  Around(90f),  140f, "ctl_jump",  "กระโดด",  new Color(0.45f, 0.7f, 1f),  actions, circle);
     }
 
-    private static void CreateActionButton(RectTransform parent, string letter, string action, ActionInput input,
-        Vector2 position, Color color, PlayerActions actions, Sprite circle)
+    private static void CreateActionButton(RectTransform parent, string action, ActionInput input, Vector2 position, float size,
+        string icon, string label, Color accent, PlayerActions actions, Sprite circle)
     {
-        var button = CreateImage($"Button{letter}_{action}", parent, circle, new Color(color.r, color.g, color.b, 0.75f), 150f);
-        button.anchorMin = button.anchorMax = new Vector2(0.5f, 0.5f);
+        var button = CreateImage($"Button_{action}", parent, circle, new Color(0f, 0f, 0f, 0.4f), size);
+        button.anchorMin = button.anchorMax = new Vector2(1f, 0f);
         button.anchoredPosition = position;
         button.GetComponent<Image>().raycastTarget = true;
-
-        var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        CreateLabel(button, letter, font, 64, new Vector2(0f, 12f));
-        CreateLabel(button, action, font, 24, new Vector2(0f, -38f));
 
         var component = button.gameObject.AddComponent<ActionButton>();
         var so = new SerializedObject(component);
         so.FindProperty("actions").objectReferenceValue = actions;
         so.FindProperty("input").enumValueIndex = (int)input;
+        so.FindProperty("icon").stringValue = icon;
+        so.FindProperty("label").stringValue = label;
+        so.FindProperty("accent").colorValue = accent;
         so.ApplyModifiedPropertiesWithoutUndo();
-    }
-
-    private static void CreateLabel(RectTransform parent, string text, Font font, int size, Vector2 position)
-    {
-        var go = new GameObject("Label_" + text, typeof(RectTransform), typeof(Text));
-        var rt = (RectTransform)go.transform;
-        rt.SetParent(parent, false);
-        rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
-        rt.sizeDelta = new Vector2(150f, 70f);
-        rt.anchoredPosition = position;
-
-        var label = go.GetComponent<Text>();
-        label.text = text;
-        label.font = font;
-        label.fontSize = size;
-        label.fontStyle = FontStyle.Bold;
-        label.alignment = TextAnchor.MiddleCenter;
-        label.color = Color.white;
-        label.raycastTarget = false;
     }
 
     private static void EnsureEventSystem()

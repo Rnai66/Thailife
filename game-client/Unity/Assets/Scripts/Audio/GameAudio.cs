@@ -13,11 +13,24 @@ public class GameAudio : MonoBehaviour
 
     public static Transform Player => instance != null ? instance.player : null;
 
-    // -1 = no music; otherwise an index into SynthMusic.Tracks
+    // -1 = no music; 0 = the recorded ลายไทย tune (Resources/Audio/Music); 1… = SynthMusic.Tracks
     public static int Track
     {
         get => PlayerPrefs.GetInt(TrackKey, 0);
-        set { PlayerPrefs.SetInt(TrackKey, value); PlayerPrefs.Save(); if (instance != null) instance.wantedTrack = value; }
+        set { PlayerPrefs.SetInt(TrackKey, value); PlayerPrefs.Save(); PrepareTrack(value); if (instance != null) instance.wantedTrack = value; }
+    }
+
+    public static int TrackCount => 1 + SynthMusic.Tracks.Length;
+
+    public static string TrackName(int track) => track == 0 ? "ลายไทยบรรเลง" : SynthMusic.Tracks[track - 1].Name;
+
+    // The synth tracks are made on a worker thread: null until ready
+    private static AudioClip TrackClip(int track) =>
+        track == 0 ? Resources.Load<AudioClip>("Audio/Music/ThaiMusic") : SynthSounds.TryGet("bgm" + (track - 1));
+
+    private static void PrepareTrack(int track)
+    {
+        if (track > 0) SynthSounds.Prepare("bgm" + (track - 1));
     }
 
     public static float MusicVolume
@@ -106,8 +119,8 @@ public class GameAudio : MonoBehaviour
         crickets.Play();
         waves.Play();
         fairMusic.Play();
-        wantedTrack = Track;
-        if (wantedTrack >= 0) SynthSounds.Prepare("bgm" + wantedTrack);
+        wantedTrack = Mathf.Min(Track, TrackCount - 1);
+        PrepareTrack(wantedTrack);
         SceneManager.sceneLoaded += OnSceneLoaded;
         OnSceneLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
     }
@@ -166,7 +179,7 @@ public class GameAudio : MonoBehaviour
             }
             else
             {
-                var clip = SynthSounds.TryGet("bgm" + wantedTrack);
+                var clip = TrackClip(wantedTrack);
                 if (clip != null)
                 {
                     bgm.clip = clip;
@@ -176,7 +189,9 @@ public class GameAudio : MonoBehaviour
                 }
             }
         }
-        float target = playingTrack >= 0 ? 0.4f * music * (1f - Mathf.Clamp01(fair * 2f)) : 0f;
+        // The recording is mastered louder than the synth tracks
+        float level = playingTrack == 0 ? 0.3f : 0.4f;
+        float target = playingTrack >= 0 ? level * music * (1f - Mathf.Clamp01(fair * 2f)) : 0f;
         bgm.volume = Mathf.MoveTowards(bgm.volume, target, dt * 0.4f);
     }
 

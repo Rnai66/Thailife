@@ -78,12 +78,12 @@ public class ContextButton : MonoBehaviour
 
         var font = ThaiFont.Font;
 
-        // Same spot as the fishing button: above the A/B/C/D diamond
+        // Same spot as the fishing button: above the action cluster
         var buttonGo = new GameObject("ActionButton", typeof(RectTransform), typeof(Image), typeof(Button));
         var rt = (RectTransform)buttonGo.transform;
         rt.SetParent(canvasGo.transform, false);
         rt.anchorMin = rt.anchorMax = new Vector2(1f, 0f);
-        rt.anchoredPosition = new Vector2(-300f, 600f);
+        rt.anchoredPosition = new Vector2(-300f, 650f); // above the action cluster
         rt.sizeDelta = new Vector2(300f, 160f);
         buttonImage = buttonGo.GetComponent<Image>();
         buttonImage.sprite = UiKit.WoodSprite;

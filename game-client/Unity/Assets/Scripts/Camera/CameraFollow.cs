@@ -15,6 +15,11 @@ public class CameraFollow : MonoBehaviour
 
     private float yaw, pitch, distance;
     private bool ready;
+    private Camera cam;
+    private float landscapeFov;
+
+    // Upright the view is narrow: open the lens and step back a little so the player still sees around them
+    private const float PortraitFov = 68f, PortraitPullBack = 1.1f;
 
     public void Rotate(float deltaDegrees)
     {
@@ -46,6 +51,9 @@ public class CameraFollow : MonoBehaviour
     {
         if (target == null) return;
         Init();
+        bool portrait = ScreenFit.Portrait;
+        if (cam == null && TryGetComponent(out cam)) landscapeFov = cam.fieldOfView;
+        if (cam != null) cam.fieldOfView = portrait ? Mathf.Max(landscapeFov, PortraitFov) : landscapeFov;
 
 #if ENABLE_INPUT_SYSTEM
         var mouse = UnityEngine.InputSystem.Mouse.current;
@@ -57,7 +65,7 @@ public class CameraFollow : MonoBehaviour
 #endif
 
         Vector3 focus = target.position + Vector3.up * lookHeight;
-        Vector3 desiredPosition = focus + Quaternion.Euler(pitch, yaw, 0f) * new Vector3(0f, 0f, -distance);
+        Vector3 desiredPosition = focus + Quaternion.Euler(pitch, yaw, 0f) * new Vector3(0f, 0f, -distance * (portrait ? PortraitPullBack : 1f));
 
         transform.position = Vector3.Lerp(transform.position, desiredPosition, followSpeed * Time.deltaTime);
         transform.LookAt(focus);

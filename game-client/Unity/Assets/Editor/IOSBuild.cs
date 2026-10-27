@@ -88,12 +88,13 @@ public static class IOSBuild
         PlayerSettings.iOS.appleDeveloperTeamID = TeamId;
         PlayerSettings.iOS.appleEnableAutomaticSigning = true;
 
-        // Landscape only: joystick left, buttons right
-        PlayerSettings.defaultInterfaceOrientation = UIOrientation.AutoRotation;
-        PlayerSettings.allowedAutorotateToLandscapeLeft = true;
-        PlayerSettings.allowedAutorotateToLandscapeRight = true;
-        PlayerSettings.allowedAutorotateToPortrait = false;
+        // Portrait (held upright, one-handed like PUBG Mobile's vertical mode): joystick bottom left,
+        // action cluster bottom right; ScreenFit re-fits the landscape-designed UI
+        PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
+        PlayerSettings.allowedAutorotateToPortrait = true;
         PlayerSettings.allowedAutorotateToPortraitUpsideDown = false;
+        PlayerSettings.allowedAutorotateToLandscapeLeft = false;
+        PlayerSettings.allowedAutorotateToLandscapeRight = false;
 
         PlayerSettings.runInBackground = true;
         if (PlayerSettings.insecureHttpOption == InsecureHttpOption.NotAllowed)
