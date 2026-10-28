@@ -13,6 +13,7 @@ public static class IOSBuild
     private const string BundleId = "com.rnai66.thailife";
     private const string TeamId = "H4X9654279";
     private const string OutputPath = "Builds/iOS";
+    private const string Version = "1.2"; // marketing version shown in TestFlight / the App Store
 
     [MenuItem("Thai Life/Build iOS (Xcode project)")]
     private static void Build() => Build(release: false);
@@ -81,6 +82,7 @@ public static class IOSBuild
     private static void Configure()
     {
         PlayerSettings.productName = "ThaiLife9"; // App Store name
+        PlayerSettings.bundleVersion = Version;
         // App icon from the game artwork (Resources/Branding/AppIcon.png, 1024x1024)
         var appIcon = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Resources/Branding/AppIcon.png");
         if (appIcon != null) PlayerSettings.SetIcons(NamedBuildTarget.Unknown, new[] { appIcon }, IconKind.Any);
