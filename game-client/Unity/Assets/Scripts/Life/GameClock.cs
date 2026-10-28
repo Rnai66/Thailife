@@ -1,16 +1,20 @@
 using System;
 
-// Shared game clock: 1 real second = 1 game minute, one game day = 24 real minutes,
-// one game month = 30 game days = 12 real hours. Computed from UTC time, so every player
+// Shared game clock: 1.5 real seconds = 1 game minute, one game day = 36 real minutes,
+// one game month = 30 game days = 18 real hours. Computed from UTC time, so every player
 // (and the server, see life_core.lua) agrees on the time of day and the calendar.
 public static class GameClock
 {
     public const int MinutesPerDay = 24 * 60;
 
-    // Day 1 starts here (any fixed UTC instant works)
-    private static readonly DateTime Epoch = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+    public const double RealSecondsPerGameMinute = 1.5;
+    public const float RealMinutesPerDay = MinutesPerDay * (float)RealSecondsPerGameMinute / 60f;
 
-    private static double TotalGameMinutes => (DateTime.UtcNow - Epoch).TotalSeconds;
+    // Day 1 starts here; moved back when days went from 24 to 36 real minutes so the day count
+    // carried on (same as life_core.lua EPOCH_MS)
+    private static readonly DateTime Epoch = new DateTime(2025, 8, 3, 18, 0, 0, DateTimeKind.Utc);
+
+    private static double TotalGameMinutes => (DateTime.UtcNow - Epoch).TotalSeconds / RealSecondsPerGameMinute;
 
     public const int DaysPerMonth = 30;
 
@@ -37,6 +41,14 @@ public static class GameClock
         Hour < 13 ? "เที่ยง" :
         Hour < 17 ? "บ่าย" :
         Hour < 19 ? "เย็น" : "กลางคืน";
+
+    // A real-time wait shown in game time: "80 วัน 5 ชม." / "3 ชม. 20 นาที" / "12 นาที"
+    public static string Countdown(float realSeconds)
+    {
+        int m = (int)(Math.Max(0f, realSeconds) / RealSecondsPerGameMinute);
+        int d = m / MinutesPerDay, h = m % MinutesPerDay / 60, min = m % 60;
+        return d > 0 ? $"{d} วัน {h} ชม." : h > 0 ? $"{h} ชม. {min} นาที" : $"{Math.Max(1, min)} นาที";
+    }
 
     // Date and time for the HUD (the event on today is shown on the HUD menu button and in the calendar)
     public static string Display => $"{DayOfMonth} {MonthTh} · {Hour:00}:{Minute:00} ({PeriodTh})";

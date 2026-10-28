@@ -11,7 +11,7 @@ local M = {}
 M.CAPACITY = 8
 M.MAX_EGGS = 12
 M.LAY_MS = 8 * 60 * 1000          -- one egg per adult hen every 8 real minutes while fed
-M.FEED_MS = 24 * 60 * 1000        -- one bag of feed lasts a game day
+M.FEED_MS = 36 * 60 * 1000        -- one bag of feed lasts a game day
 M.HATCH_MS = 10 * 60 * 1000
 M.GROW_MS = 15 * 60 * 1000        -- chick -> adult
 

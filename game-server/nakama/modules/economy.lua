@@ -70,7 +70,7 @@ local function market_open(shop, env)
   local m = data.MARKETS[shop]
   if m == nil then return true end
   if env ~= nil and env.markets_always_open == "true" then return true end
-  local hour = (math.floor((nk.time() - life.EPOCH_MS) / 1000) % 1440) / 60  -- 1 real second = 1 game minute
+  local hour = life.minute_of_day(nk.time()) / 60
   return hour >= m.open and hour < m.close
 end
 

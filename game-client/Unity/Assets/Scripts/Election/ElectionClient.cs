@@ -41,7 +41,7 @@ public static class ElectionClient
     [Serializable]
     public class State
     {
-        public int cycle, day, days, register_days, phase_ends_s, campaigns_left, level, politics, energy;
+        public int cycle, day, days, year, years, register_days, phase_ends_s, campaigns_left, level, politics, energy;
         public string phase, registered, office, office_name;
         public bool salary_today;
         public Position[] positions;

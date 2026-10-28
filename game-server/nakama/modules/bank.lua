@@ -1,5 +1,5 @@
 -- City bank (ธนาคาร): savings with interest, loans, buying land and cars, renting buildings to
--- run a business with staff. Everything is settled on the server per game day (24 real minutes).
+-- run a business with staff. Everything is settled on the server per game day (36 real minutes).
 -- Player level for the big-money services = the best career level (boxing or music).
 --
 --   bank_get       {}

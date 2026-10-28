@@ -37,7 +37,7 @@ public class HotelUI : MonoBehaviour
     {
         var body = UiKit.PremiumWindow(transform, "HotelCanvas", UiKit.WindowSize(new Vector2(1400f, 860f), 1400f), 55, "icon:hotel",
             out backdrop, out titleText, out subtitleText, Hide, out _);
-        subtitleText.text = "จองห้องพัก 1 วันในเกม (24 นาที) · นอนในห้องฟรีตลอดการจอง";
+        subtitleText.text = "จองห้องพัก 1 วันในเกม (36 นาที) · นอนในห้องฟรีตลอดการจอง";
         var status = UiKit.Panel("Status", body, Color.white, new Vector2(0f, 290f), new Vector2(1300f, 90f), shadow: true);
         status.gameObject.AddComponent<Outline>().effectColor = UiKit.CardBorder;
         statusText = UiKit.Label(status, 26, "", new Vector2(-170f, 0f), new Vector2(900f, 60f), UiKit.Ink, TextAnchor.MiddleLeft);

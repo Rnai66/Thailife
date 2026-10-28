@@ -17,12 +17,16 @@ M.RODS = {
              weights = { tilapia = 25, barb = 20, snakehead = 30, catfish = 25 } },
 }
 
--- Rice varieties (พันธุ์ข้าว): seeds are bought at the shop, one bag plants one plot.
+-- Rice varieties (พันธุ์ข้าว): seeds are bought at the shop, one bag plants one plot (1 งาน).
+-- Rice takes a third of the game year (120 game days = 3 real days), so three crops a year;
+-- yields and prices are close to real ones (paddy ~110 kg per งาน, ข้าวเปลือก 14-20 ฿/kg).
+local RICE_DAYS = 120
+local GAME_DAY_MS = 36 * 60 * 1000 -- life_core.DAY_MS
 M.RICE = {
-  khao_niao = { name = "ข้าวเหนียว กข6",    seed_price = 20, grow_ms = 12 * 60 * 1000, price_per_kg = 12,
-                yield_watered = { 10, 14 }, yield_dry = { 5, 7 } },
-  hommali   = { name = "ข้าวหอมมะลิ 105", seed_price = 30, grow_ms = 16 * 60 * 1000, price_per_kg = 18,
-                yield_watered = { 9, 12 },  yield_dry = { 4, 6 } },
+  khao_niao = { name = "ข้าวเหนียว กข6",    seed_price = 120, grow_ms = RICE_DAYS * GAME_DAY_MS, price_per_kg = 14,
+                yield_watered = { 100, 130 }, yield_dry = { 50, 65 } },
+  hommali   = { name = "ข้าวหอมมะลิ 105", seed_price = 160, grow_ms = RICE_DAYS * GAME_DAY_MS, price_per_kg = 20,
+                yield_watered = { 90, 115 },  yield_dry = { 45, 58 } },
 }
 M.RICE_ORDER = { "khao_niao", "hommali" }
 
@@ -118,9 +122,9 @@ M.FURNITURE_ORDER = { "mat", "pillow", "plant", "chair", "lamp", "low_table", "r
                       "table", "shelf", "wardrobe", "bed", "tv", "fridge" }
 
 -- Rice barn (ยุ้งข้าว): harvested rice is stored here; full barn = can't harvest
-M.BARN_START = 100
-M.BARN_STEP = 100
-M.BARN_MAX = 500
+M.BARN_START = 400
+M.BARN_STEP = 200
+M.BARN_MAX = 1400
 
 -- Things for sale. shop = where the client shows it (the server sells it anywhere).
 -- consumable items can be bought again and again.
@@ -142,12 +146,12 @@ M.CATALOG = {
   { id = "food_thai_tea",     shop = "city_food", price = 35, name = "ชาไทย",             desc = "พลังงาน +18", food = "thai_tea",    consumable = true },
   { id = "food_coffee",       shop = "city_food", price = 45, name = "กาแฟสด",            desc = "พลังงาน +25", food = "coffee",      consumable = true },
   { id = "food_khao_man_gai", shop = "city_food", price = 50, name = "ข้าวมันไก่",         desc = "พลังงาน +35", food = "khao_man_gai", consumable = true },
-  { id = "seed_khao_niao",  shop = "community", price = 20,  name = "พันธุ์ข้าวเหนียว กข6 (1 ถุง)", desc = "ปลูกได้ 1 แปลง · โต 12 นาที · ขาย 12 บาท/กก.", seed = "khao_niao", consumable = true },
-  { id = "seed_hommali",    shop = "community", price = 30,  name = "พันธุ์ข้าวหอมมะลิ 105 (1 ถุง)", desc = "ปลูกได้ 1 แปลง · โต 16 นาที · ขาย 18 บาท/กก.", seed = "hommali", consumable = true },
+  { id = "seed_khao_niao",  shop = "community", price = 120, name = "พันธุ์ข้าวเหนียว กข6 (1 ถุง)", desc = "ปลูกได้ 1 แปลง · โต 120 วันในเกม (ปีละ 3 รุ่น) · ขาย 14 บาท/กก.", seed = "khao_niao", consumable = true },
+  { id = "seed_hommali",    shop = "community", price = 160, name = "พันธุ์ข้าวหอมมะลิ 105 (1 ถุง)", desc = "ปลูกได้ 1 แปลง · โต 120 วันในเกม (ปีละ 3 รุ่น) · ขาย 20 บาท/กก.", seed = "hommali", consumable = true },
   { id = "chicken_feed",    shop = "community", price = 15,  name = "อาหารไก่ (1 ถุง)", desc = "ให้อาหารเล้า 1 ครั้ง อิ่ม 1 วันในเกม (แม่ไก่ถึงจะออกไข่)", feed = true, consumable = true },
   { id = "chicken_hen",     shop = "community", price = 120, name = "แม่ไก่พื้นเมือง", desc = "ออกไข่เมื่อได้กินอาหาร · ค่าความสวยสุ่ม", chicken = "hen", consumable = true },
   { id = "chicken_rooster", shop = "community", price = 180, name = "พ่อไก่พื้นเมือง", desc = "มีพ่อไก่ในเล้า ไข่จะเป็นไข่มีเชื้อ ฟักได้", chicken = "rooster", consumable = true },
-  { id = "barn_upgrade",    shop = "community", price = 300, name = "ขยายยุ้งข้าว +100 กก.", desc = "เก็บข้าวได้มากขึ้น (สูงสุด 500 กก.)", barn = true, consumable = true },
+  { id = "barn_upgrade",    shop = "community", price = 600, name = "ขยายยุ้งข้าว +200 กก.", desc = "เก็บข้าวได้มากขึ้น (สูงสุด 1,400 กก.)", barn = true, consumable = true },
   { id = "rod_fiber",       shop = "community", price = 150, name = "เบ็ดไฟเบอร์", desc = "ปลากินเร็วขึ้น ปลาหายากบ่อยขึ้น ตัวใหญ่ขึ้น 15%", rod = "fiber" },
   { id = "rod_carbon",      shop = "community", price = 400, name = "เบ็ดคาร์บอน", desc = "ปลากินเร็วสุด ปลาช่อน/ปลาดุกบ่อย ตัวใหญ่ขึ้น 30%", rod = "carbon" },
   { id = "camp_membership", shop = "camp",      price = 300, name = "สมาชิกค่ายมวย", desc = "ปลดล็อกการซ้อมกระสอบหนักในค่าย (ต้อง Lv 6 ด้วย)" },
@@ -158,7 +162,7 @@ for _, e in ipairs({
   { id = "food_jok",           shop = "market", price = 30, name = "โจ๊กหมู",         desc = "พลังงาน +22", food = "jok" },
   { id = "food_fruit",         shop = "market", price = 20, name = "ผลไม้รวม",        desc = "พลังงาน +12 · มะม่วง สับปะรด แตงโม", food = "fruit" },
   { id = "food_pad_thai",      shop = "market", price = 45, name = "ผัดไทย",          desc = "พลังงาน +32", food = "pad_thai" },
-  { id = "market_seed_hommali", shop = "market", price = 25, name = "พันธุ์ข้าวหอมมะลิ (ราคาตลาด)", desc = "ถูกกว่าร้านค้าชุมชน", seed = "hommali" },
+  { id = "market_seed_hommali", shop = "market", price = 140, name = "พันธุ์ข้าวหอมมะลิ (ราคาตลาด)", desc = "ถูกกว่าร้านค้าชุมชน", seed = "hommali" },
   { id = "market_feed",        shop = "market", price = 12, name = "อาหารไก่ (ราคาตลาด)", desc = "ถูกกว่าร้านค้าชุมชน", feed = true },
   { id = "food_noodle_boat",   shop = "noodle", price = 40, name = "ก๋วยเตี๋ยวเรือ",     desc = "พลังงาน +26", food = "noodle_boat" },
   { id = "food_noodle_tomyum", shop = "noodle", price = 50, name = "ก๋วยเตี๋ยวต้มยำ",   desc = "พลังงาน +30", food = "noodle_tomyum" },
@@ -198,7 +202,11 @@ function M.read_items(user_id)
   items.camp_member = items.camp_member or false
   items.seeds = items.seeds or {}
   for _, v in ipairs(M.RICE_ORDER) do items.seeds[v] = items.seeds[v] or 0 end
-  items.barn_capacity = items.barn_capacity or M.BARN_START
+  if items.barn_capacity == nil then items.barn_capacity = M.BARN_START; items.barn_v2 = true end
+  if not items.barn_v2 then -- old barns (100-500 kg) grow to the new scale, keeping bought upgrades
+    items.barn_capacity = math.min(M.BARN_MAX, M.BARN_START + math.floor((items.barn_capacity - 100) / 100) * M.BARN_STEP)
+    items.barn_v2 = true
+  end
   items.feed = items.feed or 0
   items.instruments = items.instruments or { pin = true }   -- everyone starts with a พิณ
   items.instrument = items.instrument or "pin"

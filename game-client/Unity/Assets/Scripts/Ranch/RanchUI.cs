@@ -102,7 +102,7 @@ public class RanchUI : MonoBehaviour
     {
         titleText.text = mode == "sao" ? "อบต. · โครงการวัวให้ชาวบ้าน" : mode == "pen" ? "คอกวัวของคุณ" : "พ่อค้าวัว";
         subtitleText.text = mode == "sao" ? "รับวัวฟรีคนละ 1 ตัว ไปเลี้ยงที่ฟาร์มวัวในหมู่บ้าน"
-            : mode == "pen" ? "วัวกินอาหารวันละ 1 ถุง · วัวที่ได้กินให้นมวันละ 1 ขวดและโตขึ้น"
+            : mode == "pen" ? "วัวกินอาหารวันละ 1 ถุง · แม่วัวที่ได้กินให้นมวันละ 1 ขวด · แม่วัวโตแล้วผสมเทียมได้"
             : "ซื้อวัว · ซื้ออาหารวัว · ขายวัวที่โตเต็มที่";
         UiKit.Clear(growthRow);
 
@@ -115,7 +115,7 @@ public class RanchUI : MonoBehaviour
             return;
         }
 
-        herdText.text = $"วัว {s.cows}/{s.max_cows} ตัว · อาหารวัว {s.feed} ถุง · นมรอรีด {s.milk} ขวด";
+        herdText.text = $"วัว {s.cows}/{s.max_cows} ตัว (เมีย {s.females}) · อาหาร {s.feed} ถุง · นม {s.milk} ขวด";
         int hoursLeft = s.next_day_s / 60; // real minutes until the next game day
         string hunger = s.cows > 0 && s.feed < s.cows ? " · อาหารไม่พอ! วัวที่ไม่ได้กินจะไม่ให้นมและไม่โต" : "";
         bool full = s.cows >= s.max_cows;
@@ -135,6 +135,10 @@ public class RanchUI : MonoBehaviour
             {
                 float step = UiKit.Portrait ? 80f : 130f, bar = step - 20f; // eight cows fit across the narrow upright card
                 float x = (i - (s.growth.Length - 1) * 0.5f) * step;
+                var cow = s.herd != null && i < s.herd.Length ? s.herd[i] : null;
+                if (cow != null)
+                    UiKit.Label(growthRow, 18, cow.pregnant ? $"ท้อง {cow.due_days}ว." : cow.sex == "m" ? "ตัวผู้" : "ตัวเมีย",
+                        new Vector2(x, 24f), new Vector2(step - 4f, 26f), cow.pregnant ? UiKit.PayGreen : cow.sex == "m" ? UiKit.Ink : UiKit.Price).fontStyle = FontStyle.Bold;
                 var track = UiKit.Panel("Track", growthRow, UiKit.CardBorder, new Vector2(x, 0f), new Vector2(bar, 18f));
                 var fillBar = UiKit.Panel("Fill", track, s.growth[i] >= s.grown_days ? UiKit.Gold : UiKit.PayGreen, Vector2.zero, new Vector2(bar * s.growth[i] / s.grown_days, 18f));
                 fillBar.anchorMin = fillBar.anchorMax = new Vector2(0f, 0.5f);
@@ -146,13 +150,15 @@ public class RanchUI : MonoBehaviour
         {
             infoText.text = s.cows == 0 ? "ยังไม่มีวัว — รับฟรีที่ อบต. ในตำบล หรือซื้อจากพ่อค้าวัวหน้าฟาร์ม"
                 : $"นมขวดละ {s.milk_price} บาท · วันใหม่ในเกมอีก {hoursLeft} นาที{hunger}";
+            if (s.pregnant > 0) infoText.text += $" · แม่วัวตั้งท้อง {s.pregnant} ตัว";
             SetButton(0, s.milk > 0 ? $"รีดนมขาย {s.milk * s.milk_price:N0} บาท" : "ยังไม่มีนม", s.milk > 0, r => r.MilkAsync());
-            SetButton(1, null, false, null);
+            SetButton(1, s.breedable > 0 ? $"ผสมเทียม · {s.breed_price:N0} บาท" : s.females == 0 ? "ไม่มีแม่วัว (ผสมเทียมไม่ได้)" : "ยังไม่มีแม่วัวพร้อมผสม",
+                s.breedable > 0 && s.cows + s.pregnant < s.max_cows, r => r.BreedAsync());
             SetButton(2, null, false, null);
             return;
         }
 
-        infoText.text = $"วัวโตเต็มที่เมื่อได้กินครบ {s.grown_days} วัน ขายได้ตัวละ {s.grown_price:N0} บาท · อาหารวัวเก็บได้ {s.max_feed} ถุง{hunger}";
+        infoText.text = $"โตเต็มที่เมื่อได้กินครบ {s.grown_days} วัน · ขายตัวเมีย {s.grown_price:N0} / ตัวผู้ {s.grown_price_male:N0} บาท · สุ่มเพศตอนซื้อ ได้ตัวเมียผสมเทียมมีลูกได้{hunger}";
         SetButton(0, full ? "คอกเต็ม (8 ตัว)" : $"ซื้อวัว · {s.price:N0} บาท", !full, r => r.BuyAsync());
         bool feedRoom = s.feed + s.feed_pack <= s.max_feed;
         SetButton(1, $"อาหารวัว {s.feed_pack} ถุง · {s.feed_pack_price} บาท", feedRoom, r => r.FeedAsync(1));
@@ -182,7 +188,8 @@ public class RanchUI : MonoBehaviour
                 : e.Message.Contains("pen full") ? "คอกเต็มแล้ว (สูงสุด 8 ตัว)"
                 : e.Message.Contains("feed store full") ? "ที่เก็บอาหารวัวเต็มแล้ว"
                 : e.Message.Contains("not grown") ? "ยังไม่มีวัวที่โตเต็มที่"
-                : e.Message.Contains("no milk") ? "ยังไม่มีนมให้รีด" : "ทำรายการไม่สำเร็จ", UiKit.Danger);
+                : e.Message.Contains("no milk") ? "ยังไม่มีนมให้รีด"
+                : e.Message.Contains("no cow to breed") ? "ยังไม่มีแม่วัวที่โตพร้อมผสม" : "ทำรายการไม่สำเร็จ", UiKit.Danger);
         }
         catch (Exception)
         {

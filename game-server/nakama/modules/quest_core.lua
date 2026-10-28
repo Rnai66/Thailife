@@ -1,6 +1,6 @@
 -- Daily quests (ภารกิจประจำวัน) and level quests (ภารกิจตามเลเวล), shared rules (no RPCs here;
 -- quests.lua has them).
--- Every game day (24 real minutes) each player gets 3 quests picked from the jobs they can
+-- Every game day (36 real minutes) each player gets 3 quests picked from the jobs they can
 -- actually do. Other modules report what happened with quest.progress(user_id, kind, amount);
 -- progress only counts for today's quests, and rewards are claimed through quests_claim.
 
@@ -8,6 +8,7 @@ local nk = require("nakama")
 local life = require("life_core")
 local chickens = require("chicken_core")
 local trade = require("trade_core")
+local shop = require("shop_data")
 
 local M = {}
 
@@ -19,8 +20,8 @@ M.BONUS = 80   -- extra baht for finishing all of today's quests
 M.POOL = {
   fish         = { title = "ตกปลาให้ได้ 3 ตัว",              need = 3,  reward = 40, hint = "คลองในตำบล" },
   sell_produce = { title = "ขายปลาหรือข้าวที่ร้านค้า 1 ครั้ง", need = 1,  reward = 25, hint = "ร้านค้าชุมชน" },
-  plant        = { title = "ปลูกข้าว 1 แปลง",                need = 1,  reward = 35, hint = "โคกหนองนา" },
-  harvest      = { title = "เกี่ยวข้าว 1 แปลง",              need = 1,  reward = 50, hint = "โคกหนองนา", needs = "planted" },
+  plant        = { title = "ปลูกข้าว 1 แปลง",                need = 1,  reward = 35, hint = "โคกหนองนา", needs = "free_plot" },
+  harvest      = { title = "เกี่ยวข้าว 1 แปลง",              need = 1,  reward = 50, hint = "โคกหนองนา", needs = "ripe" },
   feed         = { title = "ให้อาหารไก่ 1 ครั้ง",            need = 1,  reward = 25, hint = "เล้าไก่ข้างบ้าน", needs = "chickens" },
   sell_eggs    = { title = "ขายไข่ไก่ 5 ฟอง",                need = 5,  reward = 40, hint = "เล้าไก่ข้างบ้าน", needs = "chickens" },
   music        = { title = "เล่นดนตรี 1 เพลง",               need = 1,  reward = 40, hint = "ศาลากลางหมู่บ้าน" },
@@ -53,11 +54,11 @@ M.CHAPTERS = {
   { level = 25,  title = "หัวหน้าครอบครัว", story = "เลี้ยงไก่ หาปลา หาเงินเข้าบ้าน", reward = 1500,
     tasks = { { "fish", 30 }, { "feed", 10 }, { "sell_eggs", 30 }, { "music", 5 } } },
   { level = 50,  title = "ปราชญ์ชาวบ้าน", story = "เก่งทั้งวิชา งานนา และดนตรี", reward = 4000,
-    tasks = { { "study", 20 }, { "harvest", 15 }, { "music", 15 }, { "train", 1000 } } },
+    tasks = { { "study", 20 }, { "harvest", 6 }, { "music", 15 }, { "train", 1000 } } },
   { level = 75,  title = "เศรษฐีประจำตำบล", story = "ค้าขายจนเป็นที่รู้จักทั้งตำบล", reward = 8000,
     tasks = { { "fish", 100 }, { "sell_produce", 30 }, { "shop", 30 }, { "sell_eggs", 100 } } },
   { level = 100, title = "ตำนานแห่งตำบล", story = "สุดยอดคนเก่งที่ทุกคนเล่าขาน", reward = 20000,
-    tasks = { { "train", 5000 }, { "study", 50 }, { "harvest", 50 }, { "music", 50 } } },
+    tasks = { { "train", 5000 }, { "study", 50 }, { "harvest", 18 }, { "music", 50 } } },
 }
 
 function M.player_level(user_id)
@@ -113,16 +114,29 @@ local function has_chickens(user_id)
   return #chickens.read(user_id).chickens > 0
 end
 
-local function has_planted(user_id)
+-- A rice plot that is ripe or ripens within a game day (rice takes 120 game days to grow)
+local function has_ripe(user_id)
   local objects = nk.storage_read({ { collection = "farm", key = "plots", user_id = user_id } })
+  local now = nk.time()
   for _, p in pairs((#objects > 0) and objects[1].value or {}) do
-    if p.state == "planted" then return true end
+    local rice = shop.RICE[p.variety or "khao_niao"] or shop.RICE.khao_niao
+    if p.state == "planted" and now - (p.planted_ms or now) >= rice.grow_ms - life.DAY_MS then return true end
   end
   return false
 end
 
+-- A rice plot not already growing (6 plots at โคกหนองนา)
+local function has_free_plot(user_id)
+  local objects = nk.storage_read({ { collection = "farm", key = "plots", user_id = user_id } })
+  local planted = 0
+  for _, p in pairs((#objects > 0) and objects[1].value or {}) do
+    if p.state == "planted" then planted = planted + 1 end
+  end
+  return planted < 6
+end
+
 local function generate(user_id, day)
-  local can = { chickens = has_chickens(user_id), planted = has_planted(user_id) }
+  local can = { chickens = has_chickens(user_id), ripe = has_ripe(user_id), free_plot = has_free_plot(user_id) }
   local eligible = {}
   for _, kind in ipairs(M.ORDER) do
     local q = M.POOL[kind]

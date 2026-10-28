@@ -5,6 +5,7 @@ using UnityEngine.UI;
 // Travel map at a songthaew stop (ป้ายรถสองแถว), premium layout: one card per destination
 // (หมู่บ้าน → ตำบล → เมือง) joined by a route line; the current location is marked "อยู่ที่นี่".
 // The boat pier (ท่าเรือ) shows only the sea trips (ทะเล ⇄ เกาะ); the island is not on the road map.
+// The skytrain platform in the city shows the trips to other provinces (ต่างจังหวัด).
 // Built at runtime; one instance per scene.
 public class TravelMenu : MonoBehaviour
 {
@@ -12,25 +13,27 @@ public class TravelMenu : MonoBehaviour
 
     private const float Spacing = 360f, PortraitStep = 230f;
 
-    private static bool building; // mode for the instance being built (read in Awake)
+    private static string building; // mode for the instance being built (read in Awake): road / boat / train
 
     private GameObject backdrop;
     private Text title;
-    private bool boat, portrait;
+    private string mode;
+    private bool portrait;
 
-    public static void Show(string heading = null, bool boat = false)
+    public static void Show(string heading = null, bool boat = false, bool train = false)
     {
-        if (instance != null && instance.boat != boat)
+        string m = train ? "train" : boat ? "boat" : "road";
+        if (instance != null && instance.mode != m)
         {
             Destroy(instance.gameObject);
             instance = null;
         }
         if (instance == null)
         {
-            building = boat;
-            instance = new GameObject(boat ? "BoatMenu" : "TravelMenu").AddComponent<TravelMenu>();
+            building = m;
+            instance = new GameObject(m == "boat" ? "BoatMenu" : m == "train" ? "TrainMenu" : "TravelMenu").AddComponent<TravelMenu>();
         }
-        instance.title.text = string.IsNullOrEmpty(heading) ? "ป้ายรถสองแถว" : heading;
+        instance.title.text = !string.IsNullOrEmpty(heading) ? heading : m == "train" ? "สถานีรถไฟฟ้า" : "ป้ายรถสองแถว";
         instance.backdrop.SetActive(true);
     }
 
@@ -44,16 +47,18 @@ public class TravelMenu : MonoBehaviour
         if (FindAnyObjectByType<EventSystem>() == null)
             Debug.LogWarning("[Travel] No EventSystem in the scene — run Thai Life > Repair Scene.");
 
-        boat = building;
+        mode = building ?? "road";
         var all = new System.Collections.Generic.List<Location>();
         foreach (var l in Locations.All)
-            if (boat ? l.Level == LocationLevel.Beach : !l.BoatOnly) all.Add(l);
+            if (mode == "boat" ? l.Level == LocationLevel.Beach && !l.TrainOnly
+                : mode == "train" ? l.TrainOnly || l.Id == "city" || l.Id == "beach"
+                : !l.BoatOnly && !l.TrainOnly) all.Add(l);
         portrait = UiKit.Portrait;
         var size = portrait ? new Vector2(UiKit.PortraitWidth, all.Count * PortraitStep + 220f) : new Vector2(Mathf.Max(1500f, all.Count * Spacing + 60f), 880f);
         var body = UiKit.PremiumWindow(transform, "TravelCanvas", size, 50, "icon:travel",
             out backdrop, out title, out var subtitle, Hide, out _);
         title.text = "ป้ายรถสองแถว";
-        subtitle.text = boat ? "นั่งเรือหางยาวข้ามทะเล" : "เลือกจุดหมายปลายทาง";
+        subtitle.text = mode == "boat" ? "นั่งเรือหางยาวข้ามทะเล" : mode == "train" ? "นั่งรถไฟฟ้าไปต่างจังหวัด" : "เลือกจุดหมายปลายทาง";
 
         // Route line behind the cards (upright: down the left side)
         var route = UiKit.Rect("Route", body, UiKit.Gold);
@@ -110,7 +115,7 @@ public class TravelMenu : MonoBehaviour
         {
             var target = location;
             var go = UiKit.RoundButton(card, location.Available ? "ไปที่นี่" : "เร็วๆ นี้", new Vector2(0f, -175f), new Vector2(290f, 76f),
-                UiKit.Gold, UiKit.GoldInk, () => Locations.TravelTo(target, boat ? "ferry" : null), 32);
+                UiKit.Gold, UiKit.GoldInk, () => Locations.TravelTo(target, mode == "boat" ? "ferry" : null), 32);
             go.interactable = location.Available;
         }
     }
@@ -143,7 +148,7 @@ public class TravelMenu : MonoBehaviour
         {
             var target = location;
             UiKit.RoundButton(card, location.Available ? "ไปที่นี่" : "เร็วๆ นี้", at, size,
-                UiKit.Gold, UiKit.GoldInk, () => Locations.TravelTo(target, boat ? "ferry" : null), 32).interactable = location.Available;
+                UiKit.Gold, UiKit.GoldInk, () => Locations.TravelTo(target, mode == "boat" ? "ferry" : null), 32).interactable = location.Available;
         }
     }
 

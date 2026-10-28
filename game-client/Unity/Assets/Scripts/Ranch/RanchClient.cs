@@ -7,6 +7,14 @@ using UnityEngine;
 public class RanchClient : MonoBehaviour
 {
     [Serializable]
+    public class Cow
+    {
+        public int g, due_days;
+        public string sex;   // "f" แม่วัว / "m" วัวตัวผู้
+        public bool pregnant;
+    }
+
+    [Serializable]
     public class State
     {
         public int cows, max_cows, price;
@@ -14,6 +22,8 @@ public class RanchClient : MonoBehaviour
         public int feed, max_feed, feed_pack, feed_pack_price;
         public int milk, milk_price, grown, grown_days, grown_price, next_day_s;
         public int[] growth;
+        public Cow[] herd;
+        public int grown_price_male, breed_price, gestation_days, females, pregnant, breedable, born;
         public string done;
     }
 
@@ -55,6 +65,7 @@ public class RanchClient : MonoBehaviour
     public Task<State> FeedAsync(int packs) => Call("ranch_feed", $"{{\"packs\":{packs}}}");
     public Task<State> MilkAsync() => Call("ranch_milk");
     public Task<State> SellAsync() => Call("ranch_sell");
+    public Task<State> BreedAsync() => Call("ranch_breed");
 
     private async Task<State> Call(string rpc, string payload = "{}")
     {
@@ -63,7 +74,7 @@ public class RanchClient : MonoBehaviour
         Current = state;
         Changed?.Invoke(state);
         if (WalletClient.Instance != null && rpc != "ranch_get" && rpc != "ranch_claim") _ = WalletClient.Instance.RefreshAsync();
-        if (rpc == "ranch_milk") LifeClient.Instance?.Refresh(); // milking costs a little energy
+        if (rpc == "ranch_milk" || rpc == "ranch_breed") LifeClient.Instance?.Refresh(); // milking costs a little energy
         return state;
     }
 }

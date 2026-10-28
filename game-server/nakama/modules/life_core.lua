@@ -1,7 +1,7 @@
 -- Shared "daily life" rules (no RPCs here): game clock and energy (พลังงาน).
 -- require("life_core") from life.lua, farming.lua, fishing.lua.
 --
--- Game clock: 1 real second = 1 game minute, so one game day = 24 real minutes.
+-- Game clock: 1.5 real seconds = 1 game minute, so one game day = 36 real minutes.
 -- Every client computes the same clock from UTC time; the server uses it for nothing secret.
 
 local nk = require("nakama")
@@ -14,10 +14,16 @@ M.SLEEP_REGEN_PER_SEC = 1     -- real seconds while sleeping (a full rest ~100 s
 
 M.COST = { plow = 10, plant = 10, water = 5, harvest = 10, cast = 4 }
 
--- Calendar (same epoch as the client's GameClock): 1 game day = 24 real minutes,
--- 1 game month = 30 game days = 12 real hours.
-M.EPOCH_MS = 1767225600000   -- 2026-01-01T00:00:00Z
-M.DAY_MS = 24 * 60 * 1000
+-- Calendar (same epoch as the client's GameClock): 1 game day = 36 real minutes,
+-- 1 game month = 30 game days = 18 real hours. The epoch moved back when days went from 24 to
+-- 36 minutes (2026-10-28 12:00Z) so the day count carried on without a jump.
+M.EPOCH_MS = 1754244000000   -- 2025-08-03T18:00:00Z
+M.DAY_MS = 36 * 60 * 1000
+M.MINUTE_MS = M.DAY_MS / 1440  -- one game minute
+
+function M.minute_of_day(now)  -- 0..1439
+  return math.floor((now - M.EPOCH_MS) / M.MINUTE_MS) % 1440
+end
 M.MONTH_DAYS = 30
 
 function M.game_day(now)   -- 1-based
@@ -25,7 +31,7 @@ function M.game_day(now)   -- 1-based
 end
 
 -- Temple fair (งานวัด) = the traditional festivals (งานประเพณี) on the game calendar.
--- The game year has 12 months of 30 days (1 game day = 24 real minutes, 1 year = 6 real days),
+-- The game year has 12 months of 30 days (1 game day = 36 real minutes, 1 year = 9 real days),
 -- month 1 = มกราคม, the same calendar the client shows. Every festival comes once a year.
 -- scale: "big" festivals are held in the city (with the ferris wheel, carousel, bingo),
 -- "small" ones in the tambon.

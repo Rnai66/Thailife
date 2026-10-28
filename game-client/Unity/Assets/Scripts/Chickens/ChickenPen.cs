@@ -86,15 +86,38 @@ public class ChickenPen : MonoBehaviour
         root.localPosition = RandomPoint();
         root.localScale = Vector3.one * (c.adult ? (c.sex == "rooster" ? 1.15f : 1f) : 0.55f);
 
+        // A plump, rounded bird: round body and chest, wings, big round head with eyes and a little beak
         Color feather = c.adult ? CoopClient.FeatherColor(c.color) : new Color(1f, 0.9f, 0.4f);
-        Part(PrimitiveType.Sphere, root, new Vector3(0f, 0.3f, 0f), new Vector3(0.35f, 0.32f, 0.45f), feather);   // body
-        Part(PrimitiveType.Sphere, root, new Vector3(0f, 0.55f, 0.2f), new Vector3(0.2f, 0.22f, 0.2f), feather);  // head
-        Part(PrimitiveType.Cube, root, new Vector3(0f, 0.55f, 0.33f), new Vector3(0.06f, 0.05f, 0.1f), new Color(1f, 0.75f, 0.2f)); // beak
+        Color red = new Color(0.9f, 0.15f, 0.15f), orange = new Color(1f, 0.7f, 0.2f), ink = new Color(0.08f, 0.07f, 0.07f);
+        Part(PrimitiveType.Sphere, root, new Vector3(0f, 0.32f, -0.02f), new Vector3(0.42f, 0.38f, 0.48f), feather);   // body
+        Part(PrimitiveType.Sphere, root, new Vector3(0f, 0.36f, 0.13f), new Vector3(0.32f, 0.32f, 0.28f), feather);    // chest
+        foreach (float x in new[] { -0.19f, 0.19f })
+        {
+            Part(PrimitiveType.Sphere, root, new Vector3(x, 0.34f, -0.03f), new Vector3(0.08f, 0.22f, 0.3f), Color.Lerp(feather, ink, 0.15f)); // wing
+            Part(PrimitiveType.Cylinder, root, new Vector3(x * 0.45f, 0.07f, 0.02f), new Vector3(0.035f, 0.07f, 0.035f), orange); // leg
+            Part(PrimitiveType.Sphere, root, new Vector3(x * 0.45f, 0.01f, 0.06f), new Vector3(0.08f, 0.025f, 0.1f), orange);    // foot
+        }
+        Part(PrimitiveType.Sphere, root, new Vector3(0f, 0.6f, 0.2f), new Vector3(0.26f, 0.26f, 0.26f), feather);      // head
+        foreach (float x in new[] { -0.075f, 0.075f })
+        {
+            Part(PrimitiveType.Sphere, root, new Vector3(x, 0.63f, 0.31f), new Vector3(0.05f, 0.06f, 0.03f), ink);          // eye
+            Part(PrimitiveType.Sphere, root, new Vector3(x + 0.012f, 0.645f, 0.322f), new Vector3(0.018f, 0.018f, 0.01f), Color.white); // shine
+            Part(PrimitiveType.Sphere, root, new Vector3(x * 1.35f, 0.57f, 0.285f), new Vector3(0.05f, 0.03f, 0.02f), new Color(1f, 0.6f, 0.65f)); // blush
+        }
+        Part(PrimitiveType.Sphere, root, new Vector3(0f, 0.585f, 0.345f), new Vector3(0.07f, 0.05f, 0.09f), orange);   // beak
         if (c.adult)
         {
-            Part(PrimitiveType.Cube, root, new Vector3(0f, 0.7f, 0.2f), new Vector3(0.04f, c.sex == "rooster" ? 0.12f : 0.06f, 0.14f), new Color(0.85f, 0.1f, 0.1f)); // comb
+            bool rooster = c.sex == "rooster";
+            for (int i = 0; i < 3; i++) // comb: three round bumps
+                Part(PrimitiveType.Sphere, root, new Vector3(0f, 0.73f + (i == 1 ? 0.02f : 0f), 0.13f + i * 0.06f),
+                    Vector3.one * (rooster ? 0.085f : 0.06f), red);
+            Part(PrimitiveType.Sphere, root, new Vector3(0f, 0.52f, 0.33f), new Vector3(0.045f, rooster ? 0.09f : 0.06f, 0.045f), red); // wattle
             Color tail = c.color.EndsWith("หางขาว") ? Color.white : c.color == "ขาวล้วน" ? feather : new Color(0.08f, 0.08f, 0.1f);
-            Part(PrimitiveType.Cube, root, new Vector3(0f, 0.45f, -0.25f), new Vector3(0.08f, c.sex == "rooster" ? 0.35f : 0.18f, 0.18f), tail, new Vector3(-30f, 0f, 0f)); // tail
+            if (rooster) // a fan of curved tail feathers
+                for (int i = -1; i <= 1; i++)
+                    Part(PrimitiveType.Capsule, root, new Vector3(i * 0.06f, 0.52f, -0.26f), new Vector3(0.06f, 0.2f, 0.06f), tail, new Vector3(-35f, 0f, i * 18f));
+            else
+                Part(PrimitiveType.Sphere, root, new Vector3(0f, 0.48f, -0.24f), new Vector3(0.12f, 0.24f, 0.16f), tail, new Vector3(-30f, 0f, 0f));
         }
         return root;
     }

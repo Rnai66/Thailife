@@ -77,6 +77,7 @@ public class BoxingUI : MonoBehaviour
         resultBody.fontStyle = FontStyle.Bold;
         UiKit.RoundButton(rbody, "ตกลง", new Vector2(0f, -170f), new Vector2(300f, 90f), UiKit.Gold, UiKit.GoldInk,
             () => resultBackdrop.SetActive(false), 34);
+        UiKit.AutoFade(resultBackdrop, 6f);
         resultBackdrop.SetActive(false);
     }
 

@@ -227,6 +227,8 @@ public static class UiKit
         subtitle.gameObject.AddComponent<Outline>().effectColor = WoodEdge;
         if (onClose != null)
             RoundButton(header, "X", new Vector2(-left - 60f, 0f), new Vector2(70f, 70f), new Color32(0x5A, 0x3A, 0x26, 0xFF), HeaderText, onClose, 32, circle: true);
+        if (onClose != null) // walking away fades the window out instead of leaving it on screen
+            backdrop.AddComponent<WindowAutoClose>().Configure(onClose.Invoke);
 
         return Panel("Body", card, Cream, new Vector2(0f, -58f), new Vector2(size.x - 40f, size.y - 156f));
     }
@@ -309,6 +311,14 @@ public static class UiKit
         card.sizeDelta = cardSize;
         ScreenFit.FitCard(card); // shrinks to the screen width when the phone is upright
         return card;
+    }
+
+    // A result / message pop-up that fades away by itself after a few seconds
+    public static void AutoFade(GameObject backdrop, float seconds)
+    {
+        var auto = backdrop.GetComponent<WindowAutoClose>();
+        if (auto == null) auto = backdrop.AddComponent<WindowAutoClose>();
+        auto.Configure(() => backdrop.SetActive(false), seconds);
     }
 
     public static RectTransform Rect(string name, Transform parent, Color color)

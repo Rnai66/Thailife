@@ -32,6 +32,9 @@ public class PlayerController : MonoBehaviour
     // Owning a motorbike or car (bank.lua) makes getting around faster
     public float VehicleBoost { get; set; } = 1f;
 
+    // Extra speed while driving your own car around (DrivableCar)
+    public float DriveBoost { get; set; } = 1f;
+
     public bool IsGrounded => controller != null && controller.isGrounded;
 
     // False while knocked out
@@ -99,7 +102,7 @@ public class PlayerController : MonoBehaviour
 
         verticalVelocity += gravity * Time.deltaTime;
 
-        Vector3 velocity = move * (moveSpeed * MoveSpeedMultiplier * InjurySlow * TiredSlow * VehicleBoost) + impulseVelocity;
+        Vector3 velocity = move * (moveSpeed * MoveSpeedMultiplier * InjurySlow * TiredSlow * VehicleBoost * DriveBoost) + impulseVelocity;
         velocity.y = verticalVelocity;
         impulseVelocity = Vector3.Lerp(impulseVelocity, Vector3.zero, 1f - Mathf.Exp(-8f * Time.deltaTime));
 

@@ -1,4 +1,4 @@
--- Hotels at the beach (โรงแรม / รีสอร์ท): book a room for one game day (24 real minutes). In your room
+-- Hotels at the beach (โรงแรม / รีสอร์ท): book a room for one game day (36 real minutes). In your room
 -- you can sleep for free (life_sleep {"spot": "hotel"} checks the booking). Better rooms come with
 -- breakfast in your food bag, and the suite also restores your energy as you check in.
 --

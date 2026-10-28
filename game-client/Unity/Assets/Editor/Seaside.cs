@@ -840,24 +840,49 @@ public static class Seaside
         Places.Sign(f, new Vector3(6.6f, 0f, -hz - 2.4f), "พ่อค้าวัว\nซื้อวัวเข้าคอก", 0f);
     }
 
+    // A cute, rounded dairy cow: capsule body, round head with big eyes, pink muzzle, floppy ears
     private static void Cow(Transform parent, Vector3 pos, int index, Vector2 room)
     {
         var c = PrimitiveKit.Group("Cow_วัว", parent, pos, index * 70f).transform;
-        var white = PrimitiveKit.Mat("CowWhite", new Color(0.96f, 0.95f, 0.92f));
-        var black = PrimitiveKit.Mat("CowBlack", new Color(0.12f, 0.1f, 0.1f));
-        var pink = PrimitiveKit.Mat("CowPink", new Color(0.95f, 0.65f, 0.65f));
-        PrimitiveKit.Box("Body", c, new Vector3(0f, 0.95f, 0f), new Vector3(0.75f, 0.7f, 1.6f), white);
-        PrimitiveKit.Box("Spot", c, new Vector3(0.38f, 1.05f, 0.2f), new Vector3(0.02f, 0.4f, 0.5f), black, collider: false);
-        PrimitiveKit.Box("Spot", c, new Vector3(-0.38f, 0.9f, -0.35f), new Vector3(0.02f, 0.35f, 0.45f), black, collider: false);
-        PrimitiveKit.Box("Spot", c, new Vector3(0f, 1.31f, -0.2f), new Vector3(0.4f, 0.02f, 0.5f), black, collider: false);
-        foreach (float x in new[] { -0.25f, 0.25f })
-            foreach (float z in new[] { -0.6f, 0.6f })
-                PrimitiveKit.Box("Leg", c, new Vector3(x, 0.3f, z), new Vector3(0.16f, 0.6f, 0.16f), white, collider: false);
-        var head = PrimitiveKit.Group("Head", c, new Vector3(0f, 1.15f, 0.85f)).transform;
-        PrimitiveKit.Box("Skull", head, new Vector3(0f, 0f, 0.25f), new Vector3(0.45f, 0.45f, 0.55f), white, collider: false);
-        PrimitiveKit.Box("Muzzle", head, new Vector3(0f, -0.1f, 0.55f), new Vector3(0.4f, 0.25f, 0.15f), pink, collider: false);
-        foreach (float x in new[] { -0.17f, 0.17f })
-            PrimitiveKit.Box("Horn", head, new Vector3(x, 0.28f, 0.15f), new Vector3(0.06f, 0.15f, 0.06f), PrimitiveKit.Mat("ChurchWhite", new Color(0.96f, 0.95f, 0.92f)), collider: false);
+        var white = PrimitiveKit.Mat("CowWhite", new Color(0.97f, 0.96f, 0.93f));
+        var black = PrimitiveKit.Mat("CowBlack", new Color(0.15f, 0.12f, 0.12f));
+        var pink = PrimitiveKit.Mat("CowPink", new Color(0.98f, 0.72f, 0.74f));
+        var hoof = PrimitiveKit.Mat("CowHoof", new Color(0.32f, 0.24f, 0.2f));
+        var horn = PrimitiveKit.Mat("CowHorn", new Color(0.98f, 0.92f, 0.75f));
+        var shine = PrimitiveKit.Mat("EyeShine", Color.white);
+
+        // Body: a capsule lying front to back, a rounder belly under it
+        PrimitiveKit.Create(PrimitiveType.Capsule, "Body", c, new Vector3(0f, 0.95f, 0f), new Vector3(0.82f, 0.85f, 0.8f), white, new Vector3(90f, 0f, 0f));
+        PrimitiveKit.Sphere("Belly", c, new Vector3(0f, 0.85f, -0.05f), new Vector3(0.78f, 0.62f, 1.05f), white);
+        PrimitiveKit.Sphere("Udder", c, new Vector3(0f, 0.55f, -0.38f), new Vector3(0.28f, 0.18f, 0.26f), pink);
+        // Soft round patches hugging the sides and back
+        PrimitiveKit.Sphere("Spot", c, new Vector3(0.36f, 1.02f, 0.25f), new Vector3(0.12f, 0.4f, 0.5f), black);
+        PrimitiveKit.Sphere("Spot", c, new Vector3(-0.36f, 0.92f, -0.3f), new Vector3(0.12f, 0.36f, 0.46f), black);
+        PrimitiveKit.Sphere("Spot", c, new Vector3(0.05f, 1.32f, -0.15f), new Vector3(0.4f, 0.1f, 0.42f), black);
+        // Short rounded legs with dark hooves
+        foreach (float x in new[] { -0.22f, 0.22f })
+            foreach (float z in new[] { -0.52f, 0.52f })
+            {
+                PrimitiveKit.Create(PrimitiveType.Capsule, "Leg", c, new Vector3(x, 0.36f, z), new Vector3(0.2f, 0.32f, 0.2f), white, default, false);
+                PrimitiveKit.Cylinder("Hoof", c, new Vector3(x, 0.06f, z), new Vector3(0.2f, 0.06f, 0.2f), hoof, collider: false);
+            }
+        // Tail with a black tuft
+        PrimitiveKit.Cylinder("Tail", c, new Vector3(0f, 0.92f, -0.98f), new Vector3(0.05f, 0.28f, 0.05f), white, new Vector3(-20f, 0f, 0f), collider: false);
+        PrimitiveKit.Sphere("TailTuft", c, new Vector3(0f, 0.64f, -1.07f), new Vector3(0.1f, 0.14f, 0.1f), black);
+
+        var head = PrimitiveKit.Group("Head", c, new Vector3(0f, 1.25f, 0.85f)).transform;
+        PrimitiveKit.Sphere("Skull", head, new Vector3(0f, 0f, 0.18f), new Vector3(0.52f, 0.5f, 0.52f), white);
+        PrimitiveKit.Sphere("Muzzle", head, new Vector3(0f, -0.14f, 0.42f), new Vector3(0.44f, 0.3f, 0.3f), pink);
+        foreach (float x in new[] { -0.08f, 0.08f })
+            PrimitiveKit.Sphere("Nostril", head, new Vector3(x, -0.12f, 0.57f), new Vector3(0.05f, 0.04f, 0.03f), PrimitiveKit.Mat("CowNose", new Color(0.7f, 0.4f, 0.42f)));
+        foreach (float x in new[] { -0.15f, 0.15f })
+        {
+            PrimitiveKit.Sphere("Eye", head, new Vector3(x, 0.07f, 0.4f), new Vector3(0.1f, 0.12f, 0.06f), black);
+            PrimitiveKit.Sphere("EyeShine", head, new Vector3(x + 0.02f, 0.1f, 0.43f), new Vector3(0.035f, 0.035f, 0.02f), shine);
+            PrimitiveKit.Sphere("Ear", head, new Vector3(x * 2.1f, 0.06f, 0.12f), new Vector3(0.26f, 0.08f, 0.15f), x < 0 ? black : white);
+            PrimitiveKit.Create(PrimitiveType.Capsule, "Horn", head, new Vector3(x * 0.85f, 0.27f, 0.12f), new Vector3(0.07f, 0.07f, 0.07f), horn, new Vector3(0f, 0f, x < 0 ? 25f : -25f), false);
+        }
+        PrimitiveKit.Sphere("Fringe", head, new Vector3(0f, 0.2f, 0.3f), new Vector3(0.24f, 0.1f, 0.14f), black);
         c.gameObject.AddComponent<CowWander>().Configure(new Vector2(Mathf.Max(1f, room.x), Mathf.Max(0.8f, room.y)), head);
     }
 
@@ -887,6 +912,59 @@ public static class Seaside
         PrimitiveKit.Cylinder("UmbrellaPole", n, new Vector3(0f, 1.25f, -2.2f), new Vector3(0.06f, 1.25f, 0.06f), PrimitiveKit.Mat("RopeWhite", Color.white), collider: false);
     }
 
+    // Glass lift tower at the east end of the station: street level beside the road up to the platform
+    private static void StationLift(Transform line)
+    {
+        var steel = PrimitiveKit.Mat("SteelFrame", new Color(0.7f, 0.72f, 0.75f));
+        var glass = PrimitiveKit.Glow("LiftGlass", new Color(0.6f, 0.8f, 0.95f), 0.3f, 0.6f);
+        var lift = PrimitiveKit.Group("Lift_ลิฟต์สถานี", line, new Vector3(13.4f, 0f, -3.8f)).transform;
+        // Four corner posts and a roof; glass on the back and sides (open toward the road side and platform)
+        foreach (float x in new[] { -0.9f, 0.9f })
+            foreach (float z in new[] { -0.9f, 0.9f })
+                PrimitiveKit.Box("Post", lift, new Vector3(x, 5f, z), new Vector3(0.12f, 10f, 0.12f), steel);
+        PrimitiveKit.Box("Roof", lift, new Vector3(0f, 10.05f, 0f), new Vector3(2f, 0.1f, 2f), steel, collider: false);
+        PrimitiveKit.Box("GlassBack", lift, new Vector3(0f, 5f, 0.9f), new Vector3(1.7f, 10f, 0.04f), glass, collider: false);
+        PrimitiveKit.Box("GlassEast", lift, new Vector3(0.9f, 5f, 0f), new Vector3(0.04f, 10f, 1.7f), glass, collider: false);
+        PrimitiveKit.Box("SignBoard", lift, new Vector3(0f, 2.6f, -0.95f), new Vector3(1.6f, 0.4f, 0.05f), PrimitiveKit.Mat("SignGreen", new Color(0.15f, 0.45f, 0.3f)), collider: false);
+        PrimitiveKit.Label("ลิฟต์ขึ้นสถานี", lift, new Vector3(0f, 2.6f, -0.98f), 0.035f, Color.white);
+        // Walkway from the lift's top landing to the platform end
+        PrimitiveKit.Box("Landing", line, new Vector3(12.6f, 8.2f, -3f), new Vector3(1.6f, 0.3f, 2.6f), PrimitiveKit.Mat("PoleConcrete", new Color(0.78f, 0.77f, 0.74f)));
+
+        var cabin = PrimitiveKit.Group("Cabin", lift, new Vector3(0f, 0.05f, 0f)).transform;
+        PrimitiveKit.Box("CabinFloor", cabin, Vector3.zero, new Vector3(1.6f, 0.1f, 1.6f), steel, collider: false);
+        PrimitiveKit.Box("CabinRail", cabin, new Vector3(0f, 0.5f, 0.75f), new Vector3(1.6f, 0.06f, 0.06f), steel, collider: false);
+
+        var bottom = Point(lift, "RideBottom", new Vector3(0f, 0.05f, 0f), 0f);
+        var top = Point(lift, "RideTop", new Vector3(0f, 8.35f, 0f), 0f);
+        var platformExit = Point(line, "PlatformExit", new Vector3(11.2f, 8.4f, -2.6f), -90f);
+        var streetExit = Point(lift, "StreetExit", new Vector3(0f, 0.05f, -2.5f), 180f);
+
+        Zone(lift, "LiftDown_Street", new Vector3(0f, 1f, -0.6f), new Vector3(2.2f, 2f, 2.4f))
+            .AddComponent<SkyLift>().Configure("ขึ้นลิฟต์\nไปชานชาลา", cabin, bottom, top, platformExit);
+        Zone(line, "LiftUp_Platform", new Vector3(12.4f, 9.4f, -3f), new Vector3(1.6f, 2f, 2.4f))
+            .AddComponent<SkyLift>().Configure("ลงลิฟต์\nไปถนน", cabin, top, bottom, streetExit);
+    }
+
+    private static Transform Point(Transform parent, string name, Vector3 local, float yaw)
+    {
+        var p = new GameObject(name).transform;
+        p.SetParent(parent, false);
+        p.localPosition = local;
+        p.localRotation = Quaternion.Euler(0f, yaw, 0f);
+        return p;
+    }
+
+    private static GameObject Zone(Transform parent, string name, Vector3 local, Vector3 size)
+    {
+        var z = new GameObject(name);
+        z.transform.SetParent(parent, false);
+        z.transform.localPosition = local;
+        var box = z.AddComponent<BoxCollider>();
+        box.isTrigger = true;
+        box.size = size;
+        return z;
+    }
+
     // Elevated track over the main road (z = -8) with a station in the middle and a moving train
     public static void SkyTrainLine(Transform root)
     {
@@ -898,14 +976,28 @@ public static class Seaside
             PrimitiveKit.Box("PillarCap", line, new Vector3(x, 7.7f, 0f), new Vector3(1.4f, 0.4f, 3.6f), concrete, collider: false);
         }
         PrimitiveKit.Box("Guideway", line, new Vector3(0f, 8.1f, 0f), new Vector3(110f, 0.5f, 3.4f), concrete, collider: false);
-        // Station: platform canopy on both sides of the track
+        // Station: platform canopy on both sides of the track (you can walk on the platforms; a rail keeps you off the edge)
         foreach (float z in new[] { -2.6f, 2.6f })
         {
-            PrimitiveKit.Box("Platform", line, new Vector3(0f, 8.2f, z), new Vector3(24f, 0.3f, 1.8f), concrete, collider: false);
+            PrimitiveKit.Box("Platform", line, new Vector3(0f, 8.2f, z), new Vector3(24f, 0.3f, 1.8f), concrete);
+            PrimitiveKit.Box("PlatformRail", line, new Vector3(0f, 8.85f, z + Mathf.Sign(z) * 0.88f), new Vector3(24f, 1f, 0.06f), PrimitiveKit.Mat("SteelFrame", new Color(0.7f, 0.72f, 0.75f)));
+            PrimitiveKit.Box("TrackEdge", line, new Vector3(0f, 8.55f, z - Mathf.Sign(z) * 0.88f), new Vector3(24f, 0.4f, 0.06f), PrimitiveKit.Mat("SafetyYellow", new Color(0.98f, 0.82f, 0.1f)));
             PrimitiveKit.Box("StationRoof", line, new Vector3(0f, 11.6f, z * 0.7f), new Vector3(24f, 0.15f, 3.2f), PrimitiveKit.Mat("RoofZinc", new Color(0.72f, 0.75f, 0.78f)), collider: false);
         }
         PrimitiveKit.Box("StationSign", line, new Vector3(0f, 10.8f, -3.6f), new Vector3(5f, 0.7f, 0.1f), PrimitiveKit.Mat("SignGreen", new Color(0.15f, 0.45f, 0.3f)), collider: false);
         PrimitiveKit.Label("สถานีรถไฟฟ้าใจกลางเมือง", line, new Vector3(0f, 10.8f, -3.67f), 0.05f, Color.white);
+        StationLift(line);
+
+        // Ticket gate on the platform: trains to other provinces (ต่างจังหวัด)
+        var gate = new GameObject("TrainGate_ไปต่างจังหวัด");
+        gate.transform.SetParent(line, false);
+        gate.transform.localPosition = new Vector3(0f, 9.4f, -2.6f);
+        var gateZone = gate.AddComponent<BoxCollider>();
+        gateZone.isTrigger = true;
+        gateZone.size = new Vector3(3f, 2f, 1.8f);
+        gate.AddComponent<TravelStop>().Configure("สถานีรถไฟฟ้า · ไปต่างจังหวัด", trainPlatform: true);
+        PrimitiveKit.Box("TicketMachine", line, new Vector3(-1.8f, 8.95f, -3.2f), new Vector3(0.7f, 1.2f, 0.4f), PrimitiveKit.Mat("TrainBlue", new Color(0.1f, 0.4f, 0.8f)));
+        PrimitiveKit.Label("ตั๋วไปต่างจังหวัด", line, new Vector3(-1.8f, 9.75f, -3.42f), 0.03f, Color.white);
 
         var train = PrimitiveKit.Group("Train", line, new Vector3(-70f, 9.75f, 0f)).transform;
         var body = PrimitiveKit.Mat("TrainWhite", new Color(0.95f, 0.96f, 0.97f));

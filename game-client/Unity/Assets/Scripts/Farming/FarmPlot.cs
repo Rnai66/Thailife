@@ -219,8 +219,7 @@ public class FarmPlot : MonoBehaviour
                     ContextButton.Show(this, $"ดำนา\n{seed.name}", $"{header} · พันธุ์ข้าวที่มี: {farm.SeedSummary()}", () => Act("plant", seed.id));
                 break;
             case "growing":
-                var left = TimeSpan.FromSeconds(farm.SecondsUntilRipe(plot));
-                string timer = $"ข้าวสุกในอีก {(int)left.TotalMinutes}:{left.Seconds:00}";
+                string timer = $"ข้าวสุกในอีก {GameClock.Countdown(farm.SecondsUntilRipe(plot))}";
                 if (!plot.watered)
                     ContextButton.Show(this, "รดน้ำ\n(พลังงาน 5)", $"{header} · {plot.variety_name} · {timer} · รดน้ำแล้วได้ข้าวมากขึ้น", () => Act("water"));
                 else

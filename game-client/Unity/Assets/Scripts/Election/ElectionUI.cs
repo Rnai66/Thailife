@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 
-// Election window (เลือกตั้ง อบต., election.lua). At the อบต. office ("sao") the player registers as a
+// Election window (เลือกตั้ง อบต., election.lua; one election every 4 game years). At the อบต. office ("sao") the player registers as a
 // candidate for ส.อบต. or นายก อบต. and, once elected, draws the daily salary; at the village hall
 // ("hall") they campaign (หาเสียง) and, on voting days, cast a vote per position. Both show the live
 // standings of each position and the countdown to the next phase.
@@ -110,11 +110,6 @@ public class ElectionUI : MonoBehaviour
         catch (Exception e) { Notify(ElectionClient.Explain(e), UiKit.Danger); }
     }
 
-    private static string Clock(int s)
-    {
-        s = Mathf.Max(0, s);
-        return s >= 60 ? $"{s / 60} นาที {s % 60:00} วิ" : $"{s} วิ";
-    }
 
     private static int Left(ElectionClient.State s) =>
         Mathf.CeilToInt(s.phase_ends_s - (Time.time - ElectionClient.ReceivedAt));
@@ -122,8 +117,8 @@ public class ElectionUI : MonoBehaviour
     private void RenderPhase(ElectionClient.State s)
     {
         phaseText.text = s.phase == "vote"
-            ? $"เลือกตั้งครั้งที่ {s.cycle} · วันลงคะแนน (วันที่ {s.day}/{s.days}) · ปิดหีบในอีก {Clock(Left(s))}"
-            : $"เลือกตั้งครั้งที่ {s.cycle} · รับสมัครและหาเสียง (วันที่ {s.day}/{s.days}) · เปิดหีบในอีก {Clock(Left(s))}";
+            ? $"วาระที่ {s.cycle} · วันลงคะแนน! · ปิดหีบในอีก {GameClock.Countdown(Left(s))}"
+            : $"วาระที่ {s.cycle} ปีที่ {s.year}/{s.years} · รับสมัครและหาเสียง · เปิดหีบในอีก {GameClock.Countdown(Left(s))}";
     }
 
     private void Render()
@@ -165,7 +160,7 @@ public class ElectionUI : MonoBehaviour
             campaignButton.interactable = candidate && s.campaigns_left > 0 && !busy;
             hintText.text = s.phase == "vote"
                 ? "วันเลือกตั้ง! กด \"เลือก\" ข้างชื่อผู้สมัครได้ตำแหน่งละ 1 เสียง (+10 คะแนน)"
-                : "ลงคะแนนได้ในวันที่ 6-7 · หาเสียงได้ทุกวันวันละ 3 ครั้ง ยิ่งเลเวลสูงยิ่งได้เสียงมาก";
+                : "เลือกตั้งทุก 4 ปี ลงคะแนนได้ 7 วันสุดท้ายของวาระ · หาเสียงได้วันละ 3 ครั้ง ยิ่งเลเวลสูงยิ่งได้เสียงมาก";
             return;
         }
 
@@ -193,7 +188,7 @@ public class ElectionUI : MonoBehaviour
     private static string LastResults(ElectionClient.State s)
     {
         if (s.last_results == null || s.last_results.Length == 0)
-            return "ยังไม่มีผลเลือกตั้งครั้งก่อน · ค่าสมัครไม่คืน · ผู้ชนะดำรงตำแหน่งตลอดการเลือกตั้งครั้งถัดไป";
+            return "ยังไม่มีผลเลือกตั้งครั้งก่อน · ค่าสมัครไม่คืน · ผู้ชนะดำรงตำแหน่ง 4 ปี รับเงินเดือนทุกวัน";
         var parts = new System.Collections.Generic.List<string>();
         foreach (var r in s.last_results)
         {

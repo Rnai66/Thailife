@@ -1,7 +1,8 @@
--- Local elections (เลือกตั้ง อบต.). Every 7 game days is one election: on days 1-5 players register
--- as a candidate at the อบต. office (ส.อบต. or นายก อบต., a fee and a minimum level) and campaign
--- (หาเสียง) at the village hall; on days 6-7 everyone votes at the hall. The winners of one
--- election hold office through the next one and draw a daily salary at the อบต. Villager (NPC)
+-- Local elections (เลือกตั้ง อบต.). A term is 4 game years (1440 game days = 36 real days) and
+-- there is one election per term: through the term players register as a candidate at the อบต.
+-- office (ส.อบต. or นายก อบต., a fee and a minimum level) and campaign (หาเสียง) at the village
+-- hall; in the last 7 days of the term everyone votes at the hall. The winners hold office for the
+-- whole next term and draw a daily salary at the อบต. Villager (NPC)
 -- candidates run every time and pick up votes each day, so a player has to campaign to beat them.
 -- One shared record per election, written with version checks so simultaneous votes don't clash.
 --
@@ -21,8 +22,9 @@ local SYSTEM = "00000000-0000-0000-0000-000000000000"
 local COLLECTION = "election"
 local ME = { collection = "election", key = "me" }
 
-local CYCLE_DAYS = 7
-local REGISTER_DAYS = 5 -- days 1-5 register + campaign, days 6-7 vote
+local YEAR_DAYS = 360
+local CYCLE_DAYS = 4 * YEAR_DAYS          -- one election every 4 game years
+local REGISTER_DAYS = CYCLE_DAYS - 7     -- register + campaign all term, the last 7 days vote
 local CAMPAIGNS_PER_DAY = 3
 local CAMPAIGN_ENERGY = 10
 local PLAYER_VOTE = 10
@@ -34,9 +36,9 @@ local GRPC_FAILED_PRECONDITION = 9
 local ORDER = { "member", "mayor" }
 local POSITIONS = {
   member = { name = "สมาชิกสภา อบต.", short = "ส.อบต.", level = 10, fee = 1000, seats = 2, salary = 400, campaign = 200,
-             npcs = 4, base = { 10, 30 }, per_day = { 8, 16 } },
+             npcs = 4, base = { 20, 60 }, per_day = { 3, 8 } },
   mayor  = { name = "นายก อบต.", short = "นายก อบต.", level = 25, fee = 5000, seats = 1, salary = 1200, campaign = 500,
-             npcs = 3, base = { 30, 60 }, per_day = { 15, 30 } },
+             npcs = 3, base = { 60, 120 }, per_day = { 6, 14 } },
 }
 
 local NPC_NAMES = { "ลุงสมชาย", "ป้าบุญมี", "ผู้ใหญ่สมศักดิ์", "ครูวิไล", "เสี่ยเปี๊ยก", "กำนันทองดี",
@@ -191,7 +193,7 @@ local function view(user_id, extra)
   end
 
   local result = {
-    cycle = cycle, day = day, days = CYCLE_DAYS, register_days = REGISTER_DAYS, phase = phase, phase_ends_s = ends_s,
+    cycle = cycle, day = day, days = CYCLE_DAYS, year = math.floor((day - 1) / YEAR_DAYS) + 1, years = CYCLE_DAYS / YEAR_DAYS, register_days = REGISTER_DAYS, phase = phase, phase_ends_s = ends_s,
     positions = positions, registered = my_pos or "", office = office or "",
     office_name = office and POSITIONS[office].name or "",
     salary_today = office ~= nil and me.salary_day == today,

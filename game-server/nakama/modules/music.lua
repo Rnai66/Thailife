@@ -60,7 +60,7 @@ local function fair_always_open(env) return env ~= nil and env.fair_always_open 
 
 -- Pub hours: 19:00-03:00 game time
 local function is_night(now)
-  local minute = math.floor((now - life.EPOCH_MS) / 1000) % 1440
+  local minute = life.minute_of_day(now)
   return minute >= 19 * 60 or minute < 3 * 60
 end
 

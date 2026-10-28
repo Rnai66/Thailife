@@ -309,6 +309,13 @@ public static class VillageBuilder
             col.radius = 0.42f;
         }
 
+        // Carport under the house: the vehicle you bought at the bank parks here (between the stilt columns)
+        var carport = new GameObject("Carport_ที่จอดรถใต้ถุน");
+        carport.transform.SetParent(t, false);
+        carport.transform.localPosition = new Vector3(1.4f, 0f, 0f);
+        carport.transform.localRotation = Quaternion.Euler(0f, 180f, 0f); // nose toward the lane
+        carport.AddComponent<HomeCar>();
+
         // Gable ends and ridge cap (names start with "Roof" so HomeInterior hides them when you're inside)
         var gableEnd = MeshKit.Gable("StiltGable", 4.6f, 2.3f, 0.1f);
         MeshKit.Place("RoofGableL", t, gableEnd, wood, new Vector3(-2.8f, 5f, 0f), new Vector3(0f, 90f, 0f));

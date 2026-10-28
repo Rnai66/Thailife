@@ -79,7 +79,7 @@ public class EventCalendarUI : MonoBehaviour
                 : $"อีก {Duration(e.in_s - elapsed)}";
             UiKit.Label(row, 22, status, new Vector2(570f, 0f), new Vector2(260f, 50f), e.open ? UiKit.PayGreen : UiKit.Price, TextAnchor.MiddleRight).fontStyle = FontStyle.Bold;
         }
-        UiKit.Label(list, 20, "เวลาเป็นเวลาจริง (1 วันในเกม = 24 นาที) · งานประเพณีจัดทั้งที่วัดในหมู่บ้านและในเมือง/ตำบล",
+        UiKit.Label(list, 20, "เวลาเป็นเวลาจริง (1 วันในเกม = 36 นาที) · งานประเพณีจัดทั้งที่วัดในหมู่บ้านและในเมือง/ตำบล",
             new Vector2(0f, 300f - Rows * 68f), new Vector2(1400f, 40f), UiKit.Muted);
     }
 
@@ -100,7 +100,7 @@ public class EventCalendarUI : MonoBehaviour
             string status = e.open ? $"กำลังจัด! เหลือ {Duration(e.ends_s - elapsed)}" : $"อีก {Duration(e.in_s - elapsed)}";
             UiKit.Label(row, 22, status, new Vector2(160f, -36f), new Vector2(340f, 32f), e.open ? UiKit.PayGreen : UiKit.Price, TextAnchor.MiddleRight).fontStyle = FontStyle.Bold;
         }
-        var note = UiKit.Label(list, 20, "เวลาเป็นเวลาจริง (1 วันในเกม = 24 นาที)\nงานประเพณีจัดทั้งที่วัดในหมู่บ้านและในเมือง/ตำบล",
+        var note = UiKit.Label(list, 20, "เวลาเป็นเวลาจริง (1 วันในเกม = 36 นาที)\nงานประเพณีจัดทั้งที่วัดในหมู่บ้านและในเมือง/ตำบล",
             new Vector2(0f, 570f - Rows * 118f + 20f), new Vector2(680f, 60f), UiKit.Muted);
         note.lineSpacing = 1.1f;
     }
