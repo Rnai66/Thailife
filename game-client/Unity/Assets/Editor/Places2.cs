@@ -223,14 +223,18 @@ public static class Places2
         var gold = PrimitiveKit.Mat("Gold", new Color(0.95f, 0.75f, 0.2f));
         var concrete = PrimitiveKit.Mat("Concrete", new Color(0.75f, 0.75f, 0.72f));
 
-        PrimitiveKit.Box("Building", t, new Vector3(0f, 3f, 0f), new Vector3(14f, 6f, 8f), cream);
+        // Walk-in ground floor: service hall with queue screens (Interiors); the upper floor stays solid
+        PrimitiveKit.Box("UpperFloors", t, new Vector3(0f, 4.5f, 0f), new Vector3(14f, 3f, 8f), cream);
+        PrimitiveKit.Box("Ceiling", t, new Vector3(0f, 2.95f, 0f), new Vector3(14f, 0.1f, 8f), cream);
+        var hall = Interiors.Rooms(t, 14f, 8f, 3f, 2.6f, 2.6f, cream, new Color(0.96f, 0.95f, 0.93f), new Color(0.2f, 0.6f, 1f));
+        Interiors.Furnish(hall, "sao", 14f, 8f, 3f, new Color(0.2f, 0.6f, 1f));
         for (int floor = 0; floor < 2; floor++)
         for (int i = 0; i < 5; i++)
         {
             if (floor == 0 && i == 2) continue; // the entrance
             PrimitiveKit.Box("Window", t, new Vector3(-5.2f + i * 2.6f, 1.6f + floor * 3f, -4.03f), new Vector3(1.4f, 1.2f, 0.05f), window, collider: false);
         }
-        Entrance.Modern(t, 0f, -4f, 2.4f, 2.5f, new Color(0.2f, 0.6f, 1f), "อบต. ยินดีต้อนรับ · e-Service", "e-Service");
+        Entrance.Modern(t, 0f, -4f, 2.4f, 2.5f, new Color(0.2f, 0.6f, 1f), "อบต. ยินดีต้อนรับ · e-Service", "e-Service", lobby: false);
         // Thai-style roof with a gold gable over the entrance
         PrimitiveKit.Box("RoofFront", t, new Vector3(0f, 7.1f, -2.15f), new Vector3(15f, 0.15f, 5.2f), roof, new Vector3(-35f, 0f, 0f));
         PrimitiveKit.Box("RoofBack", t, new Vector3(0f, 7.1f, 2.15f), new Vector3(15f, 0.15f, 5.2f), roof, new Vector3(35f, 0f, 0f));
@@ -389,19 +393,28 @@ public static class Places2
         {
             float x = (i - (units - 1) * 0.5f) * unitWidth;
             var facade = PrimitiveKit.Mat($"Facade{i % facades.Length}", facades[i % facades.Length]);
-            PrimitiveKit.Box("Unit", t, new Vector3(x, 4.5f, 0f), new Vector3(unitWidth - 0.1f, 9f, 10f), facade);
             bool shop = signs != null && i < signs.Length && !string.IsNullOrEmpty(signs[i]);
-            if (shop) // glass shopfront: lit display either side of automatic doors, QR payment by the door
+            if (shop) // walk-in shop: glass shopfront either side of automatic doors, a furnished room behind
             {
-                PrimitiveKit.Box("Display", t, new Vector3(x, 1.4f, -5.02f), new Vector3(3.6f, 2.8f, 0.03f),
-                    PrimitiveKit.Glow("ShopDisplay", new Color(1f, 0.93f, 0.8f), 0.7f), collider: false);
+                var unit = PrimitiveKit.Group("ShopUnit_" + i, t, new Vector3(x, 0f, 0f)).transform;
+                PrimitiveKit.Box("UpperFloors", t, new Vector3(x, 6f, 0f), new Vector3(unitWidth - 0.1f, 6f, 10f), facade);
+                PrimitiveKit.Box("Ceiling", t, new Vector3(x, 2.95f, 0f), new Vector3(unitWidth - 0.1f, 0.1f, 10f), facade);
+                var accent = Color.HSVToRGB((i * 0.17f + 0.5f) % 1f, 0.6f, 0.95f);
+                var room = Interiors.Rooms(unit, unitWidth - 0.1f, 10f, 3f, 1.8f, 2.5f, facade, new Color(0.96f, 0.95f, 0.93f), accent, t, x);
+                Interiors.Furnish(room, Interiors.KindOfShop(signs[i]), unitWidth - 0.1f, 10f, 3f, accent);
+                foreach (float sx in new[] { -1f, 1f })
+                    PrimitiveKit.Box("Display", t, new Vector3(x + sx * 1.4f, 1.4f, -5.02f), new Vector3(0.8f, 2.8f, 0.03f),
+                        PrimitiveKit.Glow("ShopDisplay", new Color(1f, 0.93f, 0.8f), 0.7f), collider: false);
                 foreach (float sx in new[] { -1.15f, 1.15f })
                     PrimitiveKit.Box("Mullion", t, new Vector3(x + sx, 1.4f, -5.05f), new Vector3(0.07f, 2.8f, 0.05f), rail, collider: false);
                 Entrance.Modern(t, x, -5f, 1.6f, 2.4f, new Color(0.3f, 0.85f, 1f), lobby: false);
                 Entrance.QrStand(t, new Vector3(x - 1.5f, 0f, -5.5f));
             }
             else
+            {
+                PrimitiveKit.Box("Unit", t, new Vector3(x, 4.5f, 0f), new Vector3(unitWidth - 0.1f, 9f, 10f), facade);
                 PrimitiveKit.Box("Shutter", t, new Vector3(x, 1.4f, -5.03f), new Vector3(3.6f, 2.8f, 0.05f), shutter, collider: false);
+            }
             for (int floor = 1; floor < 3; floor++)
             {
                 float wy = 1.6f + floor * 3f;

@@ -150,10 +150,10 @@ public static class Seaside
         Hotel(root, new Vector3(-40f, 0f, -18.5f), "โรงแรมป่าตองบีช", 6, 14f, new Color(0.97f, 0.95f, 0.9f), new Color(0.15f, 0.5f, 0.7f));
         OpenRestaurant(root, new Vector3(-28f, 0f, -16.5f), "ร้านอาหารทะเลสด", new Color(0.15f, 0.45f, 0.75f), seafood: true);
         CityCivic.Block(root, new Vector3(-18.5f, 0f, -18.5f), 180f, "ร้านสะดวกซื้อ 24 ชม.", 8f, 10f, 2,
-            new Color(0.98f, 0.98f, 0.96f), new Color(0.95f, 0.5f, 0.1f), new Color(0.1f, 0.55f, 0.3f), Color.white, "Minimart_ร้านสะดวกซื้อ");
+            new Color(0.98f, 0.98f, 0.96f), new Color(0.95f, 0.5f, 0.1f), new Color(0.1f, 0.55f, 0.3f), Color.white, "Minimart_ร้านสะดวกซื้อ", interior: "store");
         Hotel(root, new Vector3(-7f, 0f, -18.5f), "โรงแรมอันดามัน", 8, 12f, new Color(0.98f, 0.9f, 0.75f), new Color(0.6f, 0.35f, 0.2f));
         CityCivic.Block(root, new Vector3(3.5f, 0f, -18.5f), 180f, "นวดแผนไทย", 8f, 10f, 2,
-            new Color(0.75f, 0.6f, 0.4f), new Color(0.4f, 0.25f, 0.12f), new Color(0.45f, 0.15f, 0.35f), new Color(1f, 0.9f, 0.6f), "Massage_นวดแผนไทย");
+            new Color(0.75f, 0.6f, 0.4f), new Color(0.4f, 0.25f, 0.12f), new Color(0.45f, 0.15f, 0.35f), new Color(1f, 0.9f, 0.6f), "Massage_นวดแผนไทย", interior: "spa");
         OpenRestaurant(root, new Vector3(9.8f, 0f, -16.5f), "ก๋วยเตี๋ยว ส้มตำ", new Color(0.85f, 0.25f, 0.2f), seafood: false, width: 6f);
         OpenRestaurant(root, new Vector3(26f, 0f, -16.5f), "ร้านอาหารริมหาด", new Color(0.2f, 0.6f, 0.35f), seafood: true);
         Hotel(root, new Vector3(40f, 0f, -18.5f), "รีสอร์ทริมหาด", 4, 14f, new Color(0.95f, 0.88f, 0.8f), new Color(0.2f, 0.55f, 0.45f));
@@ -170,7 +170,7 @@ public static class Seaside
 
     private static void Hotel(Transform root, Vector3 pos, string name, int floors, float width, Color wall, Color trim)
     {
-        var b = CityCivic.Block(root, pos, 180f, name, width, 10f, floors, wall, trim, trim, Color.white, "BeachHotel_" + name);
+        var b = CityCivic.Block(root, pos, 180f, name, width, 10f, floors, wall, trim, trim, Color.white, "BeachHotel_" + name, interior: "hotel");
         var rail = PrimitiveKit.Mat("RailMetal", new Color(0.2f, 0.22f, 0.24f));
         var slab = PrimitiveKit.Mat("BalconySlab", new Color(0.92f, 0.92f, 0.9f));
         for (int f = 1; f < floors; f++)

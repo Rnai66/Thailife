@@ -36,7 +36,7 @@ public static class CityCivic
     // A building block: walls, window grid, a modern automatic glass entrance with a kiosk, canopy,
     // steps and a name board
     internal static Transform Block(Transform root, Vector3 position, float yaw, string name, float width, float depth, int floors,
-        Color wall, Color trim, Color sign, Color signText, string objectName, string kiosk = "บัตรคิว")
+        Color wall, Color trim, Color sign, Color signText, string objectName, string kiosk = "บัตรคิว", string interior = "office")
     {
         var b = PrimitiveKit.Group(objectName, root, position, yaw).transform;
         b.localScale = Vector3.one * Scale;
@@ -44,7 +44,13 @@ public static class CityCivic
         var wallMat = PrimitiveKit.Mat(objectName + "Wall", wall);
         var trimMat = PrimitiveKit.Mat(objectName + "Trim", trim);
         var glass = PrimitiveKit.Mat("WindowGlass", new Color(0.35f, 0.5f, 0.62f));
-        PrimitiveKit.Box("Walls", b, new Vector3(0f, h * 0.5f, 0f), new Vector3(width, h, depth), wallMat);
+        // Walk-in ground floor (Interiors + BuildingInterior); the floors above stay a solid block
+        const float ground = 3.2f;
+        var accent = Color.Lerp(sign, new Color(0.2f, 0.8f, 1f), 0.5f);
+        if (floors > 1) PrimitiveKit.Box("UpperFloors", b, new Vector3(0f, (ground + h) * 0.5f, 0f), new Vector3(width, h - ground, depth), wallMat);
+        PrimitiveKit.Box("Ceiling", b, new Vector3(0f, ground - 0.05f, 0f), new Vector3(width, 0.1f, depth), wallMat);
+        var room = Interiors.Rooms(b, width, depth, ground, 2.4f, 2.6f, wallMat, new Color(0.96f, 0.95f, 0.93f), accent);
+        Interiors.Furnish(room, interior, width, depth, ground, accent);
         PrimitiveKit.Box("Cornice", b, new Vector3(0f, h + 0.15f, 0f), new Vector3(width + 0.3f, 0.3f, depth + 0.3f), trimMat, collider: false);
         int cols = Mathf.Max(2, Mathf.FloorToInt(width / 2.6f));
         float front = -depth * 0.5f;
@@ -63,7 +69,9 @@ public static class CityCivic
             if (f > 0 && (c + f) % 3 == 1) BuildingDetail.AirCon(b, new Vector3(x + 1.05f, wy - 0.45f, front - 0.2f));
         }
         // Base plinth, a band between floors, corner pilasters, a drainpipe
-        PrimitiveKit.Box("Plinth", b, new Vector3(0f, 0.25f, front - 0.04f), new Vector3(width + 0.1f, 0.5f, 0.1f), PrimitiveKit.Mat("PlinthGrey", new Color(0.55f, 0.53f, 0.5f)), collider: false);
+        float plinth = (width + 0.1f) * 0.5f - 1.2f; // either side of the doorway
+        foreach (float sx in new[] { -1f, 1f })
+            PrimitiveKit.Box("Plinth", b, new Vector3(sx * (1.2f + plinth * 0.5f), 0.25f, front - 0.04f), new Vector3(plinth, 0.5f, 0.1f), PrimitiveKit.Mat("PlinthGrey", new Color(0.55f, 0.53f, 0.5f)), collider: false);
         for (int f = 1; f < floors; f++)
             PrimitiveKit.Box("FloorBand", b, new Vector3(0f, f * 3.2f + 0.05f, front - 0.04f), new Vector3(width, 0.18f, 0.1f), trimMat, collider: false);
         foreach (float x in new[] { -width * 0.5f + 0.15f, width * 0.5f - 0.15f })
@@ -79,7 +87,7 @@ public static class CityCivic
         PrimitiveKit.Box("StairHouseRoof", b, new Vector3(width * 0.05f, h + 2.55f, depth * 0.25f), new Vector3(2.6f, 0.12f, 2.4f), trimMat, collider: false);
         foreach (float x in new[] { -1.9f, 1.9f })
             BuildingDetail.PottedPlant(b, new Vector3(x + (x < 0 ? -0.6f : 0.6f), 0f, front - 1.9f), (int)(x * 10f) + floors);
-        Entrance.Modern(b, 0f, -depth * 0.5f, 2.2f, 2.5f, Color.Lerp(sign, new Color(0.2f, 0.8f, 1f), 0.5f), "ยินดีต้อนรับ", kiosk);
+        Entrance.Modern(b, 0f, -depth * 0.5f, 2.2f, 2.5f, accent, "ยินดีต้อนรับ", kiosk, lobby: false);
         PrimitiveKit.Box("Canopy", b, new Vector3(0f, 2.9f, -depth * 0.5f - 1.2f), new Vector3(4.2f, 0.18f, 2.4f), trimMat, collider: false);
         foreach (float x in new[] { -1.9f, 1.9f })
             PrimitiveKit.Cylinder("CanopyPost", b, new Vector3(x, 1.4f, -depth * 0.5f - 2.2f), new Vector3(0.14f, 1.4f, 0.14f), trimMat);
@@ -95,7 +103,7 @@ public static class CityCivic
     private static void Hospital(Transform root, Vector3 p, float yaw)
     {
         var b = Block(root, p, yaw, "โรงพยาบาล", 16f, 11f, 3, new Color(0.97f, 0.97f, 0.96f), new Color(0.2f, 0.5f, 0.75f),
-            new Color(0.2f, 0.5f, 0.75f), Color.white, "Hospital_โรงพยาบาล");
+            new Color(0.2f, 0.5f, 0.75f), Color.white, "Hospital_โรงพยาบาล", interior: "hospital");
         var red = PrimitiveKit.Mat("RedCross", new Color(0.85f, 0.12f, 0.12f));
         PrimitiveKit.Box("CrossV", b, new Vector3(-6.2f, 7.6f, -5.6f), new Vector3(0.5f, 1.6f, 0.08f), red, collider: false);
         PrimitiveKit.Box("CrossH", b, new Vector3(-6.2f, 7.6f, -5.6f), new Vector3(1.6f, 0.5f, 0.08f), red, collider: false);
@@ -125,7 +133,7 @@ public static class CityCivic
     {
         var trim = new Color(0.55f, 0.35f, 0.2f);
         var b = Block(root, p, yaw, "โรงแรม", 10f, 10f, 5, new Color(0.93f, 0.85f, 0.7f), trim,
-            new Color(0.4f, 0.12f, 0.15f), new Color(1f, 0.85f, 0.4f), "Hotel_โรงแรม");
+            new Color(0.4f, 0.12f, 0.15f), new Color(1f, 0.85f, 0.4f), "Hotel_โรงแรม", interior: "hotel");
         var rail = PrimitiveKit.Mat("RailMetal", new Color(0.2f, 0.22f, 0.24f));
         for (int f = 1; f < 5; f++)
         {
@@ -153,10 +161,10 @@ public static class CityCivic
     private static void PawnShop(Transform root, Vector3 p, float yaw)
     {
         var b = Block(root, p, yaw, "โรงรับจำนำ", 6f, 9f, 2, new Color(0.88f, 0.9f, 0.84f), new Color(0.2f, 0.45f, 0.28f),
-            new Color(0.2f, 0.45f, 0.28f), new Color(1f, 0.92f, 0.6f), "PawnShop_โรงรับจำนำ");
+            new Color(0.2f, 0.45f, 0.28f), new Color(1f, 0.92f, 0.6f), "PawnShop_โรงรับจำนำ", interior: "gold");
         var bars = PrimitiveKit.Mat("RailMetal", new Color(0.2f, 0.22f, 0.24f));
-        for (int i = 0; i < 7; i++) // security grille across the ground floor
-            PrimitiveKit.Box("Grille", b, new Vector3(-1.5f + i * 0.5f, 1.25f, -4.62f), new Vector3(0.05f, 2.5f, 0.05f), bars, collider: false);
+        for (int i = 0; i < 7; i++) // security grille across the ground floor, open at the doorway
+            if (Mathf.Abs(-1.5f + i * 0.5f) > 1.2f) PrimitiveKit.Box("Grille", b, new Vector3(-1.5f + i * 0.5f, 1.25f, -4.62f), new Vector3(0.05f, 2.5f, 0.05f), bars, collider: false);
     }
 
     // Government office: Thai-style gable roof with a gold pediment, the national flag out front
@@ -272,7 +280,7 @@ public static class CityCivic
     private static void Bank(Transform root, Vector3 p, float yaw)
     {
         var b = Block(root, p, yaw, "ธนาคาร", 10f, 10f, 2, new Color(0.93f, 0.92f, 0.88f), new Color(0.35f, 0.3f, 0.55f),
-            new Color(0.35f, 0.3f, 0.55f), new Color(1f, 0.85f, 0.4f), "Bank_ธนาคาร", "ATM 24 ชม.");
+            new Color(0.35f, 0.3f, 0.55f), new Color(1f, 0.85f, 0.4f), "Bank_ธนาคาร", "ATM 24 ชม.", "bank");
         var stone = PrimitiveKit.Mat("BankStone", new Color(0.97f, 0.96f, 0.92f));
         var column = MeshKit.Lathe("BankColumn", new[]
         {
