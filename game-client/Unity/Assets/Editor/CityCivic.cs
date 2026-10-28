@@ -33,9 +33,10 @@ public static class CityCivic
         CityTemple(root, new Vector3(-10.5f, 0f, -29f), 180f); // right next to the event ground
     }
 
-    // A building block: walls, window grid, door, entrance canopy, steps and a name board
+    // A building block: walls, window grid, a modern automatic glass entrance with a kiosk, canopy,
+    // steps and a name board
     internal static Transform Block(Transform root, Vector3 position, float yaw, string name, float width, float depth, int floors,
-        Color wall, Color trim, Color sign, Color signText, string objectName)
+        Color wall, Color trim, Color sign, Color signText, string objectName, string kiosk = "บัตรคิว")
     {
         var b = PrimitiveKit.Group(objectName, root, position, yaw).transform;
         b.localScale = Vector3.one * Scale;
@@ -43,7 +44,6 @@ public static class CityCivic
         var wallMat = PrimitiveKit.Mat(objectName + "Wall", wall);
         var trimMat = PrimitiveKit.Mat(objectName + "Trim", trim);
         var glass = PrimitiveKit.Mat("WindowGlass", new Color(0.35f, 0.5f, 0.62f));
-        var door = PrimitiveKit.Mat("DoorGlass", new Color(0.25f, 0.35f, 0.42f));
         PrimitiveKit.Box("Walls", b, new Vector3(0f, h * 0.5f, 0f), new Vector3(width, h, depth), wallMat);
         PrimitiveKit.Box("Cornice", b, new Vector3(0f, h + 0.15f, 0f), new Vector3(width + 0.3f, 0.3f, depth + 0.3f), trimMat, collider: false);
         int cols = Mathf.Max(2, Mathf.FloorToInt(width / 2.6f));
@@ -79,7 +79,7 @@ public static class CityCivic
         PrimitiveKit.Box("StairHouseRoof", b, new Vector3(width * 0.05f, h + 2.55f, depth * 0.25f), new Vector3(2.6f, 0.12f, 2.4f), trimMat, collider: false);
         foreach (float x in new[] { -1.9f, 1.9f })
             BuildingDetail.PottedPlant(b, new Vector3(x + (x < 0 ? -0.6f : 0.6f), 0f, front - 1.9f), (int)(x * 10f) + floors);
-        PrimitiveKit.Box("Door", b, new Vector3(0f, 1.25f, -depth * 0.5f - 0.04f), new Vector3(2.2f, 2.5f, 0.06f), door, collider: false);
+        Entrance.Modern(b, 0f, -depth * 0.5f, 2.2f, 2.5f, Color.Lerp(sign, new Color(0.2f, 0.8f, 1f), 0.5f), "ยินดีต้อนรับ", kiosk);
         PrimitiveKit.Box("Canopy", b, new Vector3(0f, 2.9f, -depth * 0.5f - 1.2f), new Vector3(4.2f, 0.18f, 2.4f), trimMat, collider: false);
         foreach (float x in new[] { -1.9f, 1.9f })
             PrimitiveKit.Cylinder("CanopyPost", b, new Vector3(x, 1.4f, -depth * 0.5f - 2.2f), new Vector3(0.14f, 1.4f, 0.14f), trimMat);
@@ -272,7 +272,7 @@ public static class CityCivic
     private static void Bank(Transform root, Vector3 p, float yaw)
     {
         var b = Block(root, p, yaw, "ธนาคาร", 10f, 10f, 2, new Color(0.93f, 0.92f, 0.88f), new Color(0.35f, 0.3f, 0.55f),
-            new Color(0.35f, 0.3f, 0.55f), new Color(1f, 0.85f, 0.4f), "Bank_ธนาคาร");
+            new Color(0.35f, 0.3f, 0.55f), new Color(1f, 0.85f, 0.4f), "Bank_ธนาคาร", "ATM 24 ชม.");
         var stone = PrimitiveKit.Mat("BankStone", new Color(0.97f, 0.96f, 0.92f));
         var column = MeshKit.Lathe("BankColumn", new[]
         {

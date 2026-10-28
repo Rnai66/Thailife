@@ -11,7 +11,8 @@ public class ChickenPen : MonoBehaviour
     {
         public Transform root;
         public Vector3 target;
-        public float wait;
+        public float wait, phase;
+        public Transform[] legs; // hip pivots: swing while walking so the feet step instead of sliding
     }
 
     private readonly Dictionary<int, Bird> birds = new Dictionary<int, Bird>();
@@ -47,7 +48,10 @@ public class ChickenPen : MonoBehaviour
                     if (wasChick && c.adult) { Destroy(bird.root.gameObject); birds.Remove(c.id); }
                     else continue;
                 }
-                birds[c.id] = new Bird { root = Build(c), target = RandomPoint(), wait = Random.value * 2f };
+                var built = Build(c);
+                var legs = new List<Transform>();
+                foreach (Transform part in built) if (part.name == "LegPivot") legs.Add(part);
+                birds[c.id] = new Bird { root = built, target = RandomPoint(), wait = Random.value * 2f, legs = legs.ToArray() };
             }
         }
 
@@ -60,7 +64,7 @@ public class ChickenPen : MonoBehaviour
     {
         foreach (var bird in birds.Values)
         {
-            if (bird.wait > 0f) { bird.wait -= Time.deltaTime; continue; }
+            if (bird.wait > 0f) { bird.wait -= Time.deltaTime; Step(bird, false); continue; }
 
             var pos = bird.root.localPosition;
             var to = bird.target - pos;
@@ -73,7 +77,22 @@ public class ChickenPen : MonoBehaviour
             }
             bird.root.localPosition = pos + to.normalized * (0.8f * Time.deltaTime);
             bird.root.localRotation = Quaternion.LookRotation(to.normalized);
+            Step(bird, true);
         }
+    }
+
+    // Quick alternating steps with a little side-to-side waddle; legs settle when the bird stops
+    private static void Step(Bird bird, bool walking)
+    {
+        if (walking) bird.phase += Time.deltaTime * 14f;
+        float swing = walking ? Mathf.Sin(bird.phase) * 35f : 0f;
+        for (int i = 0; i < bird.legs.Length; i++)
+        {
+            var target = Quaternion.Euler(i % 2 == 0 ? swing : -swing, 0f, 0f);
+            bird.legs[i].localRotation = walking ? target : Quaternion.Slerp(bird.legs[i].localRotation, target, Time.deltaTime * 10f);
+        }
+        if (walking)
+            bird.root.localRotation *= Quaternion.Euler(0f, 0f, Mathf.Sin(bird.phase) * 5f);
     }
 
     private Vector3 RandomPoint() =>
@@ -94,8 +113,11 @@ public class ChickenPen : MonoBehaviour
         foreach (float x in new[] { -0.19f, 0.19f })
         {
             Part(PrimitiveType.Sphere, root, new Vector3(x, 0.34f, -0.03f), new Vector3(0.08f, 0.22f, 0.3f), Color.Lerp(feather, ink, 0.15f)); // wing
-            Part(PrimitiveType.Cylinder, root, new Vector3(x * 0.45f, 0.07f, 0.02f), new Vector3(0.035f, 0.07f, 0.035f), orange); // leg
-            Part(PrimitiveType.Sphere, root, new Vector3(x * 0.45f, 0.01f, 0.06f), new Vector3(0.08f, 0.025f, 0.1f), orange);    // foot
+            var hip = new GameObject("LegPivot").transform; // the leg swings from the hip
+            hip.SetParent(root, false);
+            hip.localPosition = new Vector3(x * 0.45f, 0.15f, 0.02f);
+            Part(PrimitiveType.Cylinder, hip, new Vector3(0f, -0.075f, 0f), new Vector3(0.035f, 0.075f, 0.035f), orange); // leg
+            Part(PrimitiveType.Sphere, hip, new Vector3(0f, -0.14f, 0.04f), new Vector3(0.08f, 0.025f, 0.1f), orange);  // foot
         }
         Part(PrimitiveType.Sphere, root, new Vector3(0f, 0.6f, 0.2f), new Vector3(0.26f, 0.26f, 0.26f), feather);      // head
         foreach (float x in new[] { -0.075f, 0.075f })

@@ -323,6 +323,7 @@ public static class Seaside
         PrimitiveKit.Box("Roof", r, new Vector3(0f, 3.45f, 0f), new Vector3(width + 0.8f, 0.15f, 8f), roof, new Vector3(-6f, 0f, 0f), collider: false);
         PrimitiveKit.Box("SignBoard", r, new Vector3(0f, 3.95f, -3.7f), new Vector3(Mathf.Min(width, 1.6f + name.Length * 0.28f), 0.8f, 0.1f), PrimitiveKit.Mat("SignYellow", new Color(1f, 0.85f, 0.15f)), collider: false);
         PrimitiveKit.Label(name, r, new Vector3(0f, 3.95f, -3.77f), 0.06f, new Color(0.6f, 0.1f, 0.1f));
+        Entrance.MenuBoard(r, new Vector3(-hw + 1f, 0f, -4.3f), name, roofColor);
 
         PrimitiveKit.Box("Kitchen", r, new Vector3(0f, 0.6f, 2.6f), new Vector3(width - 1.5f, 1f, 0.8f), PrimitiveKit.Mat("SteelFrame", new Color(0.7f, 0.72f, 0.75f)));
         if (seafood)
@@ -860,11 +861,14 @@ public static class Seaside
         PrimitiveKit.Sphere("Spot", c, new Vector3(-0.36f, 0.92f, -0.3f), new Vector3(0.12f, 0.36f, 0.46f), black);
         PrimitiveKit.Sphere("Spot", c, new Vector3(0.05f, 1.32f, -0.15f), new Vector3(0.4f, 0.1f, 0.42f), black);
         // Short rounded legs with dark hooves
-        foreach (float x in new[] { -0.22f, 0.22f })
-            foreach (float z in new[] { -0.52f, 0.52f })
+        // Short rounded legs with dark hooves, each hanging from a hip pivot so CowWander can walk them
+        // (order: front-left, front-right, back-left, back-right)
+        foreach (float z in new[] { 0.52f, -0.52f })
+            foreach (float x in new[] { -0.22f, 0.22f })
             {
-                PrimitiveKit.Create(PrimitiveType.Capsule, "Leg", c, new Vector3(x, 0.36f, z), new Vector3(0.2f, 0.32f, 0.2f), white, default, false);
-                PrimitiveKit.Cylinder("Hoof", c, new Vector3(x, 0.06f, z), new Vector3(0.2f, 0.06f, 0.2f), hoof, collider: false);
+                var hip = PrimitiveKit.Group("LegPivot", c, new Vector3(x, 0.7f, z)).transform;
+                PrimitiveKit.Create(PrimitiveType.Capsule, "Leg", hip, new Vector3(0f, -0.34f, 0f), new Vector3(0.2f, 0.32f, 0.2f), white, default, false);
+                PrimitiveKit.Cylinder("Hoof", hip, new Vector3(0f, -0.64f, 0f), new Vector3(0.2f, 0.06f, 0.2f), hoof, collider: false);
             }
         // Tail with a black tuft
         PrimitiveKit.Cylinder("Tail", c, new Vector3(0f, 0.92f, -0.98f), new Vector3(0.05f, 0.28f, 0.05f), white, new Vector3(-20f, 0f, 0f), collider: false);
@@ -982,10 +986,12 @@ public static class Seaside
             PrimitiveKit.Box("Platform", line, new Vector3(0f, 8.2f, z), new Vector3(24f, 0.3f, 1.8f), concrete);
             PrimitiveKit.Box("PlatformRail", line, new Vector3(0f, 8.85f, z + Mathf.Sign(z) * 0.88f), new Vector3(24f, 1f, 0.06f), PrimitiveKit.Mat("SteelFrame", new Color(0.7f, 0.72f, 0.75f)));
             PrimitiveKit.Box("TrackEdge", line, new Vector3(0f, 8.55f, z - Mathf.Sign(z) * 0.88f), new Vector3(24f, 0.4f, 0.06f), PrimitiveKit.Mat("SafetyYellow", new Color(0.98f, 0.82f, 0.1f)));
-            PrimitiveKit.Box("StationRoof", line, new Vector3(0f, 11.6f, z * 0.7f), new Vector3(24f, 0.15f, 3.2f), PrimitiveKit.Mat("RoofZinc", new Color(0.72f, 0.75f, 0.78f)), collider: false);
         }
-        PrimitiveKit.Box("StationSign", line, new Vector3(0f, 10.8f, -3.6f), new Vector3(5f, 0.7f, 0.1f), PrimitiveKit.Mat("SignGreen", new Color(0.15f, 0.45f, 0.3f)), collider: false);
-        PrimitiveKit.Label("สถานีรถไฟฟ้าใจกลางเมือง", line, new Vector3(0f, 10.8f, -3.67f), 0.05f, Color.white);
+        // Open-air station (no roof, so the platform and trains stay in view): a digital name board on two posts
+        PrimitiveKit.Box("StationSign", line, new Vector3(0f, 10.2f, -3.6f), new Vector3(5f, 0.7f, 0.1f), PrimitiveKit.Glow("StationScreen", new Color(0.1f, 0.35f, 0.6f), 0.6f, 0.5f), collider: false);
+        PrimitiveKit.Label("สถานีรถไฟฟ้าใจกลางเมือง", line, new Vector3(0f, 10.2f, -3.67f), 0.05f, Color.white);
+        foreach (float x in new[] { -2.3f, 2.3f })
+            PrimitiveKit.Box("StationSignPost", line, new Vector3(x, 9.3f, -3.6f), new Vector3(0.1f, 1.9f, 0.1f), PrimitiveKit.Mat("SteelFrame", new Color(0.7f, 0.72f, 0.75f)), collider: false);
         StationLift(line);
 
         // Ticket gate on the platform: trains to other provinces (ต่างจังหวัด)

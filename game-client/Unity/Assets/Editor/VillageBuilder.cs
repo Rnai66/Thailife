@@ -393,6 +393,7 @@ public static class VillageBuilder
         zone.size = new Vector3(4f, 2f, 1.8f);
         counterZone.AddComponent<ShopCounter>();
         Places.Sign(t, new Vector3(2.9f, 0f, -2.8f), "รับซื้อปลา · ขายเบ็ด\nเดินมาที่หน้าร้าน", 0f);
+        Entrance.QrStand(t, new Vector3(-2.6f, 0f, -2.9f));
 
         PrimitiveKit.Label("ร้านค้าชุมชน", t, new Vector3(0f, 3.65f, -2.12f), 0.09f, new Color(0.7f, 0.1f, 0.1f));
     }
