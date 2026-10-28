@@ -35,7 +35,7 @@ public static class TambonBuilder
         Seaside.Beach(root);
         ShopZone(root, new Vector3(-40f, 0f, 2.8f), "beach");
         ShopZone(root, new Vector3(-28f, 0f, -13f), "beach");      // ร้านอาหารทะเลสด
-        ShopZone(root, new Vector3(-18.5f, 0f, -13.2f), "community"); // ร้านสะดวกซื้อ: sell your sea fish, buy rods
+        ShopZone(root, new Vector3(-18.5f, 0f, -17.4f), "community"); // inside ร้านสะดวกซื้อ: sell your sea fish, buy rods
         ShopZone(root, new Vector3(9.8f, 0f, -13f), "noodle");        // ก๋วยเตี๋ยว ส้มตำ
         ShopZone(root, new Vector3(26f, 0f, -13f), "beach");        // ร้านอาหารริมหาด
         Places.BusStop(root, new Vector3(16f, 0f, -11.5f), 180f);
@@ -140,18 +140,17 @@ public static class TambonBuilder
         Places2.ClockTower(root, new Vector3(0f, 0f, 14f));
         Places2.Shophouses(root, new Vector3(-20f, 0f, 2f), 0f, 5, new[] { "ร้านทอง", "ร้านขายยา", "ออฟฟิศไอที", "ร้านข้าวมันไก่", "ร้านเสื้อผ้า" });
         Places2.Shophouses(root, new Vector3(22f, 0f, 2f), 0f, 4, new[] { "ร้านกาแฟ", "บริษัทซอฟต์แวร์", "ร้านตัดผม", "ร้านเครื่องดนตรี" });
-        // Walk up to ร้านข้าวมันไก่ (left row, 4th unit) or ร้านกาแฟ (right row, 1st unit) to buy food
-        FoodCounter(root, new Vector3(-15.5f, 0f, -4.4f));
-        FoodCounter(root, new Vector3(15.25f, 0f, -4.4f));
-        ShopZone(root, new Vector3(28.75f, 0f, -4.4f), "music");   // ร้านเครื่องดนตรี (right row, 4th unit)
-        // Barber (ร้านตัดผม, right row 3rd unit) and clothes shop (ร้านเสื้อผ้า, left row 5th unit): change your look
-        LookShop(root, new Vector3(24.25f, 0f, -4.4f), barber: true);
-        LookShop(root, new Vector3(-11f, 0f, -4.4f), barber: false);
-        Places.Sign(root, new Vector3(26.4f, 0f, -5.4f), "ร้านตัดผม\nเปลี่ยนทรงผม · ย้อมสีผม", 180f);
-        Places.Sign(root, new Vector3(-8.9f, 0f, -5.4f), "ร้านเสื้อผ้า\nเปลี่ยนสีเสื้อและกางเกง", 180f);
-        // Skilled office jobs in the two spare shophouse units (คอมพิวเตอร์ / ตรรกะ from the school)
-        Schooling.JobSpot(root, new Vector3(-20f, 0f, -4.4f), 180f, "office", "พนักงานคอมพิวเตอร์\nค่าจ้าง 320 ฿ · ต้องมี เลเวล 8 · คอมพิวเตอร์ Lv 4");
-        Schooling.JobSpot(root, new Vector3(19.75f, 0f, -4.4f), 180f, "programmer", "โปรแกรมเมอร์\nค่าจ้าง 650 ฿ · เลเวล 15 · คอมพิวเตอร์ Lv 8 · ตรรกะ Lv 6");
+        // Every shop's counter is inside its walk-in room (Interiors): the menu opens once you're in the
+        // shop, not out on the pavement. Rooms run z -2.8..6.8; the counters stand at the back.
+        const float inShop = 3.6f;
+        FoodCounter(root, new Vector3(-15.5f, 0f, inShop));               // ร้านข้าวมันไก่ (left row, 4th unit)
+        FoodCounter(root, new Vector3(15.25f, 0f, inShop));               // ร้านกาแฟ (right row, 1st unit)
+        ShopZone(root, new Vector3(28.75f, 0f, inShop), "music");         // ร้านเครื่องดนตรี (right row, 4th unit)
+        LookShop(root, new Vector3(24.25f, 0f, inShop), barber: true);    // ร้านตัดผม: change your hair
+        LookShop(root, new Vector3(-11f, 0f, inShop), barber: false);     // ร้านเสื้อผ้า: change your clothes
+        // Skilled office jobs at the desks inside ออฟฟิศไอที / บริษัทซอฟต์แวร์ (คอมพิวเตอร์ / ตรรกะ from the school)
+        Schooling.JobSpot(root, new Vector3(-20f, 0f, inShop), 180f, "office", null, showSign: false);
+        Schooling.JobSpot(root, new Vector3(19.75f, 0f, inShop), 180f, "programmer", null, showSign: false);
 
         // Music venues: city event stage by the clock tower (Lv 8) and the pub (Lv 10, night)
         Places2.MusicStage(root, new Vector3(10f, 0f, 22f), 90f, "city_event", "เวทีอีเวนต์เมือง", new Color(0.15f, 0.3f, 0.6f));

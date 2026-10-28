@@ -184,10 +184,10 @@ public static class Seaside
         foreach (float x in new[] { -width * 0.5f - 0.8f, width * 0.5f + 0.8f })
             Nature.CoconutPalm(b, new Vector3(x, 0f, -6.5f), 0.9f, (int)(x * 10f) + floors);
 
-        // Front desk under the entrance canopy: book a room, go up to it
+        // Front desk in the lobby (Interiors "hotel"): book a room, go up to it
         var desk = new GameObject("HotelDesk_" + name);
         desk.transform.SetParent(root, false);
-        desk.transform.localPosition = new Vector3(pos.x, 1f, -13.4f);
+        desk.transform.localPosition = new Vector3(pos.x, 1f, -20f);
         desk.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
         var box = desk.AddComponent<BoxCollider>();
         box.isTrigger = true;

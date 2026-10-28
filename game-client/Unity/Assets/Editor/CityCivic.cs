@@ -116,17 +116,17 @@ public static class CityCivic
         PrimitiveKit.Box("Siren", van, new Vector3(0f, 1.98f, 1.6f), new Vector3(1f, 0.16f, 0.3f), PrimitiveKit.Glow("SirenBlue", new Color(0.3f, 0.5f, 1f), 2f), collider: false);
         Wheels(van, 0.95f, 1.5f, 0.35f);
 
-        // Treatment (รักษาตัว) at the entrance: pricier than the รพ.สต. but restores full energy
+        // Treatment (รักษาตัว) at the reception desk inside: pricier than the รพ.สต. but restores full energy
         var zone = new GameObject("HealZone");
         zone.transform.SetParent(b, false);
-        zone.transform.localPosition = new Vector3(0f, 1f, -7.6f);
+        zone.transform.localPosition = new Vector3(-2.7f, 1f, 2.4f);
         var box = zone.AddComponent<BoxCollider>();
         box.isTrigger = true;
         box.size = new Vector3(4.2f, 2f, 2.4f);
         zone.AddComponent<HealSpot>().Configure("hospital", "โรงพยาบาล", 200);
         StreetFurniture.LampPost(b, new Vector3(-3.2f, 0f, -8.5f));
-        // Doctor's shifts (หมออนามัย, education.lua): beside the entrance, clear of the treatment desk
-        Schooling.JobSpot(b, new Vector3(-6.4f, 0f, -8.2f), 0f, "doctor", "หมออนามัย\nค่าจ้าง 800 ฿ · เลเวล 20 · สุขภาพ Lv 8 · ตรรกะ Lv 4");
+        // Doctor's shifts (หมออนามัย, education.lua): inside by the pharmacy window, clear of the treatment desk
+        Schooling.JobSpot(b, new Vector3(4.6f, 0f, 2.4f), 0f, "doctor", null, showSign: false);
     }
 
     private static void Hotel(Transform root, Vector3 p, float yaw)
@@ -276,7 +276,7 @@ public static class CityCivic
         StreetFurniture.LampPost(w, new Vector3(3.6f, 0f, -10.2f));
     }
 
-    // Bank: stately facade with columns, a gold name band and the counter at the entrance
+    // Bank: stately facade with columns, a gold name band; the tellers are inside (Interiors "bank")
     private static void Bank(Transform root, Vector3 p, float yaw)
     {
         var b = Block(root, p, yaw, "ธนาคาร", 10f, 10f, 2, new Color(0.93f, 0.92f, 0.88f), new Color(0.35f, 0.3f, 0.55f),
@@ -293,9 +293,9 @@ public static class CityCivic
         MeshKit.Place("Gable", b, MeshKit.Gable("BankGable", 9f, 1.4f, 0.9f), stone, new Vector3(0f, 6.2f, -6.55f));
         PrimitiveKit.Box("Band", b, new Vector3(0f, 6.4f, -7f), new Vector3(3.2f, 0.5f, 0.05f), PrimitiveKit.Glow("HotelGold", new Color(1f, 0.78f, 0.35f), 1.5f), collider: false);
 
-        var zone = new GameObject("BankZone");
+        var zone = new GameObject("BankZone"); // at the tellers' counter inside
         zone.transform.SetParent(b, false);
-        zone.transform.localPosition = new Vector3(0f, 1f, -7.6f);
+        zone.transform.localPosition = new Vector3(0f, 1f, 2f);
         var box = zone.AddComponent<BoxCollider>();
         box.isTrigger = true;
         box.size = new Vector3(4.2f, 2f, 2.4f);

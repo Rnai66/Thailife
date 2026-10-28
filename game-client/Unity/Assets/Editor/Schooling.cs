@@ -5,7 +5,7 @@ using UnityEngine;
 public static class Schooling
 {
     // A job's workplace: signpost + the trigger where you start and finish shifts
-    public static void JobSpot(Transform parent, Vector3 position, float yaw, string jobId, string sign)
+    public static void JobSpot(Transform parent, Vector3 position, float yaw, string jobId, string sign, bool showSign = true)
     {
         var spot = PrimitiveKit.Group("JobSpot_" + jobId, parent, position, yaw);
         var zone = new GameObject("JobZone");
@@ -15,7 +15,7 @@ public static class Schooling
         box.isTrigger = true;
         box.size = new Vector3(2.6f, 2f, 2f);
         zone.AddComponent<JobDesk>().Configure(jobId);
-        Places.Sign(spot.transform, new Vector3(1.8f, 0f, 0.6f), sign, 0f);
+        if (showSign) Places.Sign(spot.transform, new Vector3(1.8f, 0f, 0.6f), sign, 0f);
     }
 
     // Motorbike repair shop (ร้านซ่อมมอเตอร์ไซค์): open garage with a tin roof, tyres and a bike on the stand

@@ -602,7 +602,6 @@ public static class Places
         // cage show while it's stocked (FishPond toggles them)
         var bamboo = PrimitiveKit.Mat("Bamboo", new Color(0.72f, 0.66f, 0.38f));
         var net = PrimitiveKit.Mat("CageNet", new Color(0.2f, 0.3f, 0.28f));
-        var fishSkin = PrimitiveKit.Mat("FishSkin", new Color(0.55f, 0.6f, 0.62f));
         PrimitiveKit.Box("Jetty", t, new Vector3(7.6f, 0.12f, -3f), new Vector3(2.4f, 0.08f, 1.4f), wood, collider: false);
         foreach (float z in new[] { -3.6f, -2.4f })
             PrimitiveKit.Cylinder("JettyPost", t, new Vector3(8.6f, 0.05f, z), new Vector3(0.12f, 0.12f, 0.12f), wood, collider: false);
@@ -622,12 +621,7 @@ public static class Places
             }
             PrimitiveKit.Label($"กระชัง {i + 1}", ct, new Vector3(0f, 0.9f, 0f), 0.05f, Color.white, 90f);
             var fishGroup = PrimitiveKit.Group("Fish", ct, Vector3.zero);
-            for (int f = 0; f < 5; f++)
-            {
-                float a = f * 72f + i * 20f;
-                var p = Quaternion.Euler(0f, a, 0f) * new Vector3(0.55f + 0.1f * (f % 2), 0.06f, 0f);
-                PrimitiveKit.Box("Fish", fishGroup.transform, p, new Vector3(0.12f, 0.06f, 0.36f), fishSkin, new Vector3(0f, a, 0f), collider: false);
-            }
+            fishGroup.AddComponent<CageFish>().Configure(0.8f, 5); // species models that swim, grow and leap
             fishGroup.SetActive(false);
             cageFish[i] = fishGroup;
         }

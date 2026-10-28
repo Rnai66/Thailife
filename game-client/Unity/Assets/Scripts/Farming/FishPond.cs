@@ -1,7 +1,7 @@
 using UnityEngine;
 
 // The fish cages in the Kok Nong Na pond: walk up to the bank to open the fish cage window. Each cage's
-// fish (child objects "Fish1".."Fish3") show while that cage has fish in it.
+// fish (one "Fish" group per cage, animated by CageFish) show while that cage has fish in it.
 [RequireComponent(typeof(Collider))]
 public class FishPond : MonoBehaviour
 {
@@ -23,7 +23,12 @@ public class FishPond : MonoBehaviour
     {
         for (int i = 0; i < fish.Length; i++)
             if (fish[i] != null)
-                fish[i].SetActive(s?.cages != null && i < s.cages.Length && s.cages[i].stage != "empty");
+            {
+                var cage = s?.cages != null && i < s.cages.Length ? s.cages[i] : null;
+                fish[i].SetActive(cage != null && cage.stage != "empty");
+                var swim = fish[i].GetComponent<CageFish>();
+                if (swim != null) swim.Show(cage);
+            }
     }
 
     private async void OnTriggerEnter(Collider other)
