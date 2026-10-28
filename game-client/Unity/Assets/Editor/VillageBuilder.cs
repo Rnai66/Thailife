@@ -355,47 +355,35 @@ public static class VillageBuilder
         var red = PrimitiveKit.Mat("AwningRed", new Color(0.85f, 0.15f, 0.15f));
         var white = PrimitiveKit.Mat("AwningWhite", Color.white);
         var sign = PrimitiveKit.Mat("SignYellow", new Color(1f, 0.85f, 0.15f));
-        Material[] goods =
-        {
-            PrimitiveKit.Mat("GoodsBlue", new Color(0.2f, 0.4f, 0.85f)),
-            PrimitiveKit.Mat("GoodsGreen", new Color(0.2f, 0.7f, 0.3f)),
-            PrimitiveKit.Mat("GoodsOrange", new Color(1f, 0.55f, 0.1f)),
-        };
 
-        // Shell: back, sides and flat roof; the front (-Z) is open like a Thai shophouse
-        PrimitiveKit.Box("BackWall", t, new Vector3(0f, 1.5f, 1.9f), new Vector3(5f, 3f, 0.2f), wall);
-        PrimitiveKit.Box("SideL", t, new Vector3(-2.4f, 1.5f, 0f), new Vector3(0.2f, 3f, 4f), wall);
-        PrimitiveKit.Box("SideR", t, new Vector3(2.4f, 1.5f, 0f), new Vector3(0.2f, 3f, 4f), wall);
-        PrimitiveKit.Box("Roof", t, new Vector3(0f, 3.1f, 0f), new Vector3(5.6f, 0.2f, 4.6f), wall);
-
-        PrimitiveKit.Box("Counter", t, new Vector3(-0.6f, 0.5f, -1.4f), new Vector3(3.2f, 1f, 0.6f), wood);
-
-        // Shelves with goods
-        for (int row = 0; row < 3; row++)
-        {
-            float y = 0.8f + row * 0.6f;
-            PrimitiveKit.Box("Shelf", t, new Vector3(0f, y, 1.5f), new Vector3(4.2f, 0.06f, 0.5f), wood, collider: false);
-            for (int i = 0; i < 7; i++)
-                PrimitiveKit.Box("Goods", t, new Vector3(-1.8f + i * 0.6f, y + 0.18f, 1.5f), new Vector3(0.3f, 0.3f, 0.3f), goods[(i + row) % goods.Length], collider: false);
-        }
+        // Walk-in modern mini-mart (Interiors "store"): shelves, glowing fridges, a checkout, rods for sale
+        // and an ice box for the fish you sell. The menu opens once you're inside, not on the street.
+        var accent = new Color(0.2f, 0.75f, 0.45f);
+        var store = PrimitiveKit.Group("Store", t, new Vector3(0f, 0f, 0.7f)).transform;
+        var room = Interiors.Rooms(store, 5.6f, 5.6f, 3f, 1.8f, 2.5f, wall, new Color(0.96f, 0.95f, 0.93f), accent, t);
+        Interiors.Furnish(room, "store", 5.6f, 5.6f, 3f, accent);
+        Entrance.Modern(store, 0f, -2.8f, 1.6f, 2.4f, accent, lobby: false);
+        PrimitiveKit.Box("Roof", t, new Vector3(0f, 3.1f, 0.7f), new Vector3(6.2f, 0.2f, 6.2f), wall);
+        for (int i = 0; i < 4; i++) // fishing rods (ขายเบ็ด) leaning on the left wall
+            PrimitiveKit.Cylinder("Rod", room, new Vector3(-2.45f, 1.1f, -1.4f + i * 0.25f), new Vector3(0.025f, 1.1f, 0.025f), wood, new Vector3(0f, 0f, -8f), collider: false);
+        PrimitiveKit.Box("IceBox", room, new Vector3(-1.9f, 0.35f, -2f), new Vector3(0.9f, 0.7f, 0.6f), PrimitiveKit.Mat("IceBoxBlue", new Color(0.2f, 0.45f, 0.85f)));
+        PrimitiveKit.Label("รับซื้อปลา", room, new Vector3(-1.9f, 0.45f, -2.31f), 0.025f, Color.white);
 
         // Striped awning sloping down toward the street
         for (int i = 0; i < 7; i++)
             PrimitiveKit.Box("Awning", t, new Vector3(-2.4f + i * 0.8f, 2.7f, -2.7f), new Vector3(0.8f, 0.06f, 1.6f), i % 2 == 0 ? red : white, new Vector3(-14f, 0f, 0f), collider: false);
 
-        PrimitiveKit.Box("SignBoard", t, new Vector3(0f, 3.65f, -2.05f), new Vector3(4.2f, 0.8f, 0.1f), sign, collider: false);
-        // Walk up to the counter to open the shop (sell fish, buy rods)
+        PrimitiveKit.Box("SignBoard", t, new Vector3(0f, 3.65f, -2.2f), new Vector3(4.2f, 0.8f, 0.1f), sign, collider: false);
+        // Shop menu (sell fish, buy rods) opens anywhere inside the room
         var counterZone = new GameObject("ShopCounterZone");
-        counterZone.transform.SetParent(t, false);
-        counterZone.transform.localPosition = new Vector3(0f, 1f, -3f);
+        counterZone.transform.SetParent(store, false);
+        counterZone.transform.localPosition = new Vector3(0f, 1f, 0.3f);
         var zone = counterZone.AddComponent<BoxCollider>();
         zone.isTrigger = true;
-        zone.size = new Vector3(4f, 2f, 1.8f);
+        zone.size = new Vector3(4.6f, 2f, 3.2f);
         counterZone.AddComponent<ShopCounter>();
-        Places.Sign(t, new Vector3(2.9f, 0f, -2.8f), "รับซื้อปลา · ขายเบ็ด\nเดินมาที่หน้าร้าน", 0f);
-        Entrance.QrStand(t, new Vector3(-2.6f, 0f, -2.9f));
 
-        PrimitiveKit.Label("ร้านค้าชุมชน", t, new Vector3(0f, 3.65f, -2.12f), 0.09f, new Color(0.7f, 0.1f, 0.1f));
+        PrimitiveKit.Label("ร้านค้าชุมชน", t, new Vector3(0f, 3.65f, -2.27f), 0.09f, new Color(0.7f, 0.1f, 0.1f));
     }
 
     // Dirt lane along Z at x, from z0 to z1 (decoration only)
