@@ -26,8 +26,9 @@ public static class CharacterLook
         if (model == null) return;
         var parts = LookParts.For(skin);
         bool hairPaint = parts.OwnHair && (look.Hair > 0 || look.HairColor > 0);
-        if (look.Top > 0 || look.Bottom > 0 || hairPaint) Dress(model, skin, parts, look, hairPaint);
+        if (look.Top > 0 || look.Bottom > 0 || look.Outfit > 0 || hairPaint) Dress(model, skin, parts, look, hairPaint);
         if (look.Hair > 0) Hair(model, parts, look);
+        if (look.Outfit > 0) OutfitParts.Build(model, look.Outfit);
     }
 
     // ── Clothes ──────────────────────────────────────────────────────────────
@@ -42,7 +43,7 @@ public static class CharacterLook
                 if (System.Array.IndexOf(target.Renderers, r.name) >= 0) { original = r.sharedMaterial; break; }
             if (original == null) continue;
 
-            string key = $"{skin}.{t}.{look.Top}.{look.Bottom}.{(hairPaint ? look.HairColor : -1)}";
+            string key = $"{skin}.{t}.{look.Top}.{look.Bottom}.{look.Outfit}.{(hairPaint ? look.HairColor : -1)}";
             if (!outfits.TryGetValue(key, out var dressed) || dressed == null)
             {
                 dressed = Recolor(original, $"Characters/Looks/Skin_{skin}_{t}", look, hairPaint);
@@ -77,11 +78,14 @@ public static class CharacterLook
                     means[i] = v;
         }
         recolor.SetTexture("_Mask", mask);
-        recolor.SetColor("_TopColor", look.Top > 0 ? Look.ClothColors[look.Top].Color : Color.white);
-        recolor.SetColor("_BottomColor", look.Bottom > 0 ? Look.ClothColors[look.Bottom].Color : Color.white);
+        // An outfit (ชุด) sets both the top and the bottom; otherwise the chosen cloth colours
+        bool outfit = look.Outfit > 0 && look.Outfit < Look.Outfits.Length;
+        bool useTop = outfit || look.Top > 0, useBottom = outfit || look.Bottom > 0;
+        recolor.SetColor("_TopColor", outfit ? OutfitParts.Top(look.Outfit) : look.Top > 0 ? Look.ClothColors[look.Top].Color : Color.white);
+        recolor.SetColor("_BottomColor", outfit ? Look.OutfitBottoms[look.Outfit] : look.Bottom > 0 ? Look.ClothColors[look.Bottom].Color : Color.white);
         recolor.SetVector("_Means", means);
         recolor.SetColor("_HairColor", Look.HairColors[Mathf.Clamp(look.HairColor, 0, Look.HairColors.Length - 1)].Color);
-        recolor.SetVector("_Use", new Vector4(look.Top > 0 ? 1f : 0f, look.Bottom > 0 ? 1f : 0f, hairPaint ? 1f : 0f, 0f));
+        recolor.SetVector("_Use", new Vector4(useTop ? 1f : 0f, useBottom ? 1f : 0f, hairPaint ? 1f : 0f, 0f));
 
         int size = Mathf.Min(1024, Mathf.Max(tex.width, tex.height));
         var rt = new RenderTexture(size, size, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB)

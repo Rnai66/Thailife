@@ -155,7 +155,7 @@ public static class Interiors
             for (int i = 0; i < 6; i++)
                 PrimitiveKit.Box("Gold", r, new Vector3(x, 0.95f, 0.2f - hd * 0.6f + i * hd * 0.24f), new Vector3(0.3f, 0.06f, 0.15f), gold, collider: false);
         }
-        Screen(r, new Vector3(0f, h - 0.8f, hd - 0.03f), 2.4f, 0.6f, "ราคาทองวันนี้ 41,250 ฿", new Color(1f, 0.8f, 0.25f));
+        Screen(r, new Vector3(0f, h - 0.8f, hd - 0.03f), 2.4f, 0.6f, "ราคาทองคำ อัปเดตทุกชั่วโมง", new Color(1f, 0.8f, 0.25f));
         Stool(r, new Vector3(-hw + 1.3f, 0f, 0f)); Stool(r, new Vector3(hw - 1.3f, 0f, 0f));
     }
 

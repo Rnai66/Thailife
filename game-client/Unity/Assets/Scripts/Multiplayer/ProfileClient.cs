@@ -12,7 +12,7 @@ public class ProfileClient : MonoBehaviour
     [Serializable] private class NameRequest { public string name; }
     [Serializable] private class NameResult { public string name; }
     [Serializable] private class LookRequest { public string code; public string place; }
-    [Serializable] public class LookResult { public string code; public bool created; public int paid; public int level; }
+    [Serializable] public class LookResult { public string code; public bool created; public int paid; public int level; public int[] outfits; }
 
     public struct Info
     {

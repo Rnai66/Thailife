@@ -130,6 +130,53 @@ public static class StoreScreenshots
         EditorSceneManager.OpenScene("Assets/Scenes/ThaiVillage.unity");
     }
 
+    // Bangkok's landmarks by day and by night (Builds/StoreScreenshots/preview_bkk_*.png)
+    [MenuItem("Thai Life/Advanced/Preview City and Tambon")]
+    public static void PreviewCity()
+    {
+        if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+        Directory.CreateDirectory(OutDir);
+        var clips = LoadClips();
+        Capture(new Shot { File = "preview_city_top", Scene = "City", Title = "เมือง", Subtitle = "มุมบน",
+            Camera = new Vector3(0f, 125f, -2f), LookAt = new Vector3(0f, 0f, 0f), Fov = 60f }, clips);
+        Capture(new Shot { File = "preview_city_north", Scene = "City", Title = "เมือง", Subtitle = "ทางเท้าฝั่งร้าน",
+            Camera = new Vector3(-44f, 2.2f, -4.3f), LookAt = new Vector3(0f, 1.5f, -4.3f), Fov = 60f }, clips);
+        Capture(new Shot { File = "preview_city_south", Scene = "City", Title = "เมือง", Subtitle = "ทางเท้าฝั่งใต้",
+            Camera = new Vector3(-44f, 2.2f, -19f), LookAt = new Vector3(0f, 1.5f, -19f), Fov = 60f }, clips);
+        Capture(new Shot { File = "preview_city_temple", Scene = "City", Title = "เมือง", Subtitle = "วัด เวที ค่ายมวย",
+            Camera = new Vector3(10f, 30f, -8f), LookAt = new Vector3(-15f, 0f, -38f), Fov = 62f }, clips);
+        Capture(new Shot { File = "preview_tambon_market", Scene = "Tambon", Title = "ตำบล", Subtitle = "ตลาดนัด ร้านค้าชุมชน",
+            Camera = new Vector3(4f, 16f, -2f), LookAt = new Vector3(22f, 0f, -24f), Fov = 60f }, clips);
+        EditorSceneManager.OpenScene("Assets/Scenes/City.unity");
+    }
+
+    [MenuItem("Thai Life/Advanced/Preview Bangkok")]
+    public static void PreviewBangkok()
+    {
+        if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+        Directory.CreateDirectory(OutDir);
+        var clips = LoadClips();
+        Capture(new Shot { File = "preview_bkk_arun", Scene = "Bangkok", Title = "วัดอรุณ", Subtitle = "ริมแม่น้ำเจ้าพระยา",
+            Camera = new Vector3(-16f, 3f, 77f), LookAt = new Vector3(0f, 18f, 92f), Fov = 60f }, clips);
+        Capture(new Shot { File = "preview_bkk_arun_river", Scene = "Bangkok", Title = "วัดอรุณ", Subtitle = "มองข้ามแม่น้ำเจ้าพระยา",
+            Camera = new Vector3(-4f, 2.4f, 47.5f), LookAt = new Vector3(0f, 15f, 92f), Fov = 55f }, clips);
+        Capture(new Shot { File = "preview_bkk_arun_night", Scene = "Bangkok", Title = "วัดอรุณยามค่ำ", Subtitle = "",
+            Camera = new Vector3(-4f, 2.4f, 47.5f), LookAt = new Vector3(0f, 15f, 92f), Fov = 55f, Night = true }, clips);
+        Capture(new Shot { File = "preview_bkk_cruise", Scene = "Bangkok", Title = "เรือสำราญยามค่ำ", Subtitle = "",
+            Camera = new Vector3(-24f, 5f, 47f), LookAt = new Vector3(-40f, 4f, 58f), Fov = 55f, Night = true }, clips);
+        Capture(new Shot { File = "preview_bkk_kaew_night", Scene = "Bangkok", Title = "วัดพระแก้วยามค่ำ", Subtitle = "",
+            Camera = new Vector3(-30f, 12f, -14f), LookAt = new Vector3(-46f, 5f, 28f), Fov = 60f, Night = true }, clips);
+        Capture(new Shot { File = "preview_bkk_lift", Scene = "Bangkok", Title = "ลิฟต์สถานีรถไฟฟ้า", Subtitle = "ประตูด้านข้าง",
+            Camera = new Vector3(3f, 3f, -25f), LookAt = new Vector3(11f, 2f, -19.6f), Fov = 55f }, clips);
+        Capture(new Shot { File = "preview_bkk_kaew", Scene = "Bangkok", Title = "วัดพระแก้ว", Subtitle = "สนามหลวง",
+            Camera = new Vector3(-62f, 26f, -14f), LookAt = new Vector3(-48f, 3f, 24f), Fov = 62f }, clips);
+        Capture(new Shot { File = "preview_bkk_airport", Scene = "Bangkok", Title = "สุวรรณภูมิ", Subtitle = "ถนนสี่เลน รถไฟฟ้า",
+            Camera = new Vector3(-30f, 9f, -2f), LookAt = new Vector3(-18f, 4f, -45f), Fov = 64f }, clips);
+        Capture(new Shot { File = "preview_bkk_aerial", Scene = "Bangkok", Title = "กรุงเทพฯ", Subtitle = "มุมสูง",
+            Camera = new Vector3(45f, 60f, -60f), LookAt = new Vector3(-5f, 0f, 45f), Fov = 64f }, clips);
+        EditorSceneManager.OpenScene("Assets/Scenes/Bangkok.unity");
+    }
+
     // The four character models side by side, plus a log of their parts (meshes and materials)
     [MenuItem("Thai Life/Advanced/Preview Character Models")]
     public static void PreviewSkins()
@@ -214,6 +261,11 @@ public static class StoreScreenshots
                 if (t.name == "UpperFloor" || t.name == "Canopy") t.gameObject.SetActive(false); // look into walk-in buildings and tents
         if (System.Environment.GetEnvironmentVariable("SHOTS_NOPOLISH") != "1") ScenePolish.ApplyNow();
         SetTimeOfDay(shot.Night, shot.LookAt - shot.Camera);
+        foreach (var tower in Object.FindObjectsByType<TowerLights>()) // city towers: rooms and accents as after dark
+            if (shot.Night) tower.PreviewNight(6f); else tower.PreviewDay();
+        foreach (var flood in Object.FindObjectsByType<FloodLight>()) flood.Preview(shot.Night);
+        foreach (var cruise in Object.FindObjectsByType<NightCruise>()) cruise.Preview(shot.Night);
+        foreach (var glow in Object.FindObjectsByType<NightOnly>()) glow.Preview(shot.Night);
 
         // The concert light show only animates in Play mode: run one frame of it so beams are coloured and aimed
         foreach (var show in Object.FindObjectsByType<ConcertLights>())

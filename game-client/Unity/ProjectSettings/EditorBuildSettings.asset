@@ -20,4 +20,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Island.unity
     guid: c5114ae6934364a77b90aa08f25212b5
+  - enabled: 1
+    path: Assets/Scenes/Bangkok.unity
+    guid: a6988c15e275d459d9abd5ae1a81c8a7
   m_configObjects: {}

@@ -27,17 +27,9 @@ local MAX_SETTLE_DAYS = 10    -- businesses stop piling up money if nobody colle
 local MAX_BUSINESSES = 3
 local MAX_STAFF = 5
 
-local ASSETS = {
-  car_bicycle   = { kind = "car",  name = "รถจักรยาน",                   price = 3500,    level = 1,  speed = 1.1 },
-  car_motorbike = { kind = "car",  name = "มอเตอร์ไซค์",                 price = 45000,   level = 5,  speed = 1.2 },
-  car_pickup    = { kind = "car",  name = "รถกระบะ",                    price = 650000,  level = 8,  speed = 1.35 },
-  car_sedan     = { kind = "car",  name = "รถเก๋ง",                     price = 1200000, level = 10, speed = 1.4 },
-  car_luxury    = { kind = "car",  name = "รถหรู",                      price = 4500000, level = 15, speed = 1.5 },
-  land_plain    = { kind = "land", name = "ที่ดินเปล่า 1 ไร่",              price = 300000,  level = 50, rent = 0.0015 },
-  land_rice     = { kind = "land", name = "ที่นาติดคลอง 5 ไร่",            price = 1200000, level = 50, rent = 0.0015 },
-  land_city     = { kind = "land", name = "ที่ดินติดถนนในเมือง",          price = 3500000, level = 50, rent = 0.0015 },
-}
-local ASSET_ORDER = { "car_bicycle", "car_motorbike", "car_pickup", "car_sedan", "car_luxury", "land_plain", "land_rice", "land_city" }
+-- Cars and land you can buy (shop_data.BANK_ASSETS, shared with the pawn shop in gold.lua)
+local ASSETS = data.BANK_ASSETS
+local ASSET_ORDER = data.BANK_ASSET_ORDER
 
 -- Businesses: setup cost, rent and wage per game day, revenue per day at full staff
 local BUSINESSES = {

@@ -2,19 +2,20 @@ using System;
 using UnityEngine;
 
 // A character's look (หน้าตา): gender, face (which body model), hairstyle and hair colour, top and
-// bottom colour. Saved on the server (profile.lua) as the avatar url "look:g.f.h.c.t.b" so every
+// bottom colour, and an outfit (ชุด) worn over them. Saved on the server (profile.lua) as the avatar
+// url "look:g.f.h.c.t.b" (+ ".o" while wearing an outfit) so every
 // player sees the same; old "skin:N" accounts read as that body with its original hair and clothes.
 // Option lists (names, colours, prices, levels) mirror profile.lua — the server checks them.
 [Serializable]
 public struct Look
 {
-    public int Gender, Face, Hair, HairColor, Top, Bottom;
+    public int Gender, Face, Hair, HairColor, Top, Bottom, Outfit;
 
     public int Skin => Mathf.Clamp(Gender, 0, 1) * 2 + Mathf.Clamp(Face, 0, 1); // 0,1 male · 2,3 female
 
     public static Look FromSkin(int skin) => new Look { Gender = skin >= 2 ? 1 : 0, Face = skin % 2 };
 
-    public string Code => $"{Gender}.{Face}.{Hair}.{HairColor}.{Top}.{Bottom}";
+    public string Code => $"{Gender}.{Face}.{Hair}.{HairColor}.{Top}.{Bottom}" + (Outfit > 0 ? $".{Outfit}" : "");
 
     public static Look Parse(string avatarUrl)
     {
@@ -26,7 +27,7 @@ public struct Look
         return new Look
         {
             Gender = At(0, 2), Face = At(1, 2), Hair = At(2, HairStyles.Length), HairColor = At(3, HairColors.Length),
-            Top = At(4, ClothColors.Length), Bottom = At(5, ClothColors.Length),
+            Top = At(4, ClothColors.Length), Bottom = At(5, ClothColors.Length), Outfit = At(6, Outfits.Length),
         };
     }
 
@@ -79,6 +80,37 @@ public struct Look
         new Option("ฟ้า", new Color(0.3f, 0.6f, 1f), 300, 5),
         new Option("เขียว", new Color(0.3f, 0.8f, 0.45f), 300, 5),
         new Option("เงิน", new Color(0.85f, 0.87f, 0.9f), 500, 8),
+    };
+
+    // profile.lua OUTFITS: name, top and bottom colours (the look of the outfit is in OutfitParts),
+    // price, level. Index 0 = no outfit (your own top and bottom colours).
+    public static readonly Option[] Outfits =
+    {
+        new Option("ไม่ใส่ชุด", Color.clear),
+        new Option("ชุดปกติขาว ข้าราชการ", new Color(0.96f, 0.96f, 0.94f), 2500, 10),
+        new Option("ชุดสูทสากล", new Color(0.12f, 0.14f, 0.22f), 3000, 8),
+        new Option("ชุดนักมวยไทย", new Color(0.85f, 0.12f, 0.12f), 800, 3),
+        new Option("ชุดกากี อบต.", new Color(0.62f, 0.55f, 0.36f), 1500, 5),
+        new Option("ชุดม่อฮ่อม ชาวนา", new Color(0.13f, 0.17f, 0.32f), 300, 1),
+        new Option("เสื้อกาวน์หมอ", new Color(0.97f, 0.98f, 1f), 2000, 20),
+        new Option("ชุดไทยราชปะแตน", new Color(0.55f, 0.2f, 0.45f), 2500, 12),
+        new Option("ชุดกีฬา", new Color(0.1f, 0.45f, 0.9f), 400, 2),
+        new Option("ชุดตำรวจ", new Color(0.45f, 0.3f, 0.18f), 1800, 15),
+    };
+
+    // Trousers / skirt colour that goes with each outfit
+    public static readonly Color[] OutfitBottoms =
+    {
+        Color.clear,
+        new Color(0.96f, 0.96f, 0.94f), // white trousers
+        new Color(0.12f, 0.14f, 0.22f), // suit trousers
+        new Color(0.85f, 0.12f, 0.12f), // red boxing shorts
+        new Color(0.58f, 0.51f, 0.33f), // khaki
+        new Color(0.13f, 0.17f, 0.32f), // indigo ม่อฮ่อม
+        new Color(0.2f, 0.22f, 0.3f),   // dark trousers under the coat
+        new Color(0.35f, 0.12f, 0.3f),  // silk โจงกระเบน
+        new Color(0.95f, 0.95f, 0.95f), // white sports shorts
+        new Color(0.45f, 0.3f, 0.18f),  // police brown
     };
 
     // profile.lua CLOTH_COLORS (index 0 = the model's own clothes)

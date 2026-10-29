@@ -51,6 +51,23 @@ public static class PrimitiveKit
         return material;
     }
 
+    // Self-lit opaque surface (night windows, LED strips): URP Unlit, so its colour shows as-is day or
+    // night; scripts tint it per object (TowerLights). Saved as an asset so the shader ships in the build.
+    public static Material Unlit(string name, Color color)
+    {
+        string path = $"{MaterialFolder}/{name}.mat";
+        var material = AssetDatabase.LoadAssetAtPath<Material>(path);
+        if (material == null)
+        {
+            material = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
+            AssetDatabase.CreateAsset(material, path);
+        }
+        material.SetColor("_BaseColor", color);
+        material.enableInstancing = true;
+        EditorUtility.SetDirty(material);
+        return material;
+    }
+
     // See-through additive light (stage light beams, lasers): URP Unlit, transparent, blended "One One"
     // so overlapping beams add up and the bloom makes them shine. Saved as an asset so the shader
     // variant ships in the iOS build.

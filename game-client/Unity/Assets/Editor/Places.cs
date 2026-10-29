@@ -720,9 +720,9 @@ public static class Places
     }
 
     // ── Boxing camp (ค่ายมวย) — career training tier 3 ─────────────────────────────
-    public static GameObject BoxingCamp(Transform parent, Vector3 position, string name)
+    public static GameObject BoxingCamp(Transform parent, Vector3 position, string name, float yaw = 0f)
     {
-        var camp = PrimitiveKit.Group("BoxingCamp_ค่ายมวย", parent, position);
+        var camp = PrimitiveKit.Group("BoxingCamp_ค่ายมวย", parent, position, yaw);
         var t = camp.transform;
         var baseMat = PrimitiveKit.Mat("RingBase", new Color(0.2f, 0.2f, 0.22f));
         var canvas = PrimitiveKit.Mat("RingCanvas", new Color(0.35f, 0.6f, 0.9f));
@@ -741,12 +741,8 @@ public static class Places
             PrimitiveKit.Cylinder("RoofPost", t, new Vector3(x, 2.5f, z), new Vector3(0.2f, 2.5f, 0.2f), roofMat);
         PrimitiveKit.Box("GymRoof", t, new Vector3(1.5f, 5.05f, 0f), new Vector3(13f, 0.12f, 9f), roofMat, collider: false);
 
-        // Entrance arch with banner
-        PrimitiveKit.Box("ArchPostL", t, new Vector3(-3.6f, 1.9f, -6.5f), new Vector3(0.3f, 3.8f, 0.3f), red);
-        PrimitiveKit.Box("ArchPostR", t, new Vector3(3.6f, 1.9f, -6.5f), new Vector3(0.3f, 3.8f, 0.3f), red);
-        PrimitiveKit.Box("Banner", t, new Vector3(0f, 3.6f, -6.5f), new Vector3(7.5f, 0.9f, 0.15f), banner, collider: false);
-        PrimitiveKit.Label(name, t, new Vector3(0f, 3.62f, -6.6f), 0.09f, new Color(0.75f, 0.1f, 0.1f));
-        PrimitiveKit.Label("ซ้อมกระสอบหนัก Lv 6+", t, new Vector3(0f, 2.9f, -6.6f), 0.05f, Color.white);
+        // The camp's name on a board hung from the front of the gym roof (no posts in the way)
+        HangingSign(t, new Vector3(1.5f, 5f, -4.45f), 0f, 6f, name, "ซ้อมกระสอบหนัก Lv 6+");
 
         // Career tier 3: heavy bags beside the ring
         TrainingSetup.BuildBag("Training_CampBag", t, new Vector3(4.8f, 0f, -1.8f), "camp", 6, 7, new Color(0.1f, 0.2f, 0.55f));
@@ -763,8 +759,31 @@ public static class Places
         zone.isTrigger = true;
         zone.size = new Vector3(2.6f, 2f, 1.8f);
         desk.AddComponent<ShopCounter>().Configure("camp");
-        Sign(t, new Vector3(-8.2f, 0f, -5.6f), "สมัครสมาชิกค่าย\n300 บาท", 0f);
+        HangingSign(t, new Vector3(-3.6f, 5f, -4.45f), 0f, 2.6f, "สมัครสมาชิกค่าย", "300 บาท · โต๊ะรับสมัคร");
         return camp;
+    }
+
+    // A signboard hung on two chains from a roof edge or an arm (ป้ายแขวน): the hook point is its top
+    // centre, the board faces local -Z and reads from both sides
+    public static Transform HangingSign(Transform parent, Vector3 hook, float yaw, float width, string title, string sub = null)
+    {
+        var s = PrimitiveKit.Group("HangingSign_ป้ายแขวน", parent, hook, yaw).transform;
+        var board = PrimitiveKit.Mat("SignYellow", new Color(1f, 0.85f, 0.15f));
+        var trim = PrimitiveKit.Mat("CornerRed", new Color(0.85f, 0.15f, 0.15f));
+        var chain = PrimitiveKit.Mat("SteelFrame", new Color(0.7f, 0.72f, 0.75f));
+        float h = string.IsNullOrEmpty(sub) ? 0.7f : 1f, top = -0.35f;
+        foreach (float x in new[] { -width * 0.4f, width * 0.4f })
+            PrimitiveKit.Cylinder("Chain", s, new Vector3(x, top / 2f, 0f), new Vector3(0.03f, -top / 2f, 0.03f), chain, collider: false);
+        PrimitiveKit.Box("Board", s, new Vector3(0f, top - h / 2f, 0f), new Vector3(width, h, 0.08f), board, collider: false);
+        PrimitiveKit.Box("Trim", s, new Vector3(0f, top - h / 2f, 0f), new Vector3(width + 0.12f, h + 0.12f, 0.05f), trim, collider: false);
+        foreach (float side in new[] { -1f, 1f })
+        {
+            float yawText = side < 0f ? 0f : 180f, z = side * 0.05f;
+            PrimitiveKit.Label(title, s, new Vector3(0f, top - (string.IsNullOrEmpty(sub) ? h / 2f : 0.33f), z), 0.06f, new Color(0.7f, 0.08f, 0.08f), yawText);
+            if (!string.IsNullOrEmpty(sub))
+                PrimitiveKit.Label(sub, s, new Vector3(0f, top - 0.72f, z), 0.035f, new Color(0.25f, 0.12f, 0.05f), yawText);
+        }
+        return s;
     }
 
     // Boxing ring (เวทีมวย): 6x6 m, top at 0.6 m, ropes on three sides, steps at the open

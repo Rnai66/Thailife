@@ -15,6 +15,15 @@ public static class Npcs
         go.AddComponent<VillagerSpawner>().Configure(size, count, festival, open, close, talk);
     }
 
+    // Town crowd with foreign tourists among the locals
+    public static void TouristCrowd(Transform parent, Vector3 local, Vector2 size, int count, int tourists, int open, int close, float yaw = 0f)
+    {
+        var go = PrimitiveKit.Group("Tourists_นักท่องเที่ยว", parent, local, yaw);
+        go.AddComponent<VillagerSpawner>().Configure(size, count, "", open, close, CityTalk, tourists, TouristTalk);
+    }
+
+    public const string TouristTalk = "Hello! สวัสดีครับ|Sawasdee ka~|ต้มยำกุ้ง อร่อยมาก!|Where is the skytrain?|ตุ๊กตุ๊ก ไปวัดเท่าไหร่?|So hot today!|ขอบคุณค่ะ Khob khun ka|I love Thai food!|ถ่ายรูปให้หน่อยได้ไหมครับ|Amazing Thailand!|Pad Thai please~|ไปตลาดสดทางไหนคะ?";
+
     public static void AlmsRound(Transform parent, Vector3 from, Vector3 to, int monks)
     {
         var go = new GameObject("AlmsRound_พระบิณฑบาต");

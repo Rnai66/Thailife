@@ -15,6 +15,9 @@ public static class TambonBuilder
     [MenuItem("Thai Life/Build City Scene (เมือง)")]
     private static void BuildCityFromMenu() => BuildCity(ask: true);
 
+    [MenuItem("Thai Life/Build Bangkok Scene (กรุงเทพฯ)")]
+    private static void BuildBangkokFromMenu() => BuildBangkok(ask: true);
+
     [MenuItem("Thai Life/Build Beach Scene (ทะเล)")]
     private static void BuildBeachFromMenu() => BuildBeach(ask: true);
 
@@ -78,6 +81,10 @@ public static class TambonBuilder
         ShopZone(root, new Vector3(28f, 0f, -28f), "flea");
         Lane(root, 28f, -21f, -10f);
 
+        // ร้านค้าชุมชน next to the ตลาดนัด, facing the road (the same walk-in mini-mart as the village's)
+        VillageBuilder.BuildShop(root, new Vector3(16f, 0f, -19.5f), 180f);
+        Lane(root, 16f, -16f, -10f);
+
         Places.BusStop(root, new Vector3(16f, 0f, -11.5f), 180f);
         Places.Sign(root, new Vector3(19f, 0f, -11f), "ไปหมู่บ้าน / เมือง\n(ยืนใต้ป้ายรถ)", 180f);
         Places.Sign(root, new Vector3(-3f, 0f, -4.5f), "ตำบล", 0f);
@@ -129,13 +136,16 @@ public static class TambonBuilder
             new Vector4(13f, 0f, 35f, 18f),          // health station
             new Vector4(-26f, -42f, 6f, -15f),       // school
             new Vector4(21f, -36f, 35f, -10f),       // ตลาดนัด and its lane
+            new Vector4(12.5f, -23.5f, 19.5f, -10f), // ร้านค้าชุมชน
             new Vector4(34.5f, 13f, 41.5f, 21.5f),   // boxing ring
             new Vector4(-49.5f, -43.5f, -22.5f, -10f), // fairground and its lane
             new Vector4(-11.3f, -15f, -8.7f, -10f), new Vector4(0.7f, -6f, 3.3f, 4f));
     });
 
-    internal static void BuildCity(bool ask) => BuildLocation("Assets/Scenes/City.unity", "City", 10f, ask, root =>
+    internal static void BuildCity(bool ask) => BuildLocation("Assets/Scenes/City.unity", "City", 18f, ask, root =>
     {
+        // Four-lane avenue with traffic lights and traffic (CityTraffic)
+        CityTraffic.Build(root);
         // ตัวเมือง (อำเภอ/จังหวัด): clock tower roundabout, shophouses, boxing camp (career tier 3)
         Places2.ClockTower(root, new Vector3(0f, 0f, 14f));
         Places2.Shophouses(root, new Vector3(-20f, 0f, 2f), 0f, 5, new[] { "ร้านทอง", "ร้านขายยา", "ออฟฟิศไอที", "ร้านข้าวมันไก่", "ร้านเสื้อผ้า" });
@@ -148,19 +158,19 @@ public static class TambonBuilder
         ShopZone(root, new Vector3(28.75f, 0f, inShop), "music");         // ร้านเครื่องดนตรี (right row, 4th unit)
         LookShop(root, new Vector3(24.25f, 0f, inShop), barber: true);    // ร้านตัดผม: change your hair
         LookShop(root, new Vector3(-11f, 0f, inShop), barber: false);     // ร้านเสื้อผ้า: change your clothes
+        GoldCounter(root, new Vector3(-29f, 0f, inShop), "ร้านทอง", pawn: false); // ร้านทอง (left row, 1st unit): buy and sell gold
         // Skilled office jobs at the desks inside ออฟฟิศไอที / บริษัทซอฟต์แวร์ (คอมพิวเตอร์ / ตรรกะ from the school)
         Schooling.JobSpot(root, new Vector3(-20f, 0f, inShop), 180f, "office", null, showSign: false);
         Schooling.JobSpot(root, new Vector3(19.75f, 0f, inShop), 180f, "programmer", null, showSign: false);
 
-        // Music venues: city event stage by the clock tower (Lv 8) and the pub (Lv 10, night)
-        Places2.MusicStage(root, new Vector3(10f, 0f, 22f), 90f, "city_event", "เวทีอีเวนต์เมือง", new Color(0.15f, 0.3f, 0.6f));
+        // Music venues: the pubs (Lv 10, night); the city event stage is on the temple ground (TempleGround)
         // Pub street (ย่านผับ): three pubs by style, open at night, each playable once per game day
         Places2.Pub(root, new Vector3(-22f, 0f, 22f), 0f, "pub_puea_chiwit", "ผับเพื่อชีวิต", new Color(0.35f, 0.22f, 0.12f), new Color(1f, 0.7f, 0.25f));
         Places2.Pub(root, new Vector3(-36f, 0f, 22f), 0f, "pub_blues", "ผับบลูส์", new Color(0.1f, 0.14f, 0.3f), new Color(0.35f, 0.65f, 1f));
         Places2.Pub(root, new Vector3(26f, 0f, 24f), 0f, "pub_indie", "ผับอินดี้", new Color(0.18f, 0.12f, 0.25f), new Color(1f, 0.35f, 0.8f));
         Places.Sign(root, new Vector3(-16f, 0f, 16f), "ย่านผับ · เพื่อชีวิต บลูส์ อินดี้\nนักดนตรี Lv 10 · กลางคืน ร้านละครั้ง", 0f);
 
-        Places.BoxingCamp(root, new Vector3(0f, 0f, 34f), "ค่ายมวย");
+        TempleGround(root);
 
         // ตลาดสดเทศบาล east of the clock tower (morning market, 05:00-13:00)
         Markets.FreshMarket(root, new Vector3(39f, 0f, 11f), "ตลาดสดเทศบาล", "05:00-13:00");
@@ -169,17 +179,21 @@ public static class TambonBuilder
 
         // Cross street up to the camp, past the clock tower
         var asphalt = PrimitiveKit.Mat("Asphalt", new Color(0.22f, 0.22f, 0.24f));
-        PrimitiveKit.Box("CrossStreet", root, new Vector3(0f, 0.02f, 12f), new Vector3(6f, 0.04f, 36f), asphalt);
+        PrimitiveKit.Box("CrossStreet", root, new Vector3(0f, 0.02f, 12.3f), new Vector3(6f, 0.04f, 35.4f), asphalt);
 
-        Places.BusStop(root, new Vector3(9f, 0f, -11.5f), 180f);
-        Places.Sign(root, new Vector3(12f, 0f, -11f), "ไปหมู่บ้าน / ตำบล\n(ยืนใต้ป้ายรถ)", 180f);
-        Places.Sign(root, new Vector3(-4f, 0f, 24f), "ค่ายมวย →\nซ้อม Lv 6+", 0f);
+        // Songthaew stop to the village on the south pavement; arrivals step off onto the pavement, not the road
+        var songthaew = Places.BusStop(root, new Vector3(-2.5f, 0f, -19.3f), 180f);
+        var arrive = songthaew.transform.Find("SpawnPoint");
+        if (arrive != null) arrive.localPosition = new Vector3(0f, 0f, -0.9f);
+        Places.Sign(root, new Vector3(-6.2f, 0f, -19.6f), "ไปหมู่บ้าน / ตำบล\n(ยืนใต้ป้ายรถ)", 180f);
 
-        foreach (var pos in new[] { new Vector3(-8f, 0f, -16f), new Vector3(8f, 0f, -16f), new Vector3(-40f, 0f, 20f), new Vector3(40f, 0f, 22f) })
+        foreach (var pos in new[] { new Vector3(-40f, 0f, 20f), new Vector3(40f, 0f, 22f) })
             Places.ShadeTree(root, pos);
 
-        Npcs.Crowd(root, new Vector3(0f, 0f, -4.4f), new Vector2(76f, 1.2f), 6, "", 6, 22, Npcs.CityTalk);   // pavement along the shops
-        Npcs.Crowd(root, new Vector3(0f, 0f, 22f), new Vector2(10f, 6f), 3, "", 7, 21, Npcs.CityTalk);       // by the clock tower
+        Npcs.TouristCrowd(root, new Vector3(0f, 0f, -4.2f), new Vector2(76f, 1.0f), 9, 3, 6, 23);           // pavement along the shops
+        Npcs.TouristCrowd(root, new Vector3(20f, 0f, -19.3f), new Vector2(50f, 0.8f), 5, 2, 6, 22);         // south pavement
+        Npcs.TouristCrowd(root, new Vector3(0f, 0f, 22f), new Vector2(10f, 6f), 5, 3, 7, 22);               // by the clock tower
+        Npcs.TouristCrowd(root, new Vector3(-28f, 0f, 19f), new Vector2(22f, 3f), 6, 4, 18, 2);              // pub street at night
 
         // Noodle shop (ร้านก๋วยเตี๋ยว) by the fresh market, skytrain (รถไฟฟ้า) over the main road
         Seaside.NoodleShop(root, new Vector3(36f, 0f, 20f), 180f);
@@ -190,23 +204,22 @@ public static class TambonBuilder
         CityCivic.Build(root);
 
         // Fairground for the big festivals (งานใหญ่: งานประจำปีวัด สงกรานต์ ออกพรรษา กฐิน ลอยกระทง)
-        FestivalGrounds.Build(root, new Vector3(-34.5f, 0f, -30f), 180f, big: true); // beside the town temple
-        PrimitiveKit.Box("FairPath", root, new Vector3(-34.5f, 0.01f, -13.5f), new Vector3(4f, 0.012f, 7f),
+        FestivalGrounds.Build(root, new Vector3(-34.5f, 0f, -35f), 180f, big: true); // beside the town temple, back from the pavement
+        PrimitiveKit.Box("FairPath", root, new Vector3(-34.5f, 0.012f, -22f), new Vector3(4f, 0.012f, 1.2f),
             PrimitiveKit.Mat("Pavement", new Color(0.72f, 0.7f, 0.66f)), collider: false);
 
         // Power line on the south side of the main road (the shop awnings fill the north side),
         // and lamp posts along the street up to the boxing camp
         StreetFurniture.PoleLine(root, new[]
         {
-            new Vector3(-38f, 0f, -10.6f), new Vector3(-10f, 0f, -10.6f), new Vector3(18f, 0f, -10.6f), new Vector3(46f, 0f, -10.6f),
+            new Vector3(-44f, 0f, -18.3f), new Vector3(-16f, 0f, -18.3f), new Vector3(23f, 0f, -18.3f), new Vector3(48f, 0f, -18.3f),
         }, 180f, lamps: true);
         StreetFurniture.PoleLine(root, new[] { new Vector3(-3.6f, 0f, 0.5f) }, -90f, lamps: true);
         StreetFurniture.PoleLine(root, new[] { new Vector3(3.6f, 0f, 25.5f) }, 90f, lamps: true);
 
-        // Lamp posts at the boxing camp, the event stage and in front of each pub; bulbs in the market hall
+        // Lamp posts in front of each pub
         foreach (var p in new[]
         {
-            new Vector3(-6f, 0f, 28.5f), new Vector3(6f, 0f, 28.5f), new Vector3(13f, 0f, 18f),
             new Vector3(-22f, 0f, 18.5f), new Vector3(-36f, 0f, 18.5f), new Vector3(26f, 0f, 20.5f),
         })
             StreetFurniture.LampPost(root, p);
@@ -217,7 +230,7 @@ public static class TambonBuilder
         var planter = PrimitiveKit.Mat("Planter", new Color(0.82f, 0.8f, 0.76f));
         var streetPalms = new[]
         {
-            new Vector3(-34f, 0f, -4.6f), new Vector3(-6f, 0f, -4.6f), new Vector3(6f, 0f, -4.6f), new Vector3(36f, 0f, -4.6f),
+            new Vector3(-34f, 0f, -4.3f), new Vector3(-6f, 0f, -4.3f), new Vector3(6f, 0f, -4.3f), new Vector3(36f, 0f, -4.3f),
             new Vector3(-4.2f, 0f, 6f), new Vector3(4.2f, 0f, 6f), new Vector3(-4.2f, 0f, 20f), new Vector3(4.2f, 0f, 20f),
         };
         for (int i = 0; i < streetPalms.Length; i++)
@@ -227,7 +240,50 @@ public static class TambonBuilder
         }
         foreach (var pos in new[] { new Vector3(-10f, 0f, 30f), new Vector3(10f, 0f, 30f), new Vector3(-30f, 0f, 14f), new Vector3(-44f, 0f, 4f) })
             Nature.Bush(root, pos, 1.2f, (int)(pos.x + pos.z), flowers: true);
-    });
+    }, road: false);
+
+    // กรุงเทพฯ: another province, reached by coach, train or plane (TravelMenu). The same avenue and
+    // skytrain as the home town, วัดพระแก้ว, ศาลพระพรหม, the river with วัดอรุณ across it and
+    // สุวรรณภูมิ (Bangkok)
+    internal static void BuildBangkok(bool ask) => BuildLocation("Assets/Scenes/Bangkok.unity", "Bangkok", 22f, ask, root =>
+    {
+        CityTraffic.Build(root, "↑ ศาลพระพรหม · วัดอรุณ\n← วัดพระแก้ว · สนามหลวง", "↑ สนามบินสุวรรณภูมิ\nรถไฟฟ้า สถานีสยาม ↑",
+            "ป้ายรถเมล์ · รถทัวร์ หมอชิต");
+        Seaside.SkyTrainLine(root, "สถานีสยาม");
+        Bangkok.Build(root);
+
+        var pave = PrimitiveKit.Mat("Pavement", new Color(0.72f, 0.7f, 0.66f));
+        PrimitiveKit.Box("Pavement", root, new Vector3(0f, 0.008f, 19f), new Vector3(96f, 0.012f, 49f), pave, collider: false);
+        PrimitiveKit.Box("CrossStreet", root, new Vector3(0f, 0.02f, 2.4f), new Vector3(6f, 0.04f, 15.4f), PrimitiveKit.Mat("Asphalt", new Color(0.22f, 0.22f, 0.24f)));
+
+        // Shops along the avenue east of the side street (walk-in rooms; counters at the back)
+        Places2.Shophouses(root, new Vector3(26f, 0f, 2f), 0f, 4, new[] { "ร้านสะดวกซื้อ", "ร้านนวดแผนไทย", "ร้านของฝาก", "ร้านข้าวผัด" });
+        const float inShop = 3.6f;
+        ShopZone(root, new Vector3(19.25f, 0f, inShop), "community");   // ร้านสะดวกซื้อ
+        ShopZone(root, new Vector3(32.75f, 0f, inShop), "city_food");   // ร้านข้าวผัด
+        // Boat noodles and food on the floating market's south deck
+        Places.Sign(root, Bangkok.Wat + new Vector3(19f, 0f, -19.5f), "วัดพระแก้ว · เข้าชมฟรี\nแต่งกายสุภาพ", 0f);
+        Places.Sign(root, new Vector3(-8f, 0f, -20f), "สนามบินสุวรรณภูมิ →\nเที่ยวบินในประเทศ", 180f);
+        Places.Sign(root, new Vector3(-6f, 0f, 31f), "ท่าเรือหางยาว ข้ามไปวัดอรุณ ↑\nค่าเรือ 10 บาท", 0f);
+
+        Npcs.TouristCrowd(root, new Vector3(-50f, 0f, 2.5f), new Vector2(50f, 6f), 10, 6, 6, 22);   // สนามหลวง
+        Npcs.TouristCrowd(root, Bangkok.Wat + new Vector3(4f, 0f, -12f), new Vector2(36f, 4f), 10, 7, 8, 18); // in the temple
+        Npcs.TouristCrowd(root, new Vector3(20f, 0f, -4.2f), new Vector2(40f, 1f), 7, 4, 6, 24);   // shops pavement
+        Npcs.TouristCrowd(root, Bangkok.Terminal + new Vector3(0f, 0f, 4f), new Vector2(30f, 3f), 8, 5, 5, 24); // check-in hall
+        Npcs.TouristCrowd(root, Bangkok.Arun + new Vector3(0f, 0f, -14.5f), new Vector2(28f, 3f), 9, 7, 6, 23); // วัดอรุณ
+        Npcs.TouristCrowd(root, new Vector3(-30f, 0f, Bangkok.RiverZ - Bangkok.RiverHalf - 2f), new Vector2(60f, 2f), 8, 5, 6, 24);     // riverside promenade
+
+        StreetFurniture.PoleLine(root, new[]
+        {
+            new Vector3(-44f, 0f, -18.3f), new Vector3(-16f, 0f, -18.3f), new Vector3(23f, 0f, -18.3f), new Vector3(48f, 0f, -18.3f),
+        }, 180f, lamps: true);
+        foreach (var p in new[] { new Vector3(-6f, 0f, 9f), new Vector3(6f, 0f, 9f), new Vector3(-16f, 0f, 16f), new Vector3(16f, 0f, 16f) })
+            StreetFurniture.LampPost(root, p);
+
+        // Start on the lawn rather than in the side street (arrivals use the SpawnPoints)
+        var player = UnityEngine.Object.FindAnyObjectByType<PlayerController>();
+        if (player != null) player.transform.position = new Vector3(-34f, 1f, 2f);
+    }, road: false);
 
     private static void BuildLocation(string scenePath, string rootName, float groundScale, bool ask, Action<Transform> content, bool road = true)
     {
@@ -263,6 +319,29 @@ public static class TambonBuilder
             PrimitiveKit.Box("Dash", root, new Vector3(x, 0.045f, -8f), new Vector3(1.6f, 0.01f, 0.15f), paint, collider: false);
     }
 
+    // ลานวัด behind the town temple, for the city's events and the temple fairs: the city event stage
+    // (Lv 8) facing the ground and the boxing camp (career tier 3) along its east side. A lane runs
+    // down to it from the avenue between the temple wall and the district office, under a hanging sign.
+    private static void TempleGround(Transform root)
+    {
+        var pavement = PrimitiveKit.Mat("Pavement", new Color(0.72f, 0.7f, 0.66f));
+        PrimitiveKit.Box("TempleGround_ลานวัด", root, new Vector3(-3f, 0.01f, -53f), new Vector3(38f, 0.012f, 18f), pavement, collider: false);
+        PrimitiveKit.Box("TempleLane", root, new Vector3(1.25f, 0.012f, -33.25f), new Vector3(3f, 0.012f, 23.5f), pavement, collider: false);
+
+        Places2.MusicStage(root, new Vector3(-12f, 0f, -58f), 180f, "city_event", "เวทีอีเวนต์เมือง", new Color(0.15f, 0.3f, 0.6f));
+        Places.BoxingCamp(root, new Vector3(10f, 0f, -54f), "ค่ายมวย", 90f); // its front faces the ground (west)
+
+        // The hanging sign over the lane's mouth, on a post with an arm, just back from the pavement
+        var steel = PrimitiveKit.Mat("SteelFrame", new Color(0.7f, 0.72f, 0.75f));
+        PrimitiveKit.Cylinder("SignPost", root, new Vector3(-0.15f, 2.6f, -22.2f), new Vector3(0.14f, 2.6f, 0.14f), steel);
+        PrimitiveKit.Box("SignArm", root, new Vector3(1.25f, 5.1f, -22.2f), new Vector3(2.9f, 0.1f, 0.1f), steel, collider: false);
+        Places.HangingSign(root, new Vector3(1.25f, 5.05f, -22.2f), 0f, 2.6f, "ลานวัด ↓", "ค่ายมวย · เวทีอีเวนต์");
+
+        foreach (var p in new[] { new Vector3(-18f, 0f, -45.5f), new Vector3(-4f, 0f, -45.5f), new Vector3(-20f, 0f, -61f), new Vector3(-0.9f, 0f, -36f) })
+            StreetFurniture.LampPost(root, p);
+        Npcs.TouristCrowd(root, new Vector3(-10f, 0f, -51f), new Vector2(14f, 6f), 5, 3, 8, 22);
+    }
+
     private static void LookShop(Transform parent, Vector3 position, bool barber)
     {
         var zone = new GameObject(barber ? "Barber_ร้านตัดผม" : "Tailor_ร้านเสื้อผ้า");
@@ -272,6 +351,17 @@ public static class TambonBuilder
         box.isTrigger = true;
         box.size = new Vector3(3.6f, 2f, 2f);
         zone.AddComponent<global::LookShop>().Configure(barber);
+    }
+
+    internal static void GoldCounter(Transform parent, Vector3 position, string name, bool pawn)
+    {
+        var zone = new GameObject(pawn ? "PawnZone_โรงรับจำนำ" : "GoldZone_ร้านทอง");
+        zone.transform.SetParent(parent, false);
+        zone.transform.localPosition = position + Vector3.up;
+        var box = zone.AddComponent<BoxCollider>();
+        box.isTrigger = true;
+        box.size = new Vector3(3f, 2f, 2.4f);
+        zone.AddComponent<global::GoldCounter>().Configure(name, pawn);
     }
 
     private static void FoodCounter(Transform parent, Vector3 position) => ShopZone(parent, position, "city_food");

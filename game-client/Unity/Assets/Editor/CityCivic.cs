@@ -21,16 +21,18 @@ public static class CityCivic
         Mosque(root, new Vector3(35f, 0f, 38.5f), 0f);
 
         // South of the road, next to each other, facing the road (+Z)
-        PrimitiveKit.Box("CivicPavement", root, new Vector3(15f, 0.008f, -16f), new Vector3(34f, 0.012f, 10f),
+        // Set back so their flagpoles, canopies and kiosks stay off the pavement (it ends at z -21.5);
+        // the lane down to the temple ground runs between the temple and the district office
+        PrimitiveKit.Box("CivicPavement", root, new Vector3(18f, 0.008f, -22.75f), new Vector3(34f, 0.012f, 10.5f),
             PrimitiveKit.Mat("Pavement", new Color(0.72f, 0.7f, 0.66f)), collider: false);
-        Office(root, new Vector3(5.5f, 0f, -25f), 180f, "ที่ว่าการอำเภอ", new Color(0.96f, 0.93f, 0.84f), new Color(0.75f, 0.35f, 0.15f));
-        Office(root, new Vector3(17.1f, 0f, -25f), 180f, "องค์การบริหารส่วนจังหวัด (อบจ.)", new Color(0.92f, 0.94f, 0.96f), new Color(0.2f, 0.4f, 0.7f));
+        Office(root, new Vector3(8.5f, 0f, -29f), 180f, "ที่ว่าการอำเภอ", new Color(0.96f, 0.93f, 0.84f), new Color(0.75f, 0.35f, 0.15f));
+        Office(root, new Vector3(20.1f, 0f, -29f), 180f, "องค์การบริหารส่วนจังหวัด (อบจ.)", new Color(0.92f, 0.94f, 0.96f), new Color(0.2f, 0.4f, 0.7f));
 
         // Bank (ธนาคาร) next to the อบจ.
-        Bank(root, new Vector3(28.6f, 0f, -25f), 180f);
+        Bank(root, new Vector3(31.6f, 0f, -29f), 180f);
 
-        // The town temple (วัด) in the south-west, facing the road
-        CityTemple(root, new Vector3(-10.5f, 0f, -29f), 180f); // right next to the event ground
+        // The town temple (วัด) in the south-west, facing the road; the temple ground behind it
+        CityTemple(root, new Vector3(-10.5f, 0f, -32.5f), 180f); // right next to the event ground
     }
 
     // A building block: walls, window grid, a modern automatic glass entrance with a kiosk, canopy,
@@ -166,6 +168,7 @@ public static class CityCivic
         var bars = PrimitiveKit.Mat("RailMetal", new Color(0.2f, 0.22f, 0.24f));
         for (int i = 0; i < 7; i++) // security grille across the ground floor, open at the doorway
             if (Mathf.Abs(-1.5f + i * 0.5f) > 1.2f) PrimitiveKit.Box("Grille", b, new Vector3(-1.5f + i * 0.5f, 1.25f, -4.62f), new Vector3(0.05f, 2.5f, 0.05f), bars, collider: false);
+        TambonBuilder.GoldCounter(b, new Vector3(0f, 0f, 0.8f), "โรงรับจำนำ", pawn: true); // the pledge counter inside
     }
 
     // Government office: Thai-style gable roof with a gold pediment, the national flag out front

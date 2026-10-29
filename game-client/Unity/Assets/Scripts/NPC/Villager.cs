@@ -30,6 +30,18 @@ public class Villager : MonoBehaviour
         nextChat = Time.time + Random.Range(6f, 25f);
     }
 
+    // A foreign tourist: fair hair, holiday clothes and gear (TouristGear)
+    public void InitTourist(VillagerSpawner spawner, int seed, string[] lines)
+    {
+        home = spawner;
+        phrases = lines;
+        var model = gameObject.AddComponent<CharacterModel>();
+        model.SetLook(TouristGear.RandomLook(seed));
+        if (model.HasModel) TouristGear.Build(gameObject, seed);
+        PickTarget();
+        nextChat = Time.time + Random.Range(4f, 20f);
+    }
+
     private void PickTarget()
     {
         target = home.RandomPoint();

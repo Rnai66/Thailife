@@ -346,7 +346,7 @@ public static class VillageBuilder
             PrimitiveKit.Sphere("Garland", t, corner, Vector3.one * 0.12f, marigold);
     }
 
-    private static void BuildShop(Transform parent, Vector3 position, float yaw)
+    internal static void BuildShop(Transform parent, Vector3 position, float yaw)
     {
         var shop = PrimitiveKit.Group("Shop_ร้านโชห่วย", parent, position, yaw);
         var t = shop.transform;

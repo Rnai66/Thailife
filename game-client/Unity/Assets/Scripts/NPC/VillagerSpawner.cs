@@ -9,12 +9,17 @@ public class VillagerSpawner : MonoBehaviour
     [SerializeField] private string festivalScale = "";            // "", "any", "small", "big"
     [SerializeField] private int openHour = 0, closeHour = 24;      // game-clock hours
     [SerializeField] private string phrases = "";                   // lines separated by |
+    [SerializeField] private int tourists;                           // how many of them are foreign tourists
+    [SerializeField] private string touristPhrases = "";
 
     private GameObject crowd;
     private float nextCheck;
 
-    public void Configure(Vector2 area, int people, string festival, int open, int close, string lines)
+    public void Configure(Vector2 area, int people, string festival, int open, int close, string lines,
+        int foreigners = 0, string foreignLines = "")
     {
+        tourists = foreigners;
+        touristPhrases = foreignLines;
         size = area;
         count = people;
         festivalScale = festival;
@@ -51,6 +56,7 @@ public class VillagerSpawner : MonoBehaviour
         crowd = new GameObject("Crowd");
         crowd.transform.SetParent(transform, false);
         string[] lines = string.IsNullOrEmpty(phrases) ? null : phrases.Split('|');
+        string[] foreign = string.IsNullOrEmpty(touristPhrases) ? lines : touristPhrases.Split('|');
         int looks = Mathf.Max(1, CharacterModel.SkinCount);
         for (int i = 0; i < count; i++)
         {
@@ -58,7 +64,8 @@ public class VillagerSpawner : MonoBehaviour
             v.transform.SetParent(crowd.transform, false);
             v.transform.position = RandomPoint();
             v.transform.rotation = Quaternion.Euler(0f, Random.Range(0f, 360f), 0f);
-            v.AddComponent<Villager>().Init(this, Random.Range(0, looks), lines);
+            if (i < tourists) v.AddComponent<Villager>().InitTourist(this, Random.Range(0, 100000), foreign);
+            else v.AddComponent<Villager>().Init(this, Random.Range(0, looks), lines);
         }
     }
 }

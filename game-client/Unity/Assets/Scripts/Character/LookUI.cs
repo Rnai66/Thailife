@@ -7,7 +7,8 @@ using UnityEngine.UI;
 // Character creator (ออกแบบตัวละคร) and the two shops that change a look later:
 //  · Create — first time only, free: gender, face, hairstyle and colour, clothes colours
 //  · Barber (ร้านตัดผม) — hairstyle and colour; fancier styles and colours need money and a level
-//  · Tailor (ร้านเสื้อผ้า) — top and bottom colours, the same way
+//  · Tailor (ร้านเสื้อผ้า) — top and bottom colours, the same way, and ready-made outfits (ชุด):
+//    try one on in the preview, buy it once, then wear it again any time for free
 // A live 3D preview (LookPreview) shows every change before you pay; the server checks the price.
 public class LookUI : MonoBehaviour
 {
@@ -31,6 +32,7 @@ public class LookUI : MonoBehaviour
     private Mode mode;
     private Look look, original;
     private int level = 1;
+    private readonly HashSet<int> owned = new HashSet<int>();
     private bool busy;
     private readonly Dictionary<string, Row> rows = new Dictionary<string, Row>();
 
@@ -80,7 +82,7 @@ public class LookUI : MonoBehaviour
         title.text = m == Mode.Create ? "ออกแบบตัวละคร" : m == Mode.Barber ? "ร้านตัดผม" : "ร้านเสื้อผ้า";
         subtitle.text = m == Mode.Create ? "เลือกเพศ หน้าตา ทรงผม และชุด · ทำได้ครั้งแรกฟรี"
             : m == Mode.Barber ? $"ตัดผม {Service} บาท + ราคาทรง/สี · ทรงพิเศษต้องมีเลเวล"
-            : $"ตัดชุด {Service} บาท + ราคาสี · สีพิเศษต้องมีเลเวล";
+            : $"ลองชุดได้ฟรี · ซื้อชุดครั้งเดียวใส่ได้ตลอด · ตัดสีเสื้อ {Service} บาท + ราคาสี";
         BuildRows();
         if (preview == null) preview = LookPreview.Create();
         view.texture = preview.Texture;
@@ -92,7 +94,13 @@ public class LookUI : MonoBehaviour
         if (profile != null && profile.IsOnline)
         {
             var state = await profile.GetLookStateAsync();
-            if (state != null) { level = Mathf.Max(1, state.level); Refresh(); }
+            if (state != null)
+            {
+                level = Mathf.Max(1, state.level);
+                owned.Clear();
+                if (state.outfits != null) foreach (int o in state.outfits) owned.Add(o);
+                Refresh();
+            }
         }
     }
 
@@ -134,6 +142,12 @@ public class LookUI : MonoBehaviour
             AddTextRow("hair", "ทรงผม", names, ref y, Look.HairStyles);
             AddSwatchRow("hairColor", "สีผม", Look.HairColors, ref y);
         }
+        if (mode == Mode.Tailor)
+        {
+            var names = new string[Look.Outfits.Length];
+            for (int i = 0; i < names.Length; i++) names[i] = Look.Outfits[i].Name;
+            AddTextRow("outfit", "ชุด", names, ref y, Look.Outfits, 5, 150f, 17);
+        }
         if (mode != Mode.Barber)
         {
             AddSwatchRow("top", "เสื้อ", Look.ClothColors, ref y);
@@ -150,19 +164,19 @@ public class LookUI : MonoBehaviour
         return row;
     }
 
-    private void AddTextRow(string key, string label, string[] names, ref float y, Look.Option[] options = null)
+    private void AddTextRow(string key, string label, string[] names, ref float y, Look.Option[] options = null,
+        int perLine = 6, float width = 120f, int fontSize = 21)
     {
-        int perLine = 6;
         int lines = (names.Length + perLine - 1) / perLine;
         var row = NewRow(key, label, ref y, 30f + lines * 66f);
         for (int i = 0; i < names.Length; i++)
         {
             int value = i;
-            var at = new Vector2(-220f + (i % perLine) * 128f, -(i / perLine) * 66f);
-            var b = UiKit.RoundButton(row.Root, names[i], at, new Vector2(120f, 56f), UiKit.Pill, UiKit.Ink, () => Pick(key, value), 21);
+            var at = new Vector2(-220f + (width - 120f) / 2f + (i % perLine) * (width + 8f), -(i / perLine) * 66f);
+            var b = UiKit.RoundButton(row.Root, names[i], at, new Vector2(width, 56f), UiKit.Pill, UiKit.Ink, () => Pick(key, value), fontSize);
             Text tag = null;
             if (options != null && !options[i].Free)
-                tag = UiKit.Label(b.transform, 15, "", new Vector2(0f, -22f), new Vector2(120f, 18f), UiKit.Price);
+                tag = UiKit.Label(b.transform, 15, "", new Vector2(0f, -22f), new Vector2(width, 18f), UiKit.Price);
             row.Items.Add((b, b.GetComponent<Image>(), tag, value));
         }
     }
@@ -191,12 +205,12 @@ public class LookUI : MonoBehaviour
 
     private int Get(string key) => key switch
     {
-        "gender" => look.Gender, "face" => look.Face, "hair" => look.Hair, "hairColor" => look.HairColor, "top" => look.Top, _ => look.Bottom,
+        "gender" => look.Gender, "face" => look.Face, "hair" => look.Hair, "hairColor" => look.HairColor, "top" => look.Top, "outfit" => look.Outfit, _ => look.Bottom,
     };
 
     private Look.Option[] OptionsFor(string key) => key switch
     {
-        "hair" => Look.HairStyles, "hairColor" => Look.HairColors, "top" => Look.ClothColors, "bottom" => Look.ClothColors, _ => null,
+        "hair" => Look.HairStyles, "hairColor" => Look.HairColors, "top" => Look.ClothColors, "bottom" => Look.ClothColors, "outfit" => Look.Outfits, _ => null,
     };
 
     private void Pick(string key, int value)
@@ -209,6 +223,7 @@ public class LookUI : MonoBehaviour
             case "hairColor": look.HairColor = value; break;
             case "top": look.Top = value; break;
             case "bottom": look.Bottom = value; break;
+            case "outfit": look.Outfit = value; break;
         }
         preview.Show(look);
         preview.Front();
@@ -225,9 +240,10 @@ public class LookUI : MonoBehaviour
             foreach (var item in kv.Value.Items)
             {
                 bool selected = item.value == current;
-                bool locked = options != null && !options[item.value].Free && (mode == Mode.Create || options[item.value].Level > level);
+                bool mine = kv.Key == "outfit" && owned.Contains(item.value);
+                bool locked = options != null && !options[item.value].Free && !mine && (mode == Mode.Create || options[item.value].Level > level);
                 if (item.tag != null)
-                    item.tag.text = mode == Mode.Create ? "ร้าน" : options[item.value].Level > level ? $"Lv {options[item.value].Level}" : $"{options[item.value].Price}฿";
+                    item.tag.text = mine ? "มีแล้ว" : mode == Mode.Create ? "ร้าน" : options[item.value].Level > level ? $"Lv {options[item.value].Level}" : $"{options[item.value].Price}฿";
                 item.button.interactable = !locked;
                 var outline = item.button.GetComponent<Outline>();
                 if (outline != null) outline.effectColor = selected ? UiKit.Gold : new Color(0f, 0f, 0f, 0.15f);
@@ -245,16 +261,25 @@ public class LookUI : MonoBehaviour
     {
         changed = false;
         if (mode == Mode.Create) return 0;
-        int cost = Service;
+        int cost = 0;
         if (mode == Mode.Barber)
         {
             if (look.Hair != original.Hair) { changed = true; cost += Look.HairStyles[look.Hair].Price; }
             if (look.HairColor != original.HairColor) { changed = true; cost += Look.HairColors[look.HairColor].Price; }
+            return changed ? cost + Service : 0;
         }
-        else
+        // Tailor (profile.lua): sewing new colours costs the service; an outfit is bought once
+        if (look.Top != original.Top || look.Bottom != original.Bottom)
         {
-            if (look.Top != original.Top) { changed = true; cost += Look.ClothColors[look.Top].Price; }
-            if (look.Bottom != original.Bottom) { changed = true; cost += Look.ClothColors[look.Bottom].Price; }
+            changed = true;
+            cost += Service;
+            if (look.Top != original.Top) cost += Look.ClothColors[look.Top].Price;
+            if (look.Bottom != original.Bottom) cost += Look.ClothColors[look.Bottom].Price;
+        }
+        if (look.Outfit != original.Outfit)
+        {
+            changed = true;
+            if (look.Outfit > 0 && !owned.Contains(look.Outfit)) cost += Look.Outfits[look.Outfit].Price;
         }
         return cost;
     }
@@ -272,6 +297,7 @@ public class LookUI : MonoBehaviour
         if (mode == Mode.Create) { look.Gender = r.Next(2); look.Face = r.Next(2); }
         if (mode != Mode.Tailor) { look.Hair = Choose(Look.HairStyles, look.Hair); look.HairColor = Choose(Look.HairColors, look.HairColor); }
         if (mode != Mode.Barber) { look.Top = Choose(Look.ClothColors, look.Top); look.Bottom = Choose(Look.ClothColors, look.Bottom); }
+        if (mode == Mode.Tailor) look.Outfit = r.Next(3) == 0 ? Choose(Look.Outfits, look.Outfit) : 0;
         preview.Show(look);
         preview.Front();
         Refresh();
