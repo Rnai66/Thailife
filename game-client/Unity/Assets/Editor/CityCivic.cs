@@ -49,7 +49,8 @@ public static class CityCivic
         var accent = Color.Lerp(sign, new Color(0.2f, 0.8f, 1f), 0.5f);
         if (floors > 1) PrimitiveKit.Box("UpperFloors", b, new Vector3(0f, (ground + h) * 0.5f, 0f), new Vector3(width, h - ground, depth), wallMat);
         PrimitiveKit.Box("Ceiling", b, new Vector3(0f, ground - 0.05f, 0f), new Vector3(width, 0.1f, depth), wallMat);
-        var room = Interiors.Rooms(b, width, depth, ground, 2.4f, 2.6f, wallMat, new Color(0.96f, 0.95f, 0.93f), accent);
+        // Doorway 3.0 high: the block is scaled to 0.75, so that's 2.25 m, clear of the 2 m player capsule
+        var room = Interiors.Rooms(b, width, depth, ground, 2.4f, 3f, wallMat, new Color(0.96f, 0.95f, 0.93f), accent);
         Interiors.Furnish(room, interior, width, depth, ground, accent);
         PrimitiveKit.Box("Cornice", b, new Vector3(0f, h + 0.15f, 0f), new Vector3(width + 0.3f, 0.3f, depth + 0.3f), trimMat, collider: false);
         int cols = Mathf.Max(2, Mathf.FloorToInt(width / 2.6f));
@@ -87,8 +88,8 @@ public static class CityCivic
         PrimitiveKit.Box("StairHouseRoof", b, new Vector3(width * 0.05f, h + 2.55f, depth * 0.25f), new Vector3(2.6f, 0.12f, 2.4f), trimMat, collider: false);
         foreach (float x in new[] { -1.9f, 1.9f })
             BuildingDetail.PottedPlant(b, new Vector3(x + (x < 0 ? -0.6f : 0.6f), 0f, front - 1.9f), (int)(x * 10f) + floors);
-        Entrance.Modern(b, 0f, -depth * 0.5f, 2.2f, 2.5f, accent, "ยินดีต้อนรับ", kiosk, lobby: false);
-        PrimitiveKit.Box("Canopy", b, new Vector3(0f, 2.9f, -depth * 0.5f - 1.2f), new Vector3(4.2f, 0.18f, 2.4f), trimMat, collider: false);
+        Entrance.Modern(b, 0f, -depth * 0.5f, 2.2f, 2.85f, accent, "ยินดีต้อนรับ", kiosk, lobby: false);
+        PrimitiveKit.Box("Canopy", b, new Vector3(0f, 3.12f, -depth * 0.5f - 1.2f), new Vector3(4.2f, 0.18f, 2.4f), trimMat, collider: false);
         foreach (float x in new[] { -1.9f, 1.9f })
             PrimitiveKit.Cylinder("CanopyPost", b, new Vector3(x, 1.4f, -depth * 0.5f - 2.2f), new Vector3(0.14f, 1.4f, 0.14f), trimMat);
         PrimitiveKit.Box("Steps", b, new Vector3(0f, 0.08f, -depth * 0.5f - 0.8f), new Vector3(4f, 0.16f, 1.6f), trimMat, collider: false);
@@ -190,25 +191,32 @@ public static class CityCivic
         var white = PrimitiveKit.Mat("ChurchWhite", new Color(0.96f, 0.95f, 0.92f));
         var roof = PrimitiveKit.Mat("ChurchRoof", new Color(0.6f, 0.16f, 0.14f));
         var wood = PrimitiveKit.Mat("ChurchDoor", new Color(0.4f, 0.24f, 0.12f));
-        PrimitiveKit.Box("Nave", b, new Vector3(0f, 2.75f, 1.5f), new Vector3(8f, 5.5f, 11f), white);
+        // Walk-in nave (Interiors "church"): pews, aisle, altar; entered through the bell tower's archway
+        var nave = PrimitiveKit.Group("Nave", b, new Vector3(0f, 0f, 1.5f)).transform;
+        var naveRoom = Interiors.Rooms(nave, 8f, 11f, 5.5f, 2f, 3f, white, new Color(0.97f, 0.96f, 0.93f), new Color(0.35f, 0.45f, 0.9f), b);
+        Interiors.Furnish(naveRoom, "church", 8f, 11f, 5.5f, new Color(0.35f, 0.45f, 0.9f));
         foreach (float side in new[] { -1f, 1f })
             PrimitiveKit.Box("Roof", b, new Vector3(side * 2.2f, 7.05f, 1.5f), new Vector3(5.8f, 0.2f, 11.6f), roof, new Vector3(0f, 0f, side * -40f), collider: false);
         MeshKit.Place("NaveGable", b, MeshKit.Gable("ChurchGable", 8f, 3.4f, 0.1f), white, new Vector3(0f, 5.5f, -4.05f));
         // Bell tower at the front
-        PrimitiveKit.Box("Tower", b, new Vector3(0f, 4.5f, -4.8f), new Vector3(3f, 9f, 3f), white);
+        // Tower: an archway through its ground floor (3.0 high = 2.25 m at this scale), solid above
+        foreach (float sx in new[] { -1f, 1f })
+            PrimitiveKit.Box("TowerSide", b, new Vector3(sx * 1.25f, 1.6f, -4.8f), new Vector3(0.5f, 3.2f, 3f), white);
+        PrimitiveKit.Box("TowerUpper", b, new Vector3(0f, 6.1f, -4.8f), new Vector3(3f, 5.8f, 3f), white);
+        foreach (float sx in new[] { -1f, 1f }) // the wooden doors, swung open against the archway
+            PrimitiveKit.Box("DoorLeaf", b, new Vector3(sx * 0.95f, 1.5f, -5.85f), new Vector3(0.06f, 3f, 0.9f), wood, collider: false);
         MeshKit.Place("Spire", b, MeshKit.Lathe("ChurchSpire", new[] { new Vector2(2.1f, 0f), new Vector2(1.6f, 0.4f), new Vector2(0.05f, 3.6f), new Vector2(0f, 3.7f) }, 4),
             roof, new Vector3(0f, 9f, -4.8f), new Vector3(0f, 45f, 0f));
         var gold = PrimitiveKit.Mat("Gold", new Color(0.95f, 0.75f, 0.2f));
         PrimitiveKit.Box("CrossV", b, new Vector3(0f, 13.4f, -4.8f), new Vector3(0.14f, 1.2f, 0.14f), gold, collider: false);
         PrimitiveKit.Box("CrossH", b, new Vector3(0f, 13.6f, -4.8f), new Vector3(0.7f, 0.14f, 0.14f), gold, collider: false);
-        PrimitiveKit.Box("Door", b, new Vector3(0f, 1.4f, -6.32f), new Vector3(1.6f, 2.8f, 0.06f), wood, collider: false);
         PrimitiveKit.Cylinder("RoseWindow", b, new Vector3(0f, 6.6f, -6.32f), new Vector3(1.3f, 0.03f, 1.3f),
             PrimitiveKit.Glow("StainedGlass", new Color(0.35f, 0.45f, 0.9f), 0.8f), new Vector3(90f, 0f, 0f), collider: false);
         for (int i = 0; i < 3; i++)
             foreach (float side in new[] { -1f, 1f })
                 PrimitiveKit.Box("Window", b, new Vector3(side * 4.02f, 3f, -1.5f + i * 3f), new Vector3(0.06f, 2.4f, 1f),
                     PrimitiveKit.Glow("StainedGlass", new Color(0.35f, 0.45f, 0.9f), 0.8f), collider: false);
-        PrimitiveKit.Label("โบสถ์คริสต์", b, new Vector3(0f, 3.4f, -6.36f), 0.06f, new Color(0.4f, 0.24f, 0.12f));
+        PrimitiveKit.Label("โบสถ์คริสต์", b, new Vector3(0f, 3.6f, -6.36f), 0.06f, new Color(0.4f, 0.24f, 0.12f));
     }
 
     // Mosque (มัสยิด): white prayer hall with green trim, a central dome and a minaret with a crescent
@@ -219,7 +227,10 @@ public static class CityCivic
         var white = PrimitiveKit.Mat("MosqueWhite", new Color(0.97f, 0.97f, 0.95f));
         var green = PrimitiveKit.Mat("MosqueGreen", new Color(0.1f, 0.5f, 0.35f));
         var gold = PrimitiveKit.Mat("Gold", new Color(0.95f, 0.75f, 0.2f));
-        PrimitiveKit.Box("Hall", b, new Vector3(0f, 2.5f, 0.5f), new Vector3(10f, 5f, 9f), white);
+        // Walk-in prayer hall (Interiors "mosque"): carpet rows, mihrab, minbar, chandelier
+        var hall = PrimitiveKit.Group("Hall", b, new Vector3(0f, 0f, 0.5f)).transform;
+        var hallRoom = Interiors.Rooms(hall, 10f, 9f, 5f, 2f, 3.2f, white, new Color(0.97f, 0.97f, 0.95f), new Color(0.1f, 0.6f, 0.4f), b);
+        Interiors.Furnish(hallRoom, "mosque", 10f, 9f, 5f, new Color(0.1f, 0.6f, 0.4f));
         PrimitiveKit.Box("Trim", b, new Vector3(0f, 5.1f, 0.5f), new Vector3(10.3f, 0.3f, 9.3f), green, collider: false);
         MeshKit.Place("Dome", b, MeshKit.Lathe("MosqueDome", new[]
         {
@@ -228,7 +239,8 @@ public static class CityCivic
         }, 28), green, new Vector3(0f, 5.2f, 0.5f));
         PrimitiveKit.Cylinder("DomeDrum", b, new Vector3(0f, 5.5f, 0.5f), new Vector3(5.8f, 0.3f, 5.8f), white, collider: false);
         // Arched entrance and windows
-        PrimitiveKit.Box("Door", b, new Vector3(0f, 1.6f, -4.03f), new Vector3(2f, 3.2f, 0.06f), green, collider: false);
+        foreach (float sx in new[] { -1f, 1f }) // green door frame around the open arch
+            PrimitiveKit.Box("DoorFrame", b, new Vector3(sx * 1.05f, 1.6f, -4.03f), new Vector3(0.12f, 3.2f, 0.08f), green, collider: false);
         MeshKit.Place("DoorArch", b, MeshKit.Lathe("ArchTop", new[] { new Vector2(1f, 0f), new Vector2(0.7f, 0.5f), new Vector2(0f, 0.8f) }, 12, false, false),
             green, new Vector3(0f, 3.2f, -4.05f), new Vector3(90f, 0f, 0f), new Vector3(1f, 0.05f, 1f));
         for (int i = 0; i < 2; i++)
@@ -257,7 +269,7 @@ public static class CityCivic
         var orange = PrimitiveKit.Mat("TempleOrange", new Color(0.9f, 0.45f, 0.12f), 0.6f);
         var green = PrimitiveKit.Mat("TempleGreen", new Color(0.15f, 0.45f, 0.3f), 0.6f);
         var hall = PrimitiveKit.Group("Hall", w, new Vector3(-2f, 0f, 1.5f)).transform;
-        hall.localScale = Vector3.one * 0.6f;
+        hall.localScale = Vector3.one * 0.8f; // big enough to walk into (doorway 1.4 x 2.2 m)
         Places.Ubosot(hall, Vector3.zero, white, gold, orange, green);
         var chedi = PrimitiveKit.Group("Chedi", w, new Vector3(6f, 0f, 5f)).transform;
         chedi.localScale = Vector3.one * 0.7f;

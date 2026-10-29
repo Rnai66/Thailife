@@ -13,6 +13,7 @@ public class DrivableCar : MonoBehaviour
     private string id, carName;
     private PlayerController player;
     private Renderer[] hidden;
+    private SeatedPose riding; // astride a bicycle or motorbike
     private BoxCollider zone;
 
     public bool Driving => driving == this;
@@ -54,6 +55,11 @@ public class DrivableCar : MonoBehaviour
             hidden = player.GetComponentsInChildren<Renderer>();
             foreach (var r in hidden) if (r != null) r.enabled = false;
         }
+        else
+        {
+            riding = player.gameObject.AddComponent<SeatedPose>();
+            riding.Ride = true;
+        }
         ShowExitButton(true);
         GameAudio.Play("whoosh", null, 0.5f);
     }
@@ -66,11 +72,13 @@ public class DrivableCar : MonoBehaviour
         {
             player.DriveBoost = 1f;
             if (hidden != null) foreach (var r in hidden) if (r != null) r.enabled = true;
+            if (riding != null) Destroy(riding);
             // Step out beside the vehicle
             var side = transform.right * (CarModels.TwoWheels(id) ? 0.9f : 1.6f);
             player.Teleport(player.transform.position + side, player.transform.rotation);
         }
         hidden = null;
+        riding = null;
         zone.enabled = true;
         ShowExitButton(false);
     }
@@ -80,8 +88,10 @@ public class DrivableCar : MonoBehaviour
         if (!Driving || player == null) return;
         var cc = player.GetComponent<CharacterController>();
         float feet = player.transform.position.y + (cc != null ? cc.center.y - cc.height * 0.5f : 0f);
-        transform.position = new Vector3(player.transform.position.x, feet, player.transform.position.z);
         transform.rotation = Quaternion.Euler(0f, player.transform.eulerAngles.y, 0f);
+        // On two wheels the saddle (behind the bike's centre) sits under the rider's hips
+        var ahead = CarModels.TwoWheels(id) ? transform.forward * 0.28f : Vector3.zero;
+        transform.position = new Vector3(player.transform.position.x, feet, player.transform.position.z) + ahead;
     }
 
     private void OnDestroy()

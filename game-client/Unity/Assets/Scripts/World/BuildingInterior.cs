@@ -12,7 +12,7 @@ public class BuildingInterior : MonoBehaviour
     [SerializeField] private float shellCenterX;  // this unit's x in shellRoot (shophouse rows)
 
     private readonly List<Renderer> shell = new List<Renderer>();
-    private readonly List<Renderer> frontWindows = new List<Renderer>();
+    private readonly Dictionary<string, List<Renderer>> windows = new Dictionary<string, List<Renderer>>();
     private readonly Dictionary<string, Renderer[]> walls = new Dictionary<string, Renderer[]>();
     private Transform player, cam;
     private Light lamp;
@@ -35,16 +35,23 @@ public class BuildingInterior : MonoBehaviour
             if (w != null) walls[name] = w.GetComponentsInChildren<Renderer>();
         }
 
-        // Outside parts: anything above the ceiling, plus the ground-floor windows on the front face
+        // Outside parts: anything above the ceiling, plus the windows and doors set into each wall
+        // (measured in this room's own space, so it works for shell roots with other scales/offsets)
         var root = shellRoot != null ? shellRoot : transform;
-        float reach = halfX * (root == transform ? 1f : transform.localScale.x) + 0.4f;
         foreach (Transform child in root)
         {
             if (child == transform || child.name.StartsWith("Wall") || child.name == "Interior" || child.name.StartsWith("ShopUnit")) continue;
-            var p = child.localPosition;
-            if (root != transform && Mathf.Abs(p.x - shellCenterX) > reach) continue; // a neighbouring shop
+            var p = transform.InverseTransformPoint(child.position);
+            if (root != transform && Mathf.Abs(p.x) > halfX + 0.4f) continue; // a neighbouring shop
             if (p.y >= ceilingY - 0.25f) shell.AddRange(child.GetComponentsInChildren<Renderer>());
-            else if (p.z < -halfZ + 0.35f && IsWindow(child.name)) frontWindows.AddRange(child.GetComponentsInChildren<Renderer>());
+            else if (IsWindow(child.name))
+            {
+                string wall = p.z < -halfZ + 0.35f ? "WallFront" : p.z > halfZ - 0.35f ? "WallBack"
+                    : p.x < -halfX + 0.35f ? "WallLeft" : p.x > halfX - 0.35f ? "WallRight" : null;
+                if (wall == null) continue;
+                if (!windows.TryGetValue(wall, out var list)) windows[wall] = list = new List<Renderer>();
+                list.AddRange(child.GetComponentsInChildren<Renderer>());
+            }
         }
 
         var pc = FindAnyObjectByType<PlayerController>();
@@ -53,7 +60,7 @@ public class BuildingInterior : MonoBehaviour
 
     private static bool IsWindow(string n) =>
         n == "Window" || n == "WindowFrame" || n == "Mullion" || n == "Sill" || n == "Lintel" || n == "AirCon"
-        || n == "Display" || n == "Grille" || n == "Plinth";
+        || n == "Display" || n == "Grille" || n == "Plinth" || n == "Stripe" || n == "DoorFrame" || n == "DoorJamb" || n == "DoorLeaf" || n == "DoorArch";
 
     private void Update()
     {
@@ -80,7 +87,6 @@ public class BuildingInterior : MonoBehaviour
     private void ShowWalls(bool front, bool back, bool left, bool right)
     {
         Set("WallFront", front);
-        foreach (var r in frontWindows) if (r != null) r.enabled = front;
         Set("WallBack", back);
         Set("WallLeft", left);
         Set("WallRight", right);
@@ -88,8 +94,10 @@ public class BuildingInterior : MonoBehaviour
 
     private void Set(string wall, bool show)
     {
-        if (!walls.TryGetValue(wall, out var list)) return;
-        foreach (var r in list) if (r != null && r.enabled != show) r.enabled = show;
+        if (walls.TryGetValue(wall, out var list))
+            foreach (var r in list) if (r != null && r.enabled != show) r.enabled = show;
+        if (windows.TryGetValue(wall, out var glass))
+            foreach (var r in glass) if (r != null && r.enabled != show) r.enabled = show;
     }
 
     private void MakeLamp()

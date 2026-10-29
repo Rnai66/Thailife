@@ -70,6 +70,9 @@ public static class Interiors
             case "it": It(room, hw, hd, height, accent); break;
             case "music": Music(room, hw, hd, height); break;
             case "clothes": Clothes(room, hw, hd, height); break;
+            case "church": Church(room, hw, hd, height); break;
+            case "mosque": Mosque(room, hw, hd, height); break;
+            case "temple": Temple(room, hw, hd, height); break;
             default: Office(room, hw, hd, height, accent, kind == "sao" ? "อบต. บริการประชาชน" : "บริการประชาชน"); break;
         }
     }
@@ -109,7 +112,7 @@ public static class Interiors
             PrimitiveKit.Box("AtmScreen", r, at + new Vector3(0.26f, 1.2f, 0f), new Vector3(0.02f, 0.35f, 0.45f), PrimitiveKit.Glow("AtmScreen", new Color(0.3f, 0.7f, 1f), 1.2f), collider: false);
         }
         PrimitiveKit.Label("ATM", r, new Vector3(-hw + 0.04f, 2f, -hd + 2.7f), 0.04f, Color.Lerp(accent, Color.white, 0.5f), 90f);
-        Sofa(r, new Vector3(0.8f, 0f, -hd + 2f), new Color(0.2f, 0.25f, 0.4f));
+        Sofa(r, new Vector3(hw - 1.2f, 0f, -hd + 2f), new Color(0.2f, 0.25f, 0.4f));
         Plant(r, new Vector3(hw - 0.5f, 0f, -hd + 0.8f), 3);
     }
 
@@ -131,8 +134,8 @@ public static class Interiors
         Counter(r, new Vector3(0f, 0f, hd - 1.3f), Mathf.Min(hw * 2f - 2f, 4.5f), accent, 2);
         PrimitiveKit.Label("RECEPTION · แผนกต้อนรับ", r, new Vector3(0f, h - 0.6f, hd - 0.05f), 0.035f, Color.Lerp(accent, Color.white, 0.6f));
         Rug(r, new Vector3(0f, 0f, -hd + 2.2f), new Vector2(3.4f, 2.2f), accent);
-        Sofa(r, new Vector3(-1f, 0f, -hd + 1.4f), new Color(0.9f, 0.88f, 0.82f));
-        Sofa(r, new Vector3(1f, 0f, -hd + 1.4f), new Color(0.9f, 0.88f, 0.82f));
+        Sofa(r, new Vector3(-1.7f, 0f, -hd + 2.6f), new Color(0.9f, 0.88f, 0.82f)); // either side of the path in
+        Sofa(r, new Vector3(1.7f, 0f, -hd + 2.6f), new Color(0.9f, 0.88f, 0.82f));
         PrimitiveKit.Box("CoffeeTable", r, new Vector3(0f, 0.22f, -hd + 2.4f), new Vector3(1.2f, 0.06f, 0.6f), PrimitiveKit.Mat("WalnutTop", new Color(0.4f, 0.26f, 0.16f), 0.6f), collider: false);
         Pendant(r, new Vector3(0f, h - 0.2f, -hd + 2.3f), 0.9f, h);
         Plant(r, new Vector3(-hw + 0.5f, 0f, hd - 0.5f), 5);
@@ -267,6 +270,77 @@ public static class Interiors
         }
         PrimitiveKit.Box("FittingMirror", r, new Vector3(0f, 1.1f, hd - 0.03f), new Vector3(0.8f, 1.8f, 0.03f), PrimitiveKit.Glow("Mirror", new Color(0.85f, 0.92f, 0.98f), 0.5f, 0.8f), collider: false);
         Mannequin(r, new Vector3(0f, 0f, -hd + 1.2f), colors[0]);
+    }
+
+    // ── Places of worship ──
+    // Church: two banks of pews either side of the aisle, the altar and a cross on the back wall
+    private static void Church(Transform r, float hw, float hd, float h)
+    {
+        var wood = PrimitiveKit.Mat("PewWood", new Color(0.45f, 0.28f, 0.15f), 0.5f);
+        var red = PrimitiveKit.Mat("AisleRed", new Color(0.6f, 0.1f, 0.12f));
+        PrimitiveKit.Box("Aisle", r, new Vector3(0f, 0.05f, 0f), new Vector3(1.4f, 0.02f, hd * 2f - 0.6f), red, collider: false);
+        for (int row = 0; row < 5; row++)
+            foreach (float sx in new[] { -1f, 1f })
+            {
+                var at = new Vector3(sx * (0.9f + (hw - 1.1f) * 0.5f), 0f, -hd + 1.6f + row * 1.3f);
+                float w = hw - 1.1f;
+                PrimitiveKit.Box("Pew", r, at + new Vector3(0f, 0.45f, 0f), new Vector3(w, 0.08f, 0.45f), wood, collider: false);
+                PrimitiveKit.Box("PewBack", r, at + new Vector3(0f, 0.75f, -0.22f), new Vector3(w, 0.6f, 0.06f), wood, collider: false);
+            }
+        PrimitiveKit.Box("AltarStep", r, new Vector3(0f, 0.1f, hd - 1f), new Vector3(hw * 2f - 0.4f, 0.2f, 1.6f), PrimitiveKit.Mat("TableWhite", new Color(0.95f, 0.95f, 0.93f)));
+        PrimitiveKit.Box("Altar", r, new Vector3(0f, 0.65f, hd - 0.8f), new Vector3(2f, 0.9f, 0.7f), PrimitiveKit.Mat("TowelWhite", Color.white));
+        var gold = PrimitiveKit.Glow("AltarGold", new Color(1f, 0.8f, 0.3f), 1.2f);
+        PrimitiveKit.Box("CrossV", r, new Vector3(0f, 2.8f, hd - 0.05f), new Vector3(0.18f, 1.8f, 0.06f), gold, collider: false);
+        PrimitiveKit.Box("CrossH", r, new Vector3(0f, 3.2f, hd - 0.05f), new Vector3(1f, 0.18f, 0.06f), gold, collider: false);
+        foreach (float x in new[] { -0.7f, 0.7f })
+            PrimitiveKit.Sphere("Candle", r, new Vector3(x, 1.2f, hd - 0.8f), new Vector3(0.08f, 0.15f, 0.08f), PrimitiveKit.Glow("CandleGlow", new Color(1f, 0.7f, 0.35f), 2f));
+    }
+
+    // Mosque prayer hall: carpet in rows facing the mihrab niche, the minbar and a chandelier
+    private static void Mosque(Transform r, float hw, float hd, float h)
+    {
+        var green = PrimitiveKit.Mat("MosqueGreen", new Color(0.1f, 0.5f, 0.35f));
+        PrimitiveKit.Box("Carpet", r, new Vector3(0f, 0.05f, 0.2f), new Vector3(hw * 2f - 0.6f, 0.02f, hd * 2f - 1.6f), PrimitiveKit.Mat("PrayerCarpet", new Color(0.55f, 0.12f, 0.15f)), collider: false);
+        for (int row = 0; row < 5; row++) // rows (saf) woven into the carpet
+            PrimitiveKit.Box("CarpetRow", r, new Vector3(0f, 0.065f, -hd + 1.6f + row * 1.2f), new Vector3(hw * 2f - 0.7f, 0.005f, 0.08f), PrimitiveKit.Mat("CarpetGold", new Color(0.85f, 0.65f, 0.25f)), collider: false);
+        PrimitiveKit.Box("Mihrab", r, new Vector3(0f, 1.4f, hd - 0.08f), new Vector3(1.4f, 2.8f, 0.1f), green, collider: false);
+        PrimitiveKit.Sphere("MihrabArch", r, new Vector3(0f, 2.8f, hd - 0.08f), new Vector3(1.4f, 0.9f, 0.1f), green);
+        PrimitiveKit.Box("MihrabInner", r, new Vector3(0f, 1.3f, hd - 0.14f), new Vector3(0.9f, 2.2f, 0.04f), PrimitiveKit.Glow("MihrabGold", new Color(0.95f, 0.8f, 0.4f), 0.8f), collider: false);
+        for (int i = 0; i < 4; i++) // minbar steps
+            PrimitiveKit.Box("Minbar", r, new Vector3(1.5f, 0.2f + i * 0.2f, hd - 0.9f + i * 0.15f), new Vector3(0.7f, 0.4f + i * 0.4f, 0.3f), PrimitiveKit.Mat("PewWood", new Color(0.45f, 0.28f, 0.15f), 0.5f));
+        PrimitiveKit.Cylinder("ChandelierRing", r, new Vector3(0f, h - 1.2f, 0f), new Vector3(1.6f, 0.03f, 1.6f), PrimitiveKit.Mat("Gold", new Color(0.95f, 0.75f, 0.2f)), collider: false);
+        for (int i = 0; i < 8; i++)
+        {
+            float a = i * Mathf.PI / 4f;
+            PrimitiveKit.Sphere("ChandelierBulb", r, new Vector3(Mathf.Cos(a) * 0.8f, h - 1.3f, Mathf.Sin(a) * 0.8f), Vector3.one * 0.15f, PrimitiveKit.Glow("PendantGlow", new Color(1f, 0.85f, 0.6f), 2f));
+        }
+    }
+
+    // Ordination hall (โบสถ์): the gold Buddha on a tiered altar, red carpet, candles, lotus, murals
+    private static void Temple(Transform r, float hw, float hd, float h)
+    {
+        var gold = PrimitiveKit.Mat("BuddhaGold", new Color(0.95f, 0.75f, 0.25f), 0.8f, 0.85f);
+        var red = PrimitiveKit.Mat("TempleCarpet", new Color(0.65f, 0.1f, 0.1f));
+        PrimitiveKit.Box("Carpet", r, new Vector3(0f, 0.05f, -0.4f), new Vector3(hw * 2f - 1f, 0.02f, hd * 2f - 3f), red, collider: false);
+        for (int i = 0; i < 3; i++) // tiered altar (ฐานชุกชี)
+            PrimitiveKit.Box("Altar", r, new Vector3(0f, 0.2f + i * 0.35f, hd - 1.3f + i * 0.2f), new Vector3(3.6f - i * 0.8f, 0.4f, 1.6f - i * 0.4f), i % 2 == 0 ? PrimitiveKit.Mat("TempleLacquer", new Color(0.45f, 0.07f, 0.06f), 0.6f) : gold);
+        // Seated Buddha (พระประธาน)
+        var at = new Vector3(0f, 1.05f, hd - 0.8f);
+        PrimitiveKit.Sphere("BuddhaLap", r, at + new Vector3(0f, 0.15f, -0.1f), new Vector3(1.1f, 0.35f, 0.7f), gold);
+        PrimitiveKit.Sphere("BuddhaBody", r, at + new Vector3(0f, 0.75f, 0f), new Vector3(0.7f, 1f, 0.5f), gold);
+        PrimitiveKit.Sphere("BuddhaHead", r, at + new Vector3(0f, 1.4f, -0.02f), Vector3.one * 0.38f, gold);
+        PrimitiveKit.Cylinder("Ushnisha", r, at + new Vector3(0f, 1.7f, -0.02f), new Vector3(0.1f, 0.12f, 0.1f), gold, collider: false);
+        PrimitiveKit.Box("Halo", r, at + new Vector3(0f, 1.1f, 0.35f), new Vector3(1.6f, 2.2f, 0.05f), PrimitiveKit.Glow("HaloGold", new Color(1f, 0.82f, 0.4f), 0.9f), collider: false);
+        foreach (float x in new[] { -1.4f, 1.4f })
+        {
+            PrimitiveKit.Cylinder("Candle", r, new Vector3(x, 1.25f, hd - 1.7f), new Vector3(0.06f, 0.2f, 0.06f), PrimitiveKit.Mat("CandleYellow", new Color(1f, 0.9f, 0.5f)), collider: false);
+            PrimitiveKit.Sphere("Flame", r, new Vector3(x, 1.5f, hd - 1.7f), new Vector3(0.05f, 0.09f, 0.05f), PrimitiveKit.Glow("CandleGlow", new Color(1f, 0.7f, 0.35f), 2f));
+            PrimitiveKit.Sphere("Lotus", r, new Vector3(x * 0.6f, 1.15f, hd - 1.6f), new Vector3(0.2f, 0.18f, 0.2f), PrimitiveKit.Mat("LotusPink", new Color(0.95f, 0.55f, 0.7f)));
+        }
+        var muralColours = new[] { new Color(0.75f, 0.35f, 0.2f), new Color(0.2f, 0.45f, 0.4f), new Color(0.85f, 0.65f, 0.3f), new Color(0.35f, 0.3f, 0.55f) };
+        for (int i = 0; i < 4; i++) // murals (จิตรกรรมฝาผนัง) between the windows
+            foreach (float sx in new[] { -1f, 1f })
+                PrimitiveKit.Box("Mural", r, new Vector3(sx * (hw - 0.03f), 1.7f, -hd + 2f + i * (hd * 2f - 4f) / 3f), new Vector3(0.02f, 1.2f, 1.1f), PrimitiveKit.Mat("Mural" + i, muralColours[i]), collider: false);
     }
 
     // ── Furniture pieces ──

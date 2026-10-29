@@ -163,11 +163,17 @@ public static class Places
             MeshKit.Place("NagaHead", h, MeshKit.Blob("NagaHead", 5, 0.1f, 1), gold, new Vector3(x, 0.55f, -9.75f), default, new Vector3(0.45f, 0.6f, 0.5f));
         }
 
-        // Walls with gold-framed windows and the lacquered main door
-        PrimitiveKit.Box("Walls", h, new Vector3(0f, 2.5f, 0f), new Vector3(8f, 3.6f, 14f), white);
-        PrimitiveKit.Box("DoorFrame", h, new Vector3(0f, 2.2f, -7.02f), new Vector3(2.2f, 3f, 0.06f), gold, collider: false);
-        PrimitiveKit.Box("Door", h, new Vector3(0f, 2.15f, -7.06f), new Vector3(1.8f, 2.7f, 0.04f), lacquer, collider: false);
-        PrimitiveKit.Box("DoorSeam", h, new Vector3(0f, 2.15f, -7.09f), new Vector3(0.05f, 2.7f, 0.02f), gold, collider: false);
+        // Walk-in hall on the plinth (Interiors "temple": the Buddha, altar, carpet, murals), with
+        // gold-framed windows and the lacquered doors standing open
+        var inside = PrimitiveKit.Group("Hall", h, new Vector3(0f, 0.7f, 0f)).transform;
+        var room = Interiors.Rooms(inside, 8f, 14f, 3.6f, 1.8f, 2.7f, white, new Color(0.96f, 0.92f, 0.82f), new Color(0.75f, 0.2f, 0.12f), h);
+        Interiors.Furnish(room, "temple", 8f, 14f, 3.6f, new Color(0.75f, 0.2f, 0.12f));
+        foreach (float sx in new[] { -1f, 1f })
+        {
+            PrimitiveKit.Box("DoorFrame", h, new Vector3(sx * 1.0f, 2.05f, -7.04f), new Vector3(0.2f, 2.7f, 0.06f), gold, collider: false);
+            PrimitiveKit.Box("DoorLeaf", h, new Vector3(sx * 1.0f, 2.05f, -7.5f), new Vector3(0.05f, 2.7f, 0.9f), lacquer, collider: false);
+        }
+        PrimitiveKit.Box("DoorFrame", h, new Vector3(0f, 3.5f, -7.04f), new Vector3(2.2f, 0.2f, 0.06f), gold, collider: false);
         for (int i = 0; i < 4; i++)
         {
             float z = -4.8f + i * 3.2f;
@@ -533,11 +539,14 @@ public static class Places
         var green = PrimitiveKit.Mat("ClinicGreen", new Color(0.1f, 0.55f, 0.35f));
         var window = PrimitiveKit.Mat("Window", new Color(0.3f, 0.45f, 0.55f));
 
-        PrimitiveKit.Box("Building", t, new Vector3(0f, 1.75f, 0f), new Vector3(12f, 3.5f, 7f), white);
+        // Walk-in clinic (Interiors "hospital"): reception, pharmacy window, waiting seats
+        PrimitiveKit.Box("Ceiling", t, new Vector3(0f, 3.45f, 0f), new Vector3(12f, 0.1f, 7f), white);
+        var clinicRoom = Interiors.Rooms(t, 12f, 7f, 3.5f, 2.2f, 2.6f, white, new Color(0.96f, 0.97f, 0.96f), new Color(0.15f, 0.7f, 0.45f));
+        Interiors.Furnish(clinicRoom, "hospital", 12f, 7f, 3.5f, new Color(0.15f, 0.7f, 0.45f));
         PrimitiveKit.Box("Stripe", t, new Vector3(0f, 3.3f, -3.52f), new Vector3(12f, 0.3f, 0.05f), green, collider: false);
         PrimitiveKit.Box("RoofFront", t, new Vector3(0f, 4.1f, -1.85f), new Vector3(12.8f, 0.15f, 4.3f), green, new Vector3(-22f, 0f, 0f));
         PrimitiveKit.Box("RoofBack", t, new Vector3(0f, 4.1f, 1.85f), new Vector3(12.8f, 0.15f, 4.3f), green, new Vector3(22f, 0f, 0f));
-        PrimitiveKit.Box("Door", t, new Vector3(0f, 1.2f, -3.53f), new Vector3(2f, 2.4f, 0.05f), window, collider: false);
+        Entrance.Modern(t, 0f, -3.5f, 2f, 2.5f, new Color(0.15f, 0.7f, 0.45f), lobby: false);
         foreach (float x in new[] { -4f, -2.2f, 2.2f, 4f })
             PrimitiveKit.Box("Window", t, new Vector3(x, 1.8f, -3.53f), new Vector3(1.2f, 1f, 0.05f), window, collider: false);
 
@@ -550,13 +559,13 @@ public static class Places
         PrimitiveKit.Box("CrossV", t, new Vector3(-1.75f, 3.4f, -6.62f), new Vector3(0.14f, 0.5f, 0.02f), white, collider: false);
         PrimitiveKit.Box("CrossH", t, new Vector3(-1.75f, 3.4f, -6.62f), new Vector3(0.5f, 0.14f, 0.02f), white, collider: false);
 
-        // Treatment counter under the canopy (injuries from a knockout)
+        // Treatment at the reception counter inside (injuries from a knockout)
         var clinic = new GameObject("HealZone");
         clinic.transform.SetParent(t, false);
-        clinic.transform.localPosition = new Vector3(0f, 1f, -5.2f);
+        clinic.transform.localPosition = new Vector3(-2f, 1f, 0.7f);
         var clinicZone = clinic.AddComponent<BoxCollider>();
         clinicZone.isTrigger = true;
-        clinicZone.size = new Vector3(4f, 2f, 2.2f);
+        clinicZone.size = new Vector3(3f, 2f, 1.6f);
         clinic.AddComponent<HealSpot>().Configure("station", name, 50);
         return station;
     }

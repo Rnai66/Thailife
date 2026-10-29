@@ -2,10 +2,12 @@ using UnityEngine;
 
 // Sitting pose (ท่านั่ง) for a humanoid character without a sitting animation: after the animator has
 // posed the body each frame, the thighs are swung forward and the knees bent so the character sits,
-// and (optionally) the right arm reaches forward — e.g. the boatman holding the tiller.
+// and (optionally) the right arm reaches forward — e.g. the boatman holding the tiller. Ride = astride
+// a bicycle or motorbike: knees apart round the tank, feet on the pegs, both hands on the grips.
 public class SeatedPose : MonoBehaviour
 {
     public bool HoldTiller;
+    public bool Ride;
 
     private Animator animator;
     private CharacterModel model;
@@ -29,6 +31,18 @@ public class SeatedPose : MonoBehaviour
             if (animator == null || !animator.isHuman) return;
         }
         animator.SetFloat("Speed", 0f);
+        if (Ride)
+        {
+            Bend(HumanBodyBones.LeftUpperLeg, -70f, Vector3.forward, -12f);
+            Bend(HumanBodyBones.RightUpperLeg, -70f, Vector3.forward, 12f);
+            Bend(HumanBodyBones.LeftLowerLeg, 75f);
+            Bend(HumanBodyBones.RightLowerLeg, 75f);
+            Bend(HumanBodyBones.LeftUpperArm, -55f, Vector3.forward, 10f);
+            Bend(HumanBodyBones.RightUpperArm, -55f, Vector3.forward, -10f);
+            Bend(HumanBodyBones.LeftLowerArm, -25f);
+            Bend(HumanBodyBones.RightLowerArm, -25f);
+            return;
+        }
         Bend(HumanBodyBones.LeftUpperLeg, -85f);
         Bend(HumanBodyBones.RightUpperLeg, -85f);
         Bend(HumanBodyBones.LeftLowerLeg, 85f);
