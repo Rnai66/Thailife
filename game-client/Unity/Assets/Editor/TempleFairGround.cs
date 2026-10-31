@@ -4,7 +4,8 @@ using UnityEngine;
 // free for trading or anything else on ordinary days. During a festival it becomes the temple fair's
 // big night: a giant outdoor movie screen (หนังกลางแปลงจอใหญ่) at the far end, a ferris wheel, and the
 // village รำวง stage (LED wall, moving-head beams and lasers, a band) where anyone can buy a ticket
-// and dance round the flower table with the dancers.
+// and dance round the flower table with the dancers, the ticket booth, the prize counter and the
+// skill game booths (ยิงปืนจุก โยนห่วง ปาโป่ง).
 // Faces the road (north, +Z).
 public static class TempleFairGround
 {
@@ -21,13 +22,20 @@ public static class TempleFairGround
         PrimitiveKit.Box("Kerb", g, new Vector3(0f, 0.08f, -hd), new Vector3(size.x, 0.16f, 0.25f), kerb, collider: false);
         foreach (var p in new[] { new Vector3(-hw + 0.6f, 0f, hd - 0.6f), new Vector3(hw - 0.6f, 0f, hd - 0.6f), new Vector3(-hw + 0.6f, 0f, -hd + 0.6f), new Vector3(hw - 0.6f, 0f, -hd + 0.6f), new Vector3(-hw + 0.6f, 0f, 0f), new Vector3(hw - 0.6f, 0f, 0f) })
             StreetFurniture.LampPost(g, p);
-        Places.Sign(g, new Vector3(-2.5f, 0f, hd - 0.5f), "ลานอเนกประสงค์\nวันงาน: หนังกลางแปลง ชิงช้าสวรรค์ รำวง", 180f);
+        Places.Sign(g, new Vector3(-2.5f, 0f, hd - 0.5f), "ลานอเนกประสงค์\nวันงาน: หนังกลางแปลง ชิงช้าสวรรค์ รำวง\nเกมฝีมือ ซุ้มแลกรางวัล", 180f);
 
         // Festival nights only
         var show = FairLights.Gated(g, "FairGroundShow", "any");
         BigMovie(show, new Vector3(1f, 0f, -hd + 2.2f));
         FestivalGrounds.FerrisWheel(show, new Vector3(hw - 4.2f, 0f, hd - 9.5f), "ferris_village");
         RamwongStage(g, new Vector3(-hw + 4.6f, 0f, 1.5f));
+        // Ticket booth and prize counter by the road, the three skill booths in a row in the middle
+        var games = FairLights.Gated(g, "FairGroundGames", "any");
+        FestivalGrounds.Booth(games, new Vector3(-5.5f, 0f, hd - 4f), "tickets", "ซุ้มขายบัตร", 0, PrimitiveKit.Mat("TentYellow", new Color(0.95f, 0.75f, 0.2f)), 180f);
+        FestivalGrounds.PrizeCounter(games, new Vector3(2.5f, 0f, hd - 4f), 180f);
+        FestivalGrounds.Booth(games, new Vector3(1.5f, 0f, 1f), "shooting", "ยิงปืนจุก", 0, PrimitiveKit.Mat("TentRed", new Color(0.85f, 0.2f, 0.18f)), 0f);
+        FestivalGrounds.Booth(games, new Vector3(5f, 0f, 1f), "rings", "โยนห่วง", 0, PrimitiveKit.Mat("TentGreen", new Color(0.25f, 0.62f, 0.35f)), 0f);
+        FestivalGrounds.Booth(games, new Vector3(8.5f, 0f, 1f), "darts", "ปาโป่ง", 0, PrimitiveKit.Mat("TentBlue", new Color(0.2f, 0.45f, 0.8f)), 0f);
         // Strings of bulbs criss-crossing the ground
         var corners = new[] { new Vector3(-hw + 0.3f, 0f, hd - 0.3f), new Vector3(hw - 0.3f, 0f, hd - 0.3f), new Vector3(hw - 0.3f, 0f, -hd + 0.3f), new Vector3(-hw + 0.3f, 0f, -hd + 0.3f) };
         foreach (var c in corners) FairLights.Pole(show, c, 5.2f);

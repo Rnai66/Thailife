@@ -3,9 +3,10 @@ using System.Collections;
 using Nakama;
 using UnityEngine;
 
-// A fair game or show (สอยดาว, บิงโก, ปาโป่ง, มหาลัย ก.ไก่, ชิงช้าสวรรค์, ม้าหมุน, หนังกลางแปลง, ลิเก).
-// Rides seat the player on `seat` for a while; สอยดาว, ปาโป่ง and บิงโก open their own game screens;
-// shows just roll on the server.
+// A fair game, ride or show (ยิงปืนจุก, โยนห่วง, ปาโป่ง, ชิงช้าสวรรค์, ม้าหมุน, หนังกลางแปลง, ลิเก, and the
+// chance games สอยดาว, บิงโก, มหาลัย ก.ไก่ when the server opens them), plus the ticket booth and the
+// prize counter. Rides take coupons and seat the player on `seat` for a while; the games and the two
+// counters open their own screens; shows just roll on the server.
 [RequireComponent(typeof(Collider))]
 public class FestivalBooth : MonoBehaviour
 {
@@ -31,8 +32,9 @@ public class FestivalBooth : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         if (other.GetComponent<PlayerController>() == null) return;
-        string label = seat != null ? "ขึ้นเล่น" : price == 0 ? (game == "morlam" ? "ดูหมอลำ" : "นั่งดู") : game == "soidao" ? "สอยดาว" : "เล่น";
-        ContextButton.Show(this, label, price > 0 ? $"{title} · {price} บาท" : $"{title} · ดูฟรี", Play);
+        string label = seat != null ? "ขึ้นเล่น" : game == "tickets" ? "ซื้อบัตร" : game == "prizes" ? "แลกรางวัล"
+            : price == 0 ? (game == "morlam" ? "ดูหมอลำ" : "นั่งดู") : game == "soidao" ? "สอยดาว" : "เล่น";
+        ContextButton.Show(this, label, Caption(), Play);
     }
 
     private void OnTriggerExit(Collider other)
@@ -40,14 +42,36 @@ public class FestivalBooth : MonoBehaviour
         if (other.GetComponent<PlayerController>() != null) ContextButton.Hide(this);
     }
 
-    // Fair games with their own screen: they take the ticket money themselves when you play
+    // Rides and skill games are paid in coupons (FairClient); the ticket booth and the prize counter
+    // are free to walk up to
+    private bool Coupons => seat != null || IsSkillGame;
+    private bool IsSkillGame => game == "shooting" || game == "rings" || game == "darts";
+
+    private string Caption()
+    {
+        if (game == "tickets") return "ซุ้มขายบัตร · บัตรผ่านประตูและคูปอง";
+        if (game == "prizes") return "ซุ้มแลกรางวัล · เอาแต้มมาแลกของ";
+        if (IsSkillGame) return $"{title} · 1 คูปอง";
+        if (seat != null)
+        {
+            var ride = FairClient.Instance?.FindRide(game);
+            return $"{title} · {(ride != null ? ride.coupons : price)} คูปอง";
+        }
+        return price > 0 ? $"{title} · {price} บาท" : $"{title} · ดูฟรี";
+    }
+
+    // Fair games with their own screen: they take the ticket money (or coupon) themselves when you play
     private bool OwnScreen()
     {
         switch (game)
         {
             case "soidao": SoiDaoUI.Show(title, price); return true;
-            case "darts": DartsUI.Show(title, price); return true;
             case "bingo": BingoUI.Show(title, price); return true;
+            case "darts": DartsUI.Show(); return true;
+            case "shooting": ShootingGalleryUI.Show(); return true;
+            case "rings": RingTossUI.Show(); return true;
+            case "tickets": TicketBoothUI.Show(); return true;
+            case "prizes": PrizeCounterUI.Show(); return true;
         }
         return false;
     }
@@ -64,6 +88,7 @@ public class FestivalBooth : MonoBehaviour
         var f = FestivalClient.Instance;
         if (busy || f == null) return;
         if (OwnScreen()) return;
+        if (Coupons) { Ride(); return; }
         busy = true;
         try
         {
@@ -79,11 +104,6 @@ public class FestivalBooth : MonoBehaviour
             UiKit.FloatAbovePlayer($"{r.game_name}: {r.prize}" + (r.gained > 0 ? $" (+{r.gained} พลังงาน)" : ""), color);
             if (WalletClient.Instance != null) _ = WalletClient.Instance.RefreshAsync();
             LifeClient.Instance?.Refresh();
-            if (seat != null)
-            {
-                var player = FindAnyObjectByType<PlayerController>();
-                if (player != null) StartCoroutine(Ride(player));
-            }
         }
         catch (ApiResponseException e)
         {
@@ -92,6 +112,27 @@ public class FestivalBooth : MonoBehaviour
         catch (Exception e)
         {
             Debug.LogWarning($"[Festival] {e.Message}");
+        }
+        busy = false;
+    }
+
+    // A ride paid with coupons (needs today's gate pass)
+    private async void Ride()
+    {
+        var fair = FairClient.Instance;
+        if (fair == null) return;
+        busy = true;
+        try
+        {
+            var r = await fair.RideAsync(game);
+            UiKit.FloatAbovePlayer($"{r.ride_name}: สนุกมาก! (ใช้ {r.used} คูปอง · +{r.gained} พลังงาน)", new Color(1f, 0.85f, 0.3f));
+            LifeClient.Instance?.Refresh();
+            var player = FindAnyObjectByType<PlayerController>();
+            if (player != null) StartCoroutine(Ride(player));
+        }
+        catch (Exception e)
+        {
+            UiKit.FloatAbovePlayer(FairClient.Explain(e), new Color(1f, 0.5f, 0.4f));
         }
         busy = false;
     }

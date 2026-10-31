@@ -1,16 +1,16 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-// ปาโป่ง: a wooden board full of balloons. Buy three darts, then tap the balloons you aim at; each
-// dart flies to the board and pops it — or misses and sticks in the wood beside it. The server
-// decided beforehand which throws hit; how many pop picks the prize (1 ลูกชิ้น · 2 ชานม · 3 ตุ๊กตา).
-public class DartsUI : MonoBehaviour
+// ปาโป่ง: balloons bobbing and drifting across a wooden board. Five darts a round: tap where the
+// dart should go. It takes a moment to fly, so aim a little ahead of a moving balloon; it pops the
+// balloon it lands on, or sticks in the wood.
+public class DartsUI : SkillGameUI
 {
     private static DartsUI instance;
-    private const int Cols = 6, Rows = 4;
+    private const int Cols = 7, Rows = 4;
+    private const float Flight = 0.32f, Span = 1150f, Radius = 46f;
 
     private static readonly Color[] Colors =
     {
@@ -18,92 +18,135 @@ public class DartsUI : MonoBehaviour
         new Color(0.4f, 0.85f, 0.4f), new Color(0.9f, 0.4f, 0.9f), new Color(1f, 0.55f, 0.2f),
     };
 
-    private GameObject backdrop, prizeLayer;
-    private RectTransform body, board, stuck;
-    private Text title, subtitle, dartsText, toast;
-    private Button buyButton;
-    private readonly List<RectTransform> balloons = new List<RectTransform>();
-    private readonly List<Image> dartIcons = new List<Image>();
-    private Coroutine toastRun;
-    private FestivalClient.State round;
-    private int next;            // index of the next dart in round.throws
-    private int price = 10;
-    private bool busy, flying;
+    private class Balloon
+    {
+        public RectTransform rect;
+        public int row;
+        public float x, phase;
+        public bool popped;
+    }
 
-    public static void Show(string boothName, int ticketPrice)
+    private readonly List<Balloon> balloons = new List<Balloon>();
+    private readonly float[] drift = { 60f, -80f, 50f, -70f };
+    private RectTransform stuck;
+    private int flying;
+
+    protected override string GameId => "darts";
+    protected override string Title => "ปาโป่ง";
+    protected override string Subtitle => "แตะลูกโป่งเพื่อปา ลูกดอกบินช้านิดหน่อย เล็งดักหน้าไว้";
+    protected override string ShotWord => "ดอก";
+
+    public static void Show()
     {
         if (instance == null) instance = new GameObject("DartsUI").AddComponent<DartsUI>();
-        instance.price = ticketPrice;
-        instance.title.text = boothName;
-        instance.buyButton.GetComponentInChildren<Text>().text = $"ซื้อลูกดอก 3 ดอก · {ticketPrice} ฿";
-        instance.backdrop.SetActive(true);
-        instance.Refresh();
+        instance.Open();
     }
 
-    private void Close()
+    protected override void BuildArena(RectTransform a)
     {
-        backdrop.SetActive(false);
-        if (prizeLayer != null) Destroy(prizeLayer);
-    }
-
-    private void Awake()
-    {
-        body = UiKit.PremiumWindow(transform, "DartsCanvas", UiKit.WindowSize(new Vector2(1540f, 900f), 1460f), 58, "icon:fair",
-            out backdrop, out title, out subtitle, Close, out _);
-        subtitle.text = "ปาลูกดอกให้ลูกโป่งแตก แตกมากได้รางวัลใหญ่";
-
-        board = UiKit.Panel("Board", body, Color.white, new Vector2(-170f, 18f), new Vector2(1060f, 640f), shadow: true);
-        board.GetComponent<Image>().sprite = UiKit.WoodSprite;
-        board.GetComponent<Image>().type = Image.Type.Sliced;
-        board.gameObject.AddComponent<Outline>().effectColor = UiKit.WoodEdge;
+        var img = a.GetComponent<Image>();
+        img.sprite = UiKit.WoodSprite;
+        img.type = Image.Type.Sliced;
+        img.color = Color.white;
         for (int r = 0; r < Rows; r++)
             for (int c = 0; c < Cols; c++)
             {
-                var b = UiKit.Rect("Balloon", board, Colors[(r * 2 + c) % Colors.Length]);
+                var color = Colors[(r * 2 + c) % Colors.Length];
+                var b = UiKit.Rect("Balloon", a, color);
                 b.GetComponent<Image>().sprite = UiKit.CircleSprite;
-                b.anchoredPosition = new Vector2(-400f + c * 160f, 210f - r * 140f);
-                b.sizeDelta = new Vector2(100f, 120f);
+                b.sizeDelta = new Vector2(Radius * 2f, Radius * 2.4f);
                 var shine = UiKit.Rect("Shine", b, new Color(1f, 1f, 1f, 0.45f));
                 shine.GetComponent<Image>().sprite = UiKit.CircleSprite;
-                shine.anchoredPosition = new Vector2(-20f, 28f);
-                shine.sizeDelta = new Vector2(24f, 34f);
-                var knot = UiKit.Rect("Knot", b, b.GetComponent<Image>().color * 0.8f);
-                knot.anchoredPosition = new Vector2(0f, -62f);
+                shine.anchoredPosition = new Vector2(-18f, 26f);
+                shine.sizeDelta = new Vector2(22f, 32f);
+                var knot = UiKit.Rect("Knot", b, color * 0.8f);
+                knot.anchoredPosition = new Vector2(0f, -58f);
                 knot.sizeDelta = new Vector2(14f, 14f);
                 knot.localRotation = Quaternion.Euler(0f, 0f, 45f);
-                var target = b;
-                b.gameObject.AddComponent<Button>().onClick.AddListener(() => Throw(target));
-                balloons.Add(b);
+                balloons.Add(new Balloon { rect = b, row = r, x = -Span * 0.5f + (c + 0.5f + (r % 2) * 0.5f) * Span / Cols, phase = c * 1.3f + r });
             }
-        stuck = UiKit.Container(board, Vector2.zero);
+        stuck = UiKit.Container(a, Vector2.zero);
+        Place();
+    }
 
-        var side = UiKit.Panel("Side", body, Color.white, new Vector2(565f, 18f), new Vector2(340f, 640f), shadow: true);
-        side.gameObject.AddComponent<Outline>().effectColor = UiKit.CardBorder;
-        UiKit.Label(side, 28, "ลูกดอก", new Vector2(0f, 270f), new Vector2(300f, 40f), UiKit.Ink).fontStyle = FontStyle.Bold;
-        for (int i = 0; i < 3; i++)
-        {
-            var d = Dart(side, new Vector2(-80f + i * 80f, 180f));
-            dartIcons.Add(d.GetComponent<Image>());
-        }
-        dartsText = UiKit.Label(side, 22, "", new Vector2(0f, 105f), new Vector2(310f, 40f), UiKit.Muted);
-        UiKit.Label(side, 24, "รางวัล", new Vector2(0f, 50f), new Vector2(300f, 36f), UiKit.Price).fontStyle = FontStyle.Bold;
-        string[] icons = { "food_look_chin", "food_bubble_tea", "sell_goods_teddy" };
-        string[] names = { "แตก 1 ลูก · ลูกชิ้นปิ้ง", "แตก 2 ลูก · ชานมไข่มุก", "แตก 3 ลูก · ตุ๊กตาหมี" };
-        for (int i = 0; i < 3; i++)
-        {
-            UiKit.IconTile(side, icons[i], new Vector2(-110f, -10f - i * 90f), new Vector2(74f, 74f));
-            UiKit.Label(side, 20, names[i], new Vector2(40f, -10f - i * 90f), new Vector2(220f, 70f), UiKit.Ink, TextAnchor.MiddleLeft);
-        }
-        buyButton = UiKit.RoundButton(side, "", new Vector2(0f, -260f), new Vector2(300f, 76f), UiKit.Gold, UiKit.GoldInk, Buy, 24);
+    private Vector2 Where(Balloon b, float time) =>
+        new Vector2(b.x, 210f - b.row * 140f + Mathf.Sin(time * 2.2f + b.phase) * 14f);
 
-        toast = UiKit.ToastBar(body, new Vector2(0f, -320f), 900f);
-        if (UiKit.Portrait) // upright: the balloon board on top, darts and prizes underneath
+    protected override void Begin(System.Random rng)
+    {
+        for (int r = 0; r < Rows; r++)
         {
-            UiKit.Stack(board, new Vector2(0f, 421f), 0.66f);
-            UiKit.Stack(side, new Vector2(0f, -210f), 1.25f);
-            UiKit.Stack((RectTransform)toast.transform.parent, new Vector2(0f, 200f));
+            float s = 50f + (float)rng.NextDouble() * 70f;
+            drift[r] = r % 2 == 0 ? s : -s;
         }
-        backdrop.SetActive(false);
+        foreach (var b in balloons)
+        {
+            b.popped = false;
+            b.rect.gameObject.SetActive(true);
+        }
+        UiKit.Clear(stuck);
+    }
+
+    private void Update()
+    {
+        foreach (var b in balloons)
+        {
+            b.x += drift[b.row] * Time.unscaledDeltaTime;
+            if (b.x > Span * 0.5f) b.x -= Span;
+            if (b.x < -Span * 0.5f) b.x += Span;
+        }
+        Place();
+    }
+
+    private void Place()
+    {
+        float now = Time.unscaledTime;
+        foreach (var b in balloons) b.rect.anchoredPosition = Where(b, now);
+    }
+
+    protected override void Tap(Vector2 at)
+    {
+        if (flying > 0 && Left <= flying) return; // every dart left is already in the air
+        StartCoroutine(Fly(at));
+    }
+
+    private IEnumerator Fly(Vector2 aim)
+    {
+        flying++;
+        var dart = Dart(stuck, new Vector2(aim.x * 0.3f, -380f));
+        Vector2 from = dart.anchoredPosition;
+        GameAudio.Play("whoosh", null, 0.6f);
+        for (float t = 0f; t < Flight; t += Time.unscaledDeltaTime)
+        {
+            float k = t / Flight;
+            dart.anchoredPosition = Vector2.Lerp(from, aim, k) + Vector2.up * Mathf.Sin(k * Mathf.PI) * 60f;
+            dart.localScale = Vector3.one * Mathf.Lerp(1.4f, 0.8f, k);
+            yield return null;
+        }
+        dart.anchoredPosition = aim;
+        // Whatever balloon is under the tip now pops
+        Balloon hit = null;
+        foreach (var b in balloons)
+        {
+            if (b.popped) continue;
+            Vector2 d = aim - b.rect.anchoredPosition;
+            if (d.x * d.x / (Radius * Radius) + d.y * d.y / (Radius * 1.2f * Radius * 1.2f) <= 1f) { hit = b; break; }
+        }
+        if (hit != null)
+        {
+            hit.popped = true;
+            GameAudio.Play("punch", null, 0.9f);
+            Pop(hit.rect);
+            Destroy(dart.gameObject);
+            Float("ป๊อป!", aim, new Color(1f, 0.95f, 0.5f));
+        }
+        else
+        {
+            GameAudio.Play("punch_heavy", null, 0.4f);
+            Float("พลาด!", aim + Vector2.up * 70f, new Color(1f, 0.85f, 0.8f));
+        }
+        flying--;
+        Shot(hit != null);
     }
 
     // A dart: red fletching, wooden shaft, steel tip pointing up
@@ -123,89 +166,6 @@ public class DartsUI : MonoBehaviour
         return d;
     }
 
-    private int Left => round != null && round.throws != null ? round.throws.Length - next : 0;
-
-    private void Refresh()
-    {
-        int left = Left;
-        for (int i = 0; i < dartIcons.Count; i++) dartIcons[i].color = i < left ? new Color(0.7f, 0.5f, 0.3f) : new Color(0.85f, 0.85f, 0.85f);
-        dartsText.text = left > 0 ? $"เหลือ {left} ดอก · แตะลูกโป่งเพื่อปา" : "ซื้อลูกดอกก่อนเล่น";
-        buyButton.interactable = left == 0 && !busy && !flying;
-    }
-
-    private async void Buy()
-    {
-        var f = FestivalClient.Instance;
-        if (busy || f == null || Left > 0) return;
-        busy = true;
-        Refresh();
-        try
-        {
-            round = await f.PlayAsync("darts");
-            next = 0;
-            if (WalletClient.Instance != null) _ = WalletClient.Instance.RefreshAsync();
-            // Fresh balloons, darts pulled out of the board
-            foreach (var b in balloons) { b.gameObject.SetActive(true); b.localScale = Vector3.one; }
-            UiKit.Clear(stuck);
-            if (prizeLayer != null) Destroy(prizeLayer);
-            GameAudio.Play("coins", null, 0.5f);
-        }
-        catch (Exception e) { Say(FestivalBooth.Explain(e, price), UiKit.Danger); }
-        busy = false;
-        Refresh();
-    }
-
-    private void Throw(RectTransform target)
-    {
-        if (flying) return;
-        if (Left <= 0) { Say("ซื้อลูกดอกก่อนนะ", UiKit.Danger); return; }
-        bool hit = round.throws[next++];
-        StartCoroutine(Fly(target, hit));
-    }
-
-    private IEnumerator Fly(RectTransform target, bool hit)
-    {
-        flying = true;
-        Refresh();
-        var dart = Dart(stuck, new Vector2(target.anchoredPosition.x * 0.3f, -380f));
-        Vector2 aim = target.anchoredPosition;
-        if (!hit) aim += new Vector2(UnityEngine.Random.value < 0.5f ? -68f : 68f, UnityEngine.Random.Range(-40f, 40f)); // into the wood between
-        Vector2 from = dart.anchoredPosition;
-        GameAudio.Play("whoosh", null, 0.6f);
-        for (float t = 0f; t < 0.32f; t += Time.unscaledDeltaTime)
-        {
-            float k = t / 0.32f;
-            dart.anchoredPosition = Vector2.Lerp(from, aim, k) + Vector2.up * Mathf.Sin(k * Mathf.PI) * 60f;
-            dart.localScale = Vector3.one * Mathf.Lerp(1.4f, 0.8f, k);
-            yield return null;
-        }
-        dart.anchoredPosition = aim;
-        if (hit)
-        {
-            GameAudio.Play("punch", null, 0.9f);
-            Pop(target);
-            Destroy(dart.gameObject);
-            Float("ป๊อป!", aim, new Color(1f, 0.95f, 0.5f));
-        }
-        else
-        {
-            GameAudio.Play("punch_heavy", null, 0.4f);
-            Float("พลาด!", aim + Vector2.up * 70f, new Color(1f, 0.85f, 0.8f));
-            StartCoroutine(Wobble(target));
-        }
-        yield return new WaitForSecondsRealtime(0.35f);
-        flying = false;
-        Refresh();
-        if (Left == 0 && round != null)
-        {
-            yield return new WaitForSecondsRealtime(0.5f);
-            prizeLayer = FairPrize.Show(this, body, round.pops > 0 ? $"แตก {round.pops} ลูก!" : "ไม่แตกเลย", round.icon, round.prize, round.won, round.pops == 3);
-            if (round.won) LifeClient.Instance?.Refresh();
-            round = null;
-            Refresh();
-        }
-    }
-
     private void Pop(RectTransform balloon)
     {
         var color = balloon.GetComponent<Image>().color;
@@ -216,6 +176,7 @@ public class DartsUI : MonoBehaviour
     private IEnumerator Shard(Vector2 at, Color color, int i)
     {
         var s = UiKit.Rect("Shard", stuck, color);
+        s.GetComponent<Image>().raycastTarget = false;
         s.sizeDelta = new Vector2(16f, 10f);
         Vector2 v = Quaternion.Euler(0f, 0f, i * 45f + 10f) * Vector2.up * 380f;
         for (float t = 0f; t < 0.45f && s != null; t += Time.unscaledDeltaTime)
@@ -228,34 +189,16 @@ public class DartsUI : MonoBehaviour
         if (s != null) Destroy(s.gameObject);
     }
 
-    private IEnumerator Wobble(RectTransform b)
+    // Round over: fresh balloons, darts pulled out of the board
+    protected override void Ended()
     {
-        for (float t = 0f; t < 0.5f && b != null; t += Time.unscaledDeltaTime)
+        foreach (var b in balloons)
         {
-            b.localRotation = Quaternion.Euler(0f, 0f, Mathf.Sin(t * 30f) * 8f * (1f - t / 0.5f));
-            yield return null;
+            b.popped = false;
+            b.rect.gameObject.SetActive(true);
         }
-        if (b != null) b.localRotation = Quaternion.identity;
+        UiKit.Clear(stuck);
     }
-
-    private void Float(string text, Vector2 at, Color color)
-    {
-        var label = UiKit.Cartoon(UiKit.Label(stuck, 40, text, at, new Vector2(240f, 60f), color), 3f);
-        StartCoroutine(Rise(label.rectTransform));
-    }
-
-    private static IEnumerator Rise(RectTransform r)
-    {
-        Vector2 from = r.anchoredPosition;
-        for (float t = 0f; t < 0.8f && r != null; t += Time.unscaledDeltaTime)
-        {
-            r.anchoredPosition = from + Vector2.up * t * 90f;
-            yield return null;
-        }
-        if (r != null) Destroy(r.gameObject);
-    }
-
-    private void Say(string message, Color color) => toastRun = UiKit.Toast(this, toast, message, color, toastRun);
 
     private void OnDestroy()
     {
