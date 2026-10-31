@@ -41,6 +41,7 @@ services:
         --runtime.env "pubs_always_open=${PUBS_ALWAYS_OPEN:-false}"
         --runtime.env "markets_always_open=${MARKETS_ALWAYS_OPEN:-false}"
         --runtime.env "boxing_always_open=${BOXING_ALWAYS_OPEN:-false}"
+        --runtime.env "chance_games=${CHANCE_GAMES:-false}"
         --session.token_expiry_sec 7200
         --logger.level INFO
     volumes:

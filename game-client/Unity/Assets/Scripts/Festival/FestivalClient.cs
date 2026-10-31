@@ -30,6 +30,7 @@ public class FestivalClient : MonoBehaviour
         public string where;
         public int ends_in_s;
         public int next_in_s;
+        public bool chance_games; // สอยดาว บิงโก ก.ไก่ ปาโป่ง are open (server CHANCE_GAMES switch)
         public CalendarEntry[] calendar;
         // festival_play
         public string game_name;

@@ -91,6 +91,7 @@ public static class FestivalGrounds
     private static void Booth(Transform parent, Vector3 position, string game, string title, int price, Material canopy, float yaw = -90f)
     {
         var b = PrimitiveKit.Group("Booth_" + title, parent, position, yaw).transform; // -90: front faces +X (the middle)
+        if (game == "darts" || game == "bingo") b.gameObject.AddComponent<ChanceGameGate>();
         var pole = PrimitiveKit.Mat("TentPole", new Color(0.85f, 0.85f, 0.85f));
         foreach (float x in new[] { -1.3f, 1.3f })
         foreach (float z in new[] { -1.2f, 1.2f })
@@ -181,6 +182,7 @@ public static class FestivalGrounds
     internal static void SoiDaoPen(Transform parent, Vector3 position, string scale)
     {
         var s = PrimitiveKit.Group("SoiDao_สอยดาว", parent, position, -90f).transform;
+        s.gameObject.AddComponent<ChanceGameGate>();
         const float W = 6.6f, D = 6f, Gap = 2f;
         var red = PrimitiveKit.Mat("TentRed", new Color(0.85f, 0.2f, 0.18f));
         var wood = PrimitiveKit.Mat("WoodPlank", new Color(0.6f, 0.4f, 0.22f));
@@ -306,6 +308,7 @@ public static class FestivalGrounds
     internal static void KokaiPen(Transform parent, Vector3 position, string scale)
     {
         var k = PrimitiveKit.Group("Kokai_มหาลัยก.ไก่", parent, position, -90f).transform;
+        k.gameObject.AddComponent<ChanceGameGate>();
         const float W = 6.6f, D = 6.6f, Gap = 1.8f;
         var wood = PrimitiveKit.Mat("WoodPlank", new Color(0.6f, 0.4f, 0.22f));
         var dark = PrimitiveKit.Mat("DarkWood", new Color(0.36f, 0.22f, 0.12f));

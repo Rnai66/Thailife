@@ -70,9 +70,12 @@ nk.register_rpc(function(context, payload)
 
   local s = quest.read(user_id)
   local amount
-  if req.chapter then
+  -- The client sends every field ({"quest": 2, "bonus": false, "chapter": 0}); 0 is truthy in Lua,
+  -- so only a real chapter level or bonus = true picks those branches
+  local chapter = tonumber(req.chapter) or 0
+  if chapter > 0 then
     local c
-    for _, ch in ipairs(quest.CHAPTERS) do if ch.level == tonumber(req.chapter) then c = ch end end
+    for _, ch in ipairs(quest.CHAPTERS) do if ch.level == chapter then c = ch end end
     if c == nil then error({ "unknown chapter", GRPC_INVALID_ARGUMENT }) end
     if quest.player_level(user_id) < c.level then error({ "chapter locked", GRPC_FAILED_PRECONDITION }) end
     local levels = quest.read_levels(user_id)
@@ -83,7 +86,7 @@ nk.register_rpc(function(context, payload)
     quest.write_levels(user_id, levels)
     nk.wallet_update(user_id, { [data.CURRENCY] = c.reward }, { reason = "level_quest", chapter = c.level }, true)
     return view(s, { earned = c.reward }, user_id)
-  elseif req.bonus then
+  elseif req.bonus == true then
     if not all_done(s) then error({ "quests not finished", GRPC_FAILED_PRECONDITION }) end
     if s.bonus_claimed then error({ "already claimed", GRPC_FAILED_PRECONDITION }) end
     s.bonus_claimed = true

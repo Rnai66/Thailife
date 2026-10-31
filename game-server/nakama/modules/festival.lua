@@ -17,10 +17,10 @@ local MONTHS = { "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.
 
 -- price in baht; energy = how much fun restores; once = free shows, once per festival
 local GAMES = {
-  soidao   = { name = "สอยดาว",          price = 40 },
-  bingo    = { name = "บิงโก",           price = 30, big = true },
-  kokai    = { name = "มหาลัย ก.ไก่",      price = 30 },
-  darts    = { name = "ปาโป่ง",           price = 10 },
+  soidao   = { name = "สอยดาว",          price = 40, chance = true },
+  bingo    = { name = "บิงโก",           price = 30, big = true, chance = true },
+  kokai    = { name = "มหาลัย ก.ไก่",      price = 30, chance = true },
+  darts    = { name = "ปาโป่ง",           price = 10, chance = true },
   ferris   = { name = "ชิงช้าสวรรค์",      price = 20, energy = 10, big = true },
   carousel = { name = "ม้าหมุน",          price = 10, energy = 6, big = true },
   movie    = { name = "หนังกลางแปลง",     price = 0,  energy = 12, once = true },
@@ -180,6 +180,10 @@ end
 
 local function fair_always_open(env) return env ~= nil and env.fair_always_open == "true" end
 
+-- Paid games with a random prize count as simulated gambling, which Apple won't take from an
+-- individual developer: they stay closed unless CHANCE_GAMES=true (game-server/.env)
+local function chance_games(env) return env ~= nil and env.chance_games == "true" end
+
 local function read(user_id)
   local objects = nk.storage_read({ { collection = RECORD.collection, key = RECORD.key, user_id = user_id } })
   local r = (#objects > 0) and objects[1].value or {}
@@ -216,7 +220,7 @@ local function view(env, extra)
     kind = f and f.kind or "", temple = f and f.temple or false,
     where = f and where_of(f) or "",
     ends_in_s = math.floor((ends_in or 0) / 1000), next_in_s = math.floor((next_in or 0) / 1000),
-    calendar = calendar,
+    calendar = calendar, chance_games = chance_games(env),
   }
   for k, v in pairs(extra or {}) do result[k] = v end
   return nk.json_encode(result)
@@ -232,6 +236,7 @@ nk.register_rpc(function(context, payload)
   if not ok or type(req) ~= "table" then error({ "invalid payload", GRPC_INVALID_ARGUMENT }) end
   local g = GAMES[req.game or ""]
   if not g then error({ "unknown game", GRPC_INVALID_ARGUMENT }) end
+  if g.chance and not chance_games(context.env) then error({ "game closed", GRPC_FAILED_PRECONDITION }) end
   local open, fair_id, _, _, f = life.fair(nk.time(), fair_always_open(context.env))
   if not open then error({ "no festival today", GRPC_FAILED_PRECONDITION }) end
   -- The ferris wheel, carousel and bingo only come to the big city festivals

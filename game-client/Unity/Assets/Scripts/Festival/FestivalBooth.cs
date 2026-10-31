@@ -56,6 +56,7 @@ public class FestivalBooth : MonoBehaviour
         e.Message.Contains("baht") ? $"เงินไม่พอ ({price} บาท)"
         : e.Message.Contains("watched") ? "ดูรอบนี้ไปแล้ว รองานหน้า"
         : e.Message.Contains("big") ? "มีเฉพาะงานใหญ่ในเมือง"
+        : e.Message.Contains("closed") ? "ซุ้มนี้ปิดอยู่"
         : e.Message.Contains("no festival") ? "ยังไม่มีงานตอนนี้" : "เล่นไม่ได้ตอนนี้";
 
     private async void Play()
