@@ -36,6 +36,13 @@ local RIDES = {
   ferris         = { name = "ชิงช้าสวรรค์", coupons = 2, energy = 10, big = true },
   carousel       = { name = "ม้าหมุน",     coupons = 1, energy = 6,  big = true },
   ferris_village = { name = "ชิงช้าสวรรค์", coupons = 2, energy = 10 },
+  -- The city's big fairs (งานกาชาด and the other city festivals) bring the big rides and shows
+  coaster        = { name = "รถไฟเหาะ",    coupons = 3, energy = 14, big = true },
+  viking         = { name = "เรือไวกิ้ง",    coupons = 2, energy = 10, big = true },
+  bumper         = { name = "รถบั๊ม",      coupons = 2, energy = 10, big = true },
+  wall           = { name = "รถไต่ถัง",     coupons = 2, energy = 10, big = true },
+  haunted        = { name = "บ้านผีสิง",    coupons = 2, energy = 8,  big = true },
+  snake          = { name = "เมียงู",       coupons = 1, energy = 6,  big = true },
 }
 
 -- Skill games: one coupon a round. shots = throws/shots in a round, min_s = the fastest a real

@@ -110,7 +110,10 @@ public static class VillageBuilder
             Places.ShadeTree(v, pos);
 
         DressNature(v);
-        Seaside.CowFarm(v, new Vector3(6f, 0f, 32f)); // ฟาร์มวัว north of the home
+        Seaside.CowFarm(v, new Vector3(21f, 0f, -31f), 180f); // ฟาร์มวัว east of Kok Nong Na, gate toward the road
+        Lane(v, 21f, -10.6f, -23f);
+        LandParcels.BuildVillage(v); // land you buy at the bank: rice land by the canal, a 1-rai plot
+        Lane(v, 46.5f, -10.6f, -23f);
 
         // Villagers out and about in the daytime, monks' alms round at dawn (from the temple along the road)
         Npcs.Crowd(v, new Vector3(2f, 0f, -3f), new Vector2(22f, 4f), 3, "", 7, 19, Npcs.VillageTalk);
@@ -161,7 +164,7 @@ public static class VillageBuilder
         var palms = new[]
         {
             new Vector3(-52f, 0f, -1f), new Vector3(-26f, 0f, -12.5f), new Vector3(-16f, 0f, -4.5f), new Vector3(-2f, 0f, -12.8f),
-            new Vector3(4f, 0f, -4.2f), new Vector3(22f, 0f, -12.6f), new Vector3(34f, 0f, -4.5f), new Vector3(44f, 0f, -12.5f),
+            new Vector3(4f, 0f, -4.2f), new Vector3(25.5f, 0f, -12.6f), new Vector3(34f, 0f, -4.5f), new Vector3(42.5f, 0f, -12.5f),
             new Vector3(14f, 0f, 6f), new Vector3(-10f, 0f, 6f), new Vector3(20f, 0f, 28f), new Vector3(-44f, 0f, 40f),
         };
         for (int i = 0; i < palms.Length; i++) Nature.CoconutPalm(v, palms[i], 0.9f + (i % 3) * 0.12f, i);
@@ -185,6 +188,11 @@ public static class VillageBuilder
             new Vector4(-42f, 13f, -36f, 21f),         // sala
             new Vector4(20f, 8f, 36f, 24f),            // village hall
             new Vector4(-32f, -56f, 8f, -20f),         // Kok Nong Na paddies and pond
+            new Vector4(8.5f, -39.5f, 33.5f, -19f),    // cow farm
+            new Vector4(19.7f, -23f, 22.3f, -10f),     // lane to the cow farm
+            new Vector4(8.5f, -59.5f, 33.5f, -41.5f),  // rice land by the canal
+            new Vector4(36.5f, -38.5f, 56.5f, -23.5f), // 1-rai plot
+            new Vector4(45.2f, -23.5f, 47.8f, -10f),   // lane to the plot
             new Vector4(-11f, -16.5f, -3f, -7f),       // shop
             new Vector4(-58.5f, -50.5f, -34.5f, -11.5f), // fair ground across from the temple
             new Vector4(6f, -6f, 8f, 3f),              // lane to the house

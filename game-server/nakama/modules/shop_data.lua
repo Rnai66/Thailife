@@ -30,6 +30,19 @@ M.RICE = {
 }
 M.RICE_ORDER = { "khao_niao", "hommali" }
 
+-- Field crops (พืชไร่) grown on your own land (land.lua, ที่ดินเปล่าทำไร่): planting pays for the
+-- seed stock on the spot; the harvest goes into the field store and is sold at the field's buyer.
+M.FIELD_CROPS = {
+  corn      = { name = "ข้าวโพด",    unit = "กก.", seed_price = 300, grow_ms = 40 * GAME_DAY_MS, price_per_kg = 9,
+                yield_watered = { 180, 240 }, yield_dry = { 90, 120 } },
+  cassava   = { name = "มันสำปะหลัง", unit = "กก.", seed_price = 250, grow_ms = 80 * GAME_DAY_MS, price_per_kg = 4,
+                yield_watered = { 650, 850 }, yield_dry = { 330, 430 } },
+  sugarcane = { name = "อ้อย",       unit = "กก.", seed_price = 400, grow_ms = 100 * GAME_DAY_MS, price_per_kg = 3,
+                yield_watered = { 1100, 1400 }, yield_dry = { 550, 700 } },
+}
+M.FIELD_ORDER = { "corn", "cassava", "sugarcane" }
+M.FIELD_STORE = 5000 -- kg the field store (โรงเก็บผลผลิต) holds
+
 -- Food & drinks (ของกิน): bought into the bag, eaten any time to restore energy
 M.FOODS = {
   soda        = { name = "น้ำอัดลม",         energy = 8 },
@@ -224,6 +237,7 @@ function M.read_barn(user_id)
   local objects = nk.storage_read({ { collection = M.CROPS.collection, key = M.CROPS.key, user_id = user_id } })
   local crops = (#objects > 0) and objects[1].value or {}
   crops.rice = crops.rice or {}
+  crops.field = crops.field or {}   -- field crops from your land: { corn = kg, ... }
   if crops.rice_kg and crops.rice_kg > 0 then
     crops.rice.khao_niao = (crops.rice.khao_niao or 0) + crops.rice_kg
   end

@@ -10,13 +10,16 @@
 --   ranch_buy    {}               -> one cow from the cow seller
 --   ranch_feed   {"packs": n}     -> buy feed (FEED_PACK units per pack) into the trough store
 --   ranch_milk   {}               -> milk the cows: sells the milk to the dairy co-op (สหกรณ์โคนม)
---   ranch_sell   {}               -> sell your most grown cow (must be fully grown, not in calf)
---   ranch_breed  {}               -> artificial insemination for a grown female
+--   ranch_sell   {"cow": i}       -> sell cow i (1-based; not in calf). A grown cow fetches the full
+--                                    price, a young one less. Without "cow": the most grown cow.
+--   ranch_breed  {"cow": i}       -> artificial insemination for grown female i (or the first one ready)
+--   ranch_expand {}               -> build the pen bigger (PEN_STEP more cows, up to #PEN_PRICES times)
 
 local nk = require("nakama")
 local data = require("shop_data")
 local life = require("life_core")
 local trade = require("trade_core")
+local land = require("land_core")
 
 local HERD = { collection = "ranch", key = "herd" }
 local CURRENCY = data.CURRENCY
@@ -24,7 +27,10 @@ local GRPC_INVALID_ARGUMENT = 3
 local GRPC_FAILED_PRECONDITION = 9
 
 local COW_PRICE = 28000
-local MAX_COWS = 8          -- the pen holds eight
+local BASE_COWS = 8         -- the pen starts with room for eight
+local PEN_STEP = 4          -- each extension makes room for four more
+local PEN_PRICES = { 20000, 30000, 45000 } -- up to 20 cows
+local YOUNG_PRICE = 16000   -- a cow sold before it is grown: from this up to the grown price
 local FEED_PACK = 10        -- units per pack
 local FEED_PACK_PRICE = 250
 local MAX_FEED = 200
@@ -72,7 +78,26 @@ local function read(user_id)
   h.feed = h.feed or 0
   h.milk = h.milk or 0
   h.settled = h.settled or math.floor(game_days(nk.time()))
+  h.pen = h.pen or 0
   return h
+end
+
+-- Room in the village pen plus a second pen built on your own land (land_core)
+local function capacity(h) return BASE_COWS + PEN_STEP * h.pen + (h.extra or 0) end
+
+-- What a cow fetches now: grown cows the full price (males a bit more), young ones less
+local function cow_price(cow)
+  local full = (cow.sex == "m") and GROWN_PRICE_MALE or GROWN_PRICE
+  local g = math.min(cow.g or 0, GROWN_DAYS)
+  if g >= GROWN_DAYS then return full end
+  return math.floor((YOUNG_PRICE + (full - YOUNG_PRICE) * g / GROWN_DAYS) / 100) * 100
+end
+
+local function cow_index(h, req)
+  if req.cow == nil then return nil end
+  local i = math.floor(tonumber(req.cow) or 0)
+  if i < 1 or i > #h.cows then err("unknown cow", GRPC_INVALID_ARGUMENT) end
+  return i
 end
 
 local function write(user_id, h)
@@ -104,7 +129,7 @@ local function settle(h)
   h.milk = math.min(h.milk, females(h) * MAX_MILK_PER_COW)
   local born = {}
   for _, cow in ipairs(h.cows) do
-    if cow.bred and today >= cow.bred + GESTATION_DAYS and #h.cows + #born < MAX_COWS then
+    if cow.bred and today >= cow.bred + GESTATION_DAYS and #h.cows + #born < capacity(h) then
       cow.bred = nil
       table.insert(born, { g = 0, sex = random_sex() })
     end
@@ -122,14 +147,17 @@ local function view(h, done)
     local g = cow.g or 0
     table.insert(growth, math.min(g, GROWN_DAYS))
     table.insert(herd, { g = math.min(g, GROWN_DAYS), sex = cow.sex, pregnant = cow.bred ~= nil,
-                         due_days = cow.bred and math.max(0, cow.bred + GESTATION_DAYS - today) or 0 })
+                         due_days = cow.bred and math.max(0, cow.bred + GESTATION_DAYS - today) or 0,
+                         price = cow_price(cow) })
     if g >= GROWN_DAYS and not cow.bred then grown = grown + 1 end
     if cow.bred then pregnant = pregnant + 1 end
     if cow.sex == "f" and g >= GROWN_DAYS and not cow.bred then breedable = breedable + 1 end
   end
   local next_day_ms = (h.settled + 1 - game_days(nk.time())) * life.DAY_MS
   local result = {
-    cows = #h.cows, max_cows = MAX_COWS, price = COW_PRICE, claimed = h.claimed,
+    cows = #h.cows, max_cows = capacity(h), price = COW_PRICE, claimed = h.claimed,
+    pen = h.pen, pen_max = #PEN_PRICES, land_cows = h.extra or 0, expand_price = PEN_PRICES[h.pen + 1] or 0, pen_step = PEN_STEP,
+    young_price = YOUNG_PRICE,
     feed = h.feed, max_feed = MAX_FEED, feed_pack = FEED_PACK, feed_pack_price = FEED_PACK_PRICE,
     milk = h.milk, milk_price = MILK_PRICE, grown = grown, grown_days = GROWN_DAYS, grown_price = GROWN_PRICE,
     next_day_s = math.max(0, math.floor(next_day_ms / 1000)), done = done,
@@ -143,7 +171,9 @@ end
 local function rpc(name, handler)
   nk.register_rpc(function(context, payload)
     local user_id = context.user_id
-    local h = settle(read(user_id))
+    local h = read(user_id)
+    h.extra = land.extra_cows(user_id)
+    settle(h)
     local done = handler(user_id, h, decode(payload))
     write(user_id, h)
     return view(h, done)
@@ -154,7 +184,7 @@ rpc("ranch_get", function() return nil end)
 
 rpc("ranch_claim", function(user_id, h)
   if h.claimed then err("already claimed") end
-  if #h.cows >= MAX_COWS then err("pen full") end
+  if #h.cows >= capacity(h) then err("pen full") end
   h.claimed = true
   local sex = random_sex()
   table.insert(h.cows, { g = 0, sex = sex })
@@ -162,7 +192,7 @@ rpc("ranch_claim", function(user_id, h)
 end)
 
 rpc("ranch_buy", function(user_id, h)
-  if #h.cows >= MAX_COWS then err("pen full") end
+  if #h.cows >= capacity(h) then err("pen full") end
   if wallet(user_id) < COW_PRICE then err("not enough baht") end
   pay(user_id, -COW_PRICE, "buy_cow")
   local sex = random_sex()
@@ -195,34 +225,56 @@ rpc("ranch_milk", function(user_id, h)
   return "รีดนม " .. bottles .. " ขวด ขายให้สหกรณ์ได้ " .. earned .. " บาท"
 end)
 
-rpc("ranch_sell", function(user_id, h)
-  -- the most grown cow not in calf; males go first (the females are kept for milk and calves)
-  local best, best_i = -1, nil
-  for i, cow in ipairs(h.cows) do
-    local score = (cow.g or 0) + ((cow.sex == "m") and 0.5 or 0)
-    if not cow.bred and score > best then best, best_i = score, i end
+rpc("ranch_sell", function(user_id, h, req)
+  local i = cow_index(h, req)
+  if i then
+    if h.cows[i].bred then err("in calf") end
+  else
+    -- the most grown cow not in calf; males go first (the females are kept for milk and calves)
+    local best = -1
+    for j, cow in ipairs(h.cows) do
+      local score = (cow.g or 0) + ((cow.sex == "m") and 0.5 or 0)
+      if not cow.bred and score > best then best, i = score, j end
+    end
+    if not i or best < GROWN_DAYS then err("not grown") end
   end
-  if not best_i or best < GROWN_DAYS then err("not grown") end
-  local cow = table.remove(h.cows, best_i)
-  local price = (cow.sex == "m") and GROWN_PRICE_MALE or GROWN_PRICE
+  local cow = table.remove(h.cows, i)
+  local price = cow_price(cow)
+  local grown = (cow.g or 0) >= GROWN_DAYS
   pay(user_id, price, "sell_cow")
-  trade.gain_many(user_id, { cattle = 80, merchant = 20 }, true)
-  return "ขาย" .. (cow.sex == "m" and "วัวตัวผู้" or "วัวตัวเมีย") .. "โตเต็มที่ 1 ตัว ได้ " .. price .. " บาท"
+  trade.gain_many(user_id, { cattle = grown and 80 or 30, merchant = grown and 20 or 8 }, true)
+  return "ขาย" .. (cow.sex == "m" and "วัวตัวผู้" or "วัวตัวเมีย") .. (grown and "โตเต็มที่" or "ที่ยังไม่โต") ..
+    " 1 ตัว ได้ " .. price .. " บาท"
 end)
 
-rpc("ranch_breed", function(user_id, h)
+rpc("ranch_breed", function(user_id, h, req)
   local pick
-  for _, cow in ipairs(h.cows) do
-    if cow.sex == "f" and (cow.g or 0) >= GROWN_DAYS and not cow.bred then pick = cow; break end
+  local i = cow_index(h, req)
+  local function ready(cow) return cow.sex == "f" and (cow.g or 0) >= GROWN_DAYS and not cow.bred end
+  if i then
+    if ready(h.cows[i]) then pick = h.cows[i] end
+  else
+    for _, cow in ipairs(h.cows) do if ready(cow) then pick = cow; break end end
   end
   if not pick then err("no cow to breed") end
   local due = 0
   for _, cow in ipairs(h.cows) do if cow.bred then due = due + 1 end end
-  if #h.cows + due >= MAX_COWS then err("pen full") end
+  if #h.cows + due >= capacity(h) then err("pen full") end
   if wallet(user_id) < BREED_PRICE then err("not enough baht") end
   life.spend(user_id, 5)
   pay(user_id, -BREED_PRICE, "cow_breed")
   pick.bred = math.floor(game_days(nk.time()))
   trade.gain(user_id, "cattle", 25, true)
   return "ผสมเทียมแม่วัวแล้ว " .. BREED_PRICE .. " บาท · ลูกวัวจะเกิดในอีก " .. GESTATION_DAYS .. " วันในเกม"
+end)
+
+rpc("ranch_expand", function(user_id, h)
+  local cost = PEN_PRICES[h.pen + 1]
+  if not cost then err("pen max") end
+  if wallet(user_id) < cost then err("not enough baht") end
+  life.spend(user_id, 10)
+  pay(user_id, -cost, "cow_pen")
+  h.pen = h.pen + 1
+  trade.gain(user_id, "cattle", 40, true)
+  return "ขยายคอกวัวแล้ว " .. cost .. " บาท · เลี้ยงได้ " .. capacity(h) .. " ตัว"
 end)

@@ -83,6 +83,15 @@ public class BankClient : MonoBehaviour
         if (player != null) player.VehicleBoost = Mathf.Max(1f, state.speed); // your best car
         Changed?.Invoke(state);
         if (WalletClient.Instance != null && rpc != "bank_get") _ = WalletClient.Instance.RefreshAsync();
+        if (rpc == "bank_buy") LandOwnershipChanged();
         return state;
+    }
+
+    // Land bought or sold: the land on the map, the canal-side paddies and a pen on it change hands
+    public static void LandOwnershipChanged()
+    {
+        if (LandClient.Instance != null) _ = LandClient.Instance.RefreshAsync();
+        FarmClient.Instance?.Refresh();
+        if (RanchClient.Instance != null) _ = RanchClient.Instance.RefreshAsync();
     }
 }

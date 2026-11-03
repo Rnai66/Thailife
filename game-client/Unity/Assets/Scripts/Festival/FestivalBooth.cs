@@ -32,7 +32,8 @@ public class FestivalBooth : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         if (other.GetComponent<PlayerController>() == null) return;
-        string label = seat != null ? "ขึ้นเล่น" : game == "tickets" ? "ซื้อบัตร" : game == "prizes" ? "แลกรางวัล"
+        string label = game == "wall" || game == "snake" ? "เข้าชม" : game == "haunted" ? "เข้าบ้านผีสิง"
+            : seat != null ? "ขึ้นเล่น" : game == "tickets" ? "ซื้อบัตร" : game == "prizes" ? "แลกรางวัล"
             : price == 0 ? (game == "morlam" ? "ดูหมอลำ" : "นั่งดู") : game == "soidao" ? "สอยดาว" : "เล่น";
         ContextButton.Show(this, label, Caption(), Play);
     }
@@ -44,7 +45,7 @@ public class FestivalBooth : MonoBehaviour
 
     // Rides and skill games are paid in coupons (FairClient); the ticket booth and the prize counter
     // are free to walk up to
-    private bool Coupons => seat != null || IsSkillGame;
+    private bool Coupons => seat != null || IsSkillGame || game == "haunted";
     private bool IsSkillGame => game == "shooting" || game == "rings" || game == "darts";
 
     private string Caption()
@@ -52,7 +53,7 @@ public class FestivalBooth : MonoBehaviour
         if (game == "tickets") return "ซุ้มขายบัตร · บัตรผ่านประตูและคูปอง";
         if (game == "prizes") return "ซุ้มแลกรางวัล · เอาแต้มมาแลกของ";
         if (IsSkillGame) return $"{title} · 1 คูปอง";
-        if (seat != null)
+        if (seat != null || game == "haunted")
         {
             var ride = FairClient.Instance?.FindRide(game);
             return $"{title} · {(ride != null ? ride.coupons : price)} คูปอง";
@@ -125,10 +126,16 @@ public class FestivalBooth : MonoBehaviour
         try
         {
             var r = await fair.RideAsync(game);
-            UiKit.FloatAbovePlayer($"{r.ride_name}: สนุกมาก! (ใช้ {r.used} คูปอง · +{r.gained} พลังงาน)", new Color(1f, 0.85f, 0.3f));
+            string line = $"{r.ride_name}: สนุกมาก! (ใช้ {r.used} คูปอง · +{r.gained} พลังงาน)";
             LifeClient.Instance?.Refresh();
-            var player = FindAnyObjectByType<PlayerController>();
-            if (player != null) StartCoroutine(Ride(player));
+            if (game == "haunted")
+                HauntedHouseUI.Show(() => UiKit.FloatAbovePlayer("รอดออกมาได้! " + line, new Color(1f, 0.85f, 0.3f)));
+            else
+            {
+                UiKit.FloatAbovePlayer(line, new Color(1f, 0.85f, 0.3f));
+                var player = FindAnyObjectByType<PlayerController>();
+                if (player != null && seat != null) StartCoroutine(Ride(player));
+            }
         }
         catch (Exception e)
         {

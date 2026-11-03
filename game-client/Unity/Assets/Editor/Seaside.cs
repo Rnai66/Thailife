@@ -757,16 +757,16 @@ public static class Seaside
         PrimitiveKit.Label("ร้านอาหารทะเล", s, new Vector3(0f, 2.6f, -2.01f), 0.055f, new Color(0.6f, 0.1f, 0.1f));
     }
 
-    // ── Cow farm (ฟาร์มวัว) in the village ─────────────────────────────────────────────
-    public static void CowFarm(Transform parent, Vector3 position)
+    // ── Cow farm (ฟาร์มวัว) in the village, beside Kok Nong Na; the gate side is local -Z ──
+    public static void CowFarm(Transform parent, Vector3 position, float yaw = 0f)
     {
-        var f = PrimitiveKit.Group("CowFarm_ฟาร์มวัว", parent, position).transform;
+        var f = PrimitiveKit.Group("CowFarm_ฟาร์มวัว", parent, position, yaw).transform;
         var fence = PrimitiveKit.Mat("FenceWood", new Color(0.62f, 0.45f, 0.28f));
-        const float hx = 9f, hz = 6.5f;
+        const float hx = 12f, hz = 8f, back = 1.5f; // the shed and trough sit `back` further in than before
         for (float x = -hx; x <= hx + 0.01f; x += 3f)
             foreach (float z in new[] { -hz, hz })
                 PrimitiveKit.Box("FencePost", f, new Vector3(x, 0.6f, z), new Vector3(0.15f, 1.2f, 0.15f), fence);
-        for (float z = -hz; z <= hz + 0.01f; z += 3.25f)
+        for (float z = -hz; z <= hz + 0.01f; z += 4f)
             foreach (float x in new[] { -hx, hx })
                 PrimitiveKit.Box("FencePost", f, new Vector3(x, 0.6f, z), new Vector3(0.15f, 1.2f, 0.15f), fence);
         foreach (float y in new[] { 0.5f, 0.95f })
@@ -774,58 +774,61 @@ public static class Seaside
             PrimitiveKit.Box("Rail", f, new Vector3(0f, y, hz), new Vector3(hx * 2f, 0.1f, 0.08f), fence);
             PrimitiveKit.Box("RailL", f, new Vector3(-hx, y, 0f), new Vector3(0.08f, 0.1f, hz * 2f), fence);
             PrimitiveKit.Box("RailR", f, new Vector3(hx, y, 0f), new Vector3(0.08f, 0.1f, hz * 2f), fence);
-            PrimitiveKit.Box("RailFrontL", f, new Vector3(-5.5f, y, -hz), new Vector3(7f, 0.1f, 0.08f), fence);
-            PrimitiveKit.Box("RailFrontR", f, new Vector3(5.5f, y, -hz), new Vector3(7f, 0.1f, 0.08f), fence);
+            PrimitiveKit.Box("RailFrontL", f, new Vector3(-7f, y, -hz), new Vector3(10f, 0.1f, 0.08f), fence);
+            PrimitiveKit.Box("RailFrontR", f, new Vector3(7f, y, -hz), new Vector3(10f, 0.1f, 0.08f), fence);
         }
         // Open-sided cow shed with hay
         var roof = PrimitiveKit.Mat("RoofRed", new Color(0.7f, 0.22f, 0.15f));
         foreach (float x in new[] { -3f, 3f })
-            foreach (float z in new[] { 2.5f, 5.5f })
+            foreach (float z in new[] { 2.5f + back, 5.5f + back })
                 PrimitiveKit.Cylinder("ShedPost", f, new Vector3(x, 1.4f, z), new Vector3(0.18f, 1.4f, 0.18f), fence);
         foreach (float side in new[] { -1f, 1f })
-            PrimitiveKit.Box("ShedRoof", f, new Vector3(0f, 3.15f, 4f + side * 0.85f), new Vector3(7f, 0.12f, 2f), roof, new Vector3(side * 25f, 0f, 0f), collider: false);
+            PrimitiveKit.Box("ShedRoof", f, new Vector3(0f, 3.15f, 4f + back + side * 0.85f), new Vector3(7f, 0.12f, 2f), roof, new Vector3(side * 25f, 0f, 0f), collider: false);
         // Hay stacked together beside the trough, where the cows eat (กองฟาง)
         var hay = PrimitiveKit.Mat("Hay", new Color(0.9f, 0.78f, 0.38f));
         for (int i = 0; i < 4; i++)
-            PrimitiveKit.Box("HayBale", f, new Vector3(-2.4f + i * 1.02f, 0.3f, 4.9f), new Vector3(1f, 0.6f, 0.7f), hay);
+            PrimitiveKit.Box("HayBale", f, new Vector3(-2.4f + i * 1.02f, 0.3f, 4.9f + back), new Vector3(1f, 0.6f, 0.7f), hay);
         for (int i = 0; i < 3; i++)
-            PrimitiveKit.Box("HayBale", f, new Vector3(-1.9f + i * 1.02f, 0.9f, 4.9f), new Vector3(1f, 0.6f, 0.7f), hay);
-        PrimitiveKit.Box("HayBale", f, new Vector3(-0.88f, 1.5f, 4.9f), new Vector3(1f, 0.6f, 0.7f), hay);
-        MeshKit.Place("LooseHay", f, MeshKit.Blob("HayPile", 55, 0.3f, 1), hay, new Vector3(1.2f, 0.1f, 3.9f), default, new Vector3(1.6f, 0.5f, 1.2f));
-        PrimitiveKit.Box("Trough", f, new Vector3(2.6f, 0.3f, 3.9f), new Vector3(2f, 0.5f, 0.7f), PrimitiveKit.Mat("Concrete", new Color(0.75f, 0.75f, 0.72f)));
-        PrimitiveKit.Box("TroughWater", f, new Vector3(2.6f, 0.52f, 3.9f), new Vector3(1.8f, 0.04f, 0.5f), PrimitiveKit.Mat("CanalWater", new Color(0.25f, 0.45f, 0.5f)), collider: false);
+            PrimitiveKit.Box("HayBale", f, new Vector3(-1.9f + i * 1.02f, 0.9f, 4.9f + back), new Vector3(1f, 0.6f, 0.7f), hay);
+        PrimitiveKit.Box("HayBale", f, new Vector3(-0.88f, 1.5f, 4.9f + back), new Vector3(1f, 0.6f, 0.7f), hay);
+        MeshKit.Place("LooseHay", f, MeshKit.Blob("HayPile", 55, 0.3f, 1), hay, new Vector3(1.2f, 0.1f, 3.9f + back), default, new Vector3(1.6f, 0.5f, 1.2f));
+        PrimitiveKit.Box("Trough", f, new Vector3(2.6f, 0.3f, 3.9f + back), new Vector3(2f, 0.5f, 0.7f), PrimitiveKit.Mat("Concrete", new Color(0.75f, 0.75f, 0.72f)));
+        PrimitiveKit.Box("TroughWater", f, new Vector3(2.6f, 0.52f, 3.9f + back), new Vector3(1.8f, 0.04f, 0.5f), PrimitiveKit.Mat("CanalWater", new Color(0.25f, 0.45f, 0.5f)), collider: false);
 
         // Orange bulbs under the shed and on two poles at the front of the pen
         foreach (float x in new[] { -1.8f, 1.8f })
-            StreetFurniture.OrangeLight(f, new Vector3(x, 2.75f, 4f));
+            StreetFurniture.OrangeLight(f, new Vector3(x, 2.75f, 4f + back));
         foreach (float x in new[] { -hx + 0.4f, hx - 0.4f })
         {
             PrimitiveKit.Cylinder("LightPole", f, new Vector3(x, 1.6f, -hz + 0.4f), new Vector3(0.12f, 1.6f, 0.12f), fence);
             StreetFurniture.OrangeLight(f, new Vector3(x, 3.1f, -hz + 0.7f));
         }
 
-        // Room for eight cows; CowPen shows as many as you own (ranch.lua)
+        // Room for twenty cows (the pen grows with ranch_expand); CowPen shows as many as you own (ranch.lua)
         var spots = new[]
         {
             new Vector2(-6f, -3.5f), new Vector2(-3f, -1f), new Vector2(0f, -3.5f), new Vector2(3f, -1f),
             new Vector2(6f, -3.5f), new Vector2(-6f, 1.5f), new Vector2(6f, 1.5f), new Vector2(-1.5f, 1.2f),
+            new Vector2(-9.5f, -5f), new Vector2(9.5f, -5f), new Vector2(-9.5f, -1f), new Vector2(9.5f, -1f),
+            new Vector2(-9.5f, 3f), new Vector2(9.5f, 3f), new Vector2(-6.5f, 5.5f), new Vector2(6.5f, 5.5f),
+            new Vector2(-3f, -6f), new Vector2(3f, -6f), new Vector2(-4f, 2.2f), new Vector2(4.5f, 2f),
         };
         for (int i = 0; i < spots.Length; i++)
         {
             var c = spots[i];
-            Cow(f, new Vector3(c.x, 0f, c.y), i, new Vector2(hx - 1.5f - Mathf.Abs(c.x), hz - 1.5f - Mathf.Abs(c.y)));
+            Cow(f, new Vector3(c.x, 0f, c.y), i, new Vector2(Mathf.Max(1f, hx - 1.5f - Mathf.Abs(c.x)), Mathf.Max(0.8f, hz - 1.5f - Mathf.Abs(c.y))));
         }
         f.gameObject.AddComponent<CowPen>();
 
         // In the pen by the trough: milk the cows (รีดนม) and check feed / growth
         var penZone = new GameObject("CowPenZone");
         penZone.transform.SetParent(f, false);
-        penZone.transform.localPosition = new Vector3(2.6f, 1f, 2.6f);
+        penZone.transform.localPosition = new Vector3(2.6f, 1f, 2.6f + back);
         var penBox = penZone.AddComponent<BoxCollider>();
         penBox.isTrigger = true;
         penBox.size = new Vector3(2.8f, 2f, 1.6f);
         penZone.AddComponent<RanchCounter>().Configure("pen");
-        PrimitiveKit.Cylinder("MilkCan", f, new Vector3(3.9f, 0.35f, 3.2f), new Vector3(0.35f, 0.35f, 0.35f), PrimitiveKit.Mat("SteelFrame", new Color(0.7f, 0.72f, 0.75f)), collider: false);
+        PrimitiveKit.Cylinder("MilkCan", f, new Vector3(3.9f, 0.35f, 3.2f + back), new Vector3(0.35f, 0.35f, 0.35f), PrimitiveKit.Mat("SteelFrame", new Color(0.7f, 0.72f, 0.75f)), collider: false);
         Places.Sign(f, new Vector3(-1.8f, 0f, -hz - 0.6f), "ฟาร์มวัว", 0f);
 
         // Cow seller (พ่อค้าวัว) at the gate: buy more cows here
@@ -842,7 +845,7 @@ public static class Seaside
     }
 
     // A cute, rounded dairy cow: capsule body, round head with big eyes, pink muzzle, floppy ears
-    private static void Cow(Transform parent, Vector3 pos, int index, Vector2 room)
+    internal static void Cow(Transform parent, Vector3 pos, int index, Vector2 room)
     {
         var c = PrimitiveKit.Group("Cow_วัว", parent, pos, index * 70f).transform;
         var white = PrimitiveKit.Mat("CowWhite", new Color(0.97f, 0.96f, 0.93f));

@@ -171,6 +171,7 @@ public static class TambonBuilder
         Places.Sign(root, new Vector3(-16f, 0f, 16f), "ย่านผับ · เพื่อชีวิต บลูส์ อินดี้\nนักดนตรี Lv 10 · กลางคืน ร้านละครั้ง", 0f);
 
         TempleGround(root);
+        LandParcels.BuildCity(root); // ที่ดินติดถนน next to the bank (a shophouse to let once it's yours)
 
         // ตลาดสดเทศบาล east of the clock tower (morning market, 05:00-13:00)
         Markets.FreshMarket(root, new Vector3(39f, 0f, 11f), "ตลาดสดเทศบาล", "05:00-13:00");
@@ -205,6 +206,7 @@ public static class TambonBuilder
 
         // Fairground for the big festivals (งานใหญ่: งานประจำปีวัด สงกรานต์ ออกพรรษา กฐิน ลอยกระทง)
         FestivalGrounds.Build(root, new Vector3(-34.5f, 0f, -35f), 180f, big: true); // beside the town temple, back from the pavement
+        RedCrossFair.Build(root); // the big rides and shows spread west and south of it
         PrimitiveKit.Box("FairPath", root, new Vector3(-34.5f, 0.012f, -22f), new Vector3(4f, 0.012f, 1.2f),
             PrimitiveKit.Mat("Pavement", new Color(0.72f, 0.7f, 0.66f)), collider: false);
 

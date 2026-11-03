@@ -73,6 +73,7 @@ public static class SynthSounds
             case "waves": return Waves();
             case "bell": return Bell();
             case "ranat": return Ranat();
+            case "ghost": return Ghost();
             default: return SynthVoices.Make(name) ?? SynthMusic.Make(name);
         }
     }
@@ -92,6 +93,25 @@ public static class SynthSounds
             low += (noise - low) * 0.25f; // dull slap
             float thump = Mathf.Sin(2f * Mathf.PI * (90f - 120f * t) * t);
             d[i] = (low * 1.4f * Mathf.Exp(-t * 45f) + thump * Mathf.Exp(-t * 18f)) * 0.8f;
+        }
+        return d;
+    }
+
+    // บ้านผีสิง: a wavering wail sliding down, breathy noise under it
+    private static float[] Ghost()
+    {
+        var d = Buffer(1.8f);
+        var rng = new System.Random(7);
+        float phase = 0f, hiss = 0f;
+        for (int i = 0; i < d.Length; i++)
+        {
+            float t = (float)i / Rate;
+            float k = t / 1.8f;
+            float freq = Mathf.Lerp(620f, 240f, k) * (1f + Mathf.Sin(t * 2f * Mathf.PI * 6f) * 0.04f);
+            phase += 2f * Mathf.PI * freq / Rate;
+            hiss += (((float)rng.NextDouble() * 2f - 1f) - hiss) * 0.08f;
+            float env = Mathf.Sin(Mathf.PI * k);
+            d[i] = (Mathf.Sin(phase) * 0.45f + Mathf.Sin(phase * 1.5f) * 0.15f + hiss * 0.6f) * env * 0.7f;
         }
         return d;
     }

@@ -79,6 +79,7 @@ public static class GoldClient
         Current = s;
         ReceivedAt = Time.time;
         Changed?.Invoke(s);
+        if (rpc.Contains("pawn")) BankClient.LandOwnershipChanged(); // pawning land or a car
         if (WalletClient.Instance != null) _ = WalletClient.Instance.RefreshAsync();
         return s;
     }

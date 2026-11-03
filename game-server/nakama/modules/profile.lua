@@ -6,6 +6,7 @@
 --   profile_set_look  {"code": "g.f.h.c.t.b", "place": "create" | "barber" | "tailor"} -> {code, paid}
 --       create: once, free options only · barber (ร้านตัดผม): hairstyle + colour ·
 --       tailor (ร้านเสื้อผ้า): top + bottom colours. Paid options need the money and the level.
+--       wardrobe (the bag): put on an outfit you already own, or take it off, for free.
 --   profile_set_skin  {"skin": 0..7}   -> {skin}   (older app versions)
 -- Other players read both with GetUsers, so they can't be spoofed through match messages.
 
@@ -167,6 +168,12 @@ nk.register_rpc(function(context, payload)
       take(OUTFITS[new.o])
       record.outfits[tostring(new.o)] = true
     end
+  elseif place == "wardrobe" then
+    if new.g ~= old.g or new.f ~= old.f or new.h ~= old.h or new.c ~= old.c or new.t ~= old.t or new.b ~= old.b then
+      err("wardrobe does outfits only")
+    end
+    if new.o == old.o then err("no change") end
+    if new.o > 0 and not record.outfits[tostring(new.o)] then err("not owned") end
   else
     err("unknown place", GRPC_INVALID_ARGUMENT)
   end

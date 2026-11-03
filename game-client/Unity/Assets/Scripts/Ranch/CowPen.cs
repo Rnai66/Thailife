@@ -1,10 +1,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// The village cow pen: shows as many cows as you own (the pen is built with room for eight); calves
-// (ลูกวัว) start small and grow to full size as they are fed.
+// A cow pen: shows as many of your cows as live there; calves (ลูกวัว) start small and grow to full
+// size as they are fed. The village pen holds the herd up to its own room; a second pen built on your
+// land (land.lua, landPen) shows the cows beyond that.
 public class CowPen : MonoBehaviour
 {
+    [SerializeField] private bool landPen;
+
+    public void Configure(bool onLand) => landPen = onLand;
+
     private readonly List<GameObject> cows = new List<GameObject>();
     private readonly List<Vector3> sizes = new List<Vector3>();
     private RanchClient ranch;
@@ -14,7 +19,7 @@ public class CowPen : MonoBehaviour
     private void Awake()
     {
         foreach (var w in GetComponentsInChildren<CowWander>(true)) { cows.Add(w.gameObject); sizes.Add(w.transform.localScale); }
-        Show(0, null, 1);
+        Show(0, 0, null, 1);
     }
 
     private void Start()
@@ -30,16 +35,24 @@ public class CowPen : MonoBehaviour
         if (ranch != null) ranch.Changed -= OnChanged;
     }
 
-    private void OnChanged(RanchClient.State s) => Show(s.cows, s.herd, Mathf.Max(1, s.grown_days));
-
-    private void Show(int count, RanchClient.Cow[] herd, int grownDays)
+    private void OnChanged(RanchClient.State s)
     {
-        HasCows = count > 0;
+        int villageRoom = s.max_cows - s.land_cows;
+        int first = landPen ? villageRoom : 0;
+        int shown = landPen ? s.cows : Mathf.Min(s.cows, villageRoom);
+        Show(first, shown, s.herd, Mathf.Max(1, s.grown_days));
+    }
+
+    // Cows first..count-1 of the herd, one per cow model in this pen
+    private void Show(int first, int count, RanchClient.Cow[] herd, int grownDays)
+    {
+        HasCows = count > first;
         for (int i = 0; i < cows.Count; i++)
         {
             if (cows[i] == null) continue;
-            cows[i].SetActive(i < count);
-            float grow = herd != null && i < herd.Length ? Mathf.Clamp01((float)herd[i].g / grownDays) : 1f;
+            int cow = first + i;
+            cows[i].SetActive(cow < count);
+            float grow = herd != null && cow < herd.Length ? Mathf.Clamp01((float)herd[cow].g / grownDays) : 1f;
             cows[i].transform.localScale = sizes[i] * Mathf.Lerp(0.7f, 1f, grow);
         }
     }

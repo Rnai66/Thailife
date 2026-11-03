@@ -25,6 +25,7 @@ local GAMES = {
   carousel = { name = "ม้าหมุน",          price = 10, energy = 6, big = true },
   movie    = { name = "หนังกลางแปลง",     price = 0,  energy = 12, once = true },
   likay    = { name = "ลิเก",            price = 0,  energy = 12, once = true },
+  concert  = { name = "คอนเสิร์ตงานใหญ่",   price = 0,  energy = 15, once = true, big = true },
   -- the village temple fair ground (ลานอเนกประสงค์ across from the temple)
   ferris_village = { name = "ชิงช้าสวรรค์",  price = 20, energy = 10 },
   morlam   = { name = "หมอลำ · กันตรึม",    price = 0,  energy = 15, once = true }, -- older app versions

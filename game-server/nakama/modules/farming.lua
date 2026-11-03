@@ -1,6 +1,7 @@
--- Rice farming (ทำนา) on the Kok Nong Na paddies. Every player has their own 6 plots.
+-- Rice farming (ทำนา) on the Kok Nong Na paddies. Every player has their own 6 plots, and six more
+-- (7..12) on the canal-side paddies next door once they own that land (ที่นาติดคลอง, land_core).
 --   farm_get  {}  -> {plots:[...], seeds:{...}, barn:{...}, varieties:[...], energy...}
---   farm_act  {"plot": 1..6, "action": "plow"|"plant"|"water"|"harvest", "variety": "khao_niao"|"hommali"}
+--   farm_act  {"plot": 1..12, "action": "plow"|"plant"|"water"|"harvest", "variety": "khao_niao"|"hommali"}
 -- Stages: empty -> plowed -> growing -> ripe -> (harvest into the barn) -> empty
 -- Planting uses one seed bag bought at the shop (shop_data.RICE). Harvest needs room in the
 -- rice barn (ยุ้งข้าว). Growth runs on real time, so rice keeps growing while the game is closed.
@@ -9,9 +10,13 @@ local nk = require("nakama")
 local life = require("life_core")
 local data = require("shop_data")
 local quest = require("quest_core")
+local land = require("land_core")
 
 local FARM = { collection = "farm", key = "plots" }
 local PLOTS = 6
+local LAND_PLOTS = 6 -- on the canal-side paddies (land_rice)
+
+local function plot_count(user_id) return PLOTS + (land.owned(user_id).rice and LAND_PLOTS or 0) end
 
 local GRPC_INVALID_ARGUMENT = 3
 local GRPC_FAILED_PRECONDITION = 9
@@ -42,7 +47,7 @@ end
 local function view(user_id, farm, extra)
   local now = nk.time()
   local plots = {}
-  for i = 1, PLOTS do
+  for i = 1, plot_count(user_id) do
     local p = farm[tostring(i)] or {}
     local stage, progress = plot_stage(p, now)
     local grow_ms = variety_of(p).grow_ms
@@ -83,7 +88,7 @@ local function rpc_act(context, payload)
   if not ok or type(req) ~= "table" then error({ "invalid payload", GRPC_INVALID_ARGUMENT }) end
 
   local id = math.floor(tonumber(req.plot) or 0)
-  if id < 1 or id > PLOTS then error({ "unknown plot", GRPC_INVALID_ARGUMENT }) end
+  if id < 1 or id > plot_count(user_id) then error({ "not your paddy", GRPC_FAILED_PRECONDITION }) end
 
   local farm = read_farm(user_id)
   local key = tostring(id)

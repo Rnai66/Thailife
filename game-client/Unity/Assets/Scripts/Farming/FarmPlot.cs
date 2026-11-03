@@ -198,6 +198,11 @@ public class FarmPlot : MonoBehaviour
 
     private void Offer(FarmClient farm, FarmClient.Plot plot)
     {
+        if (farm != null && farm.IsOnline && plot == null) // the canal-side paddies (7-12) before you own them
+        {
+            ContextButton.Show(this, "ที่นาขาย", "ที่นาติดคลองแปลงนี้ยังไม่ใช่ของคุณ · ซื้อ \"ที่นาติดคลอง 5 ไร่\" ได้ที่ธนาคารในเมือง", null, enabled: false);
+            return;
+        }
         if (farm == null || !farm.IsOnline || plot == null)
         {
             ContextButton.Show(this, "ทำนา", "ต้องออนไลน์ก่อนถึงจะทำนาได้", null, enabled: false);
