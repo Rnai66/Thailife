@@ -98,6 +98,15 @@ public class ProfileClient : MonoBehaviour
         return r;
     }
 
+    // The server changed our look (ordaining puts on the robe, leaving the monkhood takes it off)
+    public async Task ReloadLookAsync()
+    {
+        var account = await connection.Client.GetAccountAsync(connection.Session);
+        Look = Look.Parse(account.User.AvatarUrl);
+        cache.Remove(connection.Session.UserId);
+        LookChanged?.Invoke(Look);
+    }
+
     public async Task<LookResult> GetLookStateAsync()
     {
         try

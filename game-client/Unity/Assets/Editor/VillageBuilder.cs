@@ -113,6 +113,7 @@ public static class VillageBuilder
         Seaside.CowFarm(v, new Vector3(21f, 0f, -31f), 180f); // ฟาร์มวัว east of Kok Nong Na, gate toward the road
         Lane(v, 21f, -10.6f, -23f);
         LandParcels.BuildVillage(v); // land you buy at the bank: rice land by the canal, a 1-rai plot
+        TempleLife.BuildVillage(v);  // monks, the abbot, meditation, amulets; the cemetery and community forest; the home shrine
         Lane(v, 46.5f, -10.6f, -23f);
 
         // Villagers out and about in the daytime, monks' alms round at dawn (from the temple along the road)
@@ -165,7 +166,7 @@ public static class VillageBuilder
         {
             new Vector3(-52f, 0f, -1f), new Vector3(-26f, 0f, -12.5f), new Vector3(-16f, 0f, -4.5f), new Vector3(-2f, 0f, -12.8f),
             new Vector3(4f, 0f, -4.2f), new Vector3(25.5f, 0f, -12.6f), new Vector3(34f, 0f, -4.5f), new Vector3(42.5f, 0f, -12.5f),
-            new Vector3(14f, 0f, 6f), new Vector3(-10f, 0f, 6f), new Vector3(20f, 0f, 28f), new Vector3(-44f, 0f, 40f),
+            new Vector3(14f, 0f, 6f), new Vector3(-10f, 0f, 6f), new Vector3(20f, 0f, 28f), new Vector3(-55f, 0f, 33f), // (the last one moved off the cemetery path)
         };
         for (int i = 0; i < palms.Length; i++) Nature.CoconutPalm(v, palms[i], 0.9f + (i % 3) * 0.12f, i);
 

@@ -17,7 +17,7 @@ M.MAX_LEVEL = 100
 M.TIERS = { 1, 10, 25, 50, 75, 100 }
 
 M.ORDER = { "boxer", "fisher", "farmer", "fishpond", "chicken", "cattle", "musician", "merchant",
-            "repair", "computer", "teacher", "programmer", "doctor", "guide", "politician" }
+            "repair", "computer", "teacher", "programmer", "doctor", "guide", "politician", "monk", "exorcist" }
 
 -- main = also gives main-level XP (false where the source already gives it: training, classes)
 M.TRADES = {
@@ -51,6 +51,10 @@ M.TRADES = {
                  ranks = { "ไกด์ฝึกหัด", "คนขับเรือ", "ไกด์นำเที่ยว", "ไกด์มืออาชีพ", "เจ้าของบริษัททัวร์", "ไกด์ระดับโลก" } },
   politician = { name = "นักการเมือง", how = "สมัครเลือกตั้งที่ อบต. หาเสียงที่ศาลา",
                  ranks = { "ผู้สมัครหน้าใหม่", "ผู้นำชุมชน", "สมาชิกสภา อบต.", "นายก อบต.", "นายกเทศมนตรี", "รัฐบุรุษ" } },
+  monk       = { name = "พระสงฆ์", how = "บวชที่วัด นั่งสมาธิในโบสถ์ (temple.lua)",
+                 ranks = { "พระบวชใหม่", "พระนวกะ", "พระนักปฏิบัติ", "พระอาจารย์", "หลวงพ่อ", "เกจิอาจารย์" } },
+  exorcist   = { name = "หมอผี", how = "บวชจนเลเวล 30 แล้วสึกออกมา ปราบผีตอนกลางคืนในป่าช้าและป่าชุมชน",
+                 ranks = { "ลูกศิษย์หมอผี", "หมอผีฝึกหัด", "หมอผีประจำหมู่บ้าน", "หมอผีชื่อดัง", "อาจารย์ใหญ่สายไสย", "ปรมาจารย์ปราบผี" } },
 }
 
 -- Daily-quest action kinds (quest_core.progress) -> XP per unit for each profession

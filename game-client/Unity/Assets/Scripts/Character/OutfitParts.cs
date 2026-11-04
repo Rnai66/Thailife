@@ -140,6 +140,18 @@ public static class OutfitParts
                     On(chest, PrimitiveType.Cube, new Vector3(x, 0f, 0f), new Vector3(0.02f, 0.25f, 0.2f), White);
                 if (head != null) On(head, PrimitiveType.Cylinder, new Vector3(0f, 0.09f, 0f), new Vector3(0.21f, 0.025f, 0.22f), White);
                 break;
+            case 10: // จีวร: the robe wrapped over the left shoulder, the สบง to the ankles, the ประคดเอว
+            {
+                var robe = new Color(0.93f, 0.52f, 0.12f);
+                var fold = new Color(0.8f, 0.4f, 0.08f);
+                On(chest, PrimitiveType.Cube, new Vector3(0.03f, 0.03f, front / s + 0.012f), new Vector3(0.13f, 0.44f, 0.02f), fold, new Vector3(0f, 0f, -35f));
+                On(chest, PrimitiveType.Cube, new Vector3(-0.03f, 0.03f, -front / s - 0.012f), new Vector3(0.13f, 0.44f, 0.02f), fold, new Vector3(0f, 0f, 35f));
+                On(armL, PrimitiveType.Sphere, new Vector3(0f, 0.01f, 0f), new Vector3(0.14f, 0.11f, 0.14f), robe);
+                On(armL, PrimitiveType.Capsule, new Vector3(0f, -0.1f, 0f), new Vector3(0.11f, 0.11f, 0.11f), robe);
+                On(hips, PrimitiveType.Cylinder, new Vector3(0f, -0.42f, 0f), new Vector3(0.37f, 0.43f, 0.31f), robe);
+                On(hips, PrimitiveType.Cylinder, new Vector3(0f, 0.04f, 0f), new Vector3(0.35f, 0.02f, 0.27f), fold);
+                break;
+            }
             case 9: // ชุดตำรวจ: badge, name tag, epaulettes, black belt, peaked cap
                 Buttons(Gold, 4);
                 Epaulettes(new Color(0.35f, 0.22f, 0.12f), Gold);

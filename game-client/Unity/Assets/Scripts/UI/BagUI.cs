@@ -381,6 +381,15 @@ public class BagUI : MonoBehaviour
             string glyph = GlyphOf(it.id);
             if (icon != null && UiKit.Art("Icons/" + icon) != null)
                 UiKit.IconTile(slot, icon, new Vector2(0f, 4f), new Vector2(Cell - 34f, Cell - 34f));
+            else if (it.id.StartsWith("holy_")) // amulets, yantra cloths, the dog and the kuman (AmuletArt)
+            {
+                var art = UiKit.Rect("Amulet", slot, Color.white);
+                art.GetComponent<Image>().sprite = AmuletArt.Get(it.id.Substring(5));
+                art.GetComponent<Image>().preserveAspect = true;
+                art.anchoredPosition = new Vector2(0f, 8f);
+                art.sizeDelta = new Vector2(Cell * 0.62f, Cell * 0.62f);
+                UiKit.Label(slot, 16, it.name, new Vector2(0f, -Cell * 0.5f + 22f), new Vector2(Cell - 20f, 22f), UiKit.HeaderSub);
+            }
             else if (glyph != null)
             {
                 var g = UiKit.Rect("Glyph", slot, it.id.StartsWith("outfit_") ? OutfitTint(it.id) : UiKit.WoodInk);

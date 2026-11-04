@@ -68,7 +68,8 @@ local CLOTH_COLORS = { [0] = { 0, 1 }, { 0, 1 }, { 0, 1 }, { 0, 1 }, { 0, 1 }, {
                        { 150, 3 }, { 200, 4 }, { 200, 4 }, { 1000, 10 } }
 -- Outfits (ชุด) from the clothes shop: bought once, then worn or taken off for free. Mirrors Look.Outfits.
 local OUTFITS = { [0] = { 0, 1 }, { 2500, 10 }, { 3000, 8 }, { 800, 3 }, { 1500, 5 }, { 300, 1 }, { 2000, 20 },
-                  { 2500, 12 }, { 400, 2 }, { 1800, 15 } }
+                  { 2500, 12 }, { 400, 2 }, { 1800, 15 }, { 0, 1 } } -- 10 = the saffron robe (จีวร), only by ordaining (temple.lua)
+local ROBE = 10
 local SERVICE = { barber = 40, tailor = 60 } -- the haircut or the sewing, on top of the option's price
 local LOOK = { collection = "profile", key = "look" }
 
@@ -140,6 +141,10 @@ nk.register_rpc(function(context, payload)
   local old = current(user_id)
   local record = look_record(user_id)
   local place = req.place
+  -- A monk keeps his robe and shaven head until he leaves the monkhood (temple_disrobe)
+  local monk = nk.storage_read({ { collection = "temple", key = "state", user_id = user_id } })
+  if #monk > 0 and monk[1].value.ordained then err("ordained") end
+  if new.o == ROBE and place ~= "create" then err("robe is for monks") end
   local cost, need = 0, 1
   local function take(opt) cost = cost + opt[1]; if opt[2] > need then need = opt[2] end end
 

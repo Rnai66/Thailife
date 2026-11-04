@@ -57,7 +57,11 @@ public static class Places
         Npcs.Crowd(t, new Vector3(0f, 0f, -20.5f), new Vector2(9f, 4f), 8, "any", 0, 24, Npcs.FairTalk); // the gate path between the pens
 
         // Low white boundary wall with a gate in the front (-Z)
-        PrimitiveKit.Box("WallBack", t, new Vector3(0f, 0.5f, 14f), new Vector3(30f, 1f, 0.3f), white);
+        // Back wall with a small gate (x -13..-10) out to the cemetery (ป่าช้า, TempleLife)
+        PrimitiveKit.Box("WallBack", t, new Vector3(-14f, 0.5f, 14f), new Vector3(2f, 1f, 0.3f), white);
+        PrimitiveKit.Box("WallBack", t, new Vector3(2.5f, 0.5f, 14f), new Vector3(25f, 1f, 0.3f), white);
+        foreach (float x in new[] { -13f, -10f })
+            PrimitiveKit.Box("BackGatePost", t, new Vector3(x, 0.8f, 14f), new Vector3(0.4f, 1.6f, 0.4f), white);
         PrimitiveKit.Box("WallL", t, new Vector3(-15f, 0.5f, 0f), new Vector3(0.3f, 1f, 28f), white);
         PrimitiveKit.Box("WallR", t, new Vector3(15f, 0.5f, 0f), new Vector3(0.3f, 1f, 28f), white);
         PrimitiveKit.Box("WallFrontL", t, new Vector3(-8.5f, 0.5f, -14f), new Vector3(13f, 1f, 0.3f), white);

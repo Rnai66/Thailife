@@ -19,7 +19,16 @@ local FISH_NAMES = {
 local FISH_ORDER = { "barb", "tilapia", "catfish", "snakehead", "mackerel", "squid", "seabass", "grouper", "kingfish" }
 -- profile.lua OUTFITS, by index (0 = your own clothes)
 local OUTFIT_NAMES = { [0] = "เสื้อผ้าลำลอง", "ชุดปกติขาว ข้าราชการ", "ชุดสูทสากล", "ชุดนักมวยไทย", "ชุดกากี อบต.",
-  "ชุดม่อฮ่อม ชาวนา", "เสื้อกาวน์หมอ", "ชุดไทยราชปะแตน", "ชุดกีฬา", "ชุดตำรวจ" }
+  "ชุดม่อฮ่อม ชาวนา", "เสื้อกาวน์หมอ", "ชุดไทยราชปะแตน", "ชุดกีฬา", "ชุดตำรวจ", "จีวรพระ" }
+-- temple.lua ITEMS shown in the bag (what's on your home shrine and who guards the house)
+local TEMPLE_NAMES = {
+  phra_pidta = "พระปิดตา", takrut = "ตะกรุดโทน", nangphaya = "พระนางพญา", somdej = "พระสมเด็จ", khunphaen = "พระขุนแผน",
+  thuat = "หลวงพ่อทวด", phra_rod = "พระรอด", rian_raek = "เหรียญหลวงพ่อรุ่นแรก", phra_kring = "พระกริ่ง",
+  yant_5 = "ผ้ายันต์ห้าแถว", yant_8 = "ผ้ายันต์แปดทิศ", yant_kraphet = "ผ้ายันต์เกราะเพชร", yant_wessuwan = "ผ้ายันต์ท้าวเวสสุวรรณ",
+  dog = "หมาวัดเฝ้าบ้าน", kuman = "กุมารทอง",
+}
+local TEMPLE_ORDER = { "phra_pidta", "takrut", "nangphaya", "somdej", "khunphaen", "thuat", "phra_rod", "rian_raek", "phra_kring",
+                       "yant_5", "yant_8", "yant_kraphet", "yant_wessuwan", "dog", "kuman" }
 local GRPC_INVALID_ARGUMENT, GRPC_FAILED_PRECONDITION = 3, 9
 
 local function read(user_id, collection, key)
@@ -124,6 +133,16 @@ local function build(user_id)
     item(clothes, "outfit_" .. o, OUTFIT_NAMES[o], 1, "ชุด", worn == o and "ใส่อยู่" or "กดสวมใส่ได้ฟรี", worn == o and "" or "wear")
   end
   section("เสื้อผ้า", clothes)
+
+  local holy = {}
+  local temple = read(user_id, "temple", "state")
+  for _, id in ipairs(TEMPLE_ORDER) do
+    if (temple.items or {})[id] then
+      local note = (id == "dog" or id == "kuman") and "เฝ้าบ้าน เตือนภัยตอนกลางคืน" or "อยู่บนหิ้งพระที่บ้าน กันผีกันขโมย"
+      item(holy, "holy_" .. id, TEMPLE_NAMES[id], 1, (id == "dog" or id == "kuman") and "ตัว" or "องค์", note)
+    end
+  end
+  section("พระเครื่องและเครื่องราง", holy)
 
   local assets = {}
   local bank = read(user_id, "bank", "account")

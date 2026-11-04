@@ -96,7 +96,11 @@ public struct Look
         new Option("ชุดไทยราชปะแตน", new Color(0.55f, 0.2f, 0.45f), 2500, 12),
         new Option("ชุดกีฬา", new Color(0.1f, 0.45f, 0.9f), 400, 2),
         new Option("ชุดตำรวจ", new Color(0.45f, 0.3f, 0.18f), 1800, 15),
+        new Option("จีวรพระ", new Color(0.93f, 0.52f, 0.12f), 0, 999), // Robe: only by ordaining at the temple
     };
+
+    // The saffron robe (จีวร) a monk wears; not sold at the tailor
+    public const int Robe = 10;
 
     // Trousers / skirt colour that goes with each outfit
     public static readonly Color[] OutfitBottoms =
@@ -111,6 +115,7 @@ public struct Look
         new Color(0.35f, 0.12f, 0.3f),  // silk โจงกระเบน
         new Color(0.95f, 0.95f, 0.95f), // white sports shorts
         new Color(0.45f, 0.3f, 0.18f),  // police brown
+        new Color(0.93f, 0.52f, 0.12f), // the robe's สบง to the ankles
     };
 
     // profile.lua CLOTH_COLORS (index 0 = the model's own clothes)

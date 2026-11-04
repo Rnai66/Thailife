@@ -63,6 +63,9 @@ public static class TambonBuilder
         FestivalGrounds.Build(root, new Vector3(-36f, 0f, -30f), 180f, big: false);
         Lane(root, -36f, -17.5f, -10f);
 
+        // ป่าตำบล in the south-east corner: ghosts at night for the หมอผี (TempleLife)
+        TempleLife.BuildTambon(root);
+
         // Motorbike repair shop (skilled job: ช่าง) where the boxing ring used to be
         Schooling.RepairShop(root, new Vector3(38f, 0f, 18f), 0f);
         StreetFurniture.LampPost(root, new Vector3(34.5f, 0f, 13.2f));

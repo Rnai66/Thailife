@@ -144,7 +144,7 @@ public class LookUI : MonoBehaviour
         }
         if (mode == Mode.Tailor)
         {
-            var names = new string[Look.Outfits.Length];
+            var names = new string[Look.Robe]; // the robe comes only from ordaining
             for (int i = 0; i < names.Length; i++) names[i] = Look.Outfits[i].Name;
             AddTextRow("outfit", "ชุด", names, ref y, Look.Outfits, 5, 150f, 17);
         }
