@@ -15,8 +15,8 @@ public static class AmbientPlaces
 
     private static readonly Rule[] Rules =
     {
-        new Rule { Prefix = "Temple_", Range = 12f, MinGap = 60f, MaxGap = 110f, Volume = 0.55f, Sounds = new[] { "chant", "temple_bell" } },
-        new Rule { Prefix = "CityTemple_", Range = 10f, MinGap = 60f, MaxGap = 110f, Volume = 0.55f, Sounds = new[] { "chant", "temple_bell" } },
+        new Rule { Prefix = "Temple_", Range = 12f, MinGap = 35f, MaxGap = 70f, Volume = 0.55f, Sounds = new[] { "wind_bells", "temple_bell", "wind_bells", "temple_gong" } },
+        new Rule { Prefix = "CityTemple_", Range = 10f, MinGap = 35f, MaxGap = 70f, Volume = 0.55f, Sounds = new[] { "wind_bells", "temple_bell", "wind_bells", "temple_gong" } },
         new Rule { Prefix = "Church_", Range = 8f, MinGap = 90f, MaxGap = 150f, Volume = 0.5f, Sounds = new[] { "church_bell" } },
         new Rule { Prefix = "KokNongNa_", Range = 6f, MinGap = 45f, MaxGap = 90f, Volume = 0.8f, Sounds = new[] { "buffalo", "frog" } },
         new Rule { Prefix = "CowFarm_", Range = 6f, MinGap = 35f, MaxGap = 70f, Volume = 0.8f, Sounds = new[] { "cow" } },

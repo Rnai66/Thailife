@@ -120,6 +120,7 @@ public class RemotePlayer : MonoBehaviour, IHittable
     private static TextMesh AddNameLabel(Transform parent, string username)
     {
         var label = new GameObject("NameLabel");
+        label.AddComponent<NoTranslate>(); // a player's name stays as they wrote it
         label.transform.SetParent(parent, false);
         label.transform.localPosition = new Vector3(0f, 1.4f, 0f);
 

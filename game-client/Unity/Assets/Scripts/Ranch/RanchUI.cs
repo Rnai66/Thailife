@@ -254,10 +254,10 @@ public class RanchUI : MonoBehaviour
         if (busy || ranch == null) return;
         if (action == null) // the sell button's first tap
         {
-            if (labels[index].text.StartsWith("ขายตัวนี้")) { sellArmed = selected; Render(); }
+            if ((labels[index].text.StartsWith("ขายตัวนี้") || labels[index].text.StartsWith("Sell this one"))) { sellArmed = selected; Render(); }
             return;
         }
-        bool selling = sellArmed >= 0 && labels[index].text.Contains("ยืนยันขาย");
+        bool selling = sellArmed >= 0 && (labels[index].text.Contains("ยืนยันขาย") || labels[index].text.Contains("confirm selling") || labels[index].text.Contains("Confirm sale"));
         sellArmed = -1;
         if (selling) selected = -1; // the sold cow leaves the herd
         busy = true;

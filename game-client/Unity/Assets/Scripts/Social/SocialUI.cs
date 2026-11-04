@@ -276,6 +276,7 @@ public class SocialUI : MonoBehaviour
                 line.mine ? UiKit.OkGreen : friend != null ? new Color(0.2f, 0.35f, 0.65f) : UiKit.Ink, TextAnchor.UpperLeft);
             label.supportRichText = false;
             label.resizeTextForBestFit = false;
+            label.gameObject.AddComponent<NoTranslate>(); // what players typed
             label.horizontalOverflow = HorizontalWrapMode.Wrap;
             float h = Mathf.Max(34f, label.preferredHeight + 6f);
             var rt = label.rectTransform;

@@ -13,6 +13,8 @@ public static class SynthVoices
         {
             case "chant": return Chant();
             case "temple_bell": return Bell(150f, new[] { 0f }, 5.5f, 0.9f);
+            case "temple_gong": return Gong(98f, new[] { 0f, 2.4f, 4.8f }, 8f, 0.85f);
+            case "wind_bells": return WindBells(5f, 0.5f);
             case "church_bell": return Bell(392f, new[] { 0f, 1.3f, 2.6f }, 5f, 0.6f);
             case "door_chime": return DoorChime();
             case "buffalo": return Moo(68f, 1.9f, 0.9f);
@@ -126,6 +128,64 @@ public static class SynthVoices
                     v += gain[p] * Mathf.Exp(-t * decay[p]) * (Mathf.Sin(2f * Mathf.PI * fp * t) + Mathf.Sin(2f * Mathf.PI * (fp + 0.8f) * t)) * 0.5f;
                 }
                 d[i] += v * Mathf.Min(1f, t * 300f);
+            }
+        }
+        Normalize(d, peak);
+        return d;
+    }
+
+    // ฆ้อง: a bossed bronze gong — a low hum with inharmonic partials that beat against each other
+    // and a slight pitch sag after the strike (struck three times, like calling the monks)
+    private static float[] Gong(float f, float[] strikes, float seconds, float peak)
+    {
+        var d = SynthSounds.Buffer(seconds);
+        float[] ratio = { 1f, 1.52f, 2.02f, 2.74f, 3.33f, 4.18f };
+        float[] gain = { 1f, 0.45f, 0.5f, 0.3f, 0.18f, 0.1f };
+        float[] decay = { 0.45f, 0.9f, 0.7f, 1.3f, 1.9f, 2.6f };
+        for (int s = 0; s < strikes.Length; s++)
+        {
+            int start = (int)(strikes[s] * Rate);
+            float loud = 1f - 0.15f * s;
+            for (int i = start; i < d.Length; i++)
+            {
+                float t = (float)(i - start) / Rate;
+                float sag = 1f + 0.012f * Mathf.Exp(-t * 3f); // a hair sharp right at the strike
+                float v = 0f;
+                for (int p = 0; p < ratio.Length; p++)
+                {
+                    float fp = f * ratio[p] * sag;
+                    v += gain[p] * Mathf.Exp(-t * decay[p]) * (Mathf.Sin(2f * Mathf.PI * fp * t) + 0.7f * Mathf.Sin(2f * Mathf.PI * (fp + 1.1f + p * 0.3f) * t));
+                }
+                float mallet = Mathf.Exp(-t * 40f) * Mathf.Sin(2f * Mathf.PI * 60f * t) * 0.6f; // the padded mallet's thump
+                d[i] += (v * 0.6f + mallet) * loud * Mathf.Min(1f, t * 200f);
+            }
+        }
+        Normalize(d, peak);
+        return d;
+    }
+
+    // กระดิ่งลม: small brass bells hanging from the temple eaves, tinkling as the breeze passes
+    private static float[] WindBells(float seconds, float peak)
+    {
+        var d = SynthSounds.Buffer(seconds);
+        var rng = new System.Random(7);
+        float[] tones = { 1568f, 1760f, 2093f, 2349f, 2637f };
+        int count = 9;
+        for (int n = 0; n < count; n++)
+        {
+            // a gust in the middle: the tinkles bunch up there
+            float at = (float)(0.15 + (seconds - 2.2) * (0.5 + 0.5 * System.Math.Sin((rng.NextDouble() - 0.5) * System.Math.PI)));
+            float f = tones[rng.Next(tones.Length)] * (float)(0.99 + rng.NextDouble() * 0.02);
+            float loud = (float)(0.4 + rng.NextDouble() * 0.6);
+            int start = (int)(at * Rate);
+            for (int i = start; i < d.Length; i++)
+            {
+                float t = (float)(i - start) / Rate;
+                if (t > 2f) break;
+                float v = Mathf.Sin(2f * Mathf.PI * f * t) * Mathf.Exp(-t * 2.2f)
+                        + 0.35f * Mathf.Sin(2f * Mathf.PI * f * 2.76f * t) * Mathf.Exp(-t * 5f)
+                        + 0.2f * Mathf.Sin(2f * Mathf.PI * f * 5.4f * t) * Mathf.Exp(-t * 9f);
+                d[i] += v * loud * Mathf.Min(1f, t * 800f);
             }
         }
         Normalize(d, peak);

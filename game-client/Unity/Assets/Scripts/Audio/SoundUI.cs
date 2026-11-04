@@ -13,6 +13,7 @@ public class SoundUI : MonoBehaviour
     private GameObject backdrop;
     private readonly List<Image> trackButtons = new List<Image>();
     private readonly List<Image> qualityButtons = new List<Image>();
+    private Image thaiButton, englishButton;
     private readonly List<Image> musicBar = new List<Image>(), sfxBar = new List<Image>();
     private Text musicValue, sfxValue;
 
@@ -37,7 +38,7 @@ public class SoundUI : MonoBehaviour
     private void Awake()
     {
         P = UiKit.Portrait;
-        var body = UiKit.PremiumWindow(transform, "SoundCanvas", UiKit.WindowSize(new Vector2(1200f, 980f), 1100f), 56, "icon:settings",
+        var body = UiKit.PremiumWindow(transform, "SoundCanvas", UiKit.WindowSize(new Vector2(1200f, 1060f), 1240f), 56, "icon:settings",
             out backdrop, out var title, out var subtitle, Close, out _);
         title.text = "ตั้งค่า";
         subtitle.text = "เพลงประจำสถานที่ · ความดังเสียง · คุณภาพภาพ";
@@ -74,7 +75,23 @@ public class SoundUI : MonoBehaviour
 
         UiKit.RoundButton(body, "บัญชี · รหัสกู้คืน", new Vector2(0f, P ? -390f : -375f), new Vector2(380f, 70f), UiKit.Gold, UiKit.GoldInk,
             () => { Close(); AccountUI.Show(); }, 26);
+
+        // Language (ภาษา): written in both, so it reads right whichever is on
+        float ly = P ? -480f : -440f;
+        var langLabel = UiKit.Label(body, 26, "ภาษา / Language", new Vector2(P ? -190f : -330f, ly), new Vector2(300f, 50f), UiKit.Ink, TextAnchor.MiddleLeft);
+        langLabel.fontStyle = FontStyle.Bold;
+        langLabel.gameObject.AddComponent<NoTranslate>();
+        thaiButton = LangButton(body, "ไทย", new Vector2(P ? 60f : 0f, ly), Lang.Thai);
+        englishButton = LangButton(body, "English", new Vector2(P ? 250f : 210f, ly), Lang.English);
         backdrop.SetActive(false);
+    }
+
+    private Image LangButton(RectTransform body, string label, Vector2 at, string lang)
+    {
+        var b = UiKit.RoundButton(body, label, at, new Vector2(180f, 64f), Color.white, UiKit.Ink, () => { Lang.Current = lang; Render(); }, 26);
+        b.gameObject.AddComponent<Outline>().effectColor = UiKit.CardBorder;
+        foreach (var t in b.GetComponentsInChildren<Text>()) t.gameObject.AddComponent<NoTranslate>();
+        return b.GetComponent<Image>();
     }
 
     // "- [bar] +" row; returns the percentage label
@@ -98,6 +115,8 @@ public class SoundUI : MonoBehaviour
             trackButtons[i].color = i - 1 == track ? UiKit.Gold : Color.white;
         for (int i = 0; i < qualityButtons.Count; i++)
             qualityButtons[i].color = i == GraphicsQuality.Level ? UiKit.Gold : Color.white;
+        thaiButton.color = Lang.IsEnglish ? Color.white : UiKit.Gold;
+        englishButton.color = Lang.IsEnglish ? UiKit.Gold : Color.white;
         Fill(musicBar, musicValue, GameAudio.MusicVolume);
         Fill(sfxBar, sfxValue, GameAudio.SfxVolume);
     }

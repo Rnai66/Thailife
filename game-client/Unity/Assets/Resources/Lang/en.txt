@@ -1,0 +1,2417 @@
+# Thai<TAB>English · {} = a hole (numbers, names) · \n = new line · built from the game texts
+ออโต้ · {}	Auto · {}
+เดินไป{}	Walking to {}
+นั่งรถไป{}	Riding to {}
+การกู้คืนจะเปลี่ยนเครื่องนี้ไปใช้บัญชีเดิม (ความคืบหน้าที่เล่นในเครื่องนี้จะไม่ถูกใช้อีก)	Restoring switches this device to your old account (progress played on this device won't be used anymore)
+การลบบัญชีจะลบเงิน ของ เลเวล และความคืบหน้าทั้งหมดอย่างถาวร กู้คืนไม่ได้	Deleting the account permanently removes all money, items, levels and progress. It cannot be undone
+กำลังกู้คืน…	Restoring…
+กำลังลบบัญชี…	Deleting account…
+กู้คืนบัญชี	Restore account
+กู้คืนไม่สำเร็จ	Restore failed
+กู้คืนไม่สำเร็จ ลองใหม่	Restore failed, try again
+จดรหัสนี้เก็บไว้ · รหัสเก่า (ถ้ามี) ใช้ไม่ได้แล้ว	Write this code down · the old code (if any) no longer works
+ต้องออนไลน์ก่อน	Go online first
+บ	A
+บัญชีผู้เล่น	Player account
+ยังไม่มีรหัส	No code yet
+ยืนยันกู้คืน?	Confirm restore?
+ยืนยันลบถาวร	Confirm permanent delete
+ย้ายมาจากเครื่องเก่า: ใส่รหัสกู้คืนของบัญชีเดิม	Moving from an old device: enter your old account's recovery code
+รหัสกู้คืนบัญชีของคุณ (จดเก็บไว้ อย่าบอกใคร)	Your account recovery code (write it down, don't share it)
+รหัสต้องมี 16 ตัว เช่น K7QM-2XPA-9RTD-WH3F	The code must have 16 characters, e.g. K7QM-2XPA-9RTD-WH3F
+ลบบัญชี	Delete account
+ลบบัญชีไม่สำเร็จ ลองใหม่	Couldn't delete the account, try again
+สร้างรหัสกู้คืน	Create recovery code
+สร้างรหัสใหม่	Create a new code
+สร้างรหัสไม่สำเร็จ ลองใหม่	Couldn't create the code, try again
+เปลี่ยนมือถือหรือลบแอป ก็ยังเล่นต่อได้ด้วยรหัสกู้คืน	Changed phones or deleted the app? Keep playing with your recovery code
+แน่ใจไหม?	Are you sure?
+โหลดรหัสไม่ได้	Couldn't load the code
+ไม่พบบัญชีของรหัสนี้ — ตรวจรหัสอีกครั้ง	No account found for this code — check the code again
+(อีก {} ม.)	({} min left)
+กำลัง{}… อีก {} วินาที	{}… {} s left
+กำลังเริ่ม…	Starting…
+กินข้าว	Eat
+ขายของ	Sell goods
+ซื้อของ	Shop
+ซ้อมมวย	Train boxing
+ดำนา	Plant rice
+ตกปลา	Fish
+ทำภารกิจ	Do quest
+ปิดออโต้แล้ว	Auto off
+ภารกิจวันนี้ครบแล้ว · ภารกิจใหม่ในอีก {}:{} นาที	Today's quests done · new quests in {}:{}
+ภารกิจวันนี้ครบแล้ว — รอภารกิจใหม่	Today's quests done — waiting for new quests
+รับรางวัล	Claim reward
+รับโบนัส	Claim bonus
+หยุดออโต้ — ควบคุมเอง	Auto stopped — manual control
+ออโต้ ·	Auto ·
+ออโต้: ทำภารกิจประจำวันให้เอง	Auto: does your daily quests for you
+ออโต้หยุด: กำลังนอนอยู่	Auto stopped: sleeping
+ออโต้หยุด: พลังงานไม่พอ — พักหรือกินข้าวก่อน	Auto stopped: not enough energy — rest or eat first
+เกี่ยวข้าว	Harvest rice
+เก็บไข่ขาย	Sell eggs
+เข้าเรียน	Attend class
+เดินไป{} · {}	Walking to {} · {}
+เล่นดนตรี	Play music
+ให้อาหารไก่	Feed chickens
+ไปขึ้นรถสองแถว เพื่อไป{}	Going to the songthaew to ride to {}
++{} พลังงาน	+{} energy
+{} บาท	{} baht
+กก.	kg
+กระเป๋า	Bag
+กระเป๋าว่างเปล่า	Your bag is empty
+กางเกง	Pants
+กางเกงสี	Pants color
+กำลังเปิดกระเป๋า…	Opening bag…
+กิน	Eat
+กิน{} อร่อย! พลังงาน +{}	Ate {}, delicious! Energy +{}
+ของกินกดกินได้ทันที · คันเบ็ด เครื่องดนตรี และชุด กดใช้ได้ที่นี่	Tap food to eat it · rods, instruments and outfits can be used here
+ของทุกอย่างที่คุณมี · แตะช่องเพื่อดูและใช้	Everything you own · tap a slot to view and use
+คันที่เร็วที่สุดของคุณ	Your fastest car
+คันที่ใช้ตกปลาอยู่ · เปลี่ยนคันได้ในหมวดอุปกรณ์	Rod in use · change rods in Equipment
+คันเบ็ด	Fishing rods
+ชิ้นที่ใช้เล่นดนตรีอยู่ · เปลี่ยนได้ในหมวดอุปกรณ์	Instrument in use · change it in Equipment
+ชุด	Outfit
+ชุดที่ซื้อแล้วสวมใส่ได้ฟรีจากหมวดเสื้อผ้า · ซื้อชุดใหม่ได้ที่ร้านเสื้อผ้า	Outfits you bought can be worn free from Clothes · buy new outfits at the clothing shop
+ช่องเก็บของ	Storage
+ดูในกระเป๋า	View in bag
+ตัวละครของคุณ	Your character
+ทรงผม	Hairstyle
+ทรัพย์สิน	Assets
+ทำไม่ได้ ลองใหม่	Can't do that, try again
+พลังงาน {}/{}	Energy {}/{}
+พลังงาน —	Energy —
+พาหนะ	Vehicles
+ยังไม่มีของชิ้นนี้	You don't have this yet
+ยังไม่มีรถ · ซื้อได้ที่ธนาคารในเมือง	No car yet · buy one at the bank in the city
+สวมใส่	Wear
+ออฟไลน์	Offline
+อิ่มแล้ว พลังงานเต็ม	Full, energy maxed
+อุปกรณ์และเฟอร์นิเจอร์	Equipment & furniture
+เกิดข้อผิดพลาด ลองใหม่	Something went wrong, try again
+เครื่องดนตรี	Instruments
+เปลี่ยนกลับเป็นเสื้อผ้าลำลองแล้ว	Changed back to casual clothes
+เปลี่ยนทรงผมได้ที่ร้านตัดผมในเมือง	Change hairstyle at the barber in the city
+เปลี่ยนสีกางเกงได้ที่ร้านเสื้อผ้าในเมือง	Change pants color at the clothing shop in the city
+เปลี่ยนสีเสื้อได้ที่ร้านเสื้อผ้าในเมือง	Change shirt color at the clothing shop in the city
+เลือกชุด	Choose outfit
+เสื้อ	Shirt
+เสื้อผ้า	Clothes
+เสื้อสี	Shirt color
+แตะช่องเพื่อดูรายละเอียด	Tap a slot for details
+ใช้	Use
+ใช้{}แล้ว	Using {}
+ใช้อยู่	In use
+ใส่{}แล้ว	Wearing {}
+ใส่อยู่	Wearing
+ไม่ได้ใส่ชุด	No outfit on
+ขายตั๋วเครื่องบิน	Air tickets
+ขาออก · เที่ยวบินในประเทศ\nเชียงใหม่  ขอนแก่น  อุบลฯ  บุรีรัมย์\nหาดใหญ่  นครศรีฯ  อู่ตะเภา (พัทยา)	Departures · domestic flights\nChiang Mai  Khon Kaen  Ubon  Buriram\nHat Yai  Nakhon Si Thammarat  U-Tapao (Pattaya)
+ท่าอากาศยานสุวรรณภูมิ	Suvarnabhumi Airport
+ท่าเตียน · เรือหางยาวข้ามฟากไปวัดอรุณ 10 บาท	Tha Tien · longtail ferry to Wat Arun 10 baht
+ท่าเรือวัดอรุณ · เรือหางยาวข้ามฟาก 10 บาท	Wat Arun pier · longtail ferry 10 baht
+นั่งเรือหางยาว → ท่าเตียน	Longtail boat → Tha Tien
+นั่งเรือหางยาว → วัดอรุณ	Longtail boat → Wat Arun
+วัดพระศรีรัตนศาสดาราม · วัดพระแก้ว	Wat Phra Si Rattana Satsadaram · Temple of the Emerald Buddha
+วัดอรุณราชวราราม	Wat Arun Ratchawararam
+ศาลพระพรหม	Erawan Shrine
+สนามบินสุวรรณภูมิ · เที่ยวบินในประเทศ	Suvarnabhumi Airport · domestic flights
+เช็คอิน A · ในประเทศ	Check-in A · domestic
+เช็คอิน B · ในประเทศ	Check-in B · domestic
+เรือสำราญเจ้าพระยา · ดินเนอร์ล่องเรือ	Chao Phraya cruise · dinner cruise
+ไทยไลฟ์แอร์	Thai Life Air
+ธนาคาร	Bank
+ฝาก-ถอน · กู้เงิน · ซื้อที่ดิน/รถ · ธุรกิจ	Deposit-Withdraw · Loans · Buy land/cars · Business
+{}\nดอกเบี้ย {}% ต่อวันในเกม	{}\nInterest {}% per game day
+{}\nต้อง Lv {}+	{}\nNeeds Lv {}+
+{} ฿	{} ฿
+กำไร/วัน ~{} ฿ · รอรับ {} ฿	Profit/day ~{} ฿ · ready {} ฿
+กู้เงิน	Borrow
+กู้ได้เมื่อ Lv {}+	Loans from Lv {}+
+จำนวนเงิน	Amount
+จ่ายขาดทุน {} ฿	Pay loss {} ฿
+ชำระหนี้	Repay
+ซื้อ {} ฿	Buy {} ฿
+ดอกเบี้ย {}% ต่อวันในเกม (ทบต้น)\nค่าเช่าที่ดินของคุณเข้าบัญชีนี้อัตโนมัติ	Interest {}% per game day (compound)\nRent from your land is paid into this account automatically
+ต้องมีเงินรวมอย่างน้อย 1,000,000 บาท	Needs at least 1,000,000 baht in total
+ถอน	Withdraw
+ทั้งหมด	All
+ทำรายการไม่สำเร็จ	Transaction failed
+ที่ดิน	Land
+ที่ดิน / รถ	Land / Cars
+ธุรกิจ	Business
+บัญชี / สินเชื่อ	Account / Loans
+บัญชีออมทรัพย์	Savings account
+ปิดกิจการ	Close business
+ฝาก	Deposit
+พนักงาน {} คน	{} staff
+มีธุรกิจครบ 3 กิจการแล้ว	You already run 3 businesses
+มีอยู่แล้ว	Already owned
+ยังไม่มีกำไรให้รับ	No profit to collect yet
+ยังไม่มีธุรกิจ — เลือกประเภทและอาคารด้านล่าง แล้วกดเปิดกิจการ	No business yet — pick a type and a building below, then tap Open business
+ยานพาหนะ	Vehicles
+ระดับผู้เล่น Lv {} · เงินสด {} ฿ · เงินฝาก {} ฿ · หนี้ {} ฿	Player Lv {} · Cash {} ฿ · Savings {} ฿ · Debt {} ฿
+รับกำไรก่อนปิดกิจการ	Collect profit before closing
+รับกำไรทั้งหมด {} ฿	Collect all profit {} ฿
+ลงทุน {} ฿ · ค่าเช่า {} ฿/วัน · ค่าจ้าง {} ฿/คน/วัน · รายได้เต็มที่ ~{} ฿/วัน	Invest {} ฿ · rent {} ฿/day · wage {} ฿/person/day · full income ~{} ฿/day
+วงเงินกู้ {} ฿ (ตามเลเวลและทรัพย์สิน)	Credit limit {} ฿ (by level and assets)
+สินเชื่อ	Loans
+อาคารนี้เช่าไปแล้ว	This building is already rented
+฿	฿
+เกินวงเงินกู้	Over the credit limit
+เงินฝากไม่พอ	Not enough savings
+เงินสดไม่พอ	Not enough cash
+เช่าอยู่แล้ว	Already renting
+เปิดกิจการ	Open business
+เปิดกิจการใหม่ (เช่าอาคาร)	Open a new business (rent a building)
+เปิดธุรกิจได้เมื่อ Lv {}+ และมีเงินรวม {} ฿ ขึ้นไป · กิจการละไม่เกิน {} พนักงาน · สูงสุด 3 กิจการ	Open a business from Lv {}+ with {} ฿ or more in total · up to {} staff each · at most 3 businesses
+เป็นเจ้าของแล้ว	Owned
+เลเวลยังไม่ถึง	Level too low
+ครบแถวเร็ว ได้รางวัลใหญ่ · แจ็กพอต 500 บาท	Finish a line fast for a big prize · jackpot 500 baht
+ซื้อการ์ด · {} ฿	Buy card · {} ฿
+ซื้อการ์ดแล้วรอฟังพิธีกรเรียกเลข	Buy a card, then listen for the caller's numbers
+บิงโก!	Bingo!
+บิงโก… ช้าไป	Bingo… too late
+พิธีกรเรียกเลข	Caller calls numbers
+ฟรี	Free
+ยังไม่ครบแถว	Line not complete
+ลูกที่ {} / {}	Ball {} / {}
+(เรียนช่างที่โรงเรียน)	(learn mechanics at school)
++{} ฿ (ทิป {})	+{} ฿ (tip {})
+ขับเรือหางยาวรอบอ่าว · ใช้พลังงาน 10 · ค่าเรือ 180 บาท + ทิป\nต้องมี เลเวล 5 · ช่าง Lv 2	Drive a longtail around the bay · 10 energy · fare 180 baht + tips\nNeeds level 5 · Mechanic Lv 2
+พลังงานไม่พอ — พักก่อนแล้วค่อยออกเรือ	Not enough energy — rest before going out
+พานักท่องเที่ยวนั่งเรือ	Take tourists on a boat ride
+ส่งนักท่องเที่ยวไม่สำเร็จ ลองใหม่	Couldn't drop off the tourists, try again
+ออกเรือไม่ได้ ลองใหม่	Can't set out, try again
+XP ตามจำนวนครั้งที่เป๊ะ	XP for each perfect
+{}\nค่าตัว/รางวัล {} บาท · XP +{}	{}\nFee/prize {} baht · XP +{}
+· พลังงาน {}	· Energy {}
+พลังงาน {}	Energy {}
+· สมาชิกค่าย	· Camp member
+สมาชิกค่าย	Camp member
+กำลังนอนอยู่	Sleeping
+ขึ้นชก	Fight
+งานนี้ชกไปแล้ว รองานหน้า	Already fought at this event, wait for the next
+ชกครั้งนี้ไปแล้ว	Already fought this one
+ชนะ {}฿ · แพ้ {}฿ · XP {}	Win {}฿ · Lose {}฿ · XP {}
+ชนะคะแนน!	Win on points!
+ชนะน็อค!	Win by KO!
+ซ้อมเป้าล่อ: เป๊ะ {} ครั้ง	Pad training: {} perfect
+ตกลง	OK
+ต้อง Lv {}+	Needs Lv {}+
+ต้อง Lv และสมาชิกค่าย	Needs Lv and camp membership
+ต้องสมัครสมาชิกค่ายก่อน	Join the camp first
+นักมวย Lv {} · ชนะ {} แพ้ {} น็อค {}	Boxer Lv {} · Won {} Lost {} KO {}
+บาดเจ็บ! ไปรักษาที่ รพ.สต. (ตำบล) หรือโรงพยาบาล (เมือง)	Injured! Get treated at the health center (tambon) or hospital (city)
+บาดเจ็บอยู่ — ไปรักษาที่ รพ.สต. หรือโรงพยาบาลก่อน	Injured — get treated at the health center or hospital first
+ผ	R
+ผลการชก	Fight result
+พลังงานไม่พอ — กินอะไรหน่อยหรือนอนพัก	Not enough energy — eat something or sleep
+ยังไม่ถึงวันจัดงาน	Not event day yet
+ยังไม่เปิด	Not open yet
+ล็อค (Lv {})	Locked (Lv {})
+สถิติ: ชนะ {} · แพ้ {} · ชนะน็อค {}	Record: won {} · lost {} · KO wins {}
+เป้า	Target
+เริ่มซ้อม	Start training
+เริ่มไม่สำเร็จ	Couldn't start
+เลเวลอัป! นักมวย Lv {}	Level up! Boxer Lv {}
+เวทีมวย	Boxing ring
+แพ้	Lose
+ได้ตำแหน่ง "{}"!	Earned the title "{}"!
+ฉายาใหม่! {}	New nickname! {}
+ตำนานมวยไทย	Muay Thai legend
+นักมวยค่าย	Camp boxer
+นักมวยดาวรุ่ง	Rising star
+นักมวยหน้าใหม่	Rookie boxer
+บาดเจ็บ! ไปรักษาที่ รพ.สต. หรือโรงพยาบาล	Injured! Get treated at the health center or hospital
+ยอดมวย	Top boxer
+ยอดแชมป์	Grand champion
+เด็กบ้านนา	Farm kid
+เหนื่อยแล้ว! กินอะไรหน่อยหรือนอนพัก	Tired! Eat something or sleep
+แชมป์	Champion
+โบกมือ	Wave
+ไหว้	Wai
+ขาวล้วน	All white
+หางขาว	White tail
+ATM 24 ชม.	ATM 24 hrs
+ที่ว่าการอำเภอ	District Office
+บัตรคิว	Queue ticket
+มัสยิด	Mosque
+ยินดีต้อนรับ	Welcome
+วัด	Temple
+สถานีตำรวจ	Police Station
+องค์การบริหารส่วนจังหวัด (อบจ.)	Provincial Administrative Organization (PAO)
+อบจ	PAO
+โบสถ์คริสต์	Church
+โรงพยาบาล	Hospital
+โรงรับจำนำ	Pawn shop
+โรงแรม	Hotel
+สกายพาร์ค	Sky Park
+8  เมือง - หาดทราย	8  City - Beach
+EV 8  สถานีรถไฟฟ้า	EV 8  Skytrain station
+ป้ายรถทัวร์ บขส. · ไปต่างจังหวัด	Coach stop · to other provinces
+ป้ายรถเมล์\nสาย 8	Bus stop\nLine 8
+ป้ายรถเมล์ · รถทัวร์ บขส.	Bus stop · intercity coach
+↑ ตลาดสด · ชายหาด\n← หอนาฬิกา · ย่านผับ	↑ Fresh market · Beach\n← Clock tower · Pub street
+↑ วัด · ค่ายมวย · ลานวัด\nสถานีรถไฟฟ้า ↑	↑ Temple · Boxing camp · Temple grounds\nSkytrain station ↑
+1,000 ฿	1,000 ฿
+250 ฿	250 ฿
+500 ฿	500 ฿
+{} คะแนน	{} points
+งานวัดตามประเพณี · สงกรานต์ ออกพรรษา กฐิน ลอยกระทง ฯลฯ	Traditional temple fairs · Songkran, End of Lent, Kathin, Loy Krathong, etc.
+งานวัดนี้ส่งประกวดไปแล้ว	Already entered at this fair
+งานวัดนี้ส่งประกวดไปแล้ว — รองานวัดครั้งหน้า	Already entered at this fair — wait for the next one
+งานวัดยังไม่เปิด	Temple fair not open
+งานวัดเปิดอยู่! เหลือเวลาอีก {}	Temple fair is on! {} left
+ตัวแทนของคุณ	Your entry
+ต้องออนไลน์ก่อนถึงจะประกวดได้	Go online to enter the contest
+ที่ 1	1st
+ที่ 2	2nd
+ที่ 3	3rd
+ที่ {}! +{} ฿	Place {}! +{} ฿
+ประกวดไก่สวย	Chicken beauty contest
+ผลการประกวด	Contest results
+พลังงานไม่พอ — กินอะไรหน่อย หรือไปนอนพัก	Not enough energy — eat something or go sleep
+ยังไม่ถึงงานวัด — งานครั้งถัดไปในอีก {}	No temple fair yet — next one in {}
+ยังไม่มีไก่โตเต็มวัย	No grown chickens yet
+ยินดีด้วย! ได้ที่ {} รับรางวัล {} บาท	Congratulations! Place {}, prize {} baht
+สี{} · ความสวย {}/100	Color {} · beauty {}/100
+ส่งประกวดไม่สำเร็จ	Couldn't enter
+ส่งไก่เข้าประกวด (พลังงาน 5)	Enter a chicken (5 energy)
+ส่งไก่เข้าประกวดแล้ว\nผลจะแสดงที่นี่	Chicken entered\nResults will show here
+เคล็ดลับ: ผสมพันธุ์ไก่ให้ลูกสวยกว่าพ่อแม่ แล้วส่งตัวที่สวยที่สุด	Tip: breed chickens prettier than their parents, then enter the prettiest
+เลี้ยงไก่ที่เล้าข้างบ้านก่อน	Raise chickens in the coop beside your house first
+ได้ที่ {} — ผสมพันธุ์ให้ไก่สวยขึ้นแล้วมาใหม่งานหน้า	Place {} — breed prettier chickens and come back next fair
+{} ชม. {} นาที	{} h {} min
+ตัวผู้	Rooster
+ตัวเมีย	Hen
+ทองแดงหางดำ	Copper black-tail
+ประดู่หางดำ	Pradu black-tail
+เขียวหางดำ	Green black-tail
+เหลืองหางขาว	Yellow white-tail
++{} ฿	+{} ฿
+{} ฟอง	{} eggs
+· กำลังฟัก {}	· hatching {}
+กำลังฟัก {}	hatching {}
+· แม่ไก่ออกไข่อยู่	· hen is laying
+แม่ไก่ออกไข่อยู่	hen is laying
+· ให้อาหารแม่ไก่ถึงจะออกไข่	· feed the hens so they lay
+ให้อาหารแม่ไก่ถึงจะออกไข่	feed the hens so they lay
+ขาย {}฿	Sell {}฿
+ขาย{} ได้ {} บาท	Sold {} for {} baht
+ขายไข่ {} ฟอง ได้ {} บาท	Sold {} eggs for {} baht
+ขายไข่ทั้งหมด	Sell all eggs
+ความสวย {}	Beauty {}
+ต้องออนไลน์ก่อนถึงจะดูเล้าได้	Go online to see the coop
+ทำไม่ได้ตอนนี้	Can't do that now
+พลังงานไม่พอ — กินอะไรหน่อย หรือไปนอนพักที่ชานบ้าน	Not enough energy — eat something or sleep on the porch
+ฟองละ {}฿ (ตามความสวยพ่อแม่){}	{}฿ each (by the parents' beauty){}
+ฟองละ {}฿ · ขายรวมไข่มีเชื้อได้ {}฿	{}฿ each · fertile eggs sell for {}฿ in total
+ฟักไข่ 1 ฟอง	Hatch 1 egg
+มีอาหารไก่ {} ถุง	{} bags of chicken feed
+ยังไม่มีไก่ — ซื้อแม่ไก่ พ่อไก่ และอาหารไก่ได้ที่ร้านค้าชุมชน (แท็บเลี้ยงไก่)	No chickens yet — buy hens, roosters and feed at the community store (Chickens tab)
+ลูกไก่ · โตใน {}	Chick · grown in {}
+สี{}	Color {}
+หิว!	Hungry!
+อาหารไก่	Chicken feed
+อิ่มอีก {}	Fed for {}
+เริ่มฟักไข่แล้ว ลูกไก่จะได้ความสวยจากพ่อแม่	Egg is hatching; the chick gets its beauty from the parents
+เล้าเต็มแล้ว (8 ตัว)	Coop is full (8 birds)
+เล้าไก่	Chicken coop
+ให้อาหาร	Feed
+ให้อาหารแล้ว แม่ไก่จะออกไข่เรื่อยๆ	Fed — the hens will keep laying
+ไก่ {}/{} ตัว · หมู่บ้าน	Chickens {}/{} · village
+ไก่ในเล้า	Chickens in the coop
+ไข่มีเชื้อ (ไข่แม่พันธุ์)	Fertile eggs (breeding eggs)
+ไข่ไก่	Eggs
+ไม่มีอาหารไก่ — ซื้อที่ร้านค้าชุมชน	No chicken feed — buy some at the community store
+ดอก	Dart
+ปาโป่ง	Balloon darts
+ป๊อป!	Pop!
+พลาด!	Miss!
+แตะลูกโป่งเพื่อปา ลูกดอกบินช้านิดหน่อย เล็งดักหน้าไว้	Tap a balloon to throw; darts fly a little slow, aim ahead
+กำลังย้าย: {} — เดินไปตรงที่ต้องการแล้วกด วางตรงนี้	Moving: {} — walk to where you want it and tap Place here
+ของในบ้าน	Home items
+ยกเลิก	Cancel
+ยังไม่มีของในห้อง — กด เพิ่มของ	Nothing in the room yet — tap Add item
+ยังไม่มีเฟอร์นิเจอร์\nซื้อได้ที่ร้านค้าชุมชน แท็บ แต่งบ้าน	No furniture yet\nBuy some at the community store, Home tab
+ย้าย	Move
+วาง	Place
+วาง{}แล้ว	Placed {}
+วางตรงนี้	Place here
+วางนอกห้องไม่ได้	Can't place outside the room
+หมุน	Rotate
+ห้องเต็มแล้ว (30 ชิ้น)	Room is full (30 items)
+เก็บ	Store
+เก็บ{}แล้ว	Stored {}
+เก็บไว้ {} · ในห้อง {}	Stored {} · in room {}
+เดินไปใกล้ของที่ต้องการจัด	Walk near the item you want to arrange
+เพิ่มของ	Add item
+เลือกของที่จะวาง · ซื้อเพิ่มที่ร้านค้าชุมชน แท็บแต่งบ้าน	Pick an item to place · buy more at the community store, Home tab
+เลือกอยู่: {} (ชิ้นที่ใกล้คุณที่สุด)	Selected: {} (the one nearest you)
+เสร็จ	Done
+ไม่มีชิ้นนี้เหลือในที่เก็บ	None of this left in storage
+{} ของคุณ · ขับเล่นรอบหมู่บ้าน	Your {} · drive around the village
+ขับรถ	Drive
+ขี่รถ	Ride
+ลงจากรถ	Get out
+กำลังทำงานอื่นอยู่	Busy with another job
+กำลังเรียนอยู่	In class
+ยังไม่ครบเวลา	Not time yet
+วันนี้ทำงานนี้ครบแล้ว — พรุ่งนี้มาใหม่	Done with this job today — come back tomorrow
+เงินไม่พอ	Not enough money
+คนใช้สิทธิ์เยอะ ลองใหม่อีกครั้ง	Lots of people using it, try again
+ต้องชนะเลือกตั้งก่อนจึงรับเงินเดือนได้	Win an election first to draw a salary
+ต้องลงสมัครที่ อบต. ก่อนจึงหาเสียงได้	Register at the TAO first to campaign
+ทำรายการไม่สำเร็จ ลองใหม่	Transaction failed, try again
+ปิดรับสมัครแล้ว รอเลือกตั้งครั้งหน้า	Registration closed, wait for the next election
+พลังงานไม่พอ — พักก่อน	Not enough energy — rest first
+ยังไม่ถึงวันเลือกตั้ง	Not election day yet
+ลงคะแนนตำแหน่งนี้ไปแล้ว	Already voted for this seat
+ลงสมัครไปแล้วในการเลือกตั้งครั้งนี้	Already registered in this election
+วันนี้รับเงินเดือนแล้ว	Salary already collected today
+วันนี้หาเสียงครบ 3 ครั้งแล้ว	Already campaigned 3 times today
+เลเวลยังไม่ถึงเกณฑ์ลงสมัคร	Level too low to run
+ลงสมัคร ส.อบต. · นายก อบต. · รับเงินเดือน	Run for TAO council · TAO chief · collect salary
+สมัครรับเลือกตั้ง	Run for election
+หาเสียงให้ตัวเอง · ลงคะแนนเลือก ส.อบต. และนายก อบต.	Campaign for yourself · vote for TAO council and TAO chief
+เลือกตั้ง · หาเสียง	Election · campaign
++{} เสียง	+{} votes
+{}\nต้องเลเวล {}	{}\nNeeds level {}
+{} (คุณ)	{} (you)
+{} · ผู้เล่น	{} · player
+{} ที่นั่ง · เงินเดือน {} ฿/วัน · สมัคร Lv {} ค่าสมัคร {} ฿	{} seats · salary {} ฿/day · run Lv {} fee {} ฿
+{} เสียง	{} votes
+{}ยังไม่ได้ลงสมัครครั้งนี้	{}not running this time
+{}ลงสมัคร {} อยู่	{}running for {}
+· ดำรงตำแหน่ง {}	· holding office as {}
+ดำรงตำแหน่ง {}	holding office as {}
+กำลังโหลด…	Loading…
+ผลครั้งก่อน —	Last result —
+ยังไม่มีผลเลือกตั้งครั้งก่อน · ค่าสมัครไม่คืน · ผู้ชนะดำรงตำแหน่ง 4 ปี รับเงินเดือนทุกวัน	No previous election results · fees aren't refunded · winners serve 4 years and get paid daily
+รับเงินเดือน\n(ต้องชนะเลือกตั้ง)	Collect salary\n(must win an election)
+รับเงินเดือน\n{} ฿	Collect salary\n{} ฿
+ลงสมัคร {}\nแล้ว ✓	Registered for {}\n✓
+ลงสมัคร ส.อบต. หรือ นายก อบต. · ชนะแล้วรับเงินเดือนทุกวัน	Run for TAO council or TAO chief · winners get paid every day
+วันเลือกตั้ง! กด "เลือก" ข้างชื่อผู้สมัครได้ตำแหน่งละ 1 เสียง (+10 คะแนน)	Election day! Tap "Vote" beside a candidate, 1 vote per seat (+10 points)
+วาระที่ {} · วันลงคะแนน! · ปิดหีบในอีก {}	Term {} · voting day! · polls close in {}
+วาระที่ {} ปีที่ {}/{} · รับสมัครและหาเสียง · เปิดหีบในอีก {}	Term {} year {}/{} · registration and campaigning · polls open in {}
+สมัคร {}\n{} ฿	Run for {}\n{} ฿
+สมัครรับเลือกตั้ง · อบต.	Run for election · TAO
+หาเสียง {} ฿ · พลังงาน {} · เหลือวันนี้ {} ครั้ง	Campaign {} ฿ · energy {} · {} left today
+หาเสียงให้ตัวเอง แล้วมาลงคะแนนในวันเลือกตั้ง	Campaign for yourself, then come vote on election day
+เลือก	Vote
+เลือกตั้ง · ศาลากลางบ้าน	Election · village hall
+เลือกตั้งทุก 4 ปี ลงคะแนนได้ 7 วันสุดท้ายของวาระ · หาเสียงได้วันละ 3 ครั้ง ยิ่งเลเวลสูงยิ่งได้เสียงมาก	Elections every 4 years; vote in the last 7 days of a term · campaign 3 times a day, higher levels win more votes
+เลือกแล้ว ✓	Voted ✓
+เลเวล {} · นักการเมือง Lv {}	Level {} · Politician Lv {}
+และผู้สมัครอีก {} คน	and {} more candidates
+ข้อความสั้น	Quick phrases
+ท	G
+ทักทาย	Greet
+ผู้เล่นที่อยู่ใกล้ๆ จะเห็นท่าทางและข้อความของคุณ	Nearby players see your gestures and messages
+ไหว้ สวัสดี	Wai, hello
+สแกนจ่าย	Scan to pay
+เมนูวันนี้	Today's menu
+{} นาที	{} min
+กำลังจัด! เหลือ {}	On now! {} left
+งานประเพณี	Traditional festivals
+งานวัด · งานประจำเดือน · คอนเสิร์ตระดับประเทศ	Temple fairs · monthly events · national concerts
+ต้องออนไลน์ก่อนจึงจะเห็นปฏิทิน	Go online to see the calendar
+ปฏิทินงานและอีเวนต์	Events calendar
+ระดับประเทศ	National
+อีก {}	In {}
+เวลาเป็นเวลาจริง (1 วันในเกม = 36 นาที)\nงานประเพณีจัดทั้งที่วัดในหมู่บ้านและในเมือง/ตำบล	Times are real time (1 game day = 36 minutes)\nFestivals are held at the village temple and in the city/tambon
+เวลาเป็นเวลาจริง (1 วันในเกม = 36 นาที) · งานประเพณีจัดทั้งที่วัดในหมู่บ้านและในเมือง/ตำบล	Times are real time (1 game day = 36 minutes) · festivals are held at the village temple and in the city/tambon
+ไม่ถึงนาที	Under a minute
+หมดแรง! กินอะไรหน่อยหรือนอนพัก	Exhausted! Eat something or sleep
+{} ระดับ {} · ปราบได้ค่าครู {} บาท\nเริ่มแล้วใช้พลังงานทันที แม้ปราบไม่สำเร็จ	{} level {} · banishing pays {} baht\nEnergy is used as soon as you start, even if you fail
+กลับ	Back
+ปราบสำเร็จ!\n+{} บาท · หมอผี XP +{}	Banished!\n+{} baht · Exorcist XP +{}
+ผี	Ghost
+ผีหนีไปได้… ลองใหม่คืนหน้า	The ghost got away… try again tomorrow night
+สะกดได้ {}/{} ยันต์	Sealed {}/{} sigils
+เชื่อมต่อไม่ได้	Can't connect
+เชื่อมต่อไม่ได้ ลองใหม่	Can't connect, try again
+เริ่มท่องคาถา	Start chanting
+แตะยันต์ที่ลุกเป็นไฟให้ทันก่อนดับ	Tap the burning sigils before they go out
+โอม… นะโมพุทธายะ	Om… Namo Buddhaya
+คูปองไม่พอ ซื้อเพิ่มได้ที่ซุ้มขายบัตร	Not enough coupons, buy more at the ticket booth
+ต้องซื้อบัตรผ่านประตูก่อน ที่ซุ้มขายบัตรหน้างาน	Buy an entry ticket first at the ticket booth by the entrance
+ทำรายการไม่ได้ตอนนี้	Can't do that right now
+มีของชิ้นนี้แล้ว	You already have this
+มีบัตรผ่านประตูงานนี้แล้ว	You already have an entry ticket for this fair
+มีเฉพาะงานใหญ่ในเมือง	Only at big events in the city
+ยังไม่มีงานตอนนี้	No event right now
+รอบนี้หมดเวลาแล้ว	This round is over
+เชื่อมต่อเซิร์ฟเวอร์ไม่ได้	Can't connect to the server
+แต้มยังไม่พอ	Not enough points
+<color=#3B6D11>มีบัตรผ่านประตู ✓</color>	<color=#3B6D11>Entry ticket ✓</color>
+<color=#993C1D>ยังไม่มีบัตรผ่านประตู</color>	<color=#993C1D>No entry ticket yet</color>
+{}   ·   คูปอง <color=#E05A3C><b>{}</b></color>   ·   แต้ม <color=#2F7DC4><b>{}</b></color>	{}   ·   Coupons <color=#E05A3C><b>{}</b></color>   ·   Points <color=#2F7DC4><b>{}</b></color>
+กำลังโหลด...	Loading...
+ไม่มีงานตอนนี้	No event right now
+แตะเพื่อปิด	Tap to close
+{} {} ถุง	{} {} bags
+{} · {} · {} · รดน้ำแล้ว	{} · {} · {} · watered
+{} · {} · {} · รดน้ำแล้วได้ข้าวมากขึ้น	{} · {} · {} · watering gives more rice
+{} · {} สุกแล้ว! · ยุ้งข้าว {}/{} กก.	{} · {} is ripe! · Barn {}/{} kg
+{} · ซื้อพันธุ์ข้าวที่ร้านค้าชุมชนก่อน ({})	{} · buy rice seed at the community store first ({})
+{} · พันธุ์ข้าวที่มี: {}	{} · rice seed you have: {}
+{} · ไถดินเตรียมดำนา	{} · plow the soil for planting
+กำลังโต	Growing
+ข้าวสุกในอีก {}	Rice ripe in {}
+ดำนา\n{}	Plant rice\n{}
+ดำนาแล้ว	Planted
+ต้องออนไลน์ก่อนถึงจะทำนาได้	Go online to farm rice
+ทำนา	Rice farming
+ที่นาขาย	Paddy for sale
+ที่นาติดคลองแปลงนี้ยังไม่ใช่ของคุณ · ซื้อ "ที่นาติดคลอง 5 ไร่" ได้ที่ธนาคารในเมือง	This canal-side paddy isn't yours yet · buy "Canal paddy 5 rai" at the bank in the city
+พลังงานไม่พอ — ไปนอนพักที่ชานบ้านก่อน	Not enough energy — sleep on the porch first
+ยุ้งข้าวเต็ม — ขายข้าวที่ร้านค้าชุมชน หรือซื้อการขยายยุ้ง	Barn full — sell rice at the community store or buy a barn expansion
+รดน้ำ\n(พลังงาน 5)	Water\n(5 energy)
+รดน้ำแล้ว	Watered
+เกี่ยวข้าว\n(พลังงาน 10)	Harvest\n(10 energy)
+แปลงนา {} · พลังงาน {}	Paddy {} · Energy {}
+ได้{} {} กก. เข้ายุ้งแล้ว!	Got {} {} kg into the barn!
+ไถนา\n(พลังงาน 10)	Plow\n(10 energy)
+ไถแล้ว	Plowed
+ไม่มี\nพันธุ์ข้าว	No\nrice seed
+ไม่มีพันธุ์ข้าว — ซื้อที่ร้านค้าชุมชน	No rice seed — buy some at the community store
+{} · ค่าเรือ {} บาท	{} · fare {} baht
+ต้องออนไลน์ก่อนลงเรือ	Go online before boarding
+นั่งเรือหางยาวข้ามฟาก	Longtail ferry
+ลงเรือไม่สำเร็จ ลองใหม่	Couldn't board, try again
+เงินไม่พอค่าเรือ 10 บาท	Not enough money for the 10 baht fare
+(+{} พลังงาน)	(+{} energy)
+{} · 1 คูปอง	{} · 1 coupon
+{} · {} คูปอง	{} · {} coupons
+{} · {} บาท	{} · {} baht
+{} · ดูฟรี	{} · free to watch
+{}: สนุกมาก! (ใช้ {} คูปอง · +{} พลังงาน)	{}: so much fun! ({} coupons used · +{} energy)
+ขึ้นเล่น	Ride
+ซื้อบัตร	Buy ticket
+ซุ้มขายบัตร · บัตรผ่านประตูและคูปอง	Ticket booth · entry tickets and coupons
+ซุ้มนี้ปิดอยู่	This stall is closed
+ซุ้มแลกรางวัล · เอาแต้มมาแลกของ	Prize stall · trade points for prizes
+ดูรอบนี้ไปแล้ว รองานหน้า	Already watched this show, come to the next fair
+ดูหมอลำ	Watch mor lam
+นั่งดู	Watch
+รอดออกมาได้!	You made it out!
+สอยดาว	Star-pick lottery
+เข้าชม	Enter
+เข้าบ้านผีสิง	Enter the haunted house
+เงินไม่พอ ({} บาท)	Not enough money ({} baht)
+เล่น	Play
+เล่นไม่ได้ตอนนี้	Can't play now
+แลกรางวัล	Redeem prizes
+งานถัดไป\n{}	Next event\n{}
+ลานจัดงาน	Event grounds
+ก  ข  ค  ง  จ  ฉ\nช  ซ  ญ  ด  ต  ถ\nท  น  บ  ป  ผ	A  B  C  D  E  F\nG  H  I  J  K  L\nM  N  O  P  Q
+ขอให้ได้ตู้เย็นที!|ได้มาม่าอีกแล้ว 555|สอยอีกใบ!|ใบนี้แหละ ใบนี้!|ได้กะละมังไปล้างจาน|เห็นจักรยานไหม สวยมาก	A fridge, please!|Instant noodles again lol|One more!|This one, this one!|Got a washbasin for the dishes|See that bike? So nice
+ชิงช้าสวรรค์	Ferris wheel
+ซุ้มขายบัตร	Ticket booth
+ซุ้มแลกรางวัล	Prize stall
+บัตรผ่านประตู\nคูปองเครื่องเล่น	Entry tickets\nRide coupons
+บิงโก	Bingo
+มหาลัย ก.ไก่	Fair Uni
+ม้าหมุน	Carousel
+ยิงปืนจุก	Cork gun shooting
+รางวัลใหญ่	Grand prize
+ลิเก	Likay
+หนังกลางแปลง	Outdoor movie
+แต้มสะสมแลกของ\nรางวัลใหญ่ ตู้เย็น ทีวี จักรยาน	Points for prizes\nGrand prizes: fridge, TV, bicycle
+โยนห่วง	Ring toss
+{} · {} · {} · รดน้ำแล้วได้ผลผลิตมากขึ้น	{} · {} · {} · watering gives a bigger harvest
+{} · {} โตเต็มที่แล้ว!	{} · {} is fully grown!
+{} · เปลี่ยนพืชได้ที่ป้ายที่ดินหน้าไร่	{} · change crops at the land sign by the field
+{} · ไถเตรียมดินก่อนปลูก	{} · plow before planting
+ต้องออนไลน์ก่อนถึงจะทำไร่ได้	Go online to farm
+ทำไร่	Farming
+ปลูก{}\n{} บาท	Plant {}\n{} baht
+ปลูกแล้ว	Planted
+พืช	Crop
+เก็บเกี่ยว\n(พลังงาน 10)	Harvest\n(10 energy)
+เก็บเกี่ยวได้ในอีก {}	Harvest in {}
+เงินไม่พอซื้อพันธุ์	Not enough money for seeds
+แปลงไร่ {} · พลังงาน {}	Field {} · Energy {}
+โรงเก็บผลผลิตเต็ม — ขายที่ป้ายที่ดินหน้าไร่ก่อน	Storehouse full — sell at the land sign by the field first
+ได้{} {} กก. เข้าโรงเก็บแล้ว!	Got {} {} kg into storage!
+ไถดิน\n(พลังงาน 10)	Plow\n(10 energy)
+KO! ชนะน็อค!	KO! Win by knockout!
+ครบเวลา! เป๊ะ {} ครั้ง	Time! {} perfect
+ครูฝึก	Trainer
+ครูฝึก: ฟังคำสั่งแล้วออกอาวุธให้ทัน!	Trainer: listen for the call and strike in time!
+คุณ	You
+ชก!	Fight!
+ซ้อมเป้าล่อ	Pad training
+ถูกน็อค...	Knocked out...
+ผิด!	Wrong!
+พักยก	Break
+ยก {}/{} · {}	Round {}/{} · {}
+ยกที่ {}	Round {}
+ระวัง! เจอตัวเก่ง	Careful! A tough one
+ลองใหม่อีกครั้ง	Try again
+ส่งผลไม่สำเร็จ	Couldn't send the result
+หมดเวลา — รอผลคะแนน	Time's up — waiting for the scores
+หมัด!	Punch!
+เข้าใกล้อีก!	Get closer!
+เตะ!	Kick!
+เป๊ะ {} · พลาด {} · {}	Perfect {} · missed {} · {}
+เป๊ะ!	Perfect!
+ขึ้นเวที	Enter the ring
+ป	F
+หนัก {} กิโลกรัม	Weight {} kg
+แตะเพื่อเก็บใส่ข้อง	Tap to put it in the basket
+ได้ปลา!	Caught a fish!
+ปล่อยลูกปลา · ให้อาหาร · จับปลาขาย	Release fry · feed · harvest to sell
+เลี้ยงปลาในกระชัง	Cage fish farming
+{}\nต้องเลี้ยงปลา Lv {}	{}\nNeeds fish farming Lv {}
+{} · {} ฿\nโต {} นาที · กก.ละ {} ฿	{} · {} ฿\nGrows in {} min · {} ฿/kg
+{} กำลังโต	{} growing
+{} นาที {} วิ	{} min {} s
+{} วิ	{} s
+{} โตแล้ว!	{} is grown!
+· วันนี้ให้แล้ว	· fed today
+วันนี้ให้แล้ว	fed today
+กระชัง {}	Cage {}
+กระชังว่าง	Empty cage
+กินไม่ครบ น้ำหนักจะน้อยหน่อย	Not fully fed, it'll weigh a bit less
+จับปลาขาย	Harvest to sell
+ปล่อยลูก{} {} ฿	Release {} fry {} ฿
+ปล่อยลูกปลา	Release fry
+ปล่อยลูกปลา ให้อาหารวันละครั้ง พอโตแล้วจับขายให้แม่ค้าปลา	Release fry, feed them once a day, and sell them to the fish vendor when grown
+ลูกปลาที่จะปล่อย: {} · {} บาท	Fry to release: {} · {} baht
+วันนี้ให้อาหารแล้ว	Fed today
+เลี้ยงปลา Lv {} · ให้อาหารวันละครั้ง ถุงละ {} บาท · ปลาที่ได้กินครบโตน้ำหนักดีกว่า	Fish farming Lv {} · feed once a day, {} baht a bag · well-fed fish grow heavier
+เลี้ยงปลาในกระชัง · สระโคกหนองนา	Cage fish farming · Khok Nong Na pond
+เลือกลูกปลา	Choose fry
+เลือกลูกปลาด้านล่าง แล้วกดปล่อยลงกระชัง	Choose fry below, then tap release into the cage
+โตในอีก {}\n{}	Grown in {}\n{}
+ให้อาหาร {} ฿	Feed {} ฿
+ให้อาหารแล้ว {}/{} วัน	Fed {}/{} days
+ได้กินครบ น้ำหนักดี	Fully fed, good weight
+{} — ลองใหม่	{} — try again
+ช้าไป ปลาหลุด	Too slow, the fish got away
+ช้าไป ปลาหลุด! ลองใหม่	Too slow, the fish got away! Try again
+ดึง	Pull
+ดึง!	Pull!
+ดึงเร็วไป ปลาตกใจหนี	Pulled too early, the fish got scared
+ตกปลาไม่สำเร็จ ลองใหม่	Fishing failed, try again
+ต้องออนไลน์ก่อนถึงจะตกปลาได้	Go online to fish
+ปลากินเบ็ด! ดึงเลย!	A bite! Pull now!
+ยืนริมคลองแล้ว กด ตกปลา (F){}	At the canal, tap Fish (F){}
+รอปลากินเบ็ด... (ดึงเร็วไปปลาจะตกใจ)	Waiting for a bite... (pull too early and the fish gets scared)
+เหวี่ยงเบ็ด...	Casting...
+ได้{} {} กก. — ตกต่อได้เลย	Got {} {} kg — keep fishing
+ได้{} {} กก.!	Got {} {} kg!
+กระเป๋าอาหาร	Food bag
+กินแล้วพลังงานเพิ่ม · ซื้อเพิ่มได้ที่ร้านค้าชุมชนและร้านอาหารในเมือง	Eating restores energy · buy more at the community store and city restaurants
+กินไม่ได้ตอนนี้	Can't eat now
+พลังงาน	Energy
+พลังงาน +{}	Energy +{}
+มี {}	Have {}
+ยังไม่มีของกินในกระเป๋า\nซื้อได้ที่ร้านค้าชุมชน (แท็บของกิน) หรือร้านข้าวมันไก่/ร้านกาแฟในเมือง	No food in your bag\nBuy some at the community store (Food tab) or the chicken rice / coffee shop in the city
+ตามสถานที่	By location
+ตำบล	Tambon
+ทะเล	Sea
+หมู่บ้าน	Village
+เกาะ	Island
+เมือง	City
+{} วัน {} ชม.	{} d {} h
+ก.ค.	Jul
+ก.พ.	Feb
+ก.ย.	Sep
+กลางคืน	Night
+ต.ค.	Oct
+ธ.ค.	Dec
+บ่าย	Afternoon
+พ.ค.	May
+พ.ย.	Nov
+ม.ค.	Jan
+มิ.ย.	Jun
+มี.ค.	Mar
+ส.ค.	Aug
+เช้า	Morning
+เที่ยง	Noon
+เม.ย.	Apr
+เย็น	Evening
+{} · ค่าปราบ {} บาท · ใช้พลังงาน · ท่องคาถาแตะยันต์ให้ทัน	{} · banishing fee {} baht · uses energy · chant and tap the sigils in time
+{} ดุเกินไป · ต้องหมอผีเลเวล {} (ตอนนี้ {})	{} is too fierce · needs exorcist level {} (now {})
+ขนลุก…	Spooky…
+ที่นี่มี{}สิงอยู่ · ผีออกตอนกลางคืน 19:00-05:00	A {} haunts this place · ghosts come out at night 19:00-05:00
+ปราบ{}ที่นี่ไปแล้วคืนนี้	Already banished the {} here tonight
+ปราบผี	Banish ghost
+มีผีสิงอยู่แถวนี้ · ต้องเป็นหมอผีจึงปราบได้ (บวชจนพระเลเวล 30 แล้วสึกออกมา)	A ghost haunts this area · only an exorcist can banish it (ordain to monk level 30, then leave)
+ตั๋วจำนำเต็มแล้ว — ไถ่ถอนก่อน	Pawn tickets full — redeem some first
+ทองไม่พอ	Not enough gold
+เก็บทองได้ไม่เกิน 100 บาททอง	You can hold at most 100 baht-weight of gold
+ไม่พบตั๋วจำนำ	Pawn ticket not found
+ไม่มีของชิ้นนี้แล้ว	You no longer have this item
+จำนำของตามราคาตลาด · ไถ่ถอนตั๋วจำนำ	Pawn items at market price · redeem pawn tickets
+ซื้อขายทองคำ · ราคาเปลี่ยนทุกชั่วโมง	Buy and sell gold · prices change every hour
+ร้านทอง	Gold shop
+1 บาท	1 baht-weight
+1 บาททอง = 8 ครึ่งสลึง ≈ 15.2 กรัม	1 baht-weight of gold = 8 half-salueng ≈ 15.2 g
+1 สลึง	1 salueng
+2 สลึง	2 salueng
+5 บาท	5 baht-weight
+{} บาท {} ครึ่งสลึง	{} baht-weight {} half-salueng
+{} บาททอง	{} baht-weight of gold
+กำไร +{} ฿	Profit +{} ฿
+ขาดทุน {} ฿	Loss {} ฿
+ขายคืนตอนนี้ได้ {} ฿	Sell back now for {} ฿
+ขายทอง	Sell gold
+จำนวน (ครึ่งสลึง)	Amount (half-salueng)
+จ่าย {} ฿	Pay {} ฿
+ซื้อทอง	Buy gold
+ต้นทุนรวม {} ฿ · เฉลี่ยบาทละ {} ฿	Total cost {} ฿ · average {} ฿ per baht-weight
+ทองของคุณ	Your gold
+ทองคำแท่ง 96.5% · ราคาเปลี่ยนทุกชั่วโมงในเกม · ซื้อตอนถูก ขายตอนแพง	96.5% gold bars · price changes every game hour · buy low, sell high
+ยังไม่มีทอง — ซื้อเก็บไว้ขายตอนราคาขึ้น	No gold yet — buy some to sell when the price rises
+รับ {} ฿	Receive {} ฿
+ราคากลาง 24 ชั่วโมงล่าสุด	Reference price, last 24 hours
+ราคาใหม่ใน {} วิ	New price in {} s
+ร้านขายออก (บาทละ)	Shop sells (per baht-weight)
+ร้านรับซื้อ (บาทละ)	Shop buys (per baht-weight)
+▲ +{} จากชั่วโมงก่อน	▲ +{} from last hour
+▼ {} จากชั่วโมงก่อน	▼ {} from last hour
+● ราคาคงที่	● Price steady
+{} {} กก.	{} {} kg
+· เต็มแล้ว! ขายที่ร้านค้าชุมชน หรือขยายยุ้ง	· Full! Sell at the community store or expand the barn
+เต็มแล้ว! ขายที่ร้านค้าชุมชน หรือขยายยุ้ง	Full! Sell at the community store or expand the barn
+ต้องออนไลน์ก่อนถึงจะดูยุ้งได้	Go online to see the barn
+ยุ้งข้าว	Rice barn
+ยุ้งข้าว {}/{} กก. · {}	Rice barn {}/{} kg · {}
+กลาง	Medium
+ประหยัด	Saver
+สวยสุด	Best
+กระสือ	Krasue
+ผีปอบ	Phi Pop
+พี่มากขา...	Phi Mak, dear...
+หิว... หิวเหลือเกิน...	Hungry... so hungry...
+เดินเข้าไปในความมืด...	Walking into the dark...
+เห็นแสงไฟตรงประตูทางออกแล้ว!	I can see the exit light!
+แม่นาค	Mae Nak
+ไฟดวงเขียวลอยมาหา...	A green will-o'-the-wisp floats toward you...
+{} · ค่ารักษา {} บาท{}	{} · treatment {} baht{}
+{} · สุขภาพแข็งแรงดี ไม่ต้องรักษา	{} · you're healthy, no treatment needed
+· พลังงานเต็ม	· full energy
+พลังงานเต็ม	full energy
+รพ.สต.	Health center
+รักษาตัว	Get treated
+รักษาไม่ได้ตอนนี้	Can't treat now
+หายแล้ว! จ่าย {} บาท	Healed! Paid {} baht
+เงินไม่พอ (ค่ารักษา {} บาท)	Not enough money (treatment {} baht)
+(นอนอยู่)	(sleeping)
+· บาดเจ็บ!	· Injured!
+บาดเจ็บ!	Injured!
+ขอเป็นเพื่อน ({})	Friend requests ({})
+ขอแต่งงาน!	Marriage proposal!
+ตั้งค่า	Settings
+ตั้งชื่อ	Name
+ปฏิทินงาน	Events
+ปิด	Close
+ภารกิจ	Quests
+ภารกิจ {}/{}	Quests {}/{}
+มีข้อความ!	New messages!
+มีงานวันนี้!	Event today!
+รับรางวัล!	Claim reward!
+ออฟไลน์{} (ลองต่อใหม่ทุก 10 วิ)	Offline{} (retrying every 10 s)
+ออโต้	Auto
+ออโต้: เปิด	Auto: ON
+อาชีพ	Career
+เพื่อน/แชท	Friends/Chat
+เมนู	Menu
+แชทใหม่ ({})	New chat ({})
+จัดวางเฟอร์นิเจอร์ในบ้านของคุณ	Arrange furniture in your home
+แต่งบ้าน	Decorate
+จองห้องพัก · เข้าห้องพักของคุณ	Book a room · enter your room
+กลับไปที่ล็อบบี้โรงแรม	Back to the hotel lobby
+ออกจากห้อง	Leave room
+คุณจองห้องไว้แล้ว	You already booked a room
+จองห้องนี้	Book this room
+จองห้องพัก 1 วันในเกม (36 นาที) · นอนในห้องฟรีตลอดการจอง	Book a room for 1 game day (36 min) · sleep free in the room while booked
+จองแล้ว	Booked
+จองไม่สำเร็จ	Booking failed
+ยังไม่ได้จองห้อง — เลือกห้องด้านล่าง	No room booked — choose a room below
+ห้องของคุณ: {} ({}) · เหลือ {} นาที	Your room: {} ({}) · {} min left
+เข้าห้องพัก	Enter room
+เงินไม่พอจองห้องนี้	Not enough money for this room
+ไม่พบห้องพัก	Room not found
+Q 105 → ช่อง 3	Q 105 → Counter 3
+RECEPTION · แผนกต้อนรับ	RECEPTION
+กาแฟ	Coffee
+ก๋วยเตี๋ยว	Noodles
+ขายยา	Pharmacy
+ข่าวสาร · ประกาศ	News · notices
+ข้าว	Rice
+ข้าวมันไก่ 50 · พิเศษ 60	Chicken rice 50 · large 60
+คิวที่ A012 → ช่อง 2	Queue A012 → Counter 2
+ซอฟต์แวร์	Software
+ดนตรี	Music
+ตัดผม	Barber
+ตัดผม 150 · สระไดร์ 100	Haircut 150 · wash & blow-dry 100
+ทอง	Gold
+บริการประชาชน	Public services
+ปรึกษาเภสัชกร	Ask the pharmacist
+ราคาทองคำ อัปเดตทุกชั่วโมง	Gold prices, updated hourly
+ลองเล่นได้ · ผ่อน 0%	Try it out · 0% installments
+สแกนจ่าย · เปิด 24 ชม.	Scan to pay · open 24 hrs
+ห้องจ่ายยา	Dispensary
+อบต. บริการประชาชน	TAO public services
+อาหาร	Food
+เมนู · อเมริกาโน่ 55 · ลาเต้ 65	Menu · Americano 55 · Latte 65
+เรียกคิว 048 → ห้องตรวจ 3	Queue 048 → Exam room 3
+ไอที	IT
+ชิงช้าริมทะเล\nนั่งแกว่งรับลม	Seaside swing\nSwing in the breeze
+ซุ้มหลังคาจากริมอ่าว	Thatched hut by the bay
+ตำนานเล่าว่า...\nโจรสลัดซ่อนหีบไว้ 3 ใบบนเกาะนี้	Legend has it...\npirates hid 3 chests on this island
+ท่าเรือ · กลับฝั่ง	Pier · back to the mainland
+ท่าเรือเกาะ\nเรือกลับฝั่ง · ตกปลาทะเล	Island pier\nBoat to the mainland · sea fishing
+นอนเปลพักผ่อน	Rest in a hammock
+บาร์กระท่อม	Hut bar
+บาร์ริมหาด	Beach bar
+สระบัวกลางป่า	Lotus pond in the forest
+อ่าวนี้สวยที่สุดเลย|น้ำใสเห็นปลาเลย|ได้ยินว่ามีหีบสมบัติซ่อนอยู่|ไปนั่งชิงช้ากัน!|หน้าผาสูงมาก|ถ่ายรูปกับเรือใบหน่อย	This bay is the most beautiful|The water's so clear you can see fish|I heard there's hidden treasure|Let's go sit on the swing!|What a high cliff|Take a photo with the sailboat
+อ่าวมาหยา\nเกาะสวรรค์กลางทะเล	Maya Bay\nParadise island in the sea
+เช่าเก้าอี้นอนพัก	Rent a lounge chair
+เปลญวนใต้ต้นมะพร้าว	Hammock under the coconut palms
+เรือกลับฝั่ง	Boat to the mainland
++{} ฿ ค่าจ้าง{}	+{} ฿ wages{}
+{}\n{} (เรียนที่โรงเรียน)	{}\n{} (learn at school)
+{}\nทำครบ {} กะแล้ว พรุ่งนี้มาใหม่	{}\nDone {} shifts, come back tomorrow
+{}\nรอให้ครบเวลาแล้วรับค่าจ้าง	{}\nWait until time's up, then collect wages
+{}\nใช้พลังงาน {} · {} วินาที · วันนี้ {}/{} กะ	{}\nUses {} energy · {} s · today {}/{} shifts
+{} · ค่าจ้าง {} ฿	{} · wage {} ฿
+{} เสร็จแล้ว!	{} done!
+ครบแล้ววันนี้	Done for today
+งาน	Job
+ทำงาน... {} วิ	Working... {} s
+ยังทำไม่ได้	Can't do yet
+รับค่าจ้าง	Collect wages
+เริ่มงาน	Start work
+ไม่ว่าง	Busy
+ฟื้นตัวที่{}	Recovering at the {}
+กระดานดำ	Blackboard
+กระดาษของคุณ	Your sheet
+พิธีกรกำลังหมุนกลอง...	The host is spinning the drum...
+อักษรบนกระดาษครบ 4 ตัวเร็ว ได้รางวัลใหญ่	Get all 4 letters on your sheet fast for a big prize
+เรียกตัวที่ {}: {}	Letter #{}: {}
+ดูที่ดิน	View land
+ที่ดินของคุณ	Your land
+ที่ดินของคุณ · สร้าง ทำไร่ เก็บค่าเช่า ขายผลผลิต	Your land · build, farm, collect rent, sell produce
+ที่ดินแปลงนี้ขายอยู่ · ซื้อได้ที่ธนาคารในเมือง	This land is for sale · buy it at the bank in the city
+ที่นาของคุณ · เดินเข้าแปลงนาเพื่อไถ ดำนา รดน้ำ เกี่ยวข้าว	Your paddy · walk into a plot to plow, plant, water and harvest
+ซื้อได้ที่ธนาคารข้างๆ · เลเวล 50	Buy at the bank next door · level 50
+ซื้อได้ที่ธนาคารในเมือง · เลเวล 50	Buy at the bank in the city · level 50
+ซื้อได้ที่ธนาคารในเมือง · แปลงนา 7-12	Buy at the bank in the city · paddies 7-12
+ตึกแถวของคุณ	Your shophouse
+ที่ดินของคุณ 1 ไร่	Your land, 1 rai
+ที่ดินขาย 1 ไร่	Land for sale, 1 rai
+ที่ดินติดถนนขาย	Roadside land for sale
+ที่นาของคุณ	Your paddy
+ที่นาขาย ติดคลอง 5 ไร่	Canal-side paddy for sale, 5 rai
+บ้านเช่า	Rental house
+หมุดที่ดิน	Land marker
+แตะป้าย: สร้าง · ทำไร่ · เก็บค่าเช่า	Tap the sign: build · farm · collect rent
+แตะป้าย: สร้างตึกแถว · เก็บค่าเช่า	Tap the sign: build a shophouse · collect rent
+แปลงนา 7-12 · เดินเข้าแปลงเพื่อทำนา	Paddies 7-12 · walk into a plot to farm
+ให้เช่า	For rent
+{} ของคุณ	Your {}
+{}{}\nพันธุ์ {} ฿ · {}	{}{}\nSeed {} ฿ · {}
+· เช่า {}/วัน	· rent {}/day
+เช่า {}/วัน	rent {}/day
+ขาย{} {} กก.\nได้ {} บาท	Sell {} {} kg\nfor {} baht
+ขายผลผลิต (ลานรับซื้อ)	Sell produce (buying yard)
+ข้างธนาคาร ริมถนนใหญ่	Beside the bank, on the main road
+ข้างฟาร์มวัว ใกล้โคกหนองนา	Beside the cattle farm, near Khok Nong Na
+คอกวัวแปลงที่สอง: เลี้ยงวัวได้เพิ่ม {} ตัว · ซื้อวัว รีดนม ผสมเทียมได้ที่ฟาร์มวัวข้างๆ	Second cattle pen: keep {} more cows · buy cows, milk and breed at the cattle farm next door
+ค่าเช่า {} บาทต่อวันในเกม · สะสมได้สูงสุด {} วัน แล้วต้องมาเก็บ	Rent {} baht per game day · builds up to {} days, then you must collect
+ซื้อได้ที่ธนาคารในเมือง (เมนูทรัพย์สิน · ต้องมีเลเวล 50) · ซื้อแล้วกลับมาที่นี่เพื่อใช้ประโยชน์	Buy at the bank in the city (Assets menu · needs level 50) · then come back here to use it
+ตัว · บ้านเช่า: ได้ค่าเช่าทุกวัน	head · Rental house: rent every day
+ตึกแถวให้เช่า: ได้ค่าเช่าทุกวันในเกม (เก็บที่นี่ สะสมได้	Shophouse for rent: rent every game day (collect here, builds up to
+ที่ดินติดถนนในเมือง	Roadside land in the city
+ที่ดินนี้ยังไม่ใช่ของคุณ	This land isn't yours yet
+ที่ดินว่าง · เลือกสิ่งที่จะสร้าง	Empty land · choose what to build
+ที่ดินเปล่า 1 ไร่	Empty land, 1 rai
+ที่ดินแปลงนี้ยังไม่ใช่ของคุณ	This plot isn't yours yet
+ที่นาของคุณ · แปลงนา 7-12	Your paddy · paddies 7-12
+ที่นาติดคลอง 5 ไร่	Canal-side paddy, 5 rai
+นาข้างโคกหนองนา · แปลงนา 7-12	Paddy by Khok Nong Na · paddies 7-12
+ปลูกครั้งต่อไป	Next planting
+ยังมีวัวอยู่ในคอกนี้ — ขายวัวหรือขยายคอกในหมู่บ้านก่อน	There are still cows in this pen — sell them or expand the village pen first
+ยังไม่มีค่าเช่า	No rent yet
+รื้อ{}	Demolish {}
+วัน)	days)
+สร้าง{}\n{} บาท	Build {}\n{} baht
+สร้างไปแล้ว	Already built
+เก็บค่าเช่า {} บาท	Collect rent {} baht
+เดินเข้าไปในแปลงนาเพื่อไถ ดำนา รดน้ำ และเกี่ยวข้าว เหมือนนาที่โคกหนองนา · ข้าวที่เกี่ยวเก็บเข้ายุ้งข้าว	Walk into a plot to plow, plant, water and harvest, just like the Khok Nong Na paddy · harvested rice goes to the barn
+เลือกพืชที่จะปลูกครั้งต่อไป แล้วเดินเข้าแปลงไร่ · ผลผลิตเก็บในโรงเก็บ (สูงสุด {} กก.) ขายได้ที่นี่	Choose the next crop, then walk into a field · produce goes to the storehouse (max {} kg) and sells here
+แตะอีกครั้ง ยืนยันรื้อถอน	Tap again to confirm demolition
+ไม่มี{}\n({} ฿/กก.)	No {}\n({} ฿/kg)
+ไม่มีผลผลิตให้ขาย	No produce to sell
+ไร่: ปลูกข้าวโพด มันสำปะหลัง อ้อย 4 แปลง · คอกวัว: เลี้ยงวัวได้เพิ่ม	Fields: grow corn, cassava, sugarcane on 4 plots · cattle pen: keep more cows
+กรุงเทพฯ · วัดพระแก้ว วัดอรุณ สุวรรณภูมิ	Bangkok · Wat Phra Kaew, Wat Arun, Suvarnabhumi
+ขอนแก่น · บึงแก่นนคร พระมหาธาตุ	Khon Kaen · Bueng Kaen Nakhon, Phra Mahathat
+ตัวเมือง · ค่ายมวย หอนาฬิกา	Town · boxing camp, clock tower
+ตำบล · อบต. รพ.สต. โรงเรียน คลองตกปลา	Tambon · TAO, health center, school, fishing canal
+ต่างจังหวัด	Other provinces
+ทะเล · ชายหาด ท่าเรือประมง ตกปลาทะเล	Sea · beach, fishing pier, sea fishing
+ท่องเที่ยว	Travel
+นครศรีธรรมราช · วัดพระมหาธาตุ	Nakhon Si Thammarat · Wat Phra Mahathat
+บุรีรัมย์ · สนามช้าง ปราสาทพนมรุ้ง	Buriram · Chang Arena, Phanom Rung
+พัทยา · ชายหาด วอล์กกิ้งสตรีท	Pattaya · beach, Walking Street
+สงขลา · หาดใหญ่ แหลมสมิหลา	Songkhla · Hat Yai, Samila Beach
+อุบลราชธานี · แห่เทียนพรรษา แม่น้ำมูล	Ubon Ratchathani · Candle Festival, Mun River
+เกาะ · อ่าวมาหยา ชิงช้า หาสมบัติ เรือใบ	Island · Maya Bay, swing, treasure hunt, sailboat
+เชียงใหม่ · ดอยสุเทพ ถนนคนเดิน	Chiang Mai · Doi Suthep, Walking Street
+กรมท่า	Navy blue
+ขาว	White
+จีวรพระ	Monk's robe
+ชมพู	Pink
+ชุดกากี อบต.	TAO khaki uniform
+ชุดกีฬา	Sportswear
+ชุดตำรวจ	Police uniform
+ชุดนักมวยไทย	Muay Thai outfit
+ชุดปกติขาว ข้าราชการ	Civil service whites
+ชุดม่อฮ่อม ชาวนา	Mor hom farmer outfit
+ชุดสูทสากล	Business suit
+ชุดไทยราชปะแตน	Thai raj pattern suit
+ดำ	Black
+ทรงเดิม	Original style
+น้ำตาล	Brown
+น้ำตาลเข้ม	Dark brown
+น้ำเงิน	Blue
+บลอนด์	Blonde
+บ็อบ	Bob
+ผมตั้ง	Spiky
+ผมฟู	Fluffy
+ผมยาว	Long hair
+ฟ้า	Light blue
+ฟ้าคราม	Sky blue
+มวยผม	Bun
+ม่วง	Purple
+รองทรง	Short back & sides
+สั้นเกรียน	Buzz cut
+ส้ม	Orange
+หัวโล้น	Bald
+หางม้า	Ponytail
+เขียว	Green
+เงิน	Silver
+เสื้อกาวน์หมอ	Doctor's coat
+เหลือง	Yellow
+แดง	Red
+แบบเดิม	Original
+โมฮอว์ก	Mohawk
+ไม่ใส่ชุด	No outfit
+ซื้อชุด	Buy outfit
+ร้านตัดผม · เปลี่ยนทรงผมและสีผม	Barber · change hairstyle and hair color
+ร้านเสื้อผ้า · เปลี่ยนสีเสื้อและกางเกง	Clothing shop · change shirt and pants colors
+{}฿	{}฿
+กด ยืนยัน เพื่อเริ่มเล่นด้วยตัวละครนี้	Tap Confirm to start playing with this character
+กางเกง/กระโปรง	Pants/skirt
+ค่าบริการรวม {} บาท · มีเงิน {} บาท	Total {} baht · you have {} baht
+ชาย	Male
+ตัดผม {} บาท + ราคาทรง/สี · ทรงพิเศษต้องมีเลเวล	Haircut {} baht + style/color price · special styles need levels
+ตัวเลือกพิเศษเพิ่มเติม ซื้อได้ที่ร้านตัดผมและร้านเสื้อผ้าในเมือง	More options at the barber and clothing shop in the city
+บันทึกไม่สำเร็จ ลองใหม่	Couldn't save, try again
+พร้อมออกไปใช้ชีวิตแล้ว!	Ready to go live your life!
+มีแล้ว	Owned
+ยังไม่ได้เปลี่ยนอะไรเลย	Nothing changed yet
+ยืนยัน	Confirm
+ร้าน	Shop
+ร้านตัดผม	Barber
+ร้านเสื้อผ้า	Clothing shop
+ลองชุดได้ฟรี · ซื้อชุดครั้งเดียวใส่ได้ตลอด · ตัดสีเสื้อ {} บาท + ราคาสี	Try outfits free · buy once, wear forever · shirt color {} baht + color price
+สีผม	Hair color
+สุ่ม	Random
+หญิง	Female
+หน้าตา	Face
+หล่อสวยขึ้น! -{} ฿	Looking good! -{} ฿
+ออกแบบตัวละคร	Create character
+ออกแบบไปแล้ว — เปลี่ยนได้ที่ร้านในเมือง	Already designed — change it at the shops in the city
+เดิม	Original
+เปลี่ยนเรียบร้อย	Changed
+เพศ	Gender
+เลือกเพศ หน้าตา ทรงผม และชุด · ทำได้ครั้งแรกฟรี	Choose gender, face, hairstyle and outfit · free the first time
+เลือกแบบใหม่ที่อยากได้	Pick the new look you want
+แบบที่ 1	Style 1
+แบบที่ 2	Style 2
+เปิด {} น.	Opens {}:00
+-{} ฿	-{} ฿
+· พระ XP +{}	· Monk XP +{}
+พระ XP +{}	Monk XP +{}
+· พระเลเวล {}	· Monk level {}
+พระเลเวล {}	Monk level {}
+· พลังงาน +{}	· Energy +{}
+จิตสงบ… อีก {} วินาที	Calm mind… {} s left
+จุดธูปเทียน ({} บาท)	Light incense ({} baht)
+จุดธูปเทียนบูชาพระ ได้บารมีเพิ่มขึ้นเท่าตัว	Light incense for the Buddha, double merit
+นั่งสมาธิหน้าพระประธาน	Meditate before the Buddha
+นั่งเฉยๆ	Just sit
+บารมี +{}	Merit +{}
+บารมี Lv {} ({}/{})	Merit Lv {} ({}/{})
+ลุก	Stand
+สาธุ	Sathu
+หายใจออก… โธ	Breathe out… Dho
+หายใจเข้า… พุท	Breathe in… Bud
+ไม่ใช่ตอนนี้	Not now
+นั่งสมาธิ	Meditate
+บารมี Lv {} · นั่งสมาธิ {} วินาที · ทำวัตรเช้า/เย็นได้สองเท่า	Merit Lv {} · meditate {} s · double at morning/evening chanting
+กระโดด	Jump
+ต่อย	Punch
+ป้องกัน	Block
+เตะ	Kick
+<b>นักดนตรี Lv {}</b> · XP {}/{} · เล่นมาแล้ว {} ครั้ง	<b>Musician Lv {}</b> · XP {}/{} · played {} times
+{}  คอมโบ {}	{}  combo {}
+คืนนี้เล่นที่ร้านนี้แล้ว	Already played here tonight
+คืนนี้เล่นที่ร้านนี้แล้ว — แวะไปร้านอื่น หรือมาใหม่พรุ่งนี้	Already played here tonight — try another venue or come back tomorrow
+จบเพลง! ความแม่น {}% · ได้ทิป {} บาท · XP +{}	Song over! Accuracy {}% · tips {} baht · XP +{}
+ซื้อเพิ่มได้ที่ร้านเครื่องดนตรีในเมือง	Buy more at the music shop in the city
+ดี	Good
+ต้องออนไลน์ก่อนถึงจะเล่นดนตรีได้	Go online to play music
+ต้องเป็นนักดนตรี Lv {} ขึ้นไป	Needs musician Lv {} or higher
+ทิป +{} ฿	Tips +{} ฿
+ทิปพื้นฐาน {} บาท · {} · {}	Base tips {} baht · {} · {}
+ทุกเครื่องดนตรี +20%	All instruments +20%
+พลังงานไม่พอ — กินอะไรหน่อยหรือไปนอนพัก	Not enough energy — eat something or go sleep
+พลาด	Miss
+ยังไม่มี	Not yet
+ยังไม่เปิด — เปิด{}	Not open — opens {}
+ส่งผลการแสดงไม่สำเร็จ	Couldn't send the performance
+เครื่องดนตรีพื้นบ้าน +20%	Thai folk instruments +20%
+เครื่องดนตรีสากล +20%	Western instruments +20%
+เตรียมตัว...	Get ready...
+เปลี่ยนเครื่องดนตรีไม่สำเร็จ	Couldn't change instrument
+เปลี่ยนเป็น{}แล้ว	Switched to {}
+เปิดอยู่ เล่นได้เลย!	Open now, play away!
+เป๊ะ {} · ดี {} · พลาด {}	Perfect {} · good {} · miss {}
+เพลง "{}" · {} · {} BPM	Song "{}" · {} · {} BPM
+เริ่มเล่น (พลังงาน 10)	Start playing (10 energy)
+เริ่มเล่นไม่สำเร็จ	Couldn't start
+เลือกเครื่องดนตรี	Choose instrument
+เลเวลนักดนตรียังไม่ถึง	Musician level too low
+เลเวลอัป! นักดนตรี Lv {}	Level up! Musician Lv {}
+เวทีดนตรี	Music stage
+เวทียังไม่เปิดตอนนี้	Stage isn't open now
+ช	N
+ชื่อตัวละคร	Character name
+ชื่อต้องยาว 2-{} ตัวอักษร ลองใหม่อีกครั้ง	Names must be 2-{} characters, try again
+บันทึกชื่อไม่สำเร็จ ลองใหม่	Couldn't save the name, try again
+พิมพ์ชื่อตรงนี้	Type a name here
+ภาษาไทยหรืออังกฤษ 2-{} ตัวอักษร · คนอื่นจะเห็นชื่อนี้บนหัว	Thai or English, 2-{} characters · others see this name over your head
+ยินดีต้อนรับสู่หมู่บ้าน!\nตั้งชื่อตัวละครของคุณ	Welcome to the village!\nName your character
+สวัสดี {}!	Hello {}!
+เปลี่ยนชื่อตัวละคร	Rename character
+Hello! สวัสดีครับ|Sawasdee ka~|ต้มยำกุ้ง อร่อยมาก!|Where is the skytrain?|ตุ๊กตุ๊ก ไปวัดเท่าไหร่?|So hot today!|ขอบคุณค่ะ Khob khun ka|I love Thai food!|ถ่ายรูปให้หน่อยได้ไหมครับ|Amazing Thailand!|Pad Thai please~|ไปตลาดสดทางไหนคะ?	Hello! Sawasdee krub|Sawasdee ka~|Tom yum goong, so good!|Where is the skytrain?|Tuk-tuk, how much to the temple?|So hot today!|Thank you, khob khun ka|I love Thai food!|Could you take a photo for me?|Amazing Thailand!|Pad Thai please~|Which way to the market?
+ผักสดๆ จ้า|วันนี้ซื้ออะไรดีนะ|ราคาเท่าไหร่จ๊ะ|ลดหน่อยได้ไหม|อร่อยมาก	Fresh veggies here!|What should I buy today|How much is it?|Any discount?|So tasty
+รถติดจัง|ไปธนาคารก่อน|ร้านกาแฟเปิดหรือยัง?|สวัสดีครับ	So much traffic|Bank first|Is the coffee shop open?|Hello
+สวัสดีจ้า|กินข้าวหรือยัง?|ไปไหนมา?|วันนี้อากาศดีนะ	Hi there|Eaten yet?|Where have you been?|Nice weather today
+ไปเที่ยวงานกัน!|สนุกจัง|ซื้อลูกชิ้นปิ้งดีกว่า|ไปสอยดาวกัน|ชิงช้าสวรรค์สวยมาก|ลิเกเริ่มหรือยัง?	Let's go to the fair!|So fun|Grilled meatballs it is|Let's play star-pick|The Ferris wheel is beautiful|Has the likay started?
+ของที่จำนำได้	Items you can pawn
+จำนำ\n{} ฿	Pawn\n{} ฿
+ดอกเบี้ย {}% ต่อเดือน · ไถ่ถอนภายใน {} วันในเกม · ถือตั๋วได้ {} ใบ	Interest {}% a month · redeem within {} game days · hold up to {} tickets
+ตั๋วจำนำของคุณ	Your pawn tickets
+ทองรับจำนำ 90% ของราคารับซื้อ (บาทละ {} ฿) · เครื่องดนตรี รถ บ้าน ที่ดิน 70% ของราคาตลาดมือสอง · เงินสด {} ฿	Gold pawns at 90% of the buy price ({} ฿ per baht-weight) · instruments, cars, houses, land at 70% of used price · cash {} ฿
+ยังไม่มีตั๋วจำนำ	No pawn tickets yet
+ราคาตลาด {} ฿	Market price {} ฿
+เงินด่วน ตามราคาตลาด	Quick cash at market price
+เงินต้น {} + ดอก {} ฿	Principal {} + interest {} ฿
+เหลือ {} วัน	{} days left
+ไถ่ถอน\n{} ฿	Redeem\n{} ฿
+ไม่มีของที่จำนำได้\nซื้อทอง เครื่องดนตรี รถ หรือบ้านไว้ก่อน	Nothing to pawn\nBuy gold, instruments, a car or a house first
+300 บาท · โต๊ะรับสมัคร	300 baht · registration desk
+ก ข ค  1+1=2	A B C  1+1=2
+ก.ไก่	Chicken
+กระสอบ	Bag
+คลอง	Canal
+คอมพิวเตอร์	Computers
+งานวัด	Temple fair
+ชิงช้า	Swing
+ช่างซ่อม	Mechanic
+ซ้อมกระสอบหนัก Lv 6+	Heavy bag training Lv 6+
+ซ้อมเตะ	Kick training
+ดนตรีพื้นบ้าน	Folk music
+ตลาด	Market
+ติวเตอร์	Tutor
+ติวเตอร์ตรรกะ\nค่าจ้าง 380 ฿ · ต้องมี เลเวล 10 · ตรรกะ Lv 5	Logic tutor\nWage 380 ฿ · needs level 10 · Logic Lv 5
+ท่าเรือ	Pier
+นา	Paddy
+ประกวด	Contest
+ประกวดไก่สวย\nช่วงงานวัดตามประเพณี	Chicken beauty contest\nDuring traditional temple fairs
+ปลา	Fish
+ป้ายรถ	Bus stop
+ป้ายรถสองแถว	Songthaew stop
+ผับ	Pub
+พักผ่อน	Rest
+ฟาร์ม	Farm
+มวย	Boxing
+รพ.	Hosp.
+รับซื้อ	Buying
+วัว	Cows
+สมบัติ	Treasure
+สมัครสมาชิกค่าย	Join the camp
+สระบัว	Lotus pond
+ห้องสมุด	Library
+ห้องเรียน	Classroom
+อนามัย	Clinic
+อบต	TAO
+อ่าวมาหยา	Maya Bay
+เดินมาที่บันไดเวที	Walk to the ring steps
+เถียงนาโคกหนองนา	Khok Nong Na field hut
+เลี้ยงปลาในกระชัง\nเดินไปท่าน้ำริมสระ	Cage fish farming\nWalk to the pond landing
+เวทีค่ายมวย	Camp ring
+เวทีมวยงานวัด	Temple fair ring
+โคก หนอง นา\nทำนา · เลี้ยงปลาในกระชัง	Khok Nong Na\nRice farming · cage fish farming
+โคกหนองนา	Khok Nong Na
+โค้ช	Coach
+โปรแกรมเมอร์	Programmer
+โรงเรียน	School
+ประกาศ	Notice
+ยุ้งข้าว\nเกี่ยวแล้วเก็บที่นี่	Rice barn\nHarvested rice goes here
+รับวัวฟรี 1 ตัว\nโครงการ อบต.	Get 1 free cow\nTAO program
+สมัครเลือกตั้ง\nส.อบต. · นายก อบต.	Run for election\nTAO council · TAO chief
+อบต. ยินดีต้อนรับ · e-Service	TAO welcomes you · e-Service
+เปิด 19:00 - 03:00 · นักดนตรี Lv 10+	Open 19:00 - 03:00 · Musician Lv 10+
+เลือกตั้ง อบต.\nหาเสียง · ลงคะแนน	TAO election\nCampaign · vote
+เล่นดนตรีรับทิป\nยืนตรงมุมนี้	Play music for tips\nStand at this corner
+เล้าไก่\nยืนหน้าประตูเพื่อดูแลไก่	Chicken coop\nStand at the gate to tend the chickens
+เวทีอีเวนต์ตำบล	Tambon event stage
+น็อค! กำลังส่งตัวไป{}	Knocked out! Taking you to the {}
+แคล้วคลาด!	Dodged!
+กระชังนี้มีปลาอยู่แล้ว	This cage already has fish
+กระชังนี้ยังว่าง	This cage is empty
+ปลายังไม่โต	The fish aren't grown yet
+วันนี้ให้อาหารแล้ว พรุ่งนี้ค่อยให้ใหม่	Already fed today, feed again tomorrow
+เลเวลเลี้ยงปลายังไม่ถึง	Fish farming level too low
+{}\nใช้ {} แต้ม	{}\nCosts {} points
+{} แต้ม	{} points
+ขาดอีก {}	{} short
+รางวัลใหญ่!	Grand prize!
+เอาแต้มจากเกมฝีมือมาแลกของ แต้มสะสมข้ามงานได้	Trade points from skill games for prizes; points carry over between fairs
+แตะอีกครั้งเพื่อแลก	Tap again to redeem
+แลก	Redeem
+แลกสำเร็จ!	Redeemed!
+(อาชีพที่เลเวลสูงสุด)	(your highest career)
+กำลังแสดง	Showing
+ครู	Teacher
+คอม	Computers
+ค้า	Trade
+ฉายาที่แสดง: {}	Title shown: {}
+ฉายาใหม่: {}	New title: {}
+ช่าง	Mechanic
+ทำงานไหนบ่อย อาชีพนั้นเลเวลขึ้น · ฉายาเปลี่ยนที่ Lv 10 · 25 · 50 · 75 · 100	The jobs you do most level up that career · titles change at Lv 10 · 25 · 50 · 75 · 100
+บ่อ	Pond
+สภา	Council
+สูงสุดแล้ว!	Max level!
+หมอ	Doctor
+อัตโนมัติ (สูงสุด)	Automatic (highest)
+อาชีพของฉัน	My careers
+เรือ	Boat
+แสดง	Show
+โค้ด	Code
+ไก่	Chickens
+ภารกิจสำเร็จ! {}	Quest complete! {}
+ภารกิจเลเวล {} สำเร็จ! ไปรับรางวัลได้เลย	Level {} quest complete! Go claim your reward
+ภารกิจเลเวล {} เปิดแล้ว! {}	Level {} quest unlocked! {}
+ออโต้: +{} ฿	Auto: +{} ฿
+กำลังทำ…	Working…
+กำลังโหลดภารกิจใหม่...	Loading new quests...
+ขาย	Sell
+ซื้อ	Buy
+ตอนนี้เลเวล {} · ต้องถึงเลเวล {} ก่อน	Now level {} · reach level {} first
+ตามเลเวล	By level
+ต้องออนไลน์ก่อนถึงจะดูภารกิจได้	Go online to see quests
+ทำครบแล้ว! กดรับได้เลย	All done! Claim it now
+ทำภารกิจด้านบนให้ครบทั้งหมด	Finish all the quests above
+ทำเอง หรือกดปุ่ม "ออโต้" ข้างจอ ให้ตัวละครไปทำเอง	Do them yourself, or tap "Auto" at the side so your character does them
+ทำแล้ว {}/{}	Done {}/{}
+ทำให้ครบ รับเงินรางวัล · ภารกิจใหม่ทุกวันในเกม	Finish them for cash rewards · new quests every game day
+ที่: {}	At: {}
+ประจำวัน	Daily
+ปลูก	Plant
+พลังงานไม่พอ — พักหรือกินข้าวก่อน	Not enough energy — rest or eat first
+ภ	Q
+ภารกิจตามเลเวล	Level quests
+ภารกิจประจำวัน	Daily quests
+ภารกิจยังไม่ครบ	Quests not finished
+ภารกิจใหม่ในอีก {}	New quests in {}
+ยังทำไม่ครบ	Not finished yet
+ยังไม่ครบ	Not done
+รับ +{} ฿	Claim +{} ฿
+รับรางวัลนี้ไปแล้ว	Reward already claimed
+รับแล้ว	Claimed
+รับโบนัสวันนี้แล้ว	Today's bonus claimed
+รับได้!	Ready!
+รางวัลเมื่อทำครบทุกข้อ	Reward for finishing everything
+ล็อก	Locked
+สำเร็จ	Done
+ออโต้: กำลังทำ… อีก {} วินาที	Auto: working… {} s left
+ออโต้: เกือบเสร็จแล้ว…	Auto: almost done…
+ออโต้เปิดอยู่ ตัวละครกำลังไล่ทำให้	Auto is on, your character is working through them
+เกี่ยว	Harvest
+เปิดที่เลเวล 1 · 10 · 25 · 50 · 75 · 100 · รางวัลก้อนใหญ่	Unlock at level 1 · 10 · 25 · 50 · 75 · 100 · big rewards
+เรียน	Study
+เลเวล {} · {}	Level {} · {}
+โบนัสทำครบทุกภารกิจ	Bonus for finishing every quest
+ไข่	Eggs
+ได้รับ {} บาท	Received {} baht
+ไม่มีภารกิจให้ออโต้แล้ว	No quests left for auto
+กินข้าวหรือยัง?	Eaten yet?
+ขอบคุณนะ	Thanks!
+ขอโทษนะ	Sorry!
+มาซ้อมมวยกัน!	Let's train boxing!
+สวัสดี!	Hello!
+เก่งมาก!	Great job!
+แล้วเจอกัน!	See you!
+ไปตกปลากัน!	Let's go fishing!
+ไปไหนมา?	Where have you been?
+ขึ้นเวทีไปรำวงรอบโต๊ะดอกไม้กับนางรำ 1 รอบ	Get on stage and do one round of ramwong around the flower table with the dancers
+ซื้อบัตรรำวง\n{} บาท	Buy ramwong ticket\n{} baht
+ซื้อบัตรไม่สำเร็จ ลองใหม่	Couldn't buy the ticket, try again
+รำวง!	Ramwong!
+รำวงกัน! วนรอบโต๊ะดอกไม้ 1 รอบ	Let's ramwong! One round of the flower table
+รำอีกรอบไหม?	Dance another round?
+ลงจากเวที	Leave the stage
+สนุกมาก! (+8 พลังงาน)	So much fun! (+8 energy)
+ซื้อวัว · ซื้ออาหารวัว · ขายวัวโต	Buy cows · buy cattle feed · sell grown cows
+ดูแลวัว	Tend cows
+พ่อค้าวัว	Cattle dealer
+รับวัวจาก อบต.	Get a cow from the TAO
+รีดนมขาย · ดูอาหารวัวและการเติบโต	Milk to sell · check feed and growth
+โครงการวัวให้ชาวบ้าน · รับฟรีคนละ 1 ตัว	Cows for villagers program · one free per person
+· อาหารไม่พอ! วัวที่ไม่ได้กินจะไม่ให้นมและไม่โต	· Not enough feed! Unfed cows give no milk and don't grow
+อาหารไม่พอ! วัวที่ไม่ได้กินจะไม่ให้นมและไม่โต	Not enough feed! Unfed cows give no milk and don't grow
+· แม่วัวตั้งท้อง {} ตัว	· {} cows pregnant
+แม่วัวตั้งท้อง {} ตัว	{} cows pregnant
+ขยายคอก +{} ตัว · {} บาท	Expand pen +{} · {} baht
+ขายตัวนี้	Sell this one
+ขายตัวนี้ · {} บาท	Sell this one · {} baht
+คอกวัวของคุณ	Your cattle pen
+คอกเต็ม ({} ตัว)	Pen full ({} head)
+คอกเต็ม · ขยายคอกก่อน	Pen full · expand first
+คอกเต็มแล้ว — ขยายคอกก่อน	Pen is full — expand it first
+คอกใหญ่สุดแล้ว	Pen is at max size
+คอกใหญ่สุดแล้ว ({} ตัว)	Pen is at max size ({} head)
+คุณรับวัวจาก อบต. ไปแล้ว — ซื้อเพิ่มได้จากพ่อค้าวัวที่ฟาร์มวัวข้างโคกหนองนา	You already got your TAO cow — buy more from the cattle dealer at the farm by Khok Nong Na
+ซื้อ {} บาท · สุ่มเพศ · โตเต็มที่เมื่อกินครบ {} วัน ขายตัวเมีย {} / ตัวผู้ {} บาท · ยังไม่โตขายได้ราคาต่ำกว่า{}	Buy {} baht · random sex · fully grown after {} fed days, sells cow {} / bull {} baht · young ones sell for less{}
+ซื้อวัว · {} บาท	Buy cow · {} baht
+ซื้อวัว · ซื้ออาหารวัว · แตะเลือกวัวที่จะขาย	Buy cows · buy feed · tap a cow to sell
+ตัวนี้ตั้งท้อง ขายไม่ได้	This one is pregnant, can't sell
+ตัวนี้ยังผสมเทียมไม่ได้	This one can't be inseminated yet
+ที่เก็บอาหารวัวเต็มแล้ว	Feed storage is full
+ท้อง {}ว.	Pregnant {}d
+นมขวดละ {} บาท · วันใหม่ในเกมอีก {} นาที{}	Milk {} baht a bottle · new game day in {} min{}
+ผสมเทียมตัวนี้ · {} บาท	Inseminate this one · {} baht
+ยังไม่มีนม	No milk yet
+ยังไม่มีนมให้รีด	No milk to collect yet
+ยังไม่มีวัว — รับฟรีที่ อบต. ในตำบล หรือซื้อจากพ่อค้าวัวหน้าฟาร์ม	No cows yet — get one free at the TAO in the tambon or buy from the dealer at the farm
+ยังไม่มีวัวที่โตเต็มที่	No fully grown cows yet
+ยังไม่มีวัวให้ขาย	No cows to sell yet
+ยังไม่มีแม่วัวโตพร้อมผสม	No grown cow ready to breed
+ยืนยันขาย	Confirm sale
+รับวัวจาก อบต. ไปแล้ว	Already got the TAO cow
+รับวัวฟรี 1 ตัว	Get 1 free cow
+รับวัวฟรีคนละ 1 ตัว ไปเลี้ยงที่ฟาร์มวัวข้างโคกหนองนา	One free cow per person, raised at the cattle farm by Khok Nong Na
+รับไปแล้ว	Received
+รีดนมขาย {} บาท	Sell milk {} baht
+วัว {}/{} ตัว (เมีย {}) · อาหาร {} ถุง · นม {} ขวด	Cows {}/{} (cows {}) · feed {} bags · milk {} bottles
+อบต. · โครงการวัวให้ชาวบ้าน	TAO · cows for villagers
+อบต. แจกวัวให้ชาวบ้านคนละ 1 ตัว (รับได้ครั้งเดียว)	The TAO gives each villager 1 cow (once only)
+อาหารวัว {} ถุง · {} บาท	Cattle feed {} bags · {} baht
+เลือกแม่วัวที่โตแล้ว	Choose a grown cow
+แตะอีกครั้ง ยืนยันขาย {}	Tap again to confirm selling {}
+แตะเลือกวัวเพื่อขายหรือผสมเทียม · วัวกินอาหารวันละ 1 ถุง · แม่วัวที่ได้กินให้นมวันละ 1 ขวด	Tap a cow to sell or inseminate · cows eat 1 bag a day · fed cows give 1 bottle of milk a day
+แม่วัวตั้งท้องอยู่ ขายไม่ได้	The cow is pregnant, can't sell
+โตแล้ว	Grown
+ไม่มีแม่วัว	No cows
+คอนเสิร์ตงานกาชาด	Red Cross fair concert
+คอนเสิร์ตเริ่มแล้ว!|เพลงนี้มันส์มาก|กรี๊ดดด!|ร้องตามกันเลย|ปีหน้ามาอีกนะ	The concert's started!|This song rocks|Eeeee!|Sing along|Come again next year
+งานกาชาด	Red Cross fair
+บ้านผีสิง	Haunted house
+รถบั๊ม	Bumper cars
+รถบั๊ม →	Bumper cars →
+รถไต่ถัง	Wall of death
+รถไต่ถังเสียงดังมาก!|ขึ้นรถไฟเหาะกัน!|กลัวบ้านผีสิงอ่ะ|เมียงูของจริงไหมเนี่ย|เรือไวกิ้งเสียวสุดๆ|ไปรถบั๊มกัน	The wall of death is so loud!|Let's ride the roller coaster!|The haunted house scares me|Is the snake woman real?|The Viking ship is wild|Let's do bumper cars
+รถไฟเหาะ	Roller coaster
+เมียงู	Snake woman
+เรือไวกิ้ง	Viking ship
+ลง!	In!
+ห่วง	Ring
+แตะครั้งแรกเล็งซ้ายขวา แตะครั้งที่สองกำหนดแรงโยน	First tap aims left-right, second tap sets the throw power
+แรง	Power
+ไม่ลง	Missed
+{}{}! +{} XP วิชา · +{} XP เลเวลหลัก	{}{}! +{} subject XP · +{} main XP
+กำลังทำงานอยู่ — เลิกงานก่อนแล้วค่อยมาเรียน	You're working — finish work before studying
+กำลังอ่าน...	Reading...
+กำลังอ่านหนังสือวิชา{}...	Reading a {} book...
+กำลังเรียน...	Studying...
+กำลังเรียนวิชา{}...	Studying {}...
+ค่าเรียน {} ฿ · พลังงาน {}\n+{} XP เลเวลหลัก	Fee {} ฿ · energy {}\n+{} main XP
+ต้องเลเวล {}	Needs level {}
+ฟรี · พลังงาน {} · 45 วิ\n+{} XP วิชา · +{} XP เลเวลหลัก	Free · energy {} · 45 s\n+{} subject XP · +{} main XP
+วิชา{} ขึ้น Lv {}!	{} reached Lv {}!
+ห้องสมุดโรงเรียน	School library
+ห้องเรียน · โรงเรียนตำบล	Classroom · tambon school
+อาชีพที่ต้องใช้วิชา	Careers that need subjects
+อ่านหนังสือ	Read
+เรียนเพื่อเพิ่มเลเวล และเปิดอาชีพใหม่	Study to level up and unlock new careers
+เลือกวิชาที่อยากเรียน	Choose a subject to study
+เลือกหนังสือวิชาที่อยากอ่าน	Choose a subject book to read
+เลเวลหลัก Lv {} · อ่านหนังสือฝึกทักษะเองฟรี	Main Lv {} · read books to train skills for free
+เลเวลหลัก Lv {} · เรียนเพื่อเพิ่มเลเวลและเปิดอาชีพใหม่	Main Lv {} · study to level up and unlock new careers
+เลเวลหลักขึ้น Lv {}!	Main level up! Lv {}
+เลเวลอัป! Lv {}	Level up! Lv {}
+ช่างซ่อมมอเตอร์ไซค์\nค่าจ้าง 260 ฿ · ต้องมี เลเวล 6 · ช่าง Lv 3	Motorcycle mechanic\nWage 260 ฿ · needs level 6 · Mechanic Lv 3
+ร้านซ่อมมอเตอร์ไซค์	Motorcycle repair shop
+ก๋วยเตี๋ยว ส้มตำ	Noodles, som tam
+ขึ้นลิฟต์\nไปชานชาลา	Elevator\nto the platform
+ตั๋วไปต่างจังหวัด	Tickets to other provinces
+ทะเล\nชายหาด · ท่าเรือประมง	Sea\nBeach · fishing pier
+ทะเลสวยจัง|น้ำใสมาก|ไปนั่งเรือกันไหม?|ร้อนจัง กินมะพร้าวดีกว่า|ถ่ายรูปหน่อย!	The sea is beautiful|So clear|Want to take a boat?|So hot, coconut time|Take a photo!
+ท่าเรือประมง\nตกปลาทะเลที่ปลายท่า	Fishing pier\nSea fishing at the end of the pier
+นวดแผนไทย	Thai massage
+นอนพักในห้อง	Rest in the room
+พ่อค้าวัว\nซื้อวัวเข้าคอก	Cattle dealer\nBuy cows for your pen
+ฟาร์มวัว	Cattle farm
+รถไฟฟ้าไทย	Thai Skytrain
+รีสอร์ทริมหาด	Beach resort
+ร้านสะดวกซื้อ 24 ชม.	24-hr convenience store
+ร้านอาหารทะเล	Seafood restaurant
+ร้านอาหารทะเลสด	Fresh seafood restaurant
+ร้านอาหารริมหาด	Beachside restaurant
+ลงลิฟต์\nไปถนน	Elevator\ndown to the street
+ลิฟต์ขึ้นสถานี	Elevator to the station
+สถานีรถไฟ · ไปต่างจังหวัด	Train station · to other provinces
+สถานีรถไฟฟ้าใจกลางเมือง	Downtown skytrain station
+สวีทริมหาด	Beachfront suite
+หิวแล้ว ไปกินซีฟู้ดกัน|คืนนี้พักโรงแรมไหนดี?|ไปนวดกันไหม?|ร้านนี้อร่อยนะ|ซื้อน้ำเย็นก่อน	Hungry, let's get seafood|Which hotel tonight?|Want a massage?|This place is good|Cold drink first
+ห้องดีลักซ์วิวทะเล	Deluxe sea-view room
+ห้องมาตรฐาน	Standard room
+เก้าอี้ชายหาดใต้ร่ม	Beach chair under an umbrella
+เพลงนี้มันส์มาก!|กรี๊ดดด!|ร้องตามกันเลย|ปีหน้ามาอีกนะ|ใครร้องเพลงต่อไป?	This song rocks!|Eeeee!|Sing along|Come again next year|Who sings next?
+เรือพาเที่ยวเกาะ	Island tour boat
+เรือหางยาวพาเที่ยว\nงานพิเศษ: ขับเรือรอบอ่าว	Longtail boat tours\nSide job: drive around the bay
+เวทีคอนเสิร์ตริมหาด	Beach concert stage
+โรงแรมป่าตองบีช	Patong Beach Hotel
+โรงแรมอันดามัน	Andaman Hotel
+ใจกลางเมือง	Downtown
+จุก	Cork
+แตะเป้าที่วิ่งอยู่เพื่อยิงให้ล้ม แถวหลังเล็กและเร็วกว่า	Tap the moving targets to knock them down; the back row is smaller and faster
+โดน!	Hit!
+0 ฿	0 ฿
+{} · เปิด {} น.	{} · opens {}:00
+{} × {} ฿	{} × {} ฿
+ขยายยุ้งได้สูงสุด 500 กก.	Barn can expand to at most 500 kg
+ของกิน	Food
+ของถูก	Bargains
+ขาดอีก   {}	Short by   {}
+ขายทั้งหมด	Sell all
+ขายปลาในข้องและข้าวในยุ้ง\nทั้งหมดในครั้งเดียว	Sell the fish in your basket and rice in your barn\nall at once
+ขายได้ {} บาท	Sold for {} baht
+ขายไม่สำเร็จ ลองใหม่	Couldn't sell, try again
+ค่ายมวย · โต๊ะรับสมัคร	Boxing camp · registration desk
+จะได้รับ	You'll get
+จ่ายเงิน	Pay
+จ่ายเงินไม่สำเร็จ	Payment failed
+จ่ายเงินไม่สำเร็จ ลองใหม่	Payment failed, try again
+ซื้อเรียบร้อย จ่าย {} บาท	Purchase complete, paid {} baht
+ตลาดนัด	Flea market
+ตลาดปิดแล้ว — เปิด {} น.	Market closed — opens {}:00
+ตลาดสดเทศบาล	Municipal fresh market
+ตะกร้า	Cart
+ตะกร้า ({})	Cart ({})
+ตัวเมือง	Town
+ต้องออนไลน์ก่อนถึงจะซื้อขายได้	Go online to buy and sell
+พื้นบ้าน	Thai folk
+มีของบางชิ้นอยู่แล้ว — เอาออกจากตะกร้า	You already own some of these — remove them from the cart
+ยังว่างอยู่\nกด + ที่สินค้าเพื่อเลือก	Empty\nTap + on an item to add it
+ยังไม่มีของให้ขาย — ตกปลาที่คลอง หรือทำนาที่โคก หนอง นา	Nothing to sell yet — fish at the canal or farm rice at Khok Nong Na
+รวม	Total
+ราคาตลาด	Market price
+ร้านก๋วยเตี๋ยว	Noodle shop
+ร้านค้าชุมชน	Community store
+ร้านรับซื้อผลผลิตของคุณ	Your produce buyer
+ร้านอาหารริมทะเล	Seaside restaurant
+ร้านอาหารในเมือง	City restaurant
+ร้านเครื่องดนตรี	Music shop
+ล้างตะกร้า	Clear cart
+สมัคร	Join
+สากล	Western
+หลังขาย   {}	After sale   {}
+อาหารทะเล	Seafood
+เงินที่มี   {}	Your money   {}
+เงินไม่พอจ่ายทั้งตะกร้า — ลดจำนวนลงก่อน	Not enough money for the whole cart — reduce the amounts first
+เลี้ยงไก่	Chickens
+เหลือหลังจ่าย   {}	Left after paying   {}
+โหลดข้อมูลร้านไม่สำเร็จ ลองใหม่	Couldn't load the shop, try again
+ในตะกร้า	In cart
+ใส่ตะกร้า	Add to cart
+ไก่เกินเล้า (เล้าจุ 8 ตัว)	Too many chickens (coop holds 8)
+<b><color=#BA7517>{} (ครบ!)</color></b>	<b><color=#BA7517>{} (complete!)</color></b>
+ครบทุกเป้า!	All targets hit!
+ซื้อบัตรที่ซุ้มขายบัตรก่อน	Buy a ticket at the ticket booth first
+รอบละ 1 คูปอง · {} {}	1 coupon a round · {} {}
+ลองใหม่อีกรอบนะ	Try another round!
+สถิติของคุณ: {}/{}	Your best: {}/{}
+สถิติใหม่!	New record!
+เล่น · 1 คูปอง	Play · 1 coupon
+เหลือ {} {}	{} {} left
+แต้มที่ได้	Points earned
+โดน {} · {} แต้ม	Hit {} · {} points
+โดน {} จาก {}	Hit {} of {}
+ได้ {} แต้ม	Got {} points
+ไม่โดนเลย	No hits
+ขึ้นลิฟต์	Elevator up
+ลิฟต์สถานีรถไฟฟ้า · ชานชาลาอยู่ชั้นบน	Skytrain station elevator · platform upstairs
+{} ({} บาท)	{} ({} baht)
+{} · {}{} · นอนแล้วฟื้นเร็ว	{} · {}{} · sleep to recover faster
+การจองห้องหมดเวลาแล้ว — จองใหม่ที่เคาน์เตอร์	Your room booking has ended — book again at the counter
+กำลังนอน... พลังงาน {}/{}	Sleeping... energy {}/{}
+ค่าเช่า {} บาท ·	Rent {} baht ·
+ตื่น	Wake up
+นอนพัก	Sleep
+สดชื่น!	Refreshed!
+เงินไม่พอจ่ายค่าเช่า {} บาท	Not enough money for the {} baht rent
+เสื่อบนชานบ้าน	Mat on the porch
+ขอแต่งงานไปแล้ว รอคำตอบก่อน	You already proposed, wait for an answer
+คนนี้แต่งงานไปแล้ว	This person is already married
+คำขอนี้หมดไปแล้ว	This proposal is no longer open
+คุณแต่งงานอยู่แล้ว	You're already married
+ต้องเป็นเพื่อนกันก่อน	You need to be friends first
+ถูกระงับการแชทชั่วคราว	Chat temporarily suspended
+ผู้เล่น	Player
+พิมพ์ข้อความก่อน	Type a message first
+พิมพ์เร็วไป รอสักครู่	Typing too fast, wait a moment
+มีคนขอเป็นเพื่อน! (เมนู → เพื่อน)	Someone wants to be your friend! (Menu → Friends)
+ยังไม่ได้แต่งงาน	Not married
+เงินไม่พอซื้อแหวน	Not enough money for the ring
+เป็นเพื่อนกันแล้ว!	You're friends now!
+· คู่ชีวิต	· spouse
+คู่ชีวิต	spouse
+· ตั้งแต่ {}	· since {}
+ตั้งแต่ {}	since {}
+· บล็อกอยู่	· blocked
+บล็อกอยู่	blocked
+· รอตอบรับ	· waiting
+รอตอบรับ	waiting
+· ส่งคำขอแล้ว	· request sent
+ส่งคำขอแล้ว	request sent
+ขอเป็นเพื่อน แชทส่วนตัว และขอแต่งงาน	Friend requests, private chat and marriage proposals
+ขอเป็นเพื่อนกับคุณ	Wants to be your friend
+ขอแต่งงาน	Propose
+ขอแต่งงาน: {}	Proposal: {}
+คุยกับทุกคนในเซิร์ฟเวอร์ · สุภาพกันนะ	Chat with everyone on the server · be polite
+คุยส่วนตัวกับ {}	Private chat with {}
+คู่ชีวิตของคุณ	Your spouse
+ทุกคน	Everyone
+บล็อก	Block
+บล็อกแล้ว ไม่เห็นข้อความของคนนี้อีก	Blocked; you won't see their messages again
+ปฏิเสธ	Decline
+ผู้เล่นที่อยู่แถวนี้	Players nearby
+พ	F
+พิมพ์ข้อความ…	Type a message…
+มอบแหวนขอ {} แต่งงานแล้ว · ถ้าปฏิเสธจะได้ค่าแหวนคืน	You gave {} a ring and proposed · if they decline, you get the ring money back
+มีคนขอคุณแต่งงาน!	Someone proposed to you!
+ยกเลิกคำขอ	Cancel request
+ยกเลิกคำขอแล้ว	Request cancelled
+ยังโสด	Single
+ยังไม่มีเพื่อน · เพิ่มเพื่อนจากผู้เล่นที่อยู่ใกล้ๆ ด้านล่าง	No friends yet · add friends from the players nearby below
+ยังไม่มีใครคุย ทักทายเลย!	Nobody's talking yet, say hi!
+ยังไม่ได้เชื่อมต่อเซิร์ฟเวอร์	Not connected to the server
+ยืนยัน {}฿	Confirm {}฿
+ยืนยัน?	Confirm?
+ยืนยันบล็อก	Confirm block
+ยืนยันลบ	Confirm remove
+ยืนยันหย่า	Confirm divorce
+รอคำตอบ	Waiting for an answer
+รับเป็นเพื่อน	Accept friend
+รายงาน	Report
+ลบเพื่อน	Unfriend
+ลบเพื่อนแล้ว	Friend removed
+ส่ง	Send
+ส่งคำขอเป็นเพื่อนแล้ว	Friend request sent
+ส่งคำขอแล้ว / บล็อกไว้	Requests sent / blocked
+ส่งรายงานแล้ว ขอบคุณ · บล็อกคนนี้ได้ที่แท็บเพื่อน	Report sent, thank you · you can block this person in the Friends tab
+ส่งแล้ว	Sent
+หย่า	Divorce
+ห้อยพระที่มีพุทธคุณ "เสน่ห์" (พระขุนแผน พระนางพญา) ช่วยเสริมเสน่ห์ให้คนรัก	Wear amulets with the "Charm" power (Khun Phaen, Nang Phaya) to boost your charm
+เพิ่มเพื่อน	Add friend
+เพื่อน	Friends
+เพื่อนของคุณ	Your friends
+เริ่มคุยกับ {} ได้เลย	Start chatting with {}
+เลิกบล็อก	Unblock
+เลิกบล็อกแล้ว	Unblocked
+แชท	Chat
+แต่งงานกับ {}	Married to {}
+แต่งงานกับเพื่อนที่รู้ใจ	Marry the friend who gets you
+ไปที่แท็บ "เพื่อน" แล้วกด "ขอแต่งงาน" กับเพื่อนที่รู้ใจ · ค่าแหวนหมั้น {} บาท	Go to the "Friends" tab and tap "Propose" next to your special friend · engagement ring {} baht
+ไม่มีผู้เล่นคนอื่นอยู่แถวนี้ตอนนี้	No other players nearby right now
+ไม่รับ	Decline
+ไม่รับคำขอแล้ว	Request declined
+กระติกน้ำ	Water bottle
+กระเป๋าเป้	Backpack
+กะละมัง	Washbasin
+ของทำบุญจากวัด · รางวัลใหญ่ขอบทอง	Merit gifts from the temple · gold-rimmed grand prizes
+ของรางวัล	Prizes
+จักรยาน	Bicycle
+ช้อนส้อม	Cutlery
+ตู้เย็น	Fridge
+ทีวี	TV
+น้ำปลา	Fish sauce
+ผงซักฟอก	Detergent
+ฟูก	Mattress
+มาม่า	Instant noodles
+ยาสีฟัน	Toothpaste
+สบู่	Soap
+สลาก {} ได้…	Ticket {} wins…
+สลากเลขที่	Ticket no.
+สอยดาวได้ {}	Star-pick won {}
+สอยสลากจากต้นไม้ ลุ้นของรางวัลจากงานบุญ	Pick a ticket from the tree and win prizes from the merit fair
+หม้อหุงข้าว	Rice cooker
+เลือกสลาก 1 ใบจากต้นไม้ · ใบละ {} บาท	Pick 1 ticket from the tree · {} baht each
+เสื่อ	Mat
+ความดังเพลง	Music volume
+คุณภาพภาพ (ลดลงถ้าเครื่องร้อนหรือกระตุก)	Graphics quality (lower it if the phone gets hot or stutters)
+บัญชี · รหัสกู้คืน	Account · recovery code
+ปิดเพลง	Music off
+เพลงประจำสถานที่	Location music
+เพลงประจำสถานที่ · ความดังเสียง · คุณภาพภาพ	Location music · volume · graphics quality
+เสียงเอฟเฟกต์และเสียงสถานที่	Effects and ambient sounds
+กรุงเทพฯ	Bangkok
+ขึ้นเวทีเป็นนักดนตรี รับทิปจากผู้ชม	Get on stage as a musician and earn tips from the crowd
+ข้างเวทีมวยงานวัด	Beside the temple fair ring
+ข้างในโรงเรียน	Inside the school
+คอกสอยดาว	Star-pick booth
+คอกสอยดาว · คอก ก.ไก่ หน้าวัด	Star-pick booth · alphabet booth by the temple
+คอกห้องเรียน · กระดานดำ	Classroom booth · blackboard
+คอนเสิร์ตริมทะเล ระดับประเทศ	National seaside concert
+งานวัด งานประเพณี ทุกเดือน	Temple fairs and festivals every month
+งานวัดหมู่บ้าน	Village temple fair
+ชิงช้าสวรรค์ ม้าหมุน มหาลัย ก.ไก่ ชกมวยงานวัด	Ferris wheel, carousel, alphabet game, temple boxing
+ซื้อบัตร 20 บาท ขึ้นไปรำรอบโต๊ะดอกไม้	Buy a 20 baht ticket and dance around the flower table
+ดีไซน์ใหม่	New design
+ตลาดนัด ร้านค้าชุมชน	Flea market, community store
+ตัวละคร	Characters
+ตัวละครชาย	Male character
+ตัวละครหญิง	Female character
+ตัวเรือใหม่ · นั่งในเรือ	New boat · sit in the boat
+ต้นสอยดาวกลางคอก	Star-pick tree in the booth
+ถนนสี่เลน รถไฟฟ้า	Four-lane road, skytrain
+ทรงผม · สีชุด	Hairstyle · outfit colors
+ทางเท้าฝั่งร้าน	Shop-side sidewalk
+ทางเท้าฝั่งใต้	South sidewalk
+บ้านไม้ใต้ถุนสูง ทำนา เลี้ยงไก่ เลี้ยงวัว	Stilt house, rice farming, chickens, cows
+ประตูด้านข้าง	Side gate
+ป้ายบอกทาง	Signposts
+มองข้ามแม่น้ำเจ้าพระยา	Across the Chao Phraya River
+มุมบน	Top corner
+มุมสูง	High angle
+ริมแม่น้ำเจ้าพระยา	Along the Chao Phraya River
+ลานอเนกประสงค์	Multi-purpose yard
+ลิฟต์สถานีรถไฟฟ้า	Skytrain station elevator
+วัด เวที ค่ายมวย	Temple, stage, boxing camp
+วัดพระแก้ว	Wat Phra Kaew
+วัดพระแก้วยามค่ำ	Wat Phra Kaew at night
+วัดยามค่ำคืน	Temple at night
+วัดอรุณ	Wat Arun
+วัดอรุณยามค่ำ	Wat Arun at night
+สนามหลวง	Sanam Luang
+สุวรรณภูมิ	Suvarnabhumi
+หนังกลางแปลง · ชิงช้าสวรรค์ · เวทีรำวง	Outdoor movie · Ferris wheel · ramwong stage
+ห้องเรียน · ห้องสมุด	Classroom · library
+เดินเข้าได้ · เวทีมวย	Walk-in · boxing ring
+เที่ยวทะเล พักโรงแรมริมหาด	Beach trips, beachfront hotels
+เปิดร้าน จ้างพนักงาน ซื้อรถ ซื้อที่ดิน	Open shops, hire staff, buy cars, buy land
+เมืองชายหาดใต้ภูเขาเขียว	Beach town under green mountains
+เมืองใหญ่ รถไฟฟ้า ตลาด ธนาคาร	Big city, skytrain, market, bank
+เรือสำราญยามค่ำ	Night cruise
+เรือหางยาว	Longtail boat
+เรือหางยาว ตกปลาทะเล อาหารทะเลสด	Longtail boats, sea fishing, fresh seafood
+เวทีรำวงชาวบ้าน	Village ramwong stage
+โรงแรม ร้านอาหาร ร้านสะดวกซื้อ ร้านนวด	Hotels, restaurants, convenience stores, massage
+ใช้ชีวิตในหมู่บ้านไทย	Live life in a Thai village
+ไฟประดับ โบสถ์ เจดีย์ ดนตรีพื้นบ้าน	Lights, chapel, chedi, folk music
+คลอง · ตกปลา\nยืนบนท่าน้ำแล้วกดตกปลา	Canal · fishing\nStand on the landing and tap Fish
+ค่ายมวย	Boxing camp
+ค่ายมวย · เวทีอีเวนต์	Boxing camp · event stage
+ตลาดสด →\nเปิด 05:00-13:00	Fresh market →\nOpen 05:00-13:00
+ท่าเรือหางยาว ข้ามไปวัดอรุณ ↑\nค่าเรือ 10 บาท	Longtail pier, across to Wat Arun ↑\nFare 10 baht
+บริษัทซอฟต์แวร์	Software company
+ป้ายรถเมล์ · รถทัวร์ หมอชิต	Bus stop · coaches to Mo Chit
+ผับบลูส์	Blues pub
+ผับอินดี้	Indie pub
+ผับเพื่อชีวิต	Phuea Chiwit pub
+ย่านผับ · เพื่อชีวิต บลูส์ อินดี้\nนักดนตรี Lv 10 · กลางคืน ร้านละครั้ง	Pub street · Phuea Chiwit, blues, indie\nMusician Lv 10 · nights, once per pub
+ร้านกาแฟ	Coffee shop
+ร้านของฝาก	Souvenir shop
+ร้านขายยา	Pharmacy
+ร้านข้าวผัด	Fried rice shop
+ร้านข้าวมันไก่	Chicken rice shop
+ร้านนวดแผนไทย	Thai massage
+ร้านสะดวกซื้อ	Convenience store
+ลานวัด ↓	Temple grounds ↓
+วัดพระแก้ว · เข้าชมฟรี\nแต่งกายสุภาพ	Wat Phra Kaew · free entry\nDress politely
+สถานีสยาม	Siam station
+สนามบินสุวรรณภูมิ →\nเที่ยวบินในประเทศ	Suvarnabhumi Airport →\nDomestic flights
+สวนสาธารณะ	Park
+อบต.	TAO
+ออฟฟิศไอที	IT office
+เวทีมวยงานตำบล	Tambon boxing ring
+เวทีอีเวนต์เมือง	City event stage
+โค้ชกีฬาโรงเรียน\nค่าจ้าง 300 ฿ · ต้องมี เลเวล 8 · กีฬา Lv 4	School sports coach\nWage 300 ฿ · needs level 8 · Sports Lv 4
+ไปหมู่บ้าน / ตำบล\n(ยืนใต้ป้ายรถ)	To the village / tambon\n(stand under the bus sign)
+ไปหมู่บ้าน / ตำบล / เมือง\n(ยืนใต้ป้ายรถ)	To the village / tambon / city\n(stand under the bus sign)
+ไปหมู่บ้าน / เมือง\n(ยืนใต้ป้ายรถ)	To the village / city\n(stand under the bus sign)
+↑ ศาลพระพรหม · วัดอรุณ\n← วัดพระแก้ว · สนามหลวง	↑ Erawan Shrine · Wat Arun\n← Wat Phra Kaew · Sanam Luang
+↑ สนามบินสุวรรณภูมิ\nรถไฟฟ้า สถานีสยาม ↑	↑ Suvarnabhumi Airport\nSkytrain Siam station ↑
+ต้องบูชาก่อน	Buy it first
+ต้องเป็นพระเลเวล 30 ก่อนจึงสึกออกมาเป็นหมอผีได้	You must reach monk level 30 before leaving as an exorcist
+ต้องเป็นหมอผีก่อน (บวชจนพระเลเวล 30 แล้วสึกออกมา)	You must be an exorcist first (ordain to monk level 30, then leave)
+บวชอยู่แล้ว	Already ordained
+บารมียังไม่พอ — นั่งสมาธิในโบสถ์เพิ่มบารมีก่อน	Not enough merit — meditate in the chapel first
+ปราบผีตัวนี้ไปแล้วคืนนี้	Already banished this ghost tonight
+ผีออกเฉพาะตอนกลางคืน (19:00-05:00)	Ghosts only come out at night (19:00-05:00)
+ยังไม่ได้บวช	Not ordained
+ห้อยพระได้ไม่เกิน 3 องค์ — ถอดองค์อื่นก่อน	You can wear at most 3 amulets — take one off first
+กราบเจ้าอาวาส	Pay respects to the abbot
+บวชเป็นพระ · รับหมาวัดและกุมารทองไปเฝ้าบ้าน	Ordain as a monk · adopt a temple dog or Kuman Thong to guard your house
+บูชาพระเครื่อง	Amulets
+พระเครื่องและผ้ายันต์ ขึ้นหิ้งพระที่บ้าน กันผีกันขโมย	Amulets and yantra cloths for your home shrine, keeping ghosts and thieves away
+พระเลเวล {} · สึก หรือสึกออกมาเป็นหมอผี (พระเลเวล {})	Monk level {} · leave, or leave as an exorcist (monk level {})
+บัตรรำวง 20.-	Ramwong ticket 20.-
+รำวง	Ramwong
+รำวงชาวบ้าน	Village ramwong
+ลานอเนกประสงค์\nวันงาน: หนังกลางแปลง ชิงช้าสวรรค์ รำวง\nเกมฝีมือ ซุ้มแลกรางวัล	Multi-purpose yard\nEvent days: outdoor movie, Ferris wheel, ramwong\nSkill games, prize stall
+ไปรำวงกัน!|ไปขึ้นชิงช้าสวรรค์กัน|หนังเรื่องนี้สนุก|ซื้อบัตรรำวงมาแล้ว|ปีหน้ามาอีกนะ|ซื้อลูกชิ้นก่อน	Let's go ramwong!|Let's ride the Ferris wheel|This movie is fun|Got our ramwong tickets|Come again next year|Meatballs first
+กุฏิเจ้าอาวาส\nบวช · สึก · หมาวัด · กุมารทอง	Abbot's kuti\nOrdain · leave · temple dog · Kuman Thong
+บูชาพระเครื่อง\nกันผี · กันขโมย	Amulets\nWard off ghosts · thieves
+ป่าชุมชน\nกลางคืนมีผี · หมอผีปราบได้	Community forest\nGhosts at night · exorcists can banish them
+ป่าช้าหลังวัด\nกลางคืนมีผี · หมอผีปราบได้	Cemetery behind the temple\nGhosts at night · exorcists can banish them
+ป่าตำบล\nกลางคืนมีผี · หมอผีปราบได้	Tambon forest\nGhosts at night · exorcists can banish them
+พระเครื่อง · ผ้ายันต์	Amulets · yantra cloths
+{} · ต้องบารมี Lv {}	{} · needs merit Lv {}
+{} · อยู่ที่บ้านแล้ว	{} · already at home
+· มีกุมารทอง	· has a Kuman Thong
+มีกุมารทอง	has a Kuman Thong
+· มีหมาเฝ้าบ้าน	· has a guard dog
+มีหมาเฝ้าบ้าน	has a guard dog
+· หมอผีเลเวล {}	· exorcist level {}
+หมอผีเลเวล {}	exorcist level {}
+กันผี +{}% · กันขโมย +{}%	Ghosts +{}% · thieves +{}%
+กุฏิเจ้าอาวาส	Abbot's kuti
+ฆราวาส (ยังไม่ได้บวช)	Layperson (not ordained)
+ต้องบารมี Lv {}	Needs merit Lv {}
+ถอดขึ้นหิ้งพระ	Back to the shrine
+นั่งสมาธิในโบสถ์หน้าพระประธานเพื่อเพิ่มบารมี (จุดธูปเทียนได้บารมีมากขึ้น)	Meditate before the Buddha in the chapel for merit (incense gives more)
+บวช สึก เลี้ยงหมาวัดและกุมารทอง	Ordain, leave, raise a temple dog or Kuman Thong
+บวชเป็นพระ · ค่าอัฐบริขาร {} บาท (เลเวล {}+)	Ordain as a monk · requisites {} baht (level {}+)
+บวชเรียน	Ordination
+บวชแล้วห่มจีวร โกนผม นั่งสมาธิเพื่อเลื่อนเลเวลพระ · ทำวัตรเช้า 05-07 น. และเย็น 18-20 น. ได้ XP สองเท่า	Once ordained you wear the robe and shave your head; meditate to raise your monk level · morning chanting 05-07 and evening 18-20 give double XP
+บารมี Lv {} ({}/{}) · บ้านกันผี {}% · กันขโมย {}%	Merit Lv {} ({}/{}) · home ghost guard {}% · thief guard {}%
+บูชา {} บาท	Buy {} baht
+ป้องกัน = กันผีเข้าบ้าน · บังตา = ขโมยมองไม่เห็นบ้าน · มหานิยม = ขายของ/ภารกิจได้เงินเพิ่ม · เสน่ห์ = ทิปดนตรีเพิ่ม	Protection = keeps ghosts from your house · Concealment = thieves can't see your house · Popularity = more money from sales/quests · Charm = more music tips
+ผู้เฝ้าบ้าน	House guardians
+ผ้ายันต์ติดบ้าน (ไม่ได้ห้อยคอ)	Yantra cloth for the home (not worn)
+พระภิกษุ · พระเลเวล {}	Monk · monk level {}
+พระเครื่องและผ้ายันต์ที่บูชาแล้ว อยู่บนหิ้งพระที่บ้าน ยิ่งมากยิ่งกันผีกันขโมยได้ดี	Amulets and yantra cloths you own sit on your home shrine; the more you have, the better they keep ghosts and thieves away
+พระเลเวล {} · XP {}/{} · นั่งสมาธิในโบสถ์เพื่อเลื่อนเลเวล	Monk level {} · XP {}/{} · meditate in the chapel to level up
+พุทธคุณ:	Powers:
+พุทธคุณ	Powers
+พุทธคุณติดตัว:	Powers worn:
+พุทธคุณติดตัว	Powers worn
+ยังไม่มีอะไรเกิดขึ้น บ้านสงบดี	Nothing has happened, the house is peaceful
+ยังไม่ได้ห้อยพระ	No amulets worn
+รับ{}ไปเลี้ยง · ทำบุญ {} บาท	Adopt the {} · donate {} baht
+ศาลาบูชาพระเครื่อง	Amulet pavilion
+สึกกลับไปเป็นฆราวาส	Leave the monkhood
+สึกออกมาเป็นหมอผี	Leave as an exorcist
+สึกเป็นหมอผี (ต้องพระเลเวล {} · ตอนนี้ {})	Leave as an exorcist (needs monk level {} · now {})
+หมอผีออกปราบผีได้ตอนกลางคืน (19:00-05:00) ที่ป่าช้าหลังวัด ป่าชุมชน และป่าตำบล	Exorcists banish ghosts at night (19:00-05:00) in the cemetery behind the temple, the community forest and the tambon forest
+หมอผีเลเวล {} · พระเลเวล {}	Exorcist level {} · monk level {}
+หมาเห่าไล่ขโมยตอนกลางคืน	The dog barks thieves away at night
+ห้อยคอ	Wear
+ห้อยคอ (เต็ม {} องค์)	Wear (full, {})
+ห้อยคออยู่	Wearing
+ห้อยพระได้ {} องค์ ได้พุทธคุณติดตัว: แคล้วคลาด = หลบหมัดเท้า · หนังเหนียว = เจ็บน้อยลง	Wear up to {} amulets for their powers: Evasion = dodge punches and kicks · Toughness = take less damage
+อยู่บนหิ้งพระแล้ว	On the home shrine
+เจ้าอาวาส	Abbot
+เตือนภัยเมื่อผีหรือขโมยมาที่บ้าน	Warns you when ghosts or thieves come to the house
+เป็นพระถึงเลเวล {} แล้วสึกออกมาเป็น "หมอผี" ปราบผีได้	Reach monk level {}, then leave as an "exorcist" to banish ghosts
+เหตุการณ์ที่บ้านช่วงนี้	Recent events at home
+แตะอีกครั้ง ยืนยันบวช	Tap again to confirm ordination
+แตะอีกครั้ง ยืนยันสึก	Tap again to confirm leaving
+แตะอีกครั้ง ยืนยันสึกเป็นหมอผี	Tap again to confirm leaving as an exorcist
+{}\nได้คูปองฟรี {} ใบ · ใช้ได้ตลอดงานนี้	{}\n{} free coupons · valid for this whole fair
+{} {} ใบ	{} {} pcs
+{} ใบ	{} pcs
+คะแนนจากเกมเอาไปแลกของที่ซุ้มแลกรางวัล	Points from games can be traded at the prize stall
+คูปอง	Coupons
+ซื้อบัตร · {} ฿	Buy ticket · {} ฿
+ต้องมีบัตรผ่านประตูก่อนจึงซื้อคูปองได้	You need an entry ticket before buying coupons
+บัตรผ่านประตู	Entry ticket
+บัตรผ่านประตู · คูปองเครื่องเล่นและเกม	Entry ticket · ride and game coupons
+ปิดขาย	Sold out
+มีบัตรแล้ว ✓	Ticket ✓
+ยังไม่มีงานตอนนี้\nดูวันงานถัดไปได้ที่ปฏิทินงาน	No event right now\nCheck the next one in the events calendar
+เกมฝีมือ รอบละ 1 ใบ	Skill games, 1 per round
+เข้าเล่นเครื่องเล่นและเกมได้ตลอดงาน	Enter rides and games all fair long
+ได้คูปอง {} ใบ	Got {} coupons
+ได้บัตรผ่านประตูแล้ว! แถมคูปอง {} ใบ	Got an entry ticket! Plus {} coupons
+ชิงช้ายางรถใต้ต้นมะพร้าว แกว่งออกไปเหนือน้ำทะเล	Tire swing under the coconut palm, swinging out over the sea
+นั่งชิงช้า	Swing
+ลงจากชิงช้า	Get off the swing
+แกว่งไกวรับลมทะเล~	Swaying in the sea breeze~
+สร้างชีวิต • สร้างอนาคต • สไตล์ไทย	Build a life • Build a future • Thai style
+แตะเพื่อเริ่มเล่น	Tap to start
+กำลังนอนพักอยู่	Sleeping
+ต้องเลเวล {} ก่อน (ตอนนี้ Lv {})	Needs level {} first (now Lv {})
+บาดเจ็บ! ไปรักษาก่อน	Injured! Get treated first
+สมัครสมาชิกค่ายก่อน	Join the camp first
+เหนื่อยแล้ว!	Tired!
+30 นาที	30 min
+{} ชม.	{} h
+{} ชม. 30 นาที	{} h 30 min
+ซื้อตั๋วไม่สำเร็จ ลองใหม่	Couldn't buy the ticket, try again
+ต้องออนไลน์ก่อนซื้อตั๋ว	Go online to buy tickets
+เงินไม่พอซื้อตั๋ว	Not enough money for the ticket
+ไม่มีเที่ยวนี้	No such trip
+-฿{} ตั๋ว{}	-฿{} {} ticket
+ตัวเมืองจังหวัดของเรา	Our province's town
+นั่งเรือหางยาวข้ามทะเล	Longtail boat across the sea
+บินไปจังหวัดที่มีสนามบิน · เลือกแล้วซื้อตั๋ว	Fly to provinces with airports · choose, then buy a ticket
+บ้านเกิด	Hometown
+รถทัวร์	Coach
+รถทัวร์ปรับอากาศ · เลือกจังหวัดแล้วซื้อตั๋ว	Air-conditioned coach · choose a province and buy a ticket
+รถไฟ	Train
+รถไฟสายเหนือ อีสาน ใต้ ตะวันออก · เลือกแล้วซื้อตั๋ว	Northern, northeastern, southern and eastern lines · choose, then buy a ticket
+สถานีขนส่ง บขส. · รถทัวร์	Bus terminal · coaches
+สนามบิน · เที่ยวบินในประเทศ	Airport · domestic flights
+อยู่ที่นี่	You're here
+฿{}	฿{}
+เครื่องบิน	Plane
+เร็วๆ นี้	Coming soon
+เลือกจุดหมายปลายทาง	Choose a destination
+ใช้เวลา	Travel time
+ไปที่นี่	Go here
+ไม่มีเที่ยว	No trips
+{}  +{} ฿	{}  +{} ฿
+· พรุ่งนี้มาเปิดใหม่ได้	· come back tomorrow to open again
+พรุ่งนี้มาเปิดใหม่ได้	come back tomorrow to open again
+หีบนี้เปิดไปแล้ววันนี้ — มาใหม่พรุ่งนี้	This chest was opened today — come back tomorrow
+หีบเก่าของนักเดินเรือ · เปิดได้วันละครั้ง	An old sailor's chest · opens once a day
+เปิดหีบสมบัติ	Open treasure chest
+เปิดหีบไม่ได้ ลองใหม่	Couldn't open the chest, try again
+ได้	Got
++ โบนัส {}	+ bonus {}
+· อีก {} ม.	· {} min left
+อีก {} ม.	{} min left
+กดปุ่ม "กระเป๋า" ทางซ้าย แล้วแตะของกินเพื่อกิน	Tap the "Bag" button on the left, then tap food to eat
+กลับหมู่บ้าน ขายปลาที่ร้านค้าชุมชน	Back in the village, sell fish at the community store
+ข้าม	Skip
+จบภารกิจเริ่มต้น! ลองเปิด เมนู → "ภารกิจวันนี้" และ "ปฏิทินงาน"	Starter quests done! Try Menu → "Quests" and "Events"
+ซื้ออาหาร 1 อย่างที่ร้านค้าชุมชน	Buy 1 food item at the community store
+ตกปลาที่คลอง 1 ตัว	Catch 1 fish at the canal
+นอนพักบนเสื่อที่ชานบ้าน (ฟื้นพลังงาน)	Sleep on the porch mat (restores energy)
+นั่งรถสองแถวไป{} แล้ว: {}	Rode the songthaew to {}: {}
+ภารกิจเริ่มต้น {}/{} · รางวัล {} บาท	Starter quest {}/{} · reward {} baht
+ภารกิจเริ่มต้นสำเร็จ! +{} ฿	Starter quests complete! +{} ฿
+ยืนใต้ป้ายรถสองแถว แล้วเลือกไป "ตำบล"	Stand under the songthaew sign and choose "Tambon"
+รับวัวฟรี 1 ตัวที่โต๊ะข้าง อบต.	Get 1 free cow at the table beside the TAO
+กระสอบทราย\nLv 3+	Punching bag\nLv 3+
+ซ้อมเตะต้นกล้วย\nLv 1+	Kick the banana tree\nLv 1+
+รับซื้อปลา	Fish buyer
+ศาลากลางบ้าน	Village hall
+ไปตำบล / เมือง\n(ยืนใต้ป้ายรถ)	To the tambon / city\n(stand under the bus sign)
+บังตา	Concealment
+มหานิยม	Popularity
+หนังเหนียว	Toughness
+เสน่ห์	Charm
+แคล้วคลาด	Evasion
+กดสวมใส่ได้ฟรี	Wear for free
+กุมารทอง	Kuman Thong
+ขวด	bottles
+ของรางวัลและของใช้	Prizes and household goods
+ขายที่ลานรับซื้อหน้าไร่	Sell at the buying yard by the field
+ขายร้านค้าชุมชน	Sell at the community store
+ขายร้านค้าชุมชน {} บาท	Sell at the community store {} baht
+คัน	vehicles
+คันเบ็ด · กดใช้แทนคันเดิม	Fishing rod · tap to use it instead
+คูปองเครื่องเล่น	Ride coupons
+ชิ้น	pcs
+ตะกรุดโทน	Takrut
+ตัว	head
+ถอดชุด กลับไปใส่เสื้อผ้าของคุณเอง	Take off the outfit, back to your own clothes
+ถุง	bags
+ที่ดินข้างโคกหนองนา	Land beside Khok Nong Na
+ที่ดินในเมือง	Land in the city
+นมวัวรอรีด	Milk ready to collect
+บาท	baht
+ปลากะพงขาว	Barramundi
+ปลาช่อน	Snakehead fish
+ปลาดุก	Catfish
+ปลาตะเพียน	Silver barb
+ปลาทู	Mackerel
+ปลานิล	Tilapia
+ปลาหมึก	Squid
+ปลาอินทรี	King mackerel
+ปลาเก๋า	Grouper
+ปลูกในไร่ได้ 1 แปลงต่อชุด	Plants 1 field plot per pack
+ผ้ายันต์ท้าวเวสสุวรรณ	Thao Wessuwan yantra cloth
+ผ้ายันต์ห้าแถว	Five-row yantra cloth
+ผ้ายันต์เกราะเพชร	Diamond armor yantra cloth
+ผ้ายันต์แปดทิศ	Eight-direction yantra cloth
+พระกริ่ง	Phra Kring
+พระขุนแผน	Phra Khun Phaen
+พระนางพญา	Phra Nang Phaya
+พระปิดตา	Phra Pidta
+พระรอด	Phra Rod
+พระสมเด็จ	Phra Somdej
+พระเครื่องและเครื่องราง	Amulets and charms
+พันธุ์	Seed
+พันธุ์{}	{} seed
+ฟอง	eggs
+ฟาร์มวัวข้างโคกหนองนา	Cattle farm by Khok Nong Na
+วัวในคอก	Cows in the pen
+หมาวัดเฝ้าบ้าน	Temple dog guarding the house
+หลวงพ่อทวด	Luang Pho Thuat
+หว่านได้ 1 แปลงต่อถุง	Sows 1 plot per bag
+องค์	pcs
+อยู่บนหิ้งพระที่บ้าน กันผีกันขโมย	On the home shrine, keeping ghosts and thieves away
+อาหารวัว	Cattle feed
+เครื่องดนตรี · กดใช้เล่นแทน	Instrument · tap to play it instead
+เฝ้าบ้าน เตือนภัยตอนกลางคืน	Guards the house, warns you at night
+เมล็ด	Seeds
+เมล็ด{}	{} seeds
+เสื้อผ้าลำลอง	Casual clothes
+เหรียญหลวงพ่อรุ่นแรก	First-edition Luang Pho coin
+แต้ม	points
+แต้มเกมฝีมือ	Skill game points
+แปลง	plots
+แลกของที่ซุ้มแลกรางวัล	Trade at the prize stall
+ใช้ในงานวัด/งานกาชาด	Used at temple/Red Cross fairs
+ในข้อง · ขายที่ร้านค้าชุมชน	In your basket · sell at the community store
+ในยุ้งข้าว · ขายที่ร้านค้าชุมชน	In the rice barn · sell at the community store
+ใบ	pcs
+ไร่นาและสัตว์	Farm and animals
+{} บาท/วัน	{} baht/day
+กู้เงิน {} บาท	Borrowed {} baht
+ค่าเช่าที่ดิน ~	Land rent ~
+ค่าเช่าที่ดิน ~{}	Land rent ~{}
+จ่ายขาดทุน	Pay loss
+จ่ายขาดทุน {} บาท	Paid a loss of {} baht
+จ้างพนักงานเพิ่ม 1 คน	Hire 1 more staff
+ชำระหนี้ {} บาท	Repaid {} baht
+ซื้อ{}แล้ว	Bought {}
+ตึกแถวห้องว่าง ฝั่งขวา	Vacant shophouse, right side
+ตึกแถวห้องว่าง ฝั่งซ้าย	Vacant shophouse, left side
+ถอนเงิน	Withdraw
+ถอนเงิน {} บาท	Withdrew {} baht
+บาท/วัน	baht/day
+ปิดกิจการแล้ว	Business closed
+ฝากเงิน	Deposit
+ฝากเงิน {} บาท	Deposited {} baht
+มินิมาร์ท	Mini-mart
+รับกำไร	Collect profit
+รับกำไร {} บาท	Collected profit {} baht
+ร้านอาหาร	Restaurant
+ลดพนักงาน 1 คน	Let 1 staff go
+อาคารพาณิชย์ 3 ชั้น กลางเมือง	3-story commercial building downtown
+อาคารหัวมุมข้างตลาดสด	Corner building by the fresh market
+เดินทางเร็วขึ้น	Travel faster
+เดินทางเร็วขึ้น {}	Travel faster {}
+เปิด	Open
+เปิด{}แล้ว	Opened {}
+แล้ว	done
+โรงแรมเล็ก	Small hotel
++ ทิป	+ tips
+พานักท่องเที่ยวเที่ยวทะเลเสร็จ ได้ค่าเรือ	Finished the sea tour, earned the boat fare
+พานักท่องเที่ยวเที่ยวทะเลเสร็จ ได้ค่าเรือ {} + ทิป {} บาท	Finished the sea tour: fare {} + tips {} baht
+ชกมวยงานตำบล	Tambon boxing
+ชกมวยงานวัด	Temple fair boxing
+ชิงแชมป์	Championship
+ซ้อมชกกับคู่ซ้อม	Spar with a partner
+ซ้อมเป้าล่อกับครูฝึก	Pad training with the trainer
+ซ้อมได้ทุกเวลา	Train any time
+ดาว	Dao
+ดำ ส.ตำบล	Dam S.Tambon
+ทุก 5 วันในเกม (วันที่ 5, 10, 15, ...)	Every 5 game days (day 5, 10, 15, ...)
+น้อย ลูกบ้านนา	Noi Luk Ban Na
+พยัคฆ์	Phayak
+ยอด	Yot
+ยอดมวย{}	Top boxer {}
+ศักดิ์	Sak
+สายฟ้า	Saifa
+สิงห์	Singh
+เฉพาะงานวัดตามประเพณี (สงกรานต์ ออกพรรษา กฐิน ฯลฯ)	Only at traditional temple fairs (Songkran, End of Lent, Kathin, etc.)
+เดช ศิษย์ครูแดง	Det, student of Kru Daeng
+เดือนละครั้ง วันที่ 15	Monthly, on day 15
+เพชร	Phet
+เล็ก ศ.สมบัติ	Lek S.Sombat
+เสือ	Suea
+แก้ว ช.ไพบูลย์	Kaew Ch.Paiboon
+แชมป์มวย	Boxing champion
+ใหญ่ ท.เมืองใหม่	Yai T.Mueang Mai
+พ่อไก่	Rooster
+ลูกไก่ #	Chick #
+ลูกไก่ #{}	Chick #{}
+แม่ไก่	Hen
+(ของคุณ)	(yours)
+{} (ของคุณ)	{} (yours)
+ไก่ตาเฒ่า	Old Grandpa's chicken
+ไก่ป้าศรี	Auntie Sri's chicken
+ไก่ผู้ใหญ่บ้าน	Village headman's chicken
+ไก่ลุงมี	Uncle Mee's chicken
+(กก.)	(kg)
+{} (กก.)	{} (kg)
+{} ชิ้น	{} pcs
+มีอยู่	Owned
+มีอยู่ {}	Owned {}
+มีอยู่ {} ถุง	Owned {} bags
+ยุ้งจุ	Barn holds
+ยุ้งจุ {} กก.	Barn holds {} kg
+ในกระเป๋า	In bag
+ในกระเป๋า {}	In bag {}
+ในเล้า	In coop
+ในเล้า {}/{} ตัว	In coop {}/{}
+กีฬา	Sports
+ขับเรือพานักท่องเที่ยว	Drive tourist boats
+คณิตศาสตร์ ปริศนา วางแผน	Math, puzzles, planning
+ช่างซ่อมมอเตอร์ไซค์	Motorcycle mechanic
+ซ่อมเครื่องยนต์ ไฟฟ้า งานไม้	Engines, electrics, woodwork
+ตรรกะ	Logic
+ติวเตอร์ตรรกะ	Logic tutor
+ต้องมี	Needs
+ต้องมี {}	Needs {}
+ปฐมพยาบาล ร่างกายคน ดูแลคนไข้	First aid, anatomy, patient care
+พนักงานคอมพิวเตอร์	Computer staff
+พิมพ์งาน ใช้โปรแกรม เขียนโค้ดเบื้องต้น	Typing, using programs, basic coding
+ฟุตบอล วิ่ง มวยไทยในคาบพละ	Football, running, Muay Thai in PE class
+สุขภาพ	Health
+หมออนามัย	Health center doctor
+เลเวล	Level
+เลเวล {}	Level {}
+โค้ชกีฬาโรงเรียน	School sports coach
+· โบนัสชนะเลือกตั้ง!	· election win bonus!
+โบนัสชนะเลือกตั้ง!	election win bonus!
+กำนันทองดี	Kamnan Thongdee
+ครูวิไล	Teacher Wilai
+นายก อบต.	TAO chief
+น้าแดงใจดี	Kind Uncle Daeng
+ป้าบุญมี	Auntie Boonmee
+ป้าสมหญิง	Auntie Somying
+ผู้สมัคร	Candidates
+ผู้ใหญ่สมศักดิ์	Headman Somsak
+พี่ต้อมคนหนุ่ม	Young Tom
+พี่หนึ่งรักถิ่น	Nueng who loves home
+รับเงินเดือน	Collect salary
+รับเงินเดือน {} {} บาท{}	Collected {} salary {} baht{}
+ลงคะแนนให้	Voted for
+ลงคะแนนให้ {} แล้ว (+{} เสียง)	Voted for {} (+{} votes)
+ลุงประยูร	Uncle Prayoon
+ลุงสมชาย	Uncle Somchai
+ส.อบต.	TAO councilor
+สมัครรับเลือกตั้ง {} แล้ว! ไปหาเสียงที่ศาลากลางบ้าน	Registered to run for {}! Go campaign at the village hall
+สมาชิกสภา อบต.	TAO council member
+หมอเอก	Doctor Ek
+หาเสียงที่ศาลา ได้คะแนนนิยม +	Campaigned at the hall, popularity +
+หาเสียงที่ศาลา ได้คะแนนนิยม +{} เสียง	Campaigned at the hall, popularity +{} votes
+เสียง	votes
+เสียง)	votes)
+เสี่ยเปี๊ยก	Sia Piak
+แล้ว! ไปหาเสียงที่ศาลากลางบ้าน	! Go campaign at the village hall
+รถจักรยาน	Bicycle
++ วัดในหมู่บ้าน	+ village temple
+{} + วัดในหมู่บ้าน	{} + village temple
+ครบตัวที่	Completed at letter
+ครบตัวที่ {} ช้าไป ไม่ได้รางวัล	Completed at letter {}, too late for a prize
+ครบแถวลูกที่	Line completed at ball
+ครบแถวลูกที่ {} ช้าไปนิด ไม่ได้รางวัล	Line completed at ball {}, just too late for a prize
+ครบใน	Completed in
+ครบใน {} ตัว! รับ {} บาท	Completed in {} letters! Receive {} baht
+คอนเสิร์ตงานใหญ่	Big concert
+งานประจำเดือน	Monthly event
+ชานมไข่มุก	Bubble milk tea
+ช้อนส้อม 1 โหล	Cutlery, 1 dozen
+ช้าไป ไม่ได้รางวัล	Too late, no prize
+ช้าไปนิด ไม่ได้รางวัล	Just too late, no prize
+ดูจบแล้ว สนุกมาก!	Show's over, so fun!
+ตุ๊กตาหมี! แตกครบ 3 ลูก	Teddy bear! Popped all 3
+ตู้เย็น! รางวัลใหญ่	Fridge! Grand prize
+ทดสอบ	Test
+ทุกที่	Everywhere
+บิงโก! ครบแถวใน	Bingo! Line in
+บิงโก! ครบแถวใน {} ลูก รับ {} บาท	Bingo! Line in {} balls, receive {} baht
+ฟูกนอน	Sleeping mattress
+มาม่า 1 แพ็ค	Instant noodles, 1 pack
+ยังไม่ครบแถว เสียใจด้วย	No line, sorry
+รถจักรยาน!	Bicycle!
+รถจักรยาน! (มีแล้ว ขายต่อได้ 1,500 บาท)	Bicycle! (already owned, resells for 1,500 baht)
+รถจักรยาน! เดินทางเร็วขึ้น 10%	Bicycle! Travel 10% faster
+ริมทะเล	Seaside
+ลูกชิ้นปิ้ง	Grilled meatballs
+สนุกมาก!	So fun!
+สบู่ก้อน	Bar soap
+หมอลำ · กันตรึม	Mor lam · kantrum
+หมู่บ้าน (ลานวัด)	Village (temple grounds)
+เสียใจด้วย ไม่แตกสักลูก	Sorry, not a single pop
+โทรทัศน์! รางวัลใหญ่	Television! Grand prize
+กก. ขายให้แม่ค้าปลาได้	kg, sold to the fish vendor for
+กุ้งก้ามกราม	Giant river prawn
+จับ	Harvested
+จับ{} {} กก. ขายให้แม่ค้าปลาได้ {} บาท	Harvested {} {} kg, sold to the fish vendor for {} baht
+ปล่อยลูก	Released
+ปล่อยลูก{}ลงกระชัง {}	Released {} fry into cage {}
+ลงกระชัง	into the cage
+ให้อาหารปลากระชัง	Fed the cage fish
+ให้อาหารปลากระชัง {} แล้ว	Fed cage fish {}
+กำไร	profit
+ขาดทุน	loss
+ขายทอง {} ครึ่งสลึง +{} ฿ ({}{} ฿)	Sold {} half-salueng of gold +{} ฿ ({}{} ฿)
+ครึ่งสลึง	half-salueng
+จำนำ {} รับเงิน {} ฿ · ไถ่คืนภายใน {} วัน	Pawned {} for {} ฿ · redeem within {} days
+ซื้อทอง {} ครึ่งสลึง -{} ฿	Bought {} half-salueng of gold -{} ฿
+ทองคำแท่ง	Gold bar
+ทองคำแท่ง {} ครึ่งสลึง	Gold bar {} half-salueng
+หลุดจำนำ:	Forfeited pawn:
+หลุดจำนำ	Forfeited pawn
+หลุดจำนำ: {}	Forfeited pawn: {}
+โฉนด	Title deed
+โฉนด{}	Title deed {}
+ไถ่ถอน {} -{} ฿	Redeemed {} -{} ฿
+จองห้อง	Booked room
+จองห้อง{} แล้ว — เข้าห้องพักได้เลย (1 วันในเกม)	Booked {} — you can go to your room now (1 game day)
+วิวทะเล + อาหารเช้า 1 ชุด	Sea view + 1 breakfast
+ห้องใหญ่หรู + อาหารเช้า 2 ชุด + พลังงานเต็มทันที	Large luxury room + 2 breakfasts + full energy at once
+เตียงนุ่ม นอนฟรีทั้งวัน	Soft bed, sleep free all day
+แล้ว — เข้าห้องพักได้เลย (1 วันในเกม)	— you can go to your room now (1 game day)
+ขุมทรัพย์โจรสลัด!	Pirate treasure!
+สร้อยทองของนักเดินเรือ	A sailor's gold necklace
+เปลือกหอยมุกหายาก ขายได้	Rare pearl shell, sellable
+เหรียญเก่าในหีบ	Old coins in the chest
+แผนที่ขุมทรัพย์ทองคำ! โชคใหญ่!	Gold treasure map! Big luck!
+· ได้ค่าเช่าค้าง	· collected back rent
+ได้ค่าเช่าค้าง	collected back rent
+· ได้ค่าเช่าค้าง {} บาท	· collected back rent {} baht
+ได้ค่าเช่าค้าง {} บาท	collected back rent {} baht
+ขาย{} {} กก. ได้ {} บาท	Sold {} {} kg for {} baht
+คอกวัวแปลงใหม่	New cattle pen
+ตึกแถว 3 ชั้นให้เช่า	3-story shophouse for rent
+รื้อ	Demolish
+รื้อ{}แล้ว{}	Demolished {}{}
+สร้าง{} แล้ว {} บาท	Built {} for {} baht
+เก็บค่าเช่า	Collect rent
+ไร่ 4 แปลง	Fields, 4 plots
+เช่าเก้าอี้ชายหาด	Rent a beach chair
+คอนเสิร์ตฤดูร้อนริมทะเล	Summer beach concert
+คอนเสิร์ตเคาท์ดาวน์ริมหาด	Beach countdown concert
+งานกาชาดจังหวัด	Provincial Red Cross fair
+งานกาชาดตำบล	Tambon Red Cross fair
+งานกีฬาสีหมู่บ้าน	Village sports day
+งานของดีตำบล	Tambon products fair
+งานทอดกฐิน	Kathin ceremony
+งานทอดผ้าป่า	Pha Pa merit ceremony
+งานทอดผ้าป่าสามัคคี	Community Pha Pa ceremony
+งานบุญกลางบ้าน	Village merit festival
+งานบุญข้าวใหม่	New rice merit festival
+งานประจำปีวัด	Annual temple fair
+งานมหกรรมของดีจังหวัด	Provincial products expo
+งานมหกรรมสินค้าชุมชน	Community products expo
+งานรื่นเริงหมู่บ้าน	Village festivities
+งานลอยกระทง	Loy Krathong
+งานลานวัฒนธรรมหมู่บ้าน	Village culture fair
+งานวันมาฆบูชา	Makha Bucha Day
+งานวันวิสาขบูชา	Visakha Bucha Day
+งานวันออกพรรษา	End of Buddhist Lent
+งานวันเข้าพรรษา	Start of Buddhist Lent
+งานวันเด็กตำบล	Tambon Children's Day
+งานสงกรานต์	Songkran
+งานอีเวนต์ (โหมดทดสอบ)	Event (test mode)
+งานแข่งเรือตำบล	Tambon boat race
+งานแสดงสินค้า OTOP	OTOP fair
+ตลาดนัดคนเดินหมู่บ้าน	Village walking street market
+เทศกาลดนตรีริมหาด	Beach music festival
+เทศกาลดอกไม้ในเมือง	City flower festival
+เทศกาลผลไม้ตำบล	Tambon fruit festival
+เทศกาลอาหารในเมือง	City food festival
+เทศกาลแสงสีในเมือง	City light festival
+กลางคืน 19:00-03:00 (ร้านละครั้งต่อวัน)	Nights 19:00-03:00 (once per venue per day)
+งานวัดตามประเพณี	Traditional temple fairs
+ช่วงคอนเสิร์ตริมหาด (ดูปฏิทินงาน)	During beach concerts (see the events calendar)
+ทุกเวลา	Any time
+มนต์รักลูกทุ่ง	Mon Rak Luk Thung
+ลาวแพน	Lao Phaen
+ลำเต้ย	Lam Toei
+ลำเพลิน	Lam Phloen
+ศาลากลางหมู่บ้าน	Village hall
+สาวบ้านแต้	Sao Ban Tae
+เต้ยโขง	Toei Khong
+เพลงงานวัด	Temple fair song
+กินอาหาร {} มื้อ	Eat {} meals
+กินอาหาร 1 มื้อ	Eat 1 meal
+ก้าวแรกในหมู่บ้าน	First steps in the village
+ขายปลาหรือข้าว {} ครั้ง	Sell fish or rice {} times
+ขายปลาหรือข้าวที่ร้านค้า 1 ครั้ง	Sell fish or rice at the store once
+ขายไข่ไก่ {} ฟอง	Sell {} eggs
+ขายไข่ไก่ 5 ฟอง	Sell 5 eggs
+คลองในตำบล	Tambon canal
+ค้าขายจนเป็นที่รู้จักทั้งตำบล	A trader known across the tambon
+ซื้อของที่ร้าน {} ครั้ง	Buy at a shop {} times
+ซื้อของที่ร้าน 1 ครั้ง	Buy at a shop once
+ซ้อมมวย ชก {} ครั้ง	Boxing training, {} hits
+ซ้อมมวย ชก 30 ครั้ง	Boxing training, 30 hits
+ตกปลา {} ตัว	Catch {} fish
+ตกปลาให้ได้ 3 ตัว	Catch 3 fish
+ตำนานแห่งตำบล	Legend of the tambon
+ต้นกล้วยข้างบ้าน	Banana tree beside the house
+ปราชญ์ชาวบ้าน	Village sage
+ปลูกข้าว {} แปลง	Plant rice in {} plots
+ปลูกข้าว 1 แปลง	Plant rice in 1 plot
+ปุ่ม กิน ข้างแถบพลังงาน	The Eat button beside the energy bar
+ลงนา ปลูกข้าว เข้าโรงเรียน	Farm the paddy, plant rice, go to school
+ลูกชาวนาขยัน	Hardworking farmer's kid
+สุดยอดคนเก่งที่ทุกคนเล่าขาน	The star everyone talks about
+หัวหน้าครอบครัว	Head of the family
+เกี่ยวข้าว {} แปลง	Harvest {} plots of rice
+เกี่ยวข้าว 1 แปลง	Harvest 1 plot of rice
+เก่งทั้งวิชา งานนา และดนตรี	Good at studies, farming and music
+เข้าเรียน {} คาบ	Attend {} classes
+เข้าเรียนที่โรงเรียน 1 คาบ	Attend 1 class at school
+เริ่มชีวิตใหม่ ทำความรู้จักหมู่บ้าน	Start a new life, get to know the village
+เลี้ยงไก่ หาปลา หาเงินเข้าบ้าน	Raise chickens, catch fish, bring home money
+เล่นดนตรี {} เพลง	Play {} songs
+เล่นดนตรี 1 เพลง	Play 1 song
+เล้าไก่ข้างบ้าน	Chicken coop beside the house
+เศรษฐีประจำตำบล	Tambon millionaire
+โรงเรียนในตำบล	Tambon school
+ให้อาหารไก่ {} ครั้ง	Feed chickens {} times
+ให้อาหารไก่ 1 ครั้ง	Feed chickens once
+1 ตัว ได้	1 head for
+1 ตัว ได้ {} บาท	1 head for {} baht
+{} ตัว	{} head
+{} ถุง {} บาท	{} bags {} baht
+{}จาก อบต. 1 ตัว — ไปดูที่ฟาร์มวัวในหมู่บ้าน	{} from the TAO — go see it at the village cattle farm
+ขยายคอกวัวแล้ว	Cattle pen expanded
+ขยายคอกวัวแล้ว {} บาท · เลี้ยงได้ {}	Cattle pen expanded {} baht · holds {}
+ขวด ขายให้สหกรณ์ได้	bottles, sold to the co-op for
+ขาย{}	Sold {}
+จาก อบต. 1 ตัว — ไปดูที่ฟาร์มวัวในหมู่บ้าน	from the TAO — go see it at the village cattle farm
+ซื้อวัว 1 ตัว	Bought 1 cow
+ซื้อวัว 1 ตัว {} บาท — ได้	Bought 1 cow for {} baht — got a
+ซื้ออาหารวัว	Bought cattle feed
+ซื้ออาหารวัว {}	Bought cattle feed {}
+ตัวผู้ โตแล้วขายได้ราคาดี	bull, sells well when grown
+ตัวเมีย! โตแล้วผสมเทียมให้มีลูกได้	cow! When grown, inseminate her for calves
+ที่ยังไม่โต	not yet grown
+บาท · ลูกวัวจะเกิดในอีก	baht · the calf is born in
+บาท · เลี้ยงได้	baht · holds
+บาท — ได้	baht — got a
+ผสมเทียมแม่วัวแล้ว	Cow inseminated
+ผสมเทียมแม่วัวแล้ว {} บาท · ลูกวัวจะเกิดในอีก {} วันในเกม	Cow inseminated {} baht · the calf is born in {} game days
+รับ	Got
+รับ{}	Got {}
+รีดนม	Milk
+รีดนม {} ขวด ขายให้สหกรณ์ได้ {} บาท	Milked {} bottles, sold to the co-op for {} baht
+วันในเกม	game days
+วัวตัวผู้	Bull
+วัวตัวเมีย	Cow
+โตเต็มที่	Fully grown
+กระถางต้นไม้	Plant pot
+กระถางต้นไม้ (ราคาตลาดนัด)	Plant pot (flea market price)
+กลอง	Drums
+กาแฟสด	Fresh coffee
+กาแฟเย็น	Iced coffee
+กีต้าร์	Guitar
+ก๋วยเตี๋ยวต้มยำ	Tom yum noodles
+ก๋วยเตี๋ยวเรือ	Boat noodles
+ขยายยุ้งข้าว +200 กก.	Expand rice barn +200 kg
+ข้าวผัดทะเล	Seafood fried rice
+ข้าวมันไก่	Chicken rice
+ข้าวหอมมะลิ 105	Hom Mali 105 jasmine rice
+ข้าวเหนียว กข6	RD6 sticky rice
+ข้าวเหนียวมะม่วง	Mango sticky rice
+ข้าวเหนียวหมูปิ้ง	Sticky rice with grilled pork
+ข้าวโพด	Corn
+คีย์บอร์ด	Keyboard
+ชั้นวางของ	Shelf
+ชั้นไม้ 3 ชั้น	3-tier wooden shelf
+ชาไทย	Thai tea
+ซอ	Saw fiddle
+ตุ๊กตาหมี	Teddy bear
+ตู้เย็น 2 ประตู	2-door fridge
+ตู้เสื้อผ้า	Wardrobe
+ตู้ไม้บานคู่	Double-door wooden cabinet
+ถูกกว่าร้านค้าชุมชน	Cheaper than the community store
+ทีวีจอแบนพร้อมตู้วาง	Flat-screen TV with stand
+น้ำอัดลม	Soft drink
+ปลดล็อกการซ้อมกระสอบหนักในค่าย (ต้อง Lv 6 ด้วย)	Unlocks heavy bag training at the camp (Lv 6 needed too)
+ปลากินเร็วขึ้น ปลาหายากบ่อยขึ้น ตัวใหญ่ขึ้น 15%	Faster bites, rare fish more often, 15% bigger
+ปลากินเร็วสุด ปลาช่อน/ปลาดุกบ่อย ตัวใหญ่ขึ้น 30%	Fastest bites, snakehead/catfish often, 30% bigger
+ปลาหมึกย่าง	Grilled squid
+ปลูกได้ 1 แปลง · โต 120 วันในเกม (ปีละ 3 รุ่น) · ขาย 14 บาท/กก.	Plants 1 plot · grows in 120 game days (3 crops a year) · sells 14 baht/kg
+ปลูกได้ 1 แปลง · โต 120 วันในเกม (ปีละ 3 รุ่น) · ขาย 20 บาท/กก.	Plants 1 plot · grows in 120 game days (3 crops a year) · sells 20 baht/kg
+ผลไม้รวม	Mixed fruit
+ผัดไทย	Pad Thai
+พรมผืนใหญ่	Large rug
+พรมลายไทยสีแดง	Red Thai-pattern rug
+พลังงาน +10	Energy +10
+พลังงาน +12 · มะม่วง สับปะรด แตงโม	Energy +12 · mango, pineapple, watermelon
+พลังงาน +15	Energy +15
+พลังงาน +16	Energy +16
+พลังงาน +18	Energy +18
+พลังงาน +20	Energy +20
+พลังงาน +22	Energy +22
+พลังงาน +24	Energy +24
+พลังงาน +25	Energy +25
+พลังงาน +26	Energy +26
+พลังงาน +28	Energy +28
+พลังงาน +30	Energy +30
+พลังงาน +32	Energy +32
+พลังงาน +34	Energy +34
+พลังงาน +35	Energy +35
+พลังงาน +36	Energy +36
+พลังงาน +8	Energy +8
+พัดลม	Fan
+พัดลมตั้งพื้น คลายร้อน	Floor fan to beat the heat
+พัดลมมือสอง	Second-hand fan
+พันธุ์ข้าวหอมมะลิ (ราคาตลาด)	Jasmine rice seed (market price)
+พันธุ์ข้าวหอมมะลิ 105 (1 ถุง)	Hom Mali 105 rice seed (1 bag)
+พันธุ์ข้าวเหนียว กข6 (1 ถุง)	RD6 sticky rice seed (1 bag)
+พิณ	Phin lute
+พื้นบ้าน · ทิป x1.05 · โบนัสที่หมู่บ้าน/งานวัด	Folk · tips x1.05 · bonus at the village/temple fair
+พื้นบ้าน · ทิป x1.10 · โบนัสที่หมู่บ้าน/งานวัด	Folk · tips x1.10 · bonus at the village/temple fair
+พ่อไก่พื้นเมือง	Native rooster
+ฟังเพลงลูกทุ่ง	Listen to luk thung
+มอเตอร์ไซค์	Motorcycle
+มะพร้าวน้ำหอม	Fragrant coconut
+มันสำปะหลัง	Cassava
+มีพ่อไก่ในเล้า ไข่จะเป็นไข่มีเชื้อ ฟักได้	With a rooster in the coop, eggs are fertile and can hatch
+ยังใช้ได้ดี	Still works fine
+รถกระบะ	Pickup truck
+รถหรู	Luxury car
+รถเก๋ง	Sedan
+ระนาด	Ranat xylophone
+วิทยุ	Radio
+วิทยุมือสอง	Second-hand radio
+สมาชิกค่ายมวย	Boxing camp membership
+สากล · ทิป x1.15 · โบนัสที่ผับ/อีเวนต์เมือง	Western · tips x1.15 · bonus at pubs/city events
+สากล · ทิป x1.25 · โบนัสที่ผับ/อีเวนต์เมือง	Western · tips x1.25 · bonus at pubs/city events
+ส้มตำ	Som tam
+หมอนข้าง	Bolster pillow
+หมอนข้าง (ราคาตลาดนัด)	Bolster pillow (flea market price)
+หมอนข้างนุ่มๆ ไว้กอดนอน	Soft bolster to hug while you sleep
+ออกไข่เมื่อได้กินอาหาร · ค่าความสวยสุ่ม	Lays when fed · random beauty
+อาหารไก่ (1 ถุง)	Chicken feed (1 bag)
+อาหารไก่ (ราคาตลาด)	Chicken feed (market price)
+อ้อย	Sugarcane
+เกาเหลาหมูตุ๋น	Stewed pork soup
+เก็บข้าวได้มากขึ้น (สูงสุด 1,400 กก.)	Store more rice (up to 1,400 kg)
+เก้าอี้ไม้	Wooden chair
+เก้าอี้ไม้สัก	Teak chair
+เตียงนอน	Bed
+เตียงไม้พร้อมฟูก	Wooden bed with mattress
+เบส	Bass
+เบ็ดคาร์บอน	Carbon rod
+เบ็ดไฟเบอร์	Fiberglass rod
+เบ็ดไม้ไผ่	Bamboo rod
+เพิ่มความเขียวในบ้าน	Adds greenery to your home
+เสื่อ (ราคาตลาดนัด)	Mat (flea market price)
+เสื่อกก ปูนั่งเล่นกลางบ้าน	Reed mat for lounging at home
+แคน	Khaen
+แม่ไก่พื้นเมือง	Native hen
+โคมไฟ	Lamp
+โคมไฟตั้งพื้น	Floor lamp
+โจ๊กหมู	Pork congee
+โต๊ะนั่งพื้น กินข้าวกับครอบครัว	Low table, eat with the family
+โต๊ะเตี้ย	Low table
+โต๊ะไม้	Wooden table
+โต๊ะไม้สูง	Tall wooden table
+โทรทัศน์	Television
+ให้อาหารเล้า 1 ครั้ง อิ่ม 1 วันในเกม (แม่ไก่ถึงจะออกไข่)	Feed the coop once, full for 1 game day (needed for hens to lay)
+ไก่ทอด	Fried chicken
+{} ขอคุณแต่งงาน!	{} proposed to you!
+{} ขอหย่าแล้ว	{} asked for a divorce
+{} ตอบตกลงแต่งงาน!	{} said yes!
+{} ปฏิเสธคำขอแต่งงาน · ได้ค่าแหวนคืน	{} declined the proposal · ring money refunded
+{} แต่งงานไปแล้ว · ได้ค่าแหวนคืน	{} is already married · ring money refunded
+ขอคุณแต่งงาน!	proposed to you!
+ขอหย่าแล้ว	asked for a divorce
+ตอบตกลงแต่งงาน!	said yes!
+ปฏิเสธคำขอแต่งงาน · ได้ค่าแหวนคืน	declined the proposal · ring money refunded
+ปฏิเสธคำขอแต่งงานแล้ว	Proposal declined
+มอบแหวนขอ	Gave a ring to
+มอบแหวนขอ{}แต่งงานแล้ว รอคำตอบนะ	Gave {} a ring and proposed, wait for the answer
+หย่าแล้ว	Divorced
+แชทจาก	Chat from
+แชทจาก {}	Chat from {}
+แต่งงานกับ	Married to
+แต่งงานกับ{}แล้ว! ยินดีด้วย	Married {}! Congratulations
+แต่งงานแล้ว รอคำตอบนะ	proposed, wait for the answer
+แต่งงานไปแล้ว · ได้ค่าแหวนคืน	is already married · ring money refunded
+แล้ว! ยินดีด้วย	! Congratulations
+{}มาหลอกทั้งคืน นอนไม่หลับ พลังงาน -10 · บูชาพระเครื่องหรือผ้ายันต์ไว้กันผี	A {} haunted you all night, no sleep, energy -10 · keep amulets or yantra cloths against ghosts
+{}หนีไปได้! ลองใหม่คืนนี้	The {} got away! Try again tonight
+{}เข้าบ้านเมื่อคืน กินของกินไป {} อย่าง · บูชาพระเครื่องหรือผ้ายันต์ไว้กันผี	A {} got into the house last night and ate {} food items · keep amulets or yantra cloths against ghosts
+กุมารทองปลุกให้ตื่น ขโมยตกใจหนีไป ไม่มีอะไรหาย	The Kuman Thong woke you, the thief ran off, nothing lost
+กุมารทองเตือน!	The Kuman Thong warned you!
+กุมารทองเตือน! {}มาด้อมๆ หน้าบ้านเมื่อคืน แต่เข้าบ้านไม่ได้	The Kuman Thong warned you! A {} prowled outside last night but couldn't get in
+ขึ้นหิ้งพระที่บ้านแล้ว	placed on the home shrine
+ขึ้นหิ้งพระแล้ว	on the shrine
+ขโมยขึ้นบ้านเมื่อคืน เงินหายไป	A thief broke in last night and took
+ขโมยขึ้นบ้านเมื่อคืน เงินหายไป {} บาท · รับหมาวัดไปเลี้ยงเฝ้าบ้านได้	A thief broke in last night and took {} baht · adopt a temple dog to guard the house
+ขโมยขึ้นบ้านเมื่อคืน แต่ไม่เจออะไรมีค่า	A thief broke in last night but found nothing of value
+ถอด	Took off
+ถอด{}ขึ้นหิ้งพระแล้ว	Put {} back on the shrine
+นางตะเคียน	Nang Takhian
+นางตานี	Nang Tani
+บวชแล้ว สาธุ! ห่มจีวรเรียบร้อย · นั่งสมาธิในโบสถ์เพื่อเลื่อนเลเวลพระ	Ordained, sathu! Robed up · meditate in the chapel to raise your monk level
+บาท · รับหมาวัดไปเลี้ยงเฝ้าบ้านได้	baht · adopt a temple dog to guard the house
+บูชา	Bought
+บูชา{}ขึ้นหิ้งพระที่บ้านแล้ว	Placed {} on your home shrine
+บูชา{}แล้ว ห้อยคอไว้เลย · ได้พุทธคุณติดตัว	Got {}, wearing it now · its powers go with you
+ปราบ	Banished
+ปราบ{}สำเร็จ! ชาวบ้านให้ค่าครู {} บาท	Banished the {}! The villagers paid you {} baht
+ผีกระหัง	Phi Krahang
+ผีพราย	Phi Phrai
+ผีเปรต	Phi Pret
+มาด้อมๆ หน้าบ้านเมื่อคืน แต่เข้าบ้านไม่ได้	prowled outside last night but couldn't get in
+มาหลอกทั้งคืน นอนไม่หลับ พลังงาน -10 · บูชาพระเครื่องหรือผ้ายันต์ไว้กันผี	haunted you all night, no sleep, energy -10 · keep amulets or yantra cloths against ghosts
+รับ{}ไปเลี้ยงเฝ้าบ้านแล้ว	Adopted the {} to guard the house
+สำเร็จ! ชาวบ้านให้ค่าครู	banished! The villagers paid you
+สึกออกมาเป็นหมอผีแล้ว! ออกไปปราบผีในป่าช้าและป่าชุมชนตอนกลางคืนได้	Left the monkhood as an exorcist! Banish ghosts in the cemetery and community forest at night
+สึกแล้ว กลับไปใช้ชีวิตฆราวาส	Left the monkhood, back to lay life
+หนีไปได้! ลองใหม่คืนนี้	got away! Try again tonight
+หมาวัด	Temple dog
+หมาเห่าไล่ขโมยที่มาด้อมๆ บ้านเมื่อคืน ไม่มีอะไรหาย	The dog barked off a thief prowling around last night, nothing lost
+ห้อย	Wearing
+ห้อย{}ไว้ที่คอแล้ว	Now wearing {}
+อย่าง · บูชาพระเครื่องหรือผ้ายันต์ไว้กันผี	items · keep amulets or yantra cloths against ghosts
+เข้าบ้านเมื่อคืน กินของกินไป	got into the house last night and ate
+แม่นาก	Mae Nak
+แล้ว ห้อยคอไว้เลย · ได้พุทธคุณติดตัว	, wearing it now · its powers go with you
+ไปเลี้ยงเฝ้าบ้านแล้ว	adopted to guard the house
+ไว้ที่คอแล้ว	around your neck
+กูรูคอมพิวเตอร์	Computer guru
+ขายปลา ข้าว ไข่ และซื้อของที่ร้าน	Sell fish, rice, eggs and buy at shops
+คนขับเรือ	Boatman
+คนเลี้ยงปลา	Fish farmer
+คนเลี้ยงวัว	Cattle herder
+คนเลี้ยงไก่	Chicken farmer
+ครูชำนาญการ	Senior teacher
+ครูดนตรี	Music teacher
+ครูประจำชั้น	Homeroom teacher
+ครูอัตราจ้าง	Contract teacher
+ครูแห่งชาติ	National teacher
+จูเนียร์โปรแกรมเมอร์	Junior programmer
+ชาวนา	Farmer
+ชาวนาขยัน	Hardworking farmer
+ชาวนาชำนาญ	Skilled farmer
+ชาวนาตัวอย่าง	Model farmer
+ชาวนามือใหม่	Novice farmer
+ชาวประมง	Fisher
+ชาวประมงชำนาญ	Skilled fisher
+ช่างคอม	Computer tech
+ช่างคอมประจำตำบล	Tambon computer tech
+ช่างคอมฝึกหัด	Trainee computer tech
+ช่างซ่อมฝึกหัด	Trainee mechanic
+ช่างฝีมือ	Craftsman
+ช่างเทพ	Master mechanic
+ซีทีโอ	CTO
+ซีเนียร์โปรแกรมเมอร์	Senior programmer
+ซ้อมมวย ชกต่อย ขึ้นเวที	Train boxing, punch, fight in the ring
+ดูแลวัว รีดนม ขายวัว	Tend cows, milk, sell cattle
+ตกปลาในคลองและทะเล	Fish in canals and the sea
+ตำนานนายฮ้อย	Legendary cattle trader
+ตำนานโคกหนองนา	Legend of Khok Nong Na
+นักการเมือง	Politician
+นักดนตรี	Musician
+นักดนตรีงานวัด	Temple fair musician
+นักดนตรีหน้าใหม่	New musician
+นักตกปลา	Angler
+นักมวย	Boxer
+นักมวยฝีมือดี	Skilled boxer
+นักเรียนแพทย์	Medical student
+นายกเทศมนตรี	Mayor
+นายฮ้อยฝึกหัด	Trainee cattle trader
+บวชจนเลเวล 30 แล้วสึกออกมา ปราบผีตอนกลางคืนในป่าช้าและป่าชุมชน	Ordain to level 30, then leave and banish ghosts at night in the cemetery and community forest
+บวชที่วัด นั่งสมาธิในโบสถ์ (temple.lua)	Ordain at the temple, meditate in the chapel
+ปรมาจารย์ปราบผี	Grandmaster exorcist
+ปราชญ์ชาวนา	Farming sage
+ปลูกข้าว เกี่ยวข้าว ที่โคกหนองนา	Plant and harvest rice at Khok Nong Na
+ผู้ช่วยพยาบาล	Nurse's aide
+ผู้ช่วยสอน	Teaching assistant
+ผู้นำชุมชน	Community leader
+ผู้สมัครหน้าใหม่	New candidate
+ผู้อำนวยการโรงเรียน	School director
+ผู้เชี่ยวชาญบ่อปลา	Fish pond expert
+ผู้เชี่ยวชาญไอที	IT expert
+พระนวกะ	Junior monk
+พระนักปฏิบัติ	Practicing monk
+พระบวชใหม่	Newly ordained monk
+พระสงฆ์	Monk
+พระอาจารย์	Venerable teacher
+พรานปลาประจำคลอง	Canal fishing hunter
+พ่อค้าขายส่ง	Wholesaler
+พ่อค้าตลาดนัด	Flea market trader
+พ่อค้าแม่ค้า	Merchant
+มือใหม่หัดตกปลา	Novice angler
+มือใหม่เลี้ยงปลา	Novice fish farmer
+มือใหม่เลี้ยงวัว	Novice cattle herder
+มือใหม่เลี้ยงไก่	Novice chicken farmer
+ยอดมวยไทย	Muay Thai great
+รัฐบุรุษ	Statesman
+ราชาข้าวหอม	Jasmine rice king
+ราชาแห่งสายน้ำ	King of the waters
+ราชาไก่ชน	Fighting cock king
+ลูกศิษย์หมอผี	Exorcist's apprentice
+ศิลปินพื้นบ้าน	Folk artist
+ศิลปินแห่งชาติ	National artist
+สมัครเลือกตั้งที่ อบต. หาเสียงที่ศาลา	Run for election at the TAO, campaign at the hall
+หมอผี	Exorcist
+หมอผีชื่อดัง	Famous exorcist
+หมอผีประจำหมู่บ้าน	Village exorcist
+หมอผีฝึกหัด	Trainee exorcist
+หมอเทวดา	Miracle doctor
+หลวงพ่อ	Luang Pho
+หัดเขียนโค้ด	Learning to code
+หัดเล่นดนตรี	Learning music
+หัดใช้คอม	Learning computers
+หัวหน้าช่าง	Head mechanic
+หัวหน้าทีมเทค	Tech lead
+อาจารย์ใหญ่สายไสย	Grand master of the occult
+เกจิอาจารย์	Revered master monk
+เจ้าของบริษัททัวร์	Tour company owner
+เจ้าของบ่อปลา	Fish pond owner
+เจ้าของฟาร์มวัว	Cattle farm owner
+เจ้าของฟาร์มไก่ไข่	Egg farm owner
+เจ้าของร้านค้า	Shop owner
+เจ้าของเล้าไก่	Coop owner
+เจ้าสัว	Tycoon
+เซียนตกปลา	Fishing master
+เซียนไก่	Chicken master
+เด็กฝึกงานช่าง	Mechanic intern
+เถ้าแก่	Boss
+เรียนคอมพิวเตอร์ ทำงานพนักงานคอม	Study computers, work as computer staff
+เรียนคอมและตรรกะ ทำงานโปรแกรมเมอร์	Study computers and logic, work as a programmer
+เรียนตรรกะ เป็นโค้ชและติวเตอร์	Study logic, be a coach and tutor
+เรียนวิชาช่าง ทำงานช่างซ่อม	Study mechanics, work as a repairman
+เรียนสุขภาพ ทำงานที่โรงพยาบาล	Study health, work at the hospital
+เลี้ยงปลา	Fish farming
+เลี้ยงปลาในกระชังที่สระโคกหนองนา	Raise fish in cages at the Khok Nong Na pond
+เลี้ยงวัว	Cattle
+เล่นดนตรีที่ศาลาและงานวัด	Play music at the hall and temple fairs
+เศรษฐีบ่อปลา	Fish pond millionaire
+เศรษฐีโคนม	Dairy millionaire
+แชมป์เวทีตำบล	Tambon ring champion
+แพทย์ประจำโรงพยาบาล	Hospital doctor
+แพทย์ผู้เชี่ยวชาญ	Specialist doctor
+แม่ค้ามือใหม่	Novice trader
+ให้อาหารไก่ ขายไข่	Feed chickens, sell eggs
+ไกด์นำเที่ยว	Tour guide
+ไกด์ฝึกหัด	Trainee guide
+ไกด์มืออาชีพ	Professional guide
+ไกด์ระดับโลก	World-class guide
+ไอทีซัพพอร์ต	IT support
+ซื้อตั๋วแล้ว — ออกเดินทาง!	Ticket bought — off you go!

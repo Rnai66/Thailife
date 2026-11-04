@@ -111,7 +111,7 @@ public class GameAudio : MonoBehaviour
 
     // Sounds too long to make in one frame (generated on a worker thread)
     private static bool Long(string name) =>
-        name == "chant" || name.EndsWith("_bell") || name == "buffalo" || name == "cow" || name.StartsWith("bgm");
+        name == "chant" || name.EndsWith("_bell") || name.EndsWith("_bells") || name == "temple_gong" || name == "buffalo" || name == "cow" || name.StartsWith("bgm");
 
     private static AudioSource Source(GameObject go, AudioClip clip, bool loop, float volume, bool spatial)
     {
