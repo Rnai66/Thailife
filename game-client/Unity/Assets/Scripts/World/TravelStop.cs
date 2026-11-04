@@ -20,8 +20,9 @@ public class TravelStop : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        // Only the local player (remote avatars are triggers without a PlayerController)
-        if (other.GetComponent<PlayerController>() != null)
+        // Only the local player (remote avatars are triggers without a PlayerController). Arriving by
+        // songthaew puts you right under the stop: don't pop the map up again as you get off.
+        if (other.GetComponent<PlayerController>() != null && Time.timeSinceLevelLoad > 3f)
             TravelMenu.Show(title, boat, intercity);
     }
 

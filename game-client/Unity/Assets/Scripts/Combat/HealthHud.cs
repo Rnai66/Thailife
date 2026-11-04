@@ -22,8 +22,9 @@ public class HealthHud : MonoBehaviour
     private Text energyLabel;
 
     private RectTransform menuColumn;
-    private Image menuDisc, menuGlyph, questDisc, calendarDisc;
-    private Text menuCaption, questCaption, nameCaption, careerCaption;
+    private Image menuDisc, menuGlyph, questDisc, calendarDisc, autoDisc, socialDisc;
+    private Text autoCaption;
+    private Text menuCaption, questCaption, nameCaption, careerCaption, socialCaption;
 
     private void Awake()
     {
@@ -74,11 +75,22 @@ public class HealthHud : MonoBehaviour
         bool questOnline = quest != null && quest.IsOnline;
         bool reward = questOnline && quest.HasReward;
         bool open = menuColumn.gameObject.activeSelf;
-        menuCaption.text = open ? "ปิด" : eventOn ? "มีงานวันนี้!" : reward ? "รับรางวัล!" : "เมนู";
-        menuDisc.color = !open && (eventOn || reward) ? DiscAlert : DiscColor; // golden when an event is on or a reward waits
+        var social = SocialClient.Instance;
+        int unread = social != null ? social.UnreadTotal : 0;
+        bool love = social != null && social.Wedding?.proposals != null && social.Wedding.proposals.Length > 0;
+        int asks = 0;
+        if (social != null) foreach (var f in social.FriendList) if (f.state == SocialClient.Requested) asks++;
+        bool socialAlert = unread > 0 || love || asks > 0;
+        socialDisc.color = socialAlert ? DiscAlert : DiscColor;
+        socialCaption.text = love ? "ขอแต่งงาน!" : asks > 0 ? $"ขอเป็นเพื่อน ({asks})" : unread > 0 ? $"แชทใหม่ ({unread})" : "เพื่อน/แชท";
+        menuCaption.text = open ? "ปิด" : eventOn ? "มีงานวันนี้!" : reward ? "รับรางวัล!" : socialAlert ? "มีข้อความ!" : "เมนู";
+        menuDisc.color = !open && (eventOn || reward || socialAlert) ? DiscAlert : DiscColor; // golden when an event is on or a reward waits
         menuGlyph.sprite = HudIcons.Get(open ? "close" : "menu");
         calendarDisc.color = eventOn ? DiscAlert : DiscColor;
         questDisc.color = reward ? DiscAlert : DiscColor;
+        bool auto = AutoQuest.On;
+        autoDisc.color = auto ? Color.Lerp(DiscAlert, new Color(0.2f, 0.55f, 0.75f, 0.95f), Mathf.PingPong(Time.time, 1f)) : DiscColor;
+        autoCaption.text = auto ? "ออโต้: เปิด" : "ออโต้";
         questCaption.text = !questOnline ? "ภารกิจ" : reward ? "รับรางวัล!" : $"ภารกิจ {quest.DoneCount}/{quest.Current.quests?.Length ?? 0}";
         if (career == null || career.Current == null) RefreshCareer(null, null); // keep the offline reason current
 
@@ -174,6 +186,7 @@ public class HealthHud : MonoBehaviour
         var left = Column(canvasGo.transform, "HudButtons", 120f);
         Round(left, 0, "bag", "กระเป๋า", BagUI.Toggle, out _, out _, out _);
         Round(left, 1, "menu", "เมนู", ToggleMenu, out menuDisc, out menuGlyph, out menuCaption);
+        Round(left, 2, "auto", "ออโต้", AutoQuest.Toggle, out autoDisc, out _, out autoCaption); // the character does today's quests
 
         menuColumn = Column(canvasGo.transform, "MenuColumn", 120f + Disc + 34f);
         int row = 0;
@@ -184,6 +197,7 @@ public class HealthHud : MonoBehaviour
         Entry("quest", "ภารกิจ", QuestUI.Toggle, out questDisc, out questCaption);
         Entry("food", "กิน", FoodUI.Toggle, out _, out _);
         Entry("chat", "ทักทาย", EmoteUI.Toggle, out _, out _);
+        Entry("friends", "เพื่อน/แชท", SocialUI.Toggle, out socialDisc, out socialCaption);
         Entry("calendar", "ปฏิทินงาน", EventCalendarUI.Toggle, out calendarDisc, out _);
         Entry("gear", "ตั้งค่า", SoundUI.Toggle, out _, out _);
         menuColumn.gameObject.SetActive(false);

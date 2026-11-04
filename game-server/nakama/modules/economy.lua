@@ -9,6 +9,7 @@ local data = require("shop_data")
 local chickens = require("chicken_core")
 local life = require("life_core")
 local quest = require("quest_core")
+local amulet = require("amulet_core")
 
 local INVENTORY = { collection = "inventory", key = "fish" }
 
@@ -133,7 +134,9 @@ local function rpc_sell_fish(context, payload)
   for _, n in pairs(items.goods) do goods = goods + n end
   local sold = (inv.total or 0) + rice_kg + goods
 
+  local charm = 0
   if value > 0 then
+    value, charm = amulet.boost(user_id, "niyom", value) -- มหานิยม: buyers pay a little more
     -- Pay first, then empty the fish basket and the rice barn (keep the biggest-fish record)
     nk.wallet_update(user_id, { [CURRENCY] = value }, { reason = "sell_produce", fish = inv.total or 0, rice_kg = rice_kg }, true)
     inv.counts = {}
@@ -150,7 +153,7 @@ local function rpc_sell_fish(context, payload)
     quest.progress(user_id, "sell_produce", 1)
   end
 
-  return view(user_id, inv, { sold = sold, earned = value })
+  return view(user_id, inv, { sold = sold, earned = value, charm_bonus = charm })
 end
 
 local GRPC_INVALID_ARGUMENT = 3

@@ -42,6 +42,20 @@ public class MatchSync : MonoBehaviour
     private Vector3 lastSentPosition;
     private float lastSentYaw;
 
+    // The other players in this place right now
+    public IEnumerable<RemotePlayer> Others
+    {
+        get { foreach (var r in remotes.Values) if (r != null) yield return r; }
+    }
+
+    public RemotePlayer FindByUser(string userId)
+    {
+        foreach (var r in remotes.Values) if (r != null && r.UserId == userId) return r;
+        return null;
+    }
+
+    public Transform LocalPlayer => localPlayer;
+
     private void Awake()
     {
         connection = GetComponent<NakamaConnection>();

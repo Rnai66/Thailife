@@ -29,10 +29,10 @@ public static class TempleLife
         foreach (float x in new[] { -42.2f, -39.8f })
             SeatedMonk(root, new Vector3(x, 0.5f, 18.6f), 0f);
 
-        Kuti(root, new Vector3(-21f, 0f, 18f), 90f);              // front faces the ubosot
+        Kuti(root, new Vector3(-43.5f, 0f, 24f), -90f);           // west side behind the sala, front faces the ubosot
         AmuletPavilion(root, new Vector3(-41f, 0f, 10.5f), -90f); // front faces the gate path
         TempleDog(root, new Vector3(-24f, 0f, 10f), new Vector2(2.5f, 1.8f), new Color(0.78f, 0.55f, 0.3f), 1);
-        TempleDog(root, new Vector3(-44.5f, 0f, 25f), new Vector2(1.5f, 2.5f), new Color(0.2f, 0.18f, 0.16f), 2);
+        TempleDog(root, new Vector3(-45f, 0f, 13.5f), new Vector2(1.4f, 1.8f), new Color(0.2f, 0.18f, 0.16f), 2);
 
         Cemetery(root);
         CommunityForest(root);
@@ -128,8 +128,8 @@ public static class TempleLife
         l.range = 3.5f;
         l.intensity = 1.2f;
 
-        // Where the feet go: below the mat, so the hips rest on the cushion with the legs folded
-        var seat = PrimitiveKit.Group("SeatPoint", g, new Vector3(0f, -0.4f, 0f));
+        // The cushion top: the player sits พับเพียบ with the hips here
+        var seat = PrimitiveKit.Group("SeatPoint", g, new Vector3(0f, 0.1f, 0.05f));
         var zone = PrimitiveKit.Group("MeditateZone", g, new Vector3(0f, 1f, -0.2f));
         var box = zone.AddComponent<BoxCollider>();
         box.isTrigger = true;

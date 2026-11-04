@@ -20,6 +20,12 @@ public class PlayerController : MonoBehaviour
     // When non-zero it takes priority over keyboard/gamepad.
     public Vector2 ExternalMoveInput { get; set; }
 
+    // Walking by itself (AutoQuest): a world-space direction, used while the player isn't steering
+    public Vector3 AutoMove { get; set; }
+
+    // The player is steering with the joystick or keys this frame
+    public bool ManualInput { get; private set; }
+
     // Lowered while blocking (PlayerActions)
     public float MoveSpeedMultiplier { get; set; } = 1f;
 
@@ -76,6 +82,7 @@ public class PlayerController : MonoBehaviour
     private void Update()
     {
         Vector2 input = InputEnabled ? ReadMoveInput() : Vector2.zero;
+        ManualInput = input.sqrMagnitude > 0.01f;
 
         Vector3 forward = cameraTransform != null ? cameraTransform.forward : Vector3.forward;
         Vector3 right = cameraTransform != null ? cameraTransform.right : Vector3.right;
@@ -86,6 +93,7 @@ public class PlayerController : MonoBehaviour
         right.Normalize();
 
         Vector3 move = forward * input.y + right * input.x;
+        if (!ManualInput && InputEnabled && AutoMove.sqrMagnitude > 0.0001f) move = new Vector3(AutoMove.x, 0f, AutoMove.z);
         move = Vector3.ClampMagnitude(move, 1f);
 
         if (move.sqrMagnitude > 0.001f)

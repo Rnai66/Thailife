@@ -9,6 +9,8 @@
 --                                                           while ordained, double at ทำวัตรเช้า/เย็น)
 --   temple_buy       {"item": id}                        -> บูชา an amulet or a yantra cloth for the home
 --                                                           shrine, adopt a temple dog, raise a กุมารทอง
+--   temple_wear      {"item": id, "wear": bool}          -> ห้อยคอ / ถอด an amulet (at most 3 worn); worn
+--                                                           amulets give their พุทธคุณ (amulet_core.lua)
 --   ghost_start      {"spot": "...", "ghost": id}        -> {token, ghost, sigils, seconds, need}
 --   ghost_finish     {"token": "...", "hits": n}         -> view + result (exorcists only, at night)
 --
@@ -21,6 +23,7 @@ local nk = require("nakama")
 local data = require("shop_data")
 local life = require("life_core")
 local trade = require("trade_core")
+local amulet = require("amulet_core")
 
 local STORE = { collection = "temple", key = "state" }
 local GRPC_INVALID_ARGUMENT, GRPC_FAILED_PRECONDITION = 3, 9
@@ -82,6 +85,7 @@ local function read(user_id)
   s.log = s.log or {}
   s.seq = s.seq or 0
   s.banished = s.banished or {} -- spot -> game day it was last banished
+  s.worn = s.worn or {}         -- amulets hanging from the neck (ids, owned)
   return s
 end
 
@@ -126,6 +130,8 @@ local function protection(s)
     if owned and it then guard, luck = guard + it.guard, luck + it.luck end
   end
   if s.exorcist then guard = guard + 25 end
+  local p = amulet.totals(s.worn)
+  guard, luck = guard + p.pongkan, luck + p.bangta
   return math.min(GUARD_CAP, guard), math.min(LUCK_CAP, luck)
 end
 
@@ -223,6 +229,13 @@ local function settle_nights(user_id, s, now)
   s.night_day = today
 end
 
+local function is_worn(s, id)
+  for _, w in ipairs(s.worn) do if w == id then return true end end
+  return false
+end
+
+local function powers_or_nil(list) return (#list > 0) and list or nil end
+
 -- ── View ──────────────────────────────────────────────────────────────────────────────────────
 local function view(user_id, s, extra)
   local trades = trade.read(user_id)
@@ -232,7 +245,8 @@ local function view(user_id, s, extra)
   for _, id in ipairs(ITEM_ORDER) do
     local it = ITEMS[id]
     table.insert(catalog, { id = id, kind = it.kind, name = it.name, price = it.price, guard = it.guard, luck = it.luck,
-                            barami = it.barami, owned = s.items[id] == true })
+                            barami = it.barami, owned = s.items[id] == true, worn = is_worn(s, id),
+                            powers = amulet.list(id) })
   end
   local ghosts = {}
   for id, g in pairs(GHOSTS) do
@@ -250,6 +264,7 @@ local function view(user_id, s, extra)
     guard = guard, luck = luck, dog = s.items.dog == true, kuman = s.items.kuman == true,
     ordain_level = ORDAIN.level, ordain_cost = ORDAIN.cost, exorcist_monk_level = EXORCIST_MONK_LEVEL,
     incense_cost = MEDITATE.incense, meditate_seconds = MEDITATE.seconds,
+    worn_max = amulet.WORN_MAX, my_powers = powers_or_nil(amulet.totals_list(amulet.totals(s.worn))),
     night = is_night(nk.time()), items = catalog, ghosts = ghosts,
     log = (#s.log > 0) and s.log or nil, banished = (#banished > 0) and banished or nil,
   }
@@ -332,8 +347,27 @@ nk.register_rpc(rpc(function(context, user_id, s, req)
   if s.barami.level < it.barami then err("barami") end
   pay(user_id, it.price, "temple_" .. req.item)
   s.items[req.item] = true
+  if amulet.ITEMS[req.item] and #s.worn < amulet.WORN_MAX then
+    table.insert(s.worn, req.item)
+    return { done = "บูชา" .. it.name .. "แล้ว ห้อยคอไว้เลย · ได้พุทธคุณติดตัว" }
+  end
   return { done = it.kind == "guardian" and ("รับ" .. it.name .. "ไปเลี้ยงเฝ้าบ้านแล้ว") or ("บูชา" .. it.name .. "ขึ้นหิ้งพระที่บ้านแล้ว") }
 end), "temple_buy")
+
+nk.register_rpc(rpc(function(context, user_id, s, req)
+  local id = req.item or ""
+  local it = ITEMS[id]
+  if not it or not amulet.ITEMS[id] then err("unknown item", GRPC_INVALID_ARGUMENT) end
+  if not s.items[id] then err("not owned") end
+  local kept = {}
+  for _, w in ipairs(s.worn) do if w ~= id then table.insert(kept, w) end end
+  if req.wear == true then
+    if #kept >= amulet.WORN_MAX then err("neck full") end
+    table.insert(kept, id)
+  end
+  s.worn = kept
+  return { done = req.wear == true and ("ห้อย" .. it.name .. "ไว้ที่คอแล้ว") or ("ถอด" .. it.name .. "ขึ้นหิ้งพระแล้ว") }
+end), "temple_wear")
 
 nk.register_rpc(rpc(function(context, user_id, s, req)
   local g = GHOSTS[req.ghost or ""]

@@ -108,6 +108,15 @@ public class PlayerCombat : MonoBehaviour
         int damage = Mathf.Min(hit.Damage, HitInfo.MaxDamageFor(hit.Attack));
         if (damage <= 0) return;
 
+        // พุทธคุณ of the amulets worn: แคล้วคลาด slips the hit, หนังเหนียว takes less of it
+        if (UnityEngine.Random.value * 100f < TempleClient.Buddha("klaeo"))
+        {
+            FloatingText.Spawn(transform.position + Vector3.up * 1.4f, "แคล้วคลาด!", new Color(1f, 0.85f, 0.35f));
+            return;
+        }
+        int tough = TempleClient.Buddha("nangniao");
+        if (tough > 0) damage = Mathf.Max(1, Mathf.RoundToInt(damage * (1f - tough / 100f)));
+
         bool blocked = actions != null && actions.IsBlocking;
         if (blocked)
         {

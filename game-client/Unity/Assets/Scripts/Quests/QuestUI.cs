@@ -5,7 +5,8 @@ using UnityEngine;
 using UnityEngine.UI;
 
 // Quests window, two tabs. ภารกิจประจำวัน: summary + countdown to the next set, one card per quest
-// with a progress bar and its reward, and the all-done bonus at the bottom. ภารกิจตามเลเวล: the
+// with a progress bar and its reward, and the all-done bonus at the bottom. A quest the character is
+// doing on auto (AutoQuest, the ออโต้ button on the HUD) shows how long it still takes. ภารกิจตามเลเวล: the
 // chapters at levels 1, 10, 25, 50, 75, 100 down the left, the picked chapter's tasks and big
 // reward on the right. Opened from the "ภารกิจ" button on the HUD.
 public class QuestUI : MonoBehaviour
@@ -75,13 +76,13 @@ public class QuestUI : MonoBehaviour
         summaryFill.pivot = new Vector2(0f, 0.5f);
         resetText = UiKit.Label(summary, 22, "", portrait ? new Vector2(170f, 22f) : new Vector2(450f, 0f), new Vector2(portrait ? 300f : 260f, 40f), UiKit.Muted, TextAnchor.MiddleRight);
 
-        list = UiKit.Container(body, new Vector2(0f, portrait ? 350f : 165f));
+        list = UiKit.Container(body, new Vector2(0f, portrait ? 350f : 200f));
 
-        var bonus = UiKit.Panel("Bonus", body, new Color32(0xFF, 0xF6, 0xDF, 0xFF), new Vector2(0f, portrait ? -260f : -255f), new Vector2(portrait ? 690f : 1180f, portrait ? 170f : 110f), shadow: true);
+        var bonus = UiKit.Panel("Bonus", body, new Color32(0xFF, 0xF6, 0xDF, 0xFF), new Vector2(0f, portrait ? -390f : -322f), new Vector2(portrait ? 690f : 1180f, portrait ? 170f : 84f), shadow: true);
         bonus.gameObject.AddComponent<Outline>().effectColor = UiKit.Gold;
-        UiKit.Label(bonus, 28, "โบนัสทำครบทุกภารกิจ", portrait ? new Vector2(0f, 52f) : new Vector2(-330f, 18f), new Vector2(portrait ? 640f : 480f, 44f), UiKit.Ink, TextAnchor.MiddleLeft).fontStyle = FontStyle.Bold;
-        bonusNote = UiKit.Label(bonus, 22, "", portrait ? new Vector2(0f, 14f) : new Vector2(-330f, -22f), new Vector2(portrait ? 640f : 480f, 36f), UiKit.Muted, TextAnchor.MiddleLeft);
-        bonusButton = UiKit.RoundButton(bonus, "", portrait ? new Vector2(0f, -45f) : new Vector2(410f, 0f), new Vector2(portrait ? 400f : 300f, portrait ? 64f : 72f), UiKit.Gold, UiKit.GoldInk, ClaimBonus, 28);
+        UiKit.Label(bonus, 28, "โบนัสทำครบทุกภารกิจ", portrait ? new Vector2(0f, 52f) : new Vector2(-330f, 16f), new Vector2(portrait ? 640f : 480f, 40f), UiKit.Ink, TextAnchor.MiddleLeft).fontStyle = FontStyle.Bold;
+        bonusNote = UiKit.Label(bonus, 22, "", portrait ? new Vector2(0f, 14f) : new Vector2(-330f, -20f), new Vector2(portrait ? 640f : 480f, 34f), UiKit.Muted, TextAnchor.MiddleLeft);
+        bonusButton = UiKit.RoundButton(bonus, "", portrait ? new Vector2(0f, -45f) : new Vector2(410f, 0f), new Vector2(portrait ? 400f : 300f, portrait ? 64f : 66f), UiKit.Gold, UiKit.GoldInk, ClaimBonus, 28);
 
         toastText = UiKit.ToastBar(window, new Vector2(0f, portrait ? -540f : -345f), 760f);
         backdrop.SetActive(false);
@@ -100,6 +101,7 @@ public class QuestUI : MonoBehaviour
         var quests = QuestClient.Instance;
         if (quests == null || !quests.IsOnline) return;
         float left = quests.Current.resets_in_s - quests.Age;
+        if (quests.AutoRunning && !showLevels) RenderDaily(); // tick the auto countdowns
         resetText.text = left > 0 ? $"ภารกิจใหม่ในอีก {Countdown(left)}" : "กำลังโหลดภารกิจใหม่...";
         if (left <= -2f && Time.time % 5f < 1f) quests.Refresh(); // a new game day started
     }
@@ -150,54 +152,71 @@ public class QuestUI : MonoBehaviour
         bonusNote.text = s.bonus_claimed ? "รับโบนัสวันนี้แล้ว" : s.all_done ? "ทำครบแล้ว! กดรับได้เลย" : "ทำภารกิจด้านบนให้ครบทั้งหมด";
         bonusButton.GetComponentInChildren<Text>().text = s.bonus_claimed ? "รับแล้ว" : $"รับ +{s.bonus} ฿";
         bonusButton.interactable = !busy && s.all_done && !s.bonus_claimed;
+        if (!s.all_done && !s.bonus_claimed)
+            bonusNote.text = AutoQuest.On ? "ออโต้เปิดอยู่ ตัวละครกำลังไล่ทำให้" : "ทำเอง หรือกดปุ่ม \"ออโต้\" ข้างจอ ให้ตัวละครไปทำเอง";
+    }
+
+    private static readonly Color AutoColor = new Color32(0x2B, 0x7A, 0x9B, 0xFF);
+
+    // Where to do it, or how long the auto run still takes
+    private string HintOf(QuestClient.Quest q)
+    {
+        if (!q.auto) return $"ที่: {q.hint}";
+        float left = q.auto_left_s - (QuestClient.Instance?.Age ?? 0f);
+        return left > 0 ? $"ออโต้: กำลังทำ… อีก {Mathf.CeilToInt(left)} วินาที" : "ออโต้: เกือบเสร็จแล้ว…";
+    }
+
+    // The button on a quest card: claim, already claimed, being done on auto, or not done yet
+    private void QuestButton(RectTransform card, QuestClient.Quest q, Vector2 at, Vector2 size, int font)
+    {
+        int id = q.id;
+        if (q.claimed)
+            UiKit.PillLabel(card, "รับแล้ว", at, size - new Vector2(0f, 6f), UiKit.OkTint, UiKit.OkGreen, font);
+        else if (q.done)
+            UiKit.RoundButton(card, "รับรางวัล", at, size, UiKit.Gold, UiKit.GoldInk, () => Claim(id), font).interactable = !busy;
+        else if (q.auto)
+            UiKit.RoundButton(card, "กำลังทำ…", at, size, UiKit.Pill, AutoColor, () => { }, font).interactable = false;
+        else
+            UiKit.RoundButton(card, "ยังไม่ครบ", at, size, UiKit.Pill, UiKit.Muted, () => { }, font).interactable = false;
     }
 
     private void AddQuestCard(QuestClient.Quest q, int index)
     {
         if (portrait) { AddQuestRow(q, index); return; }
         var card = UiKit.Panel("Quest", list, q.claimed ? (Color)new Color32(0xF3, 0xFA, 0xEC, 0xFF) : Color.white,
-            new Vector2(0f, -index * 140f), new Vector2(1180f, 125f), shadow: true);
-        card.gameObject.AddComponent<Outline>().effectColor = q.done ? UiKit.PayGreen : UiKit.CardBorder;
+            new Vector2(0f, -index * 104f), new Vector2(1180f, 94f), shadow: true);
+        card.gameObject.AddComponent<Outline>().effectColor = q.done ? UiKit.PayGreen : q.auto ? AutoColor : UiKit.CardBorder;
 
-        var tile = UiKit.Panel("Icon", card, q.done ? UiKit.OkTint : UiKit.Pill, new Vector2(-520f, 0f), new Vector2(96f, 96f));
-        UiKit.Label(tile, 30, Icons.TryGetValue(q.kind, out var icon) ? icon : "?", Vector2.zero, new Vector2(88f, 88f),
+        var tile = UiKit.Panel("Icon", card, q.done ? UiKit.OkTint : UiKit.Pill, new Vector2(-530f, 0f), new Vector2(76f, 76f));
+        UiKit.Label(tile, 26, Icons.TryGetValue(q.kind, out var icon) ? icon : "?", Vector2.zero, new Vector2(70f, 70f),
             q.done ? UiKit.OkGreen : UiKit.Price).fontStyle = FontStyle.Bold;
 
-        UiKit.Label(card, 28, q.title, new Vector2(-195f, 30f), new Vector2(540f, 42f), UiKit.Ink, TextAnchor.MiddleLeft).fontStyle = FontStyle.Bold;
-        UiKit.Label(card, 20, $"ที่: {q.hint}", new Vector2(-195f, -4f), new Vector2(540f, 30f), UiKit.Muted, TextAnchor.MiddleLeft);
+        UiKit.Label(card, 26, q.title, new Vector2(-195f, 24f), new Vector2(540f, 38f), UiKit.Ink, TextAnchor.MiddleLeft).fontStyle = FontStyle.Bold;
+        UiKit.Label(card, 20, HintOf(q), new Vector2(-195f, -6f), new Vector2(540f, 28f), q.auto ? AutoColor : UiKit.Muted, TextAnchor.MiddleLeft);
 
-        var track = UiKit.Panel("Track", card, new Color32(0xF1, 0xEF, 0xE8, 0xFF), new Vector2(-245f, -38f), new Vector2(440f, 16f));
+        var track = UiKit.Panel("Track", card, new Color32(0xF1, 0xEF, 0xE8, 0xFF), new Vector2(-245f, -32f), new Vector2(440f, 14f));
         var fill = UiKit.Panel("Fill", track, q.done ? UiKit.PayGreen : UiKit.Gold, Vector2.zero,
-            new Vector2(440f * Mathf.Clamp01((float)q.have / Mathf.Max(1, q.need)), 16f));
+            new Vector2(440f * Mathf.Clamp01((float)q.have / Mathf.Max(1, q.need)), 14f));
         fill.anchorMin = fill.anchorMax = new Vector2(0f, 0.5f);
         fill.pivot = new Vector2(0f, 0.5f);
-        UiKit.Label(card, 22, $"{q.have}/{q.need}", new Vector2(30f, -38f), new Vector2(90f, 30f), UiKit.Muted, TextAnchor.MiddleLeft);
+        UiKit.Label(card, 22, $"{q.have}/{q.need}", new Vector2(30f, -32f), new Vector2(90f, 30f), UiKit.Muted, TextAnchor.MiddleLeft);
 
-        UiKit.PillLabel(card, $"+{q.reward} ฿", new Vector2(190f, 0f), new Vector2(130f, 48f), UiKit.Pill, UiKit.Price, 26);
-
-        if (q.claimed)
-            UiKit.PillLabel(card, "รับแล้ว", new Vector2(440f, 0f), new Vector2(240f, 64f), UiKit.OkTint, UiKit.OkGreen, 26);
-        else
-        {
-            int id = q.id;
-            var b = UiKit.RoundButton(card, q.done ? "รับรางวัล" : "ยังไม่ครบ", new Vector2(440f, 0f), new Vector2(240f, 70f),
-                q.done ? UiKit.Gold : UiKit.Pill, q.done ? UiKit.GoldInk : UiKit.Muted, () => Claim(id), 28);
-            b.interactable = q.done && !busy;
-        }
+        UiKit.PillLabel(card, $"+{q.reward} ฿", new Vector2(190f, 0f), new Vector2(130f, 46f), UiKit.Pill, UiKit.Price, 26);
+        QuestButton(card, q, new Vector2(440f, 0f), new Vector2(240f, 66f), 26);
     }
 
     // Upright quest card: icon, title, where, progress on the left; reward and button stacked on the right
     private void AddQuestRow(QuestClient.Quest q, int index)
     {
         var card = UiKit.Panel("Quest", list, q.claimed ? (Color)new Color32(0xF3, 0xFA, 0xEC, 0xFF) : Color.white,
-            new Vector2(0f, -index * 140f), new Vector2(690f, 128f), shadow: true);
-        card.gameObject.AddComponent<Outline>().effectColor = q.done ? UiKit.PayGreen : UiKit.CardBorder;
+            new Vector2(0f, -index * 132f), new Vector2(690f, 122f), shadow: true);
+        card.gameObject.AddComponent<Outline>().effectColor = q.done ? UiKit.PayGreen : q.auto ? AutoColor : UiKit.CardBorder;
 
         var tile = UiKit.Panel("Icon", card, q.done ? UiKit.OkTint : UiKit.Pill, new Vector2(-290f, 0f), new Vector2(90f, 90f));
         UiKit.Label(tile, 28, Icons.TryGetValue(q.kind, out var icon) ? icon : "?", Vector2.zero, new Vector2(84f, 84f),
             q.done ? UiKit.OkGreen : UiKit.Price).fontStyle = FontStyle.Bold;
         UiKit.Label(card, 28, q.title, new Vector2(-55f, 34f), new Vector2(360f, 42f), UiKit.Ink, TextAnchor.MiddleLeft).fontStyle = FontStyle.Bold;
-        UiKit.Label(card, 20, $"ที่: {q.hint}", new Vector2(-55f, 0f), new Vector2(360f, 30f), UiKit.Muted, TextAnchor.MiddleLeft);
+        UiKit.Label(card, 20, HintOf(q), new Vector2(-55f, 0f), new Vector2(360f, 30f), q.auto ? AutoColor : UiKit.Muted, TextAnchor.MiddleLeft);
         var track = UiKit.Panel("Track", card, new Color32(0xF1, 0xEF, 0xE8, 0xFF), new Vector2(-95f, -38f), new Vector2(280f, 16f));
         var fill = UiKit.Panel("Fill", track, q.done ? UiKit.PayGreen : UiKit.Gold, Vector2.zero,
             new Vector2(280f * Mathf.Clamp01((float)q.have / Mathf.Max(1, q.need)), 16f));
@@ -206,15 +225,7 @@ public class QuestUI : MonoBehaviour
         UiKit.Label(card, 22, $"{q.have}/{q.need}", new Vector2(100f, -38f), new Vector2(90f, 30f), UiKit.Muted, TextAnchor.MiddleLeft);
 
         UiKit.PillLabel(card, $"+{q.reward} ฿", new Vector2(250f, 32f), new Vector2(150f, 40f), UiKit.Pill, UiKit.Price, 24);
-        if (q.claimed)
-            UiKit.PillLabel(card, "รับแล้ว", new Vector2(250f, -24f), new Vector2(160f, 54f), UiKit.OkTint, UiKit.OkGreen, 24);
-        else
-        {
-            int id = q.id;
-            var b = UiKit.RoundButton(card, q.done ? "รับรางวัล" : "ยังไม่ครบ", new Vector2(250f, -24f), new Vector2(160f, 58f),
-                q.done ? UiKit.Gold : UiKit.Pill, q.done ? UiKit.GoldInk : UiKit.Muted, () => Claim(id), 24);
-            b.interactable = q.done && !busy;
-        }
+        QuestButton(card, q, new Vector2(250f, -24f), new Vector2(160f, 58f), 24);
     }
 
     // ── Level chapters ──────────────────────────────────────────────────────────────────────────
@@ -335,7 +346,11 @@ public class QuestUI : MonoBehaviour
         }
         catch (ApiResponseException e)
         {
-            Notify(e.Message.Contains("already") ? "รับรางวัลนี้ไปแล้ว" : "ภารกิจยังไม่ครบ", UiKit.Danger);
+            string m = e.Message;
+            Notify(m.Contains("not enough energy") ? "พลังงานไม่พอ — พักหรือกินข้าวก่อน"
+                : m.Contains("sleeping") ? "กำลังนอนอยู่"
+                : m.Contains("nothing to do") ? "ไม่มีภารกิจให้ออโต้แล้ว"
+                : m.Contains("already") ? "รับรางวัลนี้ไปแล้ว" : "ภารกิจยังไม่ครบ", UiKit.Danger);
         }
         catch (Exception e)
         {

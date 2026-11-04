@@ -1,12 +1,14 @@
 -- Daily quest RPCs (rules in quest_core.lua).
 --   quests_get   {}                          -> today's quests
---   quests_claim {"quest": 1..3} | {"bonus": true} | {"chapter": level} -> pays the reward into the wallet
+--   quests_claim {"quest": 1..5} | {"bonus": true} | {"chapter": level} -> pays the reward into the wallet
+--   quests_auto  {"quest": 1..5} | {"all": true} -> the character does it by itself (energy, then a timer)
 -- Both return today's quests plus the level chapters (milestones) and the player's level.
 
 local nk = require("nakama")
 local quest = require("quest_core")
 local life = require("life_core")
 local data = require("shop_data")
+local amulet = require("amulet_core")
 
 local GRPC_INVALID_ARGUMENT = 3
 local GRPC_FAILED_PRECONDITION = 9
@@ -39,20 +41,66 @@ local function chapters(user_id)
   return out, level
 end
 
+-- Auto quests whose time is up get finished and their rewards paid (and the all-done bonus).
+-- Returns the baht paid.
+local function settle_auto(user_id, s)
+  local a = s.auto
+  if a == nil or a.queue == nil or #a.queue == 0 then s.auto = nil; return 0 end
+  local now = nk.time()
+  local paid, changed = 0, false
+  while #a.queue > 0 and now >= a.next_ms do
+    local q = s.list[table.remove(a.queue, 1)]
+    if q ~= nil then
+      local def = quest.POOL[q.kind]
+      q.have = def.need
+      if not q.claimed then q.claimed = true; paid = paid + def.reward end
+    end
+    a.next_ms = a.next_ms + quest.AUTO_SECONDS * 1000
+    changed = true
+  end
+  if #a.queue == 0 then s.auto = nil end
+  if changed then
+    if all_done(s) and not s.bonus_claimed then
+      s.bonus_claimed = true
+      paid = paid + quest.BONUS
+    end
+    quest.write(user_id, s)
+    paid = amulet.boost(user_id, "niyom", paid)
+    if paid > 0 then nk.wallet_update(user_id, { [data.CURRENCY] = paid }, { reason = "daily_quest_auto", day = s.day }, true) end
+  end
+  return paid
+end
+
+-- Today's quests with any finished auto ones settled
+local function read(user_id)
+  local s = quest.read(user_id)
+  local paid = settle_auto(user_id, s)
+  return s, paid
+end
+
 local function view(s, extra, user_id)
   local list = {}
+  local now = nk.time()
+  -- when each queued quest finishes
+  local finishes = {}
+  if s.auto and s.auto.queue then
+    for n, i in ipairs(s.auto.queue) do
+      finishes[i] = math.max(0, math.ceil((s.auto.next_ms + (n - 1) * quest.AUTO_SECONDS * 1000 - now) / 1000))
+    end
+  end
   for i, q in ipairs(s.list) do
     local def = quest.POOL[q.kind]
     table.insert(list, {
       id = i, kind = q.kind, title = def.title, hint = def.hint, need = def.need,
       have = q.have, reward = def.reward, done = q.have >= def.need, claimed = q.claimed,
+      auto = finishes[i] ~= nil, auto_left_s = finishes[i] or 0,
     })
   end
-  local now = nk.time()
   local next_day_ms = life.EPOCH_MS + life.game_day(now) * life.DAY_MS
   local result = {
     day = s.day, quests = list, bonus = quest.BONUS, all_done = all_done(s),
     bonus_claimed = s.bonus_claimed, resets_in_s = math.max(0, math.floor((next_day_ms - now) / 1000)),
+    auto_seconds = quest.AUTO_SECONDS, auto_energy = quest.AUTO_ENERGY,
   }
   result.chapters, result.level = chapters(user_id)
   for k, v in pairs(extra or {}) do result[k] = v end
@@ -60,15 +108,40 @@ local function view(s, extra, user_id)
 end
 
 nk.register_rpc(function(context, payload)
-  return view(quest.read(context.user_id), nil, context.user_id)
+  local s, paid = read(context.user_id)
+  return view(s, { earned = paid, auto_earned = paid }, context.user_id)
 end, "quests_get")
 
 nk.register_rpc(function(context, payload)
   local user_id = context.user_id
   local ok, req = pcall(nk.json_decode, payload or "")
   if not ok or type(req) ~= "table" then error({ "invalid payload", GRPC_INVALID_ARGUMENT }) end
+  local s, paid = read(user_id)
+  s.auto = s.auto or { queue = {}, next_ms = 0 }
+  local queued = {}
+  for _, i in ipairs(s.auto.queue) do queued[i] = true end
+  local wanted = {}
+  local one = math.floor(tonumber(req.quest) or 0)
+  for i, q in ipairs(s.list) do
+    if (req.all == true or i == one) and q.have < quest.POOL[q.kind].need and not queued[i] then table.insert(wanted, i) end
+  end
+  if #wanted == 0 then error({ "nothing to do", GRPC_FAILED_PRECONDITION }) end
+  -- as many as the energy allows (at least one, or "not enough energy")
+  local energy = life.state(user_id).energy or 0
+  local n = math.max(1, math.min(#wanted, math.floor(energy / quest.AUTO_ENERGY)))
+  life.spend(user_id, n * quest.AUTO_ENERGY)
+  if #s.auto.queue == 0 then s.auto.next_ms = nk.time() + quest.AUTO_SECONDS * 1000 end
+  for k = 1, n do table.insert(s.auto.queue, wanted[k]) end
+  quest.write(user_id, s)
+  return view(s, { earned = paid, auto_earned = paid, auto_started = n }, user_id)
+end, "quests_auto")
 
-  local s = quest.read(user_id)
+nk.register_rpc(function(context, payload)
+  local user_id = context.user_id
+  local ok, req = pcall(nk.json_decode, payload or "")
+  if not ok or type(req) ~= "table" then error({ "invalid payload", GRPC_INVALID_ARGUMENT }) end
+
+  local s = read(user_id)
   local amount
   -- The client sends every field ({"quest": 2, "bonus": false, "chapter": 0}); 0 is truthy in Lua,
   -- so only a real chapter level or bonus = true picks those branches
@@ -102,6 +175,7 @@ nk.register_rpc(function(context, payload)
   end
 
   quest.write(user_id, s)
+  amount = amulet.boost(user_id, "niyom", amount) -- มหานิยม: a little extra for each quest
   nk.wallet_update(user_id, { [data.CURRENCY] = amount }, { reason = "daily_quest", day = s.day }, true)
   return view(s, { earned = amount }, user_id)
 end, "quests_claim")

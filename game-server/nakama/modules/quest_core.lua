@@ -1,6 +1,6 @@
 -- Daily quests (ภารกิจประจำวัน) and level quests (ภารกิจตามเลเวล), shared rules (no RPCs here;
 -- quests.lua has them).
--- Every game day (36 real minutes) each player gets 3 quests picked from the jobs they can
+-- Every game day (36 real minutes) each player gets 5 quests picked from the jobs they can
 -- actually do. Other modules report what happened with quest.progress(user_id, kind, amount);
 -- progress only counts for today's quests, and rewards are claimed through quests_claim.
 
@@ -13,8 +13,13 @@ local shop = require("shop_data")
 local M = {}
 
 M.STATE = { collection = "quests", key = "today" }
-M.PER_DAY = 3
-M.BONUS = 80   -- extra baht for finishing all of today's quests
+M.PER_DAY = 5
+M.BONUS = 120  -- extra baht for finishing all of today's quests
+
+-- Auto (ออโต้): the character does a daily quest by itself — energy up front, then AUTO_SECONDS
+-- real seconds per quest, one after another; it finishes the quest and claims the reward (quests.lua)
+M.AUTO_SECONDS = 20
+M.AUTO_ENERGY = 8
 
 -- kind -> what counts, how many, reward (baht). needs = only offered when the player can do it.
 M.POOL = {
@@ -135,19 +140,25 @@ local function has_free_plot(user_id)
   return planted < 6
 end
 
-local function generate(user_id, day)
+-- Add quests the player can do until there are PER_DAY (none twice)
+local function fill(user_id, list)
   local can = { chickens = has_chickens(user_id), ripe = has_ripe(user_id), free_plot = has_free_plot(user_id) }
+  local taken = {}
+  for _, q in ipairs(list) do taken[q.kind] = true end
   local eligible = {}
   for _, kind in ipairs(M.ORDER) do
     local q = M.POOL[kind]
-    if q.needs == nil or can[q.needs] then table.insert(eligible, kind) end
+    if not taken[kind] and (q.needs == nil or can[q.needs]) then table.insert(eligible, kind) end
   end
-  local list = {}
-  for i = 1, M.PER_DAY do
+  while #list < M.PER_DAY and #eligible > 0 do
     local kind = table.remove(eligible, math.random(#eligible))
     table.insert(list, { kind = kind, have = 0, claimed = false })
   end
-  return { day = day, list = list, bonus_claimed = false }
+  return list
+end
+
+local function generate(user_id, day)
+  return { day = day, list = fill(user_id, {}), bonus_claimed = false }
 end
 
 -- Today's quests (a new set once the game day changes)
@@ -157,6 +168,9 @@ function M.read(user_id)
   local s = (#objects > 0) and objects[1].value or nil
   if s == nil or s.day ~= day then
     s = generate(user_id, day)
+    M.write(user_id, s)
+  elseif #s.list < M.PER_DAY and not s.bonus_claimed then -- the day began with fewer quests: top it up
+    fill(user_id, s.list)
     M.write(user_id, s)
   end
   return s

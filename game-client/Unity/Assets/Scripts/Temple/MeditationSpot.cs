@@ -1,8 +1,8 @@
 using UnityEngine;
 
 // The meditation mat before the Buddha in the ubosot: walk onto it to sit (MeditateUI). The player is
-// set down on `seat` (where the feet go: below the mat, so the hips rest on it with the legs folded), and the incense and candle flames (`flames`) burn while the
-// player meditates with incense lit.
+// set down sitting พับเพียบ on `seat` (the cushion: the hips rest on it, legs folded to the side), and
+// the incense and candle flames (`flames`) burn while the player meditates with incense lit.
 [RequireComponent(typeof(Collider))]
 public class MeditationSpot : MonoBehaviour
 {
@@ -59,12 +59,15 @@ public class MeditationSpot : MonoBehaviour
         player.InputEnabled = false;
         if (seat != null)
         {
-            var cc = player.GetComponent<CharacterController>();
-            float foot = cc != null ? cc.center.y - cc.height * 0.5f : 0f;
-            player.Teleport(seat.position - Vector3.up * foot, seat.rotation);
+            // Lower the body so the hips (not the feet) are on the cushion
+            var animator = player.GetComponentInChildren<Animator>();
+            var hips = animator != null && animator.isHuman ? animator.GetBoneTransform(HumanBodyBones.Hips) : null;
+            float hipHeight = hips != null ? hips.position.y - player.transform.position.y : 0.9f;
+            player.Teleport(seat.position - Vector3.up * (hipHeight - 0.12f), seat.rotation);
             player.enabled = false; // hold still on the mat
         }
-        if (player.GetComponent<SeatedPose>() == null) player.gameObject.AddComponent<SeatedPose>();
+        var pose = player.GetComponent<SeatedPose>() ?? player.gameObject.AddComponent<SeatedPose>();
+        pose.Kneel = true;
         if (flames != null) flames.SetActive(incense);
         ContextButton.Hide(this);
     }

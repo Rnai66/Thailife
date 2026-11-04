@@ -9,12 +9,22 @@ using UnityEngine;
 [RequireComponent(typeof(NakamaConnection))]
 public class TempleClient : MonoBehaviour
 {
+    // พุทธคุณ (amulet_core.lua): klaeo แคล้วคลาด, nangniao หนังเหนียว, pongkan ป้องกัน, bangta บังตา,
+    // niyom มหานิยม, sanae เสน่ห์ — points, i.e. percent
+    [Serializable]
+    public class Power
+    {
+        public string id, name;
+        public int value;
+    }
+
     [Serializable]
     public class Item
     {
         public string id, kind, name;
         public int price, guard, luck, barami;
-        public bool owned;
+        public bool owned, worn;
+        public Power[] powers;
     }
 
     [Serializable]
@@ -38,7 +48,8 @@ public class TempleClient : MonoBehaviour
         public bool ordained, exorcist, dog, kuman, night;
         public int monk_level, monk_xp, monk_to_next, exorcist_level, exorcist_xp, exorcist_to_next;
         public int barami, barami_xp, barami_to_next, guard, luck;
-        public int ordain_level, ordain_cost, exorcist_monk_level, incense_cost, meditate_seconds;
+        public int ordain_level, ordain_cost, exorcist_monk_level, incense_cost, meditate_seconds, worn_max;
+        public Power[] my_powers; // the worn amulets together
         public Item[] items;
         public Ghost[] ghosts;
         public Night[] log;
@@ -53,6 +64,7 @@ public class TempleClient : MonoBehaviour
     [Serializable] private class GhostRequest { public string spot, ghost, token; public int hits; }
     [Serializable] private class ItemRequest { public string item; }
     [Serializable] private class DisrobeRequest { public bool exorcist; }
+    [Serializable] private class WearRequest { public string item; public bool wear; }
 
     private const float PollInterval = 60f;
     private const string SeenKey = "temple.night.seen";
@@ -116,6 +128,26 @@ public class TempleClient : MonoBehaviour
         return false;
     }
 
+    // A power of the amulets worn right now (0 when none / offline)
+    public int PowerOf(string id)
+    {
+        if (Current?.my_powers == null) return 0;
+        foreach (var p in Current.my_powers) if (p.id == id) return p.value;
+        return 0;
+    }
+
+    public static int Buddha(string id) => Instance != null ? Instance.PowerOf(id) : 0;
+
+    public int WornCount
+    {
+        get
+        {
+            int n = 0;
+            if (Current?.items != null) foreach (var i in Current.items) if (i.worn) n++;
+            return n;
+        }
+    }
+
     public Ghost GhostInfo(string id)
     {
         if (Current?.ghosts == null) return null;
@@ -127,6 +159,7 @@ public class TempleClient : MonoBehaviour
     public Task<State> OrdainAsync() => Call("temple_ordain");
     public Task<State> DisrobeAsync(bool exorcist) => Call("temple_disrobe", JsonUtility.ToJson(new DisrobeRequest { exorcist = exorcist }));
     public Task<State> BuyAsync(string item) => Call("temple_buy", JsonUtility.ToJson(new ItemRequest { item = item }));
+    public Task<State> WearAsync(string item, bool wear) => Call("temple_wear", JsonUtility.ToJson(new WearRequest { item = item, wear = wear }));
     public Task<State> MeditateStartAsync(bool incense) => Call("temple_meditate", JsonUtility.ToJson(new MeditateRequest { action = "start", incense = incense }));
     public Task<State> MeditateFinishAsync(string token) => Call("temple_meditate", JsonUtility.ToJson(new MeditateRequest { action = "finish", token = token }));
     public Task<State> GhostStartAsync(string spot, string ghost) => Call("ghost_start", JsonUtility.ToJson(new GhostRequest { spot = spot, ghost = ghost }));
@@ -184,6 +217,8 @@ public class TempleClient : MonoBehaviour
             : m.Contains("barami") ? "บารมียังไม่พอ — นั่งสมาธิในโบสถ์เพิ่มบารมีก่อน"
             : m.Contains("level") ? "เลเวลยังไม่ถึง"
             : m.Contains("already owned") ? "มีอยู่แล้ว"
+            : m.Contains("neck full") ? "ห้อยพระได้ไม่เกิน 3 องค์ — ถอดองค์อื่นก่อน"
+            : m.Contains("not owned") ? "ต้องบูชาก่อน"
             : m.Contains("not exorcist") ? "ต้องเป็นหมอผีก่อน (บวชจนพระเลเวล 30 แล้วสึกออกมา)"
             : m.Contains("daytime") ? "ผีออกเฉพาะตอนกลางคืน (19:00-05:00)"
             : m.Contains("banished") ? "ปราบผีตัวนี้ไปแล้วคืนนี้"

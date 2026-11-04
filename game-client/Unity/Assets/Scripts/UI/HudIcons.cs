@@ -80,6 +80,8 @@ public static class HudIcons
     private static readonly float[] Pants = { -0.5f, 0.75f, 0.5f, 0.75f, 0.6f, -0.85f, 0.16f, -0.85f, 0f, 0.25f, -0.16f, -0.85f, -0.6f, -0.85f };
     private static readonly float[] Star = MakeStar();
     private static readonly float[] Bolt = { 0.15f, 0.9f, -0.55f, -0.1f, -0.05f, -0.1f, -0.2f, -0.9f, 0.55f, 0.15f, 0.05f, 0.15f };
+    private static readonly float[] ArrowHead = { 0.5f, 0.5f, 0.98f, 0.62f, 0.8f, 0.12f };
+    private static readonly float[] Play = { -0.25f, 0.4f, -0.25f, -0.4f, 0.42f, 0f };
     private static readonly float[] Tail = { -0.4f, -0.3f, -0.05f, -0.3f, -0.55f, -0.78f };
 
     private static float[] MakeStar()
@@ -108,6 +110,10 @@ public static class HudIcons
                 return (x, y) => Line(x, y, -0.55f, -0.55f, 0.55f, 0.55f, 0.2f) || Line(x, y, -0.55f, 0.55f, 0.55f, -0.55f, 0.2f);
             case "person":
                 return (x, y) => Circle(x, y, 0f, 0.4f, 0.32f) || (Circle(x, y, 0f, -0.75f, 0.72f) && y > -0.82f && !Circle(x, y, 0f, 0.4f, 0.42f));
+            case "friends": // two people side by side
+                return (x, y) => Circle(x, y, -0.36f, 0.42f, 0.24f) || Circle(x, y, 0.36f, 0.42f, 0.24f)
+                                 || (Circle(x, y, -0.36f, -0.7f, 0.55f) && y > -0.8f && !Circle(x, y, -0.36f, 0.42f, 0.32f))
+                                 || (Circle(x, y, 0.36f, -0.7f, 0.55f) && y > -0.8f && !Circle(x, y, 0.36f, 0.42f, 0.32f));
             case "star":
                 return (x, y) => Poly(x, y, Star);
             case "quest": // clipboard with lines
@@ -147,6 +153,13 @@ public static class HudIcons
                 return (x, y) => Circle(x, y, 0f, 0f, 0.9f) && !(Circle(x, y, 0f, 0f, 0.72f) && !Circle(x, y, 0f, 0f, 0.62f));
             case "bolt": // energy
                 return (x, y) => Poly(x, y, Bolt);
+            case "auto": // a circling arrow around a play triangle
+                return (x, y) =>
+                {
+                    float r = Mathf.Sqrt(x * x + y * y), a = Mathf.Atan2(y, x);
+                    bool ring = r > 0.68f && r < 0.86f && !(a > 0.25f && a < 1.0f);
+                    return ring || Poly(x, y, ArrowHead) || Poly(x, y, Play);
+                };
         }
         return null;
     }

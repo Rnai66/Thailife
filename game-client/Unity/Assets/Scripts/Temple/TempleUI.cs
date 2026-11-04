@@ -157,7 +157,8 @@ public class TempleUI : MonoBehaviour
             : s.exorcist ? $"หมอผีเลเวล {s.exorcist_level} · พระเลเวล {s.monk_level}" : "ฆราวาส (ยังไม่ได้บวช)";
         infoText.text = $"บารมี Lv {s.barami} ({s.barami_xp}/{s.barami_to_next}) · บ้านกันผี {s.guard}% · กันขโมย {s.luck}%"
                         + (s.dog ? " · มีหมาเฝ้าบ้าน" : "") + (s.kuman ? " · มีกุมารทอง" : "")
-                        + "\nนั่งสมาธิในโบสถ์หน้าพระประธานเพื่อเพิ่มบารมี (จุดธูปเทียนได้บารมีมากขึ้น)";
+                        + (tab == Amulets ? "\nพุทธคุณติดตัว: " + PowerText(s.my_powers, "ยังไม่ได้ห้อยพระ")
+                                          : "\nนั่งสมาธิในโบสถ์หน้าพระประธานเพื่อเพิ่มบารมี (จุดธูปเทียนได้บารมีมากขึ้น)");
 
         if (tab == Abbot) RenderAbbot(s);
         else RenderAmulets(s);
@@ -202,7 +203,9 @@ public class TempleUI : MonoBehaviour
         if (s.items == null) return;
         bool upright = UiKit.Portrait;
         int cols = upright ? 2 : 4;
-        float cw = upright ? 330f : 300f, ch = 300f;
+        float cw = upright ? 330f : 300f, ch = 340f;
+        int worn = TempleClient.Instance != null ? TempleClient.Instance.WornCount : 0;
+        int wornMax = s.worn_max > 0 ? s.worn_max : 3;
         int i = 0;
         y -= 10f;
         foreach (var it in s.items)
@@ -211,25 +214,67 @@ public class TempleUI : MonoBehaviour
             int row = i / cols, col = i % cols;
             i++;
             var pos = new Vector2((col - (cols - 1) * 0.5f) * (cw + 14f), y - row * (ch + 14f) - ch * 0.5f);
-            var card = Top(UiKit.Panel("Amulet", content, it.owned ? UiKit.OkTint : Color.white, pos, new Vector2(cw, ch), shadow: true));
-            card.gameObject.AddComponent<Outline>().effectColor = it.owned ? UiKit.PayGreen : UiKit.CardBorder;
+            var card = Top(UiKit.Panel("Amulet", content, it.worn ? new Color(1f, 0.95f, 0.8f) : it.owned ? UiKit.OkTint : Color.white, pos, new Vector2(cw, ch), shadow: true));
+            card.gameObject.AddComponent<Outline>().effectColor = it.worn ? UiKit.Gold : it.owned ? UiKit.PayGreen : UiKit.CardBorder;
             var pic = UiKit.Rect("Art", card, Color.white);
             pic.GetComponent<Image>().sprite = AmuletArt.Get(it.id);
             pic.GetComponent<Image>().preserveAspect = true;
-            pic.anchoredPosition = new Vector2(0f, 72f);
-            pic.sizeDelta = new Vector2(130f, 130f);
-            UiKit.Label(card, 24, it.name, new Vector2(0f, -14f), new Vector2(cw - 20f, 34f), UiKit.Ink).fontStyle = FontStyle.Bold;
-            UiKit.Label(card, 18, $"กันผี +{it.guard}% · กันขโมย +{it.luck}%", new Vector2(0f, -48f), new Vector2(cw - 20f, 26f), UiKit.Muted);
+            pic.anchoredPosition = new Vector2(0f, 94f);
+            pic.sizeDelta = new Vector2(120f, 120f);
+            if (it.worn) UiKit.PillLabel(card, "ห้อยคออยู่", new Vector2(-cw * 0.5f + 70f, ch * 0.5f - 26f), new Vector2(120f, 36f), UiKit.Gold, UiKit.GoldInk, 17);
+            UiKit.Label(card, 24, it.name, new Vector2(0f, 14f), new Vector2(cw - 20f, 34f), UiKit.Ink).fontStyle = FontStyle.Bold;
+            bool hasPowers = it.powers != null && it.powers.Length > 0;
+            UiKit.Label(card, 17, hasPowers ? "พุทธคุณ: " + PowerText(it.powers, "") : "ผ้ายันต์ติดบ้าน (ไม่ได้ห้อยคอ)",
+                new Vector2(0f, -26f), new Vector2(cw - 20f, 46f), hasPowers ? UiKit.Price : UiKit.Muted);
+            UiKit.Label(card, 16, $"กันผี +{it.guard}% · กันขโมย +{it.luck}%", new Vector2(0f, -64f), new Vector2(cw - 20f, 24f), UiKit.Muted);
             bool locked = s.barami < it.barami;
-            string label = it.owned ? "อยู่บนหิ้งพระแล้ว" : locked ? $"ต้องบารมี Lv {it.barami}" : $"บูชา {it.price:N0} บาท";
             string id = it.id;
-            var b = UiKit.RoundButton(card, label, new Vector2(0f, -106f), new Vector2(cw - 40f, 62f), it.owned ? UiKit.Pill : UiKit.Gold, it.owned ? UiKit.OkGreen : UiKit.GoldInk,
-                () => Do(t => t.BuyAsync(id)), 21);
-            b.interactable = !it.owned && !locked && !busy;
+            string label;
+            Color fill, ink;
+            bool able;
+            Func<TempleClient, Task<TempleClient.State>> act;
+            if (!it.owned)
+            {
+                label = locked ? $"ต้องบารมี Lv {it.barami}" : $"บูชา {it.price:N0} บาท";
+                fill = UiKit.Gold; ink = UiKit.GoldInk; able = !locked;
+                act = t => t.BuyAsync(id);
+            }
+            else if (!hasPowers)
+            {
+                label = "อยู่บนหิ้งพระแล้ว";
+                fill = UiKit.Pill; ink = UiKit.OkGreen; able = false;
+                act = null;
+            }
+            else if (it.worn)
+            {
+                label = "ถอดขึ้นหิ้งพระ";
+                fill = UiKit.Pill; ink = UiKit.Danger; able = true;
+                act = t => t.WearAsync(id, false);
+            }
+            else
+            {
+                bool room = worn < wornMax;
+                label = room ? "ห้อยคอ" : $"ห้อยคอ (เต็ม {wornMax} องค์)";
+                fill = UiKit.Teak; ink = UiKit.GoldText; able = room;
+                act = t => t.WearAsync(id, true);
+            }
+            var b = UiKit.RoundButton(card, label, new Vector2(0f, -122f), new Vector2(cw - 40f, 58f), fill, ink,
+                () => { if (act != null) Do(act); }, 21);
+            b.interactable = able && !busy;
         }
         int rows = (i + cols - 1) / cols;
         y -= rows * (ch + 14f) + 10f;
-        Note("พระเครื่องและผ้ายันต์ที่บูชาแล้ว จะไปอยู่บนหิ้งพระที่บ้าน ยิ่งมากยิ่งกันผีกันขโมยได้ดี", UiKit.Muted);
+        Note("พระเครื่องและผ้ายันต์ที่บูชาแล้ว อยู่บนหิ้งพระที่บ้าน ยิ่งมากยิ่งกันผีกันขโมยได้ดี", UiKit.Muted);
+        Note($"ห้อยพระได้ {wornMax} องค์ ได้พุทธคุณติดตัว: แคล้วคลาด = หลบหมัดเท้า · หนังเหนียว = เจ็บน้อยลง", UiKit.Price, 19);
+        Note("ป้องกัน = กันผีเข้าบ้าน · บังตา = ขโมยมองไม่เห็นบ้าน · มหานิยม = ขายของ/ภารกิจได้เงินเพิ่ม · เสน่ห์ = ทิปดนตรีเพิ่ม", UiKit.Price, 19);
+    }
+
+    private static string PowerText(TempleClient.Power[] powers, string none)
+    {
+        if (powers == null || powers.Length == 0) return none;
+        var parts = new string[powers.Length];
+        for (int i = 0; i < powers.Length; i++) parts[i] = $"{powers[i].name} +{powers[i].value}%";
+        return string.Join(" · ", parts);
     }
 
     private static TempleClient.Item Find(TempleClient.State s, string id)

@@ -20,6 +20,8 @@ public class QuestClient : MonoBehaviour
         public int reward;
         public bool done;
         public bool claimed;
+        public bool auto;         // the character is doing it by itself (ออโต้)
+        public int auto_left_s;   // seconds until the auto run finishes it
     }
 
     [Serializable]
@@ -56,6 +58,14 @@ public class QuestClient : MonoBehaviour
         public int earned;
         public Chapter[] chapters;
         public int level;
+        public int auto_seconds, auto_energy, auto_earned, auto_started;
+    }
+
+    [Serializable]
+    private class AutoRequest
+    {
+        public int quest;
+        public bool all;
     }
 
     [Serializable]
@@ -133,11 +143,28 @@ public class QuestClient : MonoBehaviour
 
     private void OnConnected(NakamaConnection conn) => Refresh();
 
+    // Any quest being done on auto right now
+    public bool AutoRunning
+    {
+        get
+        {
+            if (Current?.quests != null) foreach (var q in Current.quests) if (q.auto) return true;
+            return false;
+        }
+    }
+
     private void Update()
     {
-        if (!connection.IsConnected || Time.time < nextPoll) return;
+        if (!connection.IsConnected) return;
+        // an auto quest is due: ask again right away so it finishes on time
+        if (Current?.quests != null && Time.time >= nextAutoCheck)
+            foreach (var q in Current.quests)
+                if (q.auto && q.auto_left_s - Age <= 0f) { nextAutoCheck = Time.time + 2f; Refresh(); return; }
+        if (Time.time < nextPoll) return;
         Refresh();
     }
+
+    private float nextAutoCheck;
 
     public void Refresh()
     {
@@ -153,6 +180,16 @@ public class QuestClient : MonoBehaviour
 
     public System.Threading.Tasks.Task<State> ClaimAsync(int questId) => CallAsync("quests_claim", JsonUtility.ToJson(new ClaimRequest { quest = questId }));
     public System.Threading.Tasks.Task<State> ClaimChapterAsync(int level) => CallAsync("quests_claim", JsonUtility.ToJson(new ClaimRequest { chapter = level }));
+    public System.Threading.Tasks.Task<State> AutoAsync(int questId) => AutoCall(new AutoRequest { quest = questId });
+    public System.Threading.Tasks.Task<State> AutoAllAsync() => AutoCall(new AutoRequest { all = true });
+
+    private async System.Threading.Tasks.Task<State> AutoCall(AutoRequest req)
+    {
+        var s = await CallAsync("quests_auto", JsonUtility.ToJson(req));
+        LifeClient.Instance?.Refresh(); // energy went down
+        return s;
+    }
+
     public System.Threading.Tasks.Task<State> ClaimBonusAsync() => CallAsync("quests_claim", JsonUtility.ToJson(new ClaimRequest { bonus = true }));
 
     private async System.Threading.Tasks.Task<State> CallAsync(string rpc, string payload = "{}")
@@ -164,6 +201,11 @@ public class QuestClient : MonoBehaviour
         receivedAt = Time.time;
         Changed?.Invoke(state);
         if (state.earned > 0 && WalletClient.Instance != null) _ = WalletClient.Instance.RefreshAsync();
+        if (state.auto_earned > 0)
+        {
+            UiKit.FloatAbovePlayer($"ออโต้: +{state.auto_earned} ฿", new Color(1f, 0.85f, 0.2f));
+            GameAudio.Play("coins");
+        }
         return state;
     }
 

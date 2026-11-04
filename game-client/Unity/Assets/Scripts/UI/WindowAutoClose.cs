@@ -15,7 +15,7 @@ public class WindowAutoClose : MonoBehaviour
     private bool walkAway = true;
     private CanvasGroup group;
     private Transform player;
-    private Vector3 openedAt;
+    private Vector3 openedAt, lastSeen;
     private float openedTime, fadeStart = -1f;
 
     public void Configure(Action onClose, float seconds = 0f, bool closeOnWalkAway = true)
@@ -34,13 +34,22 @@ public class WindowAutoClose : MonoBehaviour
         openedTime = Time.unscaledTime;
         var pc = FindAnyObjectByType<PlayerController>();
         player = pc != null ? pc.transform : null;
-        if (player != null) openedAt = player.position;
+        if (player != null) lastSeen = openedAt = player.position;
     }
 
     private void Update()
     {
         if (fadeStart < 0f)
         {
+            // The player may not exist yet when a window opens as a scene starts, or may be moved to
+            // the spawn point right after: measure walking away from where they really stand
+            if (player == null)
+            {
+                var pc = FindAnyObjectByType<PlayerController>();
+                if (pc != null) { player = pc.transform; openedAt = player.position; }
+            }
+            else if ((player.position - lastSeen).sqrMagnitude > 100f) openedAt = player.position; // teleported
+            if (player != null) lastSeen = player.position;
             bool expired = lifetime > 0f && Time.unscaledTime - openedTime > lifetime;
             bool left = walkAway && player != null && (player.position - openedAt).sqrMagnitude > WalkAwayMeters * WalkAwayMeters;
             if (expired || left) fadeStart = Time.unscaledTime;

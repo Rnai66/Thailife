@@ -94,6 +94,8 @@ public class LifeClient : MonoBehaviour
         if (GetComponent<TempleClient>() == null) gameObject.AddComponent<TempleClient>();
         if (GetComponent<HotelClient>() == null) gameObject.AddComponent<HotelClient>();
         if (GetComponent<TutorialGuide>() == null) gameObject.AddComponent<TutorialGuide>();
+        if (GetComponent<AutoQuest>() == null) gameObject.AddComponent<AutoQuest>();
+        if (GetComponent<SocialClient>() == null) gameObject.AddComponent<SocialClient>();
 
         // Every location scene gets a day/night sun without extra setup
         foreach (var light in FindObjectsByType<Light>(FindObjectsSortMode.None))

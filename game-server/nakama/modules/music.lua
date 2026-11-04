@@ -10,6 +10,7 @@ local nk = require("nakama")
 local life = require("life_core")
 local data = require("shop_data")
 local quest = require("quest_core")
+local amulet = require("amulet_core")
 
 local STATS = { collection = "music", key = "stats" }
 local CURRENCY = "baht"
@@ -197,6 +198,8 @@ local function rpc_finish(context, payload)
   local inst = data.INSTRUMENTS[items.instrument] or data.INSTRUMENTS.pin
   local level_bonus = 1 + 0.03 * (math.min(s.level, 20) - 1) -- tips stop growing after Lv 20
   local tips = math.floor(v.base * accuracy * inst.mult * bonus_for(v, inst) * level_bonus + 0.5)
+  local charm
+  tips, charm = amulet.boost(user_id, "sanae", tips) -- เสน่ห์: the crowd tips more
   if tips > 0 then nk.wallet_update(user_id, { [CURRENCY] = tips }, { reason = "music_tips", venue = session.venue }, true) end
 
   local gained = perfect + good
@@ -213,7 +216,7 @@ local function rpc_finish(context, payload)
   quest.progress(user_id, "music", 1)
 
   return view(user_id, s, context.env, {
-    tips = tips, accuracy = math.floor(accuracy * 100 + 0.5), gained_xp = gained, leveled_up = leveled,
+    tips = tips, charm_bonus = charm, accuracy = math.floor(accuracy * 100 + 0.5), gained_xp = gained, leveled_up = leveled,
     perfect = perfect, good = good, total_notes = session.notes, venue_name = v.name,
   })
 end
