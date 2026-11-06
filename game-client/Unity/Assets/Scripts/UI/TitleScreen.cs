@@ -51,7 +51,7 @@ public class TitleScreen : MonoBehaviour
     private Vector3 orbitCenter;
 
     private const float IconSize = 132f, IconGap = 156f;
-    // Laid out from the bottom up each frame (icon row, sign, tagline, then the logo in what's left)
+    // Laid out each frame: the logo centred on the screen, tagline and sign under it, icons along the bottom
     private float LogoY = 125f, TaglineY = -205f, PromptY = -298f, logoAspect = 1.4f;
     private RectTransform sparkleRoot;
 
@@ -276,11 +276,16 @@ public class TitleScreen : MonoBehaviour
         if (h <= 0f) return;
         float bottom = -h * 0.5f;
         float iconTop = 14f + (IconSize + 30f) * 0.5f + IconSize * 0.5f;
-        PromptY = bottom + iconTop + 16f + 50f;
-        TaglineY = PromptY + 50f + 14f + 35f;
-        float space = h * 0.5f - 18f - (TaglineY + 35f + 6f);
-        float logoH = Mathf.Clamp(space, 260f, 560f);
-        LogoY = TaglineY + 35f + 6f + logoH * 0.5f;
+        // The logo sits in the middle of the screen with the tagline and the sign just under it; only
+        // when the screen is too short for that does the stack rest on the icon row instead.
+        float lowestPrompt = bottom + iconTop + 16f + 50f;
+        float space = h * 0.5f - 18f - (lowestPrompt + 50f + 14f + 70f + 6f); // above the lowest tagline
+        float maxH = root.rect.width > h ? 560f : 760f;
+        float logoH = Mathf.Clamp(Mathf.Min(space, root.rect.width * 0.88f / logoAspect), 240f, maxH);
+        float lowestLogo = lowestPrompt + 50f + 14f + 70f + 6f + logoH * 0.5f;
+        LogoY = Mathf.Min(Mathf.Max(0f, lowestLogo), h * 0.5f - 18f - logoH * 0.5f);
+        TaglineY = LogoY - logoH * 0.5f - 6f - 35f;
+        PromptY = TaglineY - 35f - 14f - 50f;
         logo.sizeDelta = new Vector2(logoH * logoAspect, logoH);
         if (sparkleRoot != null)
         {

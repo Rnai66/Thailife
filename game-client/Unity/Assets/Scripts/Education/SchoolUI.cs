@@ -45,6 +45,7 @@ public class SchoolUI : MonoBehaviour
     public static void Hide()
     {
         if (instance != null) instance.backdrop.SetActive(false);
+        ClassSeat.Stand(true);
     }
 
     private void Awake()
@@ -183,6 +184,12 @@ public class SchoolUI : MonoBehaviour
         else classText.text = working ? "กำลังทำงานอยู่ — เลิกงานก่อนแล้วค่อยมาเรียน"
             : library ? "เลือกหนังสือวิชาที่อยากอ่าน" : "เลือกวิชาที่อยากเรียน";
         progressBar.gameObject.SetActive(inClass);
+
+        // Sit down for the lesson / the book, up again when it's over
+        var desk = SchoolDesk.Current;
+        if (inClass && !ClassSeat.Seated && backdrop.activeSelf && desk != null && desk.transform.parent != null)
+            ClassSeat.Sit(desk.transform.parent, desk.transform.position);
+        else if (!inClass && ClassSeat.Seated) ClassSeat.Stand();
     }
 
     private void Update()
@@ -237,6 +244,6 @@ public class SchoolUI : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (instance == this) instance = null;
+        if (instance == this) { instance = null; ClassSeat.Stand(); }
     }
 }

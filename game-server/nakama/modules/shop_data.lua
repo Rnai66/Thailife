@@ -19,14 +19,14 @@ M.RODS = {
 
 -- Rice varieties (พันธุ์ข้าว): seeds are bought at the shop, one bag plants one plot (1 งาน).
 -- Rice takes a third of the game year (120 game days = 3 real days), so three crops a year;
--- yields and prices are close to real ones (paddy ~110 kg per งาน, ข้าวเปลือก 14-20 ฿/kg).
+-- a watered crop earns about 10,000 ฿ per ไร่ (4 งาน): ~180 kg/งาน x 14 ฿, ~128 kg/งาน x 20 ฿.
 local RICE_DAYS = 120
 local GAME_DAY_MS = 36 * 60 * 1000 -- life_core.DAY_MS
 M.RICE = {
   khao_niao = { name = "ข้าวเหนียว กข6",    seed_price = 120, grow_ms = RICE_DAYS * GAME_DAY_MS, price_per_kg = 14,
-                yield_watered = { 100, 130 }, yield_dry = { 50, 65 } },
+                yield_watered = { 160, 200 }, yield_dry = { 80, 100 } },
   hommali   = { name = "ข้าวหอมมะลิ 105", seed_price = 160, grow_ms = RICE_DAYS * GAME_DAY_MS, price_per_kg = 20,
-                yield_watered = { 90, 115 },  yield_dry = { 45, 58 } },
+                yield_watered = { 115, 140 }, yield_dry = { 58, 70 } },
 }
 M.RICE_ORDER = { "khao_niao", "hommali" }
 
@@ -135,9 +135,9 @@ M.FURNITURE_ORDER = { "mat", "pillow", "plant", "chair", "lamp", "low_table", "r
                       "table", "shelf", "wardrobe", "bed", "tv", "fridge" }
 
 -- Rice barn (ยุ้งข้าว): harvested rice is stored here; full barn = can't harvest
-M.BARN_START = 400
-M.BARN_STEP = 200
-M.BARN_MAX = 1400
+M.BARN_START = 800
+M.BARN_STEP = 400
+M.BARN_MAX = 2800
 
 -- Things for sale. shop = where the client shows it (the server sells it anywhere).
 -- consumable items can be bought again and again.
@@ -164,7 +164,7 @@ M.CATALOG = {
   { id = "chicken_feed",    shop = "community", price = 15,  name = "อาหารไก่ (1 ถุง)", desc = "ให้อาหารเล้า 1 ครั้ง อิ่ม 1 วันในเกม (แม่ไก่ถึงจะออกไข่)", feed = true, consumable = true },
   { id = "chicken_hen",     shop = "community", price = 120, name = "แม่ไก่พื้นเมือง", desc = "ออกไข่เมื่อได้กินอาหาร · ค่าความสวยสุ่ม", chicken = "hen", consumable = true },
   { id = "chicken_rooster", shop = "community", price = 180, name = "พ่อไก่พื้นเมือง", desc = "มีพ่อไก่ในเล้า ไข่จะเป็นไข่มีเชื้อ ฟักได้", chicken = "rooster", consumable = true },
-  { id = "barn_upgrade",    shop = "community", price = 600, name = "ขยายยุ้งข้าว +200 กก.", desc = "เก็บข้าวได้มากขึ้น (สูงสุด 1,400 กก.)", barn = true, consumable = true },
+  { id = "barn_upgrade",    shop = "community", price = 600, name = "ขยายยุ้งข้าว +400 กก.", desc = "เก็บข้าวได้มากขึ้น (สูงสุด 2,800 กก.)", barn = true, consumable = true },
   { id = "rod_fiber",       shop = "community", price = 150, name = "เบ็ดไฟเบอร์", desc = "ปลากินเร็วขึ้น ปลาหายากบ่อยขึ้น ตัวใหญ่ขึ้น 15%", rod = "fiber" },
   { id = "rod_carbon",      shop = "community", price = 400, name = "เบ็ดคาร์บอน", desc = "ปลากินเร็วสุด ปลาช่อน/ปลาดุกบ่อย ตัวใหญ่ขึ้น 30%", rod = "carbon" },
   { id = "camp_membership", shop = "camp",      price = 300, name = "สมาชิกค่ายมวย", desc = "ปลดล็อกการซ้อมกระสอบหนักในค่าย (ต้อง Lv 6 ด้วย)" },
@@ -215,10 +215,14 @@ function M.read_items(user_id)
   items.camp_member = items.camp_member or false
   items.seeds = items.seeds or {}
   for _, v in ipairs(M.RICE_ORDER) do items.seeds[v] = items.seeds[v] or 0 end
-  if items.barn_capacity == nil then items.barn_capacity = M.BARN_START; items.barn_v2 = true end
-  if not items.barn_v2 then -- old barns (100-500 kg) grow to the new scale, keeping bought upgrades
-    items.barn_capacity = math.min(M.BARN_MAX, M.BARN_START + math.floor((items.barn_capacity - 100) / 100) * M.BARN_STEP)
+  if items.barn_capacity == nil then items.barn_capacity = M.BARN_START; items.barn_v2 = true; items.barn_v3 = true end
+  if not items.barn_v2 then -- old barns (100-500 kg) grow to the v2 scale (400 + 200/step), keeping bought upgrades
+    items.barn_capacity = math.min(1400, 400 + math.floor((items.barn_capacity - 100) / 100) * 200)
     items.barn_v2 = true
+  end
+  if not items.barn_v3 then -- bigger harvests: v2 barns double (400 + 200/step -> 800 + 400/step)
+    items.barn_capacity = math.min(M.BARN_MAX, items.barn_capacity * 2)
+    items.barn_v3 = true
   end
   items.feed = items.feed or 0
   items.instruments = items.instruments or { pin = true }   -- everyone starts with a พิณ

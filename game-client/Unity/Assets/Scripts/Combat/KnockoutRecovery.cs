@@ -26,7 +26,7 @@ public class KnockoutRecovery : MonoBehaviour
         }
         Locations.PendingSpawnId = null;
         SceneManager.sceneLoaded += OnLoaded;
-        SceneManager.LoadScene(scene);
+        SceneLoader.Load(scene, NameOf(clinic));
     }
 
     private static void OnLoaded(Scene scene, LoadSceneMode mode)

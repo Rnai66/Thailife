@@ -217,31 +217,65 @@ public static class TempleLife
     }
 
     // ── Dogs ───────────────────────────────────────────────────────────────────────────────
-    // A Thai village dog (front toward +Z, as CowWander walks), four LegPivots for its trot
+    // A Thai village dog (หมาไทย; front toward +Z, as CowWander walks): lean and short-coated, a deep chest
+    // and tucked belly, a wedge head with erect pointed ears, a sickle tail curled over the back; four
+    // LegPivots for its trot (the hind legs bend at the hock).
     private static Transform Dog(Transform parent, Vector3 at, Color fur, out Transform head)
     {
         var d = PrimitiveKit.Group("Dog_หมา", parent, at).transform;
-        var coat = PrimitiveKit.Mat("DogFur" + ColorUtility.ToHtmlStringRGB(fur), fur, 0.15f);
-        var light = PrimitiveKit.Mat("DogFurLight" + ColorUtility.ToHtmlStringRGB(fur), Color.Lerp(fur, Color.white, 0.55f), 0.15f);
+        string key = ColorUtility.ToHtmlStringRGB(fur);
+        var coat = PrimitiveKit.Mat("DogFur" + key, fur, 0.15f);
+        var light = PrimitiveKit.Mat("DogFurLight" + key, Color.Lerp(fur, Color.white, 0.45f), 0.15f);
         var dark = PrimitiveKit.Mat("DogNose", new Color(0.08f, 0.06f, 0.05f), 0.6f);
-        PrimitiveKit.Sphere("Body", d, new Vector3(0f, 0.45f, 0f), new Vector3(0.3f, 0.3f, 0.7f), coat);
-        PrimitiveKit.Sphere("Chest", d, new Vector3(0f, 0.42f, 0.24f), new Vector3(0.22f, 0.24f, 0.24f), light);
-        foreach (var (name, x, z) in new[] { ("LegPivotFL", -0.1f, 0.22f), ("LegPivotFR", 0.1f, 0.22f), ("LegPivotBL", -0.1f, -0.22f), ("LegPivotBR", 0.1f, -0.22f) })
+        var eye = PrimitiveKit.Mat("DogEye", new Color(0.12f, 0.07f, 0.03f), 0.9f);
+
+        // body: a barrel lying along Z, narrow side to side, rump to chest
+        MeshKit.Place("Body", d, MeshKit.Lathe("Dog_Body", new[]
         {
-            var hip = PrimitiveKit.Group(name, d, new Vector3(x, 0.38f, z)).transform;
-            PrimitiveKit.Box("Leg", hip, new Vector3(0f, -0.19f, 0f), new Vector3(0.07f, 0.38f, 0.08f), coat, collider: false);
-            PrimitiveKit.Box("Paw", hip, new Vector3(0f, -0.37f, 0.03f), new Vector3(0.08f, 0.04f, 0.11f), light, collider: false);
+            new Vector2(0.06f, 0f), new Vector2(0.13f, 0.04f), new Vector2(0.155f, 0.12f), new Vector2(0.14f, 0.28f),
+            new Vector2(0.15f, 0.4f), new Vector2(0.175f, 0.52f), new Vector2(0.17f, 0.6f), new Vector2(0.12f, 0.68f), new Vector2(0.05f, 0.71f),
+        }, 18), coat, new Vector3(0f, 0.52f, -0.36f), new Vector3(90f, 0f, 0f), new Vector3(0.78f, 1f, 1f));
+        PrimitiveKit.Sphere("Chest", d, new Vector3(0f, 0.44f, 0.18f), new Vector3(0.2f, 0.22f, 0.24f), light);
+        MeshKit.Place("Neck", d, MeshKit.Sweep("Dog_Neck",
+            MeshKit.Curve(new Vector3(0f, 0.56f, 0.2f), new Vector3(0f, 0.66f, 0.3f), new Vector3(0f, 0.74f, 0.38f), 6),
+            new[] { 0.1f, 0.09f, 0.08f, 0.072f, 0.066f, 0.062f }, 10), coat, Vector3.zero);
+
+        // legs: slim straight fore legs, muscled thighs and an angled hock behind
+        var foreUpper = MeshKit.Sweep("Dog_ForeUpper", new[] { new Vector3(0f, 0.02f, 0f), new Vector3(0f, -0.1f, 0.01f), new Vector3(0f, -0.2f, 0.005f) }, new[] { 0.05f, 0.038f, 0.03f }, 8);
+        var foreLower = MeshKit.Sweep("Dog_ForeLower", new[] { new Vector3(0f, -0.2f, 0.005f), new Vector3(0f, -0.3f, 0f), new Vector3(0f, -0.37f, 0.012f) }, new[] { 0.028f, 0.024f, 0.022f }, 8);
+        var thigh = MeshKit.Sweep("Dog_Thigh", new[] { new Vector3(0f, 0.04f, 0.02f), new Vector3(0f, -0.08f, 0.05f), new Vector3(0f, -0.2f, 0.03f) }, new[] { 0.075f, 0.06f, 0.035f }, 8);
+        var hock = MeshKit.Sweep("Dog_Hock", new[] { new Vector3(0f, -0.2f, 0.03f), new Vector3(0f, -0.28f, -0.04f), new Vector3(0f, -0.43f, -0.02f) }, new[] { 0.032f, 0.025f, 0.022f }, 8);
+        foreach (var (name, x, y, z, fore) in new[]
+                 { ("LegPivotFL", -0.075f, 0.4f, 0.2f, true), ("LegPivotFR", 0.075f, 0.4f, 0.2f, true),
+                   ("LegPivotBL", -0.08f, 0.45f, -0.24f, false), ("LegPivotBR", 0.08f, 0.45f, -0.24f, false) })
+        {
+            var hip = PrimitiveKit.Group(name, d, new Vector3(x, y, z)).transform;
+            MeshKit.Place("Leg", hip, fore ? foreUpper : thigh, coat, Vector3.zero);
+            MeshKit.Place("Shin", hip, fore ? foreLower : hock, coat, Vector3.zero);
+            PrimitiveKit.Sphere("Paw", hip, new Vector3(0f, fore ? -0.38f : -0.435f, fore ? 0.03f : 0f), new Vector3(0.05f, 0.03f, 0.075f), light);
         }
-        head = PrimitiveKit.Group("Head", d, new Vector3(0f, 0.66f, 0.36f)).transform;
-        PrimitiveKit.Sphere("Skull", head, Vector3.zero, new Vector3(0.22f, 0.2f, 0.22f), coat);
-        PrimitiveKit.Sphere("Muzzle", head, new Vector3(0f, -0.04f, 0.13f), new Vector3(0.12f, 0.1f, 0.16f), light);
-        PrimitiveKit.Sphere("Nose", head, new Vector3(0f, -0.02f, 0.21f), Vector3.one * 0.04f, dark);
+
+        // head: wedge skull, tapering muzzle, erect triangular ears
+        head = PrimitiveKit.Group("Head", d, new Vector3(0f, 0.78f, 0.42f)).transform;
+        PrimitiveKit.Sphere("Skull", head, Vector3.zero, new Vector3(0.17f, 0.15f, 0.19f), coat);
+        PrimitiveKit.Sphere("Cheeks", head, new Vector3(0f, -0.035f, 0.03f), new Vector3(0.15f, 0.1f, 0.14f), coat);
+        MeshKit.Place("Muzzle", head, MeshKit.Lathe("Dog_Muzzle", new[]
+        {
+            new Vector2(0.055f, 0f), new Vector2(0.05f, 0.06f), new Vector2(0.04f, 0.11f), new Vector2(0.03f, 0.145f), new Vector2(0.012f, 0.16f),
+        }, 12), light, new Vector3(0f, -0.035f, 0.06f), new Vector3(90f, 0f, 0f), new Vector3(1f, 1f, 0.8f));
+        PrimitiveKit.Sphere("Nose", head, new Vector3(0f, -0.022f, 0.215f), new Vector3(0.04f, 0.03f, 0.03f), dark);
+        PrimitiveKit.Box("Mouth", head, new Vector3(0f, -0.07f, 0.13f), new Vector3(0.05f, 0.006f, 0.1f), dark, collider: false);
+        var ear = MeshKit.Lathe("Dog_Ear", new[] { new Vector2(0.05f, 0f), new Vector2(0.025f, 0.06f), new Vector2(0f, 0.12f) }, 4);
         foreach (float sx in new[] { -1f, 1f })
         {
-            PrimitiveKit.Box("Ear", head, new Vector3(sx * 0.07f, 0.13f, -0.02f), new Vector3(0.06f, 0.11f, 0.03f), coat, new Vector3(0f, 0f, sx * -15f), collider: false);
-            PrimitiveKit.Sphere("Eye", head, new Vector3(sx * 0.055f, 0.03f, 0.1f), Vector3.one * 0.03f, dark);
+            MeshKit.Place("Ear", head, ear, coat, new Vector3(sx * 0.055f, 0.06f, -0.02f), new Vector3(-10f, 0f, sx * -14f), new Vector3(1f, 1f, 0.35f));
+            PrimitiveKit.Sphere("Eye", head, new Vector3(sx * 0.05f, 0.022f, 0.085f), new Vector3(0.026f, 0.022f, 0.02f), eye);
         }
-        PrimitiveKit.Box("Tail", d, new Vector3(0f, 0.6f, -0.38f), new Vector3(0.05f, 0.05f, 0.28f), coat, new Vector3(-50f, 0f, 0f), collider: false);
+
+        // the sickle tail, curled up over the rump
+        MeshKit.Place("Tail", d, MeshKit.Sweep("Dog_Tail",
+            MeshKit.Curve(new Vector3(0f, 0.58f, -0.37f), new Vector3(0f, 0.92f, -0.56f), new Vector3(0f, 0.8f, -0.28f), 9),
+            MeshKit.Taper(9, 0.032f, 0.01f), 8), coat, Vector3.zero);
         return d;
     }
 
@@ -264,10 +298,7 @@ public static class TempleLife
             PrimitiveKit.Box("Bracket", h, new Vector3(sx, 4.5f, -2.4f), new Vector3(0.05f, 0.18f, 0.18f), teak, collider: false);
         PrimitiveKit.Box("Valance", h, new Vector3(0f, 4.56f, -2.615f), new Vector3(2f, 0.06f, 0.01f), PrimitiveKit.Mat("ShrineCloth", new Color(0.85f, 0.65f, 0.2f)), collider: false);
         // A small Buddha (always there) and a garland
-        var buddha = PrimitiveKit.Mat("BuddhaGold", new Color(0.95f, 0.75f, 0.25f));
-        PrimitiveKit.Sphere("BuddhaLap", h, new Vector3(0f, 4.66f, -2.46f), new Vector3(0.16f, 0.06f, 0.11f), buddha);
-        PrimitiveKit.Sphere("BuddhaBody", h, new Vector3(0f, 4.75f, -2.45f), new Vector3(0.1f, 0.14f, 0.08f), buddha);
-        PrimitiveKit.Sphere("BuddhaHead", h, new Vector3(0f, 4.86f, -2.45f), Vector3.one * 0.06f, buddha);
+        BuddhaStatue.Build(h, new Vector3(0f, 4.635f, -2.47f), 0.12f, detail: false, arch: false);
 
         var owned = PrimitiveKit.Group("Guardians", h, Vector3.zero);
         var g = owned.transform;

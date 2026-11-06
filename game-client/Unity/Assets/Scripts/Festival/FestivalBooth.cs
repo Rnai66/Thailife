@@ -152,12 +152,29 @@ public class FestivalBooth : MonoBehaviour
         Quaternion standRot = player.transform.rotation;
         player.InputEnabled = false;
         player.enabled = false;
+        // Sit down on it: astride the carousel horse, on the bench/seat of the rest (hips this far above
+        // the seat point, which marks the floor of the car). The wall-of-death rim is stood at.
+        bool sit = game != "wall";
+        float lift = game == "carousel" ? 0.4f : game == "viking" ? 0.62f : 0.45f;
+        Vector3 hipsOffset = SeatedPose.HipsOffset(player.transform);
+        SeatedPose pose = null;
+        if (sit)
+        {
+            pose = player.gameObject.AddComponent<SeatedPose>();
+            pose.Ride = game == "carousel";
+        }
         float end = Time.time + rideSeconds;
         while (Time.time < end && player != null)
         {
-            player.transform.SetPositionAndRotation(seat.position + Vector3.up * 0.9f, Quaternion.Euler(0f, seat.eulerAngles.y, 0f));
+            if (sit)
+            {
+                Quaternion rot = seat.rotation;
+                player.transform.SetPositionAndRotation(SeatedPose.RootFor(seat.position + seat.up * lift, rot, hipsOffset), rot);
+            }
+            else player.transform.SetPositionAndRotation(seat.position + Vector3.up * 0.9f, Quaternion.Euler(0f, seat.eulerAngles.y, 0f));
             yield return null;
         }
+        if (pose != null) Destroy(pose);
         if (player == null) yield break;
         player.enabled = true;
         player.InputEnabled = true;

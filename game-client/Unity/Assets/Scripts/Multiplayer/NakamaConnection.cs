@@ -181,7 +181,7 @@ public class NakamaConnection : MonoBehaviour
         PlayerPrefs.Save();
         Debug.Log($"[Nakama] Account recovered: now user {session.UserId}");
         if (Socket != null) await Socket.CloseAsync();
-        UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
+        SceneLoader.Load(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
     }
 
     // Delete this account on the server (and everything in it), forget it on this phone, and start
@@ -195,7 +195,7 @@ public class NakamaConnection : MonoBehaviour
         PlayerPrefs.Save();
         Debug.Log("[Nakama] Account deleted");
         if (Socket != null) await Socket.CloseAsync();
-        UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
+        SceneLoader.Load(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
     }
 
     private string GetDeviceId()

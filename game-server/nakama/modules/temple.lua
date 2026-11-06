@@ -56,17 +56,18 @@ local ITEM_ORDER = { "phra_pidta", "takrut", "nangphaya", "somdej", "khunphaen",
                      "yant_5", "yant_8", "yant_kraphet", "yant_wessuwan", "dog", "kuman" }
 local GUARD_CAP, LUCK_CAP = 70, 85
 
--- Ghosts the หมอผี can banish at night. level = exorcist level needed; sigils = how many ยันต์
--- appear in the chant; need = how many must be hit to win; seconds = how long the chant lasts
+-- Ghosts the หมอผี can banish at night. level = exorcist level needed; sigils = how many words of the
+-- chant (คาถา) the player must type, each before its ยันต์ burns out; need = how many must be typed in
+-- time to win; seconds = the shortest a fair chant can take (typing it takes longer: see ghost_finish)
 local GHOSTS = {
-  krasue  = { name = "กระสือ", level = 1, sigils = 12, need = 8, seconds = 30, energy = 8, baht = 300, xp = 40 },
-  krahang = { name = "ผีกระหัง", level = 5, sigils = 14, need = 10, seconds = 30, energy = 9, baht = 450, xp = 55 },
-  pop     = { name = "ผีปอบ", level = 10, sigils = 16, need = 11, seconds = 32, energy = 10, baht = 650, xp = 70 },
-  tani    = { name = "นางตานี", level = 15, sigils = 18, need = 13, seconds = 32, energy = 10, baht = 900, xp = 90 },
-  takhian = { name = "นางตะเคียน", level = 20, sigils = 20, need = 14, seconds = 34, energy = 12, baht = 1200, xp = 110 },
-  phrai   = { name = "ผีพราย", level = 25, sigils = 22, need = 16, seconds = 34, energy = 12, baht = 1500, xp = 130 },
-  pret    = { name = "ผีเปรต", level = 35, sigils = 26, need = 19, seconds = 36, energy = 15, baht = 2200, xp = 170 },
-  nak     = { name = "แม่นาก", level = 50, sigils = 32, need = 24, seconds = 40, energy = 20, baht = 5000, xp = 260 },
+  krasue  = { name = "กระสือ", level = 1, sigils = 8, need = 5, seconds = 30, energy = 8, baht = 300, xp = 40 },
+  krahang = { name = "ผีกระหัง", level = 5, sigils = 9, need = 6, seconds = 30, energy = 9, baht = 450, xp = 55 },
+  pop     = { name = "ผีปอบ", level = 10, sigils = 10, need = 7, seconds = 32, energy = 10, baht = 650, xp = 70 },
+  tani    = { name = "นางตานี", level = 15, sigils = 11, need = 7, seconds = 32, energy = 10, baht = 900, xp = 90 },
+  takhian = { name = "นางตะเคียน", level = 20, sigils = 12, need = 8, seconds = 34, energy = 12, baht = 1200, xp = 110 },
+  phrai   = { name = "ผีพราย", level = 25, sigils = 13, need = 9, seconds = 34, energy = 12, baht = 1500, xp = 130 },
+  pret    = { name = "ผีเปรต", level = 35, sigils = 15, need = 10, seconds = 36, energy = 15, baht = 2200, xp = 170 },
+  nak     = { name = "แม่นาก", level = 50, sigils = 18, need = 13, seconds = 40, energy = 20, baht = 5000, xp = 260 },
 }
 
 local function err(msg, code) error({ msg, code or GRPC_FAILED_PRECONDITION }) end
@@ -395,7 +396,7 @@ nk.register_rpc(rpc(function(context, user_id, s, req)
   local hits = math.floor(tonumber(req.hits) or 0)
   if hits < 0 or hits > g.sigils then err("invalid hits", GRPC_INVALID_ARGUMENT) end
   if hits >= g.need and elapsed < g.seconds * 0.4 then err("too soon") end
-  if elapsed > g.seconds + 120 then err("expired") end
+  if elapsed > g.seconds * 3 + 240 then err("expired") end -- typing the whole chant takes a while
   if hits < g.need then
     return { won = false, ghost_name = g.name, done = g.name .. "หนีไปได้! ลองใหม่คืนนี้" }
   end

@@ -325,12 +325,7 @@ public static class Interiors
         for (int i = 0; i < 3; i++) // tiered altar (ฐานชุกชี)
             PrimitiveKit.Box("Altar", r, new Vector3(0f, 0.2f + i * 0.35f, hd - 1.3f + i * 0.2f), new Vector3(3.6f - i * 0.8f, 0.4f, 1.6f - i * 0.4f), i % 2 == 0 ? PrimitiveKit.Mat("TempleLacquer", new Color(0.45f, 0.07f, 0.06f), 0.6f) : gold);
         // Seated Buddha (พระประธาน)
-        var at = new Vector3(0f, 1.05f, hd - 0.8f);
-        PrimitiveKit.Sphere("BuddhaLap", r, at + new Vector3(0f, 0.15f, -0.1f), new Vector3(1.1f, 0.35f, 0.7f), gold);
-        PrimitiveKit.Sphere("BuddhaBody", r, at + new Vector3(0f, 0.75f, 0f), new Vector3(0.7f, 1f, 0.5f), gold);
-        PrimitiveKit.Sphere("BuddhaHead", r, at + new Vector3(0f, 1.4f, -0.02f), Vector3.one * 0.38f, gold);
-        PrimitiveKit.Cylinder("Ushnisha", r, at + new Vector3(0f, 1.7f, -0.02f), new Vector3(0.1f, 0.12f, 0.1f), gold, collider: false);
-        PrimitiveKit.Box("Halo", r, at + new Vector3(0f, 1.1f, 0.35f), new Vector3(1.6f, 2.2f, 0.05f), PrimitiveKit.Glow("HaloGold", new Color(1f, 0.82f, 0.4f), 0.9f), collider: false);
+        BuddhaStatue.Build(r, new Vector3(0f, 1.08f, hd - 0.85f), 1f);
         foreach (float x in new[] { -1.4f, 1.4f })
         {
             PrimitiveKit.Cylinder("Candle", r, new Vector3(x, 1.25f, hd - 1.7f), new Vector3(0.06f, 0.2f, 0.06f), PrimitiveKit.Mat("CandleYellow", new Color(1f, 0.9f, 0.5f)), collider: false);

@@ -17,6 +17,7 @@ public class GhostSpot : MonoBehaviour
 
     public string Spot => spot;
     public string Ghost => ghost;
+    public Transform Model => model;
 
     public void Configure(string spotId, string ghostId, Transform ghostModel)
     {
@@ -103,7 +104,7 @@ public class GhostSpot : MonoBehaviour
         if (!Night) { ContextButton.Show(this, "ปราบผี", $"ที่นี่มี{name}สิงอยู่ · ผีออกตอนกลางคืน 19:00-05:00", null, enabled: false); return; }
         if (TempleClient.Instance.Banished(spot)) { ContextButton.Show(this, "ปราบผี", $"ปราบ{name}ที่นี่ไปแล้วคืนนี้", null, enabled: false); return; }
         bool able = info == null || t.exorcist_level >= info.level;
-        string hint = able ? $"{name} · ค่าปราบ {info?.baht ?? 0:N0} บาท · ใช้พลังงาน · ท่องคาถาแตะยันต์ให้ทัน"
+        string hint = able ? $"{name} · ค่าปราบ {info?.baht ?? 0:N0} บาท · ใช้พลังงาน · พิมพ์คาถาให้ทัน"
                            : $"{name} ดุเกินไป · ต้องหมอผีเลเวล {info.level} (ตอนนี้ {t.exorcist_level})";
         ContextButton.Show(this, $"ปราบ{name}", hint, () => ExorciseUI.Show(this), able, highlight: able);
     }

@@ -1,7 +1,7 @@
 using UnityEngine;
 
 // The meditation mat before the Buddha in the ubosot: walk onto it to sit (MeditateUI). The player is
-// set down sitting พับเพียบ on `seat` (the cushion: the hips rest on it, legs folded to the side), and
+// set down sitting ขัดสมาธิ on `seat` (the cushion: the hips rest on it, legs crossed), and
 // the incense and candle flames (`flames`) burn while the player meditates with incense lit.
 [RequireComponent(typeof(Collider))]
 public class MeditationSpot : MonoBehaviour
@@ -67,7 +67,7 @@ public class MeditationSpot : MonoBehaviour
             player.enabled = false; // hold still on the mat
         }
         var pose = player.GetComponent<SeatedPose>() ?? player.gameObject.AddComponent<SeatedPose>();
-        pose.Kneel = true;
+        pose.CrossLegged = true;
         if (flames != null) flames.SetActive(incense);
         ContextButton.Hide(this);
     }

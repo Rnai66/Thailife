@@ -204,7 +204,7 @@ public static class RedCrossFair
             PrimitiveKit.Box("Bench", swing, new Vector3(0f, -4f, -2.2f + i * 1.1f), new Vector3(2.3f, 0.12f, 0.35f), PrimitiveKit.Mat("WoodPlank", new Color(0.6f, 0.4f, 0.22f)), collider: false);
         Bulbs(swing, new Vector3(-1.32f, -3.95f, -2.9f), new Vector3(-1.32f, -3.95f, 2.9f), 12, 0.12f);
         Bulbs(swing, new Vector3(1.32f, -3.95f, -2.9f), new Vector3(1.32f, -3.95f, 2.9f), 12, 0.12f);
-        var seat = PrimitiveKit.Group("Seat", swing, new Vector3(0f, -4.5f, 2.2f), 90f).transform;
+        var seat = PrimitiveKit.Group("Seat", swing, new Vector3(0f, -4.5f, 2.2f), 180f).transform; // last bench, facing the middle
         PrimitiveKit.Box("SignBoard", v, new Vector3(2.6f, 1.5f, 0f), new Vector3(0.1f, 0.8f, 3f), PrimitiveKit.Mat("SignYellow", new Color(1f, 0.85f, 0.15f)), collider: false);
         Thai(PrimitiveKit.Label("เรือไวกิ้ง", v, new Vector3(2.67f, 1.5f, 0f), 0.06f, new Color(0.7f, 0.08f, 0.08f), -90f));
         Zone(v, new Vector3(3.4f, 1f, 0f), new Vector3(1.6f, 2f, 3f), "viking", "เรือไวกิ้ง", seat, 22f);

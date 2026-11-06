@@ -636,7 +636,7 @@ KO! ชนะน็อค!	KO! Win by knockout!
 เที่ยง	Noon
 เม.ย.	Apr
 เย็น	Evening
-{} · ค่าปราบ {} บาท · ใช้พลังงาน · ท่องคาถาแตะยันต์ให้ทัน	{} · banishing fee {} baht · uses energy · chant and tap the sigils in time
+{} · ค่าปราบ {} บาท · ใช้พลังงาน · พิมพ์คาถาให้ทัน	{} · banishing fee {} baht · uses energy · type the chant in time
 {} ดุเกินไป · ต้องหมอผีเลเวล {} (ตอนนี้ {})	{} is too fierce · needs exorcist level {} (now {})
 ขนลุก…	Spooky…
 ที่นี่มี{}สิงอยู่ · ผีออกตอนกลางคืน 19:00-05:00	A {} haunts this place · ghosts come out at night 19:00-05:00
@@ -2126,7 +2126,7 @@ Hello! สวัสดีครับ|Sawasdee ka~|ต้มยำกุ้ง �
 กีต้าร์	Guitar
 ก๋วยเตี๋ยวต้มยำ	Tom yum noodles
 ก๋วยเตี๋ยวเรือ	Boat noodles
-ขยายยุ้งข้าว +200 กก.	Expand rice barn +200 kg
+ขยายยุ้งข้าว +400 กก.	Expand rice barn +400 kg
 ข้าวผัดทะเล	Seafood fried rice
 ข้าวมันไก่	Chicken rice
 ข้าวหอมมะลิ 105	Hom Mali 105 jasmine rice
@@ -2207,7 +2207,7 @@ Hello! สวัสดีครับ|Sawasdee ka~|ต้มยำกุ้ง �
 อาหารไก่ (ราคาตลาด)	Chicken feed (market price)
 อ้อย	Sugarcane
 เกาเหลาหมูตุ๋น	Stewed pork soup
-เก็บข้าวได้มากขึ้น (สูงสุด 1,400 กก.)	Store more rice (up to 1,400 kg)
+เก็บข้าวได้มากขึ้น (สูงสุด 2,800 กก.)	Store more rice (up to 2,800 kg)
 เก้าอี้ไม้	Wooden chair
 เก้าอี้ไม้สัก	Teak chair
 เตียงนอน	Bed
@@ -2415,3 +2415,17 @@ Hello! สวัสดีครับ|Sawasdee ka~|ต้มยำกุ้ง �
 ไกด์ระดับโลก	World-class guide
 ไอทีซัพพอร์ต	IT support
 ซื้อตั๋วแล้ว — ออกเดินทาง!	Ticket bought — off you go!
+สะกดได้ {}/{} คำ	Sealed {}/{} words
+พิมพ์คาถาตามบทให้ทัน ก่อนไฟยันต์มอด	Type each word of the chant before its sigil burns out
+พิมพ์คาถาตรงนี้…	Type the chant here…
+กำลังเดินทางไป{}…	Travelling to {}…
+กำลังเชื่อมต่อ…	Connecting…
+เคล็ดลับ: {}	Tip: {}
+ทำภารกิจรายวันครบ รับโบนัสพิเศษ	Finish all daily quests for a bonus
+นอนพักที่บ้านเพื่อฟื้นพลังงาน	Sleep at home to restore energy
+ข้าวที่รดน้ำได้ผลผลิตเกือบสองเท่า	Watered rice yields almost twice as much
+พระเครื่องที่ห้อยอยู่ช่วยเสริมพลังได้ถึง 3 องค์	Wear up to 3 amulets for their powers
+กลางคืนระวังผี! หมอผีปราบผีได้ค่าครู	Beware of ghosts at night! Exorcists get paid to banish them
+ขึ้นรถสองแถวที่ป้ายเพื่อเดินทางไปที่อื่น	Take the songthaew at the stop to travel
+เรียนที่โรงเรียนเพื่อเปิดอาชีพใหม่	Study at school to unlock new jobs
+กดปุ่มออโต้ ให้ตัวละครทำภารกิจเอง	Press Auto to let your character do quests

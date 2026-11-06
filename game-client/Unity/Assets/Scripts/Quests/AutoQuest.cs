@@ -73,7 +73,7 @@ public class AutoQuest : MonoBehaviour
         if (player == null) player = FindAnyObjectByType<PlayerController>();
         if (player == null) return;
         if (player.ManualInput) { Stop("หยุดออโต้ — ควบคุมเอง"); return; }
-        if (running == null) running = StartCoroutine(Loop());
+        if (running == null && !SceneLoader.Loading) running = StartCoroutine(Loop()); // the map first
     }
 
     // One long-running loop while auto is on: each pass does (or travels toward) one quest
@@ -303,33 +303,74 @@ public class AutoQuest : MonoBehaviour
     }
 
     // ── Walking ───────────────────────────────────────────────────────────────────────────
-    // Head for the place, steer round what's in the way, and if stuck for a while hop over to it
+    // Head for the place along the walkable map (WalkMesh): round walls, through gates and doors, turning
+    // smoothly from corner to corner. Until the map is ready (or where it has no way) steer straight at
+    // it round what's in the way. Only when truly stuck for a long while step over to it.
     private IEnumerator WalkTo(Collider place, Vector3 goal)
     {
-        float best = float.MaxValue, checkAt = Time.time + 3f, giveUp = Time.time + 75f;
-        int stuck = 0, side = 1;
+        var map = WalkMesh.Get();
+        var corners = new System.Collections.Generic.List<Vector3>();
+        int corner = 0, stuck = 0, side = 1;
+        float repathAt = 0f, checkAt = Time.time + 3f, giveUp = Time.time + 120f;
+        Vector3 lastCheck = player.transform.position, heading = Vector3.zero;
         while (On)
         {
             var pos = player.transform.position;
             if (Arrived(place, goal, pos)) break;
-            Vector3 to = goal - pos;
+            Vector3 aim = Target(place, goal, pos);
+            Vector3 to = aim - pos;
             to.y = 0f;
-            float dist = to.magnitude;
-            status = status.Split('(')[0].TrimEnd() + $" (อีก {dist:0} ม.)";
+            status = status.Split('(')[0].TrimEnd() + $" (อีก {to.magnitude:0} ม.)";
 
-            player.AutoMove = Steer(pos, to.normalized, place, ref side);
+            if (Time.time >= repathAt)
+            {
+                repathAt = Time.time + (map.Busy ? 0.5f : 2.5f);
+                // the path goes to the middle of the place, on its floor: in through its door, not to
+                // the nearest bit of it, which may be the other side of a wall
+                Vector3 middle = place != null ? new Vector3(place.bounds.center.x, place.bounds.min.y + 0.2f, place.bounds.center.z) : goal;
+                map.Cover(pos, middle);
+                corner = map.Path(pos, middle, corners) ? 1 : 0;
+            }
+
+            Vector3 dir;
+            if (corners.Count > 1 && corner < corners.Count)
+            {
+                // next corner once close to this one (look past it a little so the turn is smooth)
+                while (corner < corners.Count - 1 && Flat(corners[corner] - pos).magnitude < 0.8f) corner++;
+                Vector3 toCorner = Flat(corners[corner] - pos);
+                dir = toCorner.magnitude < 0.3f && corner == corners.Count - 1 ? to.normalized : toCorner.normalized;
+                if (corner == corners.Count - 1 && toCorner.magnitude < 0.6f) dir = Steer(pos, to.normalized, place, ref side);
+            }
+            else dir = Steer(pos, to.normalized, place, ref side);
+
+            heading = heading.sqrMagnitude < 0.01f ? dir : Vector3.Slerp(heading, dir, 1f - Mathf.Exp(-9f * Time.deltaTime));
+            player.AutoMove = heading.normalized;
 
             if (Time.time >= checkAt)
             {
                 checkAt = Time.time + 3f;
-                if (dist > best - 0.6f) stuck++; else stuck = 0;
-                best = Mathf.Min(best, dist);
-                if (stuck == 1) player.Jump();
-                if (stuck >= 2 || Time.time > giveUp) { Hop(goal, pos); stuck = 0; best = float.MaxValue; giveUp = Time.time + 75f; }
+                if (Flat(pos - lastCheck).magnitude < 0.8f) { stuck++; repathAt = 0f; side = -side; } else stuck = 0;
+                lastCheck = pos;
+                if (stuck >= 4 || Time.time > giveUp)
+                {
+                    Hop(goal, pos);
+                    stuck = 0;
+                    giveUp = Time.time + 120f;
+                    repathAt = 0f;
+                }
             }
             yield return null;
         }
         player.AutoMove = Vector3.zero;
+    }
+
+    private static Vector3 Flat(Vector3 v) { v.y = 0f; return v; }
+
+    // The point of the place to walk to: its nearest edge from here (zones are often big)
+    private static Vector3 Target(Collider place, Vector3 goal, Vector3 pos)
+    {
+        if (place == null) return goal;
+        try { return place.ClosestPoint(pos); } catch (Exception) { return place.bounds.center; }
     }
 
     private static bool Arrived(Collider place, Vector3 goal, Vector3 pos)
@@ -343,7 +384,10 @@ public class AutoQuest : MonoBehaviour
         }
         Vector3 d = p - pos;
         d.y = 0f;
-        return d.magnitude < 1.1f;
+        if (d.magnitude >= 1.1f || Mathf.Abs(p.y - pos.y) >= 2.5f) return false;
+        // next to it, but not through a wall
+        return place == null || !Physics.Linecast(pos + Vector3.up, p + Vector3.up * 0.2f, out var hit, ~0, QueryTriggerInteraction.Ignore)
+               || hit.collider == place;
     }
 
     private Vector3 Steer(Vector3 pos, Vector3 dir, Collider place, ref int side)

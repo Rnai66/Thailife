@@ -81,6 +81,6 @@ public static class Locations
     {
         if (destination == null || !destination.Available) return;
         PendingSpawnId = spawnId ?? destination.SpawnId;
-        SceneManager.LoadScene(destination.Scene);
+        SceneLoader.Load(destination.Scene, destination.NameTh);
     }
 }
