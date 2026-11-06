@@ -10,7 +10,7 @@ using UnityEngine;
 //  · at the stilt house: the shrine shelf (หิ้งพระ) over the door with what you offered for, the
 //    kuman, and the dog's kennel (HomeGuardians)
 // BuildTambon adds ป่าตำบล in the tambon scene.
-public static class TempleLife
+public static partial class TempleLife
 {
     private static readonly Color Robe = new Color(0.93f, 0.52f, 0.12f);
     private static readonly Color AbbotRobe = new Color(0.7f, 0.38f, 0.1f);

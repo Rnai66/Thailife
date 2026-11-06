@@ -47,7 +47,7 @@ public static class Homes
         foreach (float x in new[] { 52.6f, 58.4f })
             PrimitiveKit.Box("GatePost", root, new Vector3(x, 1.6f, -1.2f), new Vector3(0.5f, 3.2f, 0.5f), white);
         PrimitiveKit.Box("GateBeam", root, new Vector3(55.5f, 3.4f, -1.2f), new Vector3(6.4f, 0.6f, 0.5f), white, collider: false);
-        PrimitiveKit.Label(name, root, new Vector3(55.5f, 3.4f, -1.5f), 0.05f, new Color(0.15f, 0.25f, 0.45f), 180f);
+        PrimitiveKit.Label(name, root, new Vector3(55.5f, 3.4f, -1.5f), 0.05f, new Color(0.15f, 0.25f, 0.45f));
         foreach (float z in new[] { 6f, 22f, 38f })
             StreetFurniture.LampPost(root, new Vector3(58.5f, 0f, z));
         Nature.Bush(root, new Vector3(52.5f, 0f, 9f), 1.1f, 7, flowers: true);

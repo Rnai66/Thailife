@@ -3,12 +3,12 @@ using UnityEngine;
 
 // The city's big fair (งานกาชาดจังหวัด and every other city festival): spreads out west and south of
 // the city event ground (FestivalGrounds, big) with the big rides and shows — a gateway of lights on
-// the main road, รถไต่ถัง, เรือไวกิ้ง, a รถไฟเหาะ looping round the รถบั๊ม floor, บ้านผีสิง, the เมียงู tent
+// the main road, รถไต่ถัง, เรือไวกิ้ง, a รถไฟเหาะ looping round a Red Cross flower bed, the รถบั๊ม pavilion, บ้านผีสิง, the เมียงู tent
 // and a concert stage — plus searchlights sweeping the sky and พลุ after dark. Everything shows only
 // while a big festival is on. Positions are in the city root's space.
-public static class RedCrossFair
+public static partial class RedCrossFair
 {
-    // West wing x -68..-48.5, z -59..-22; south strip x -48..-22.5, z -62..-48.5
+    // West wing x -68..-48.5, z -59..-22; south strip x -48..-22.5, z -62..-48.5 (and RedCrossFairWest beyond)
     private static readonly Vector3 CoasterCentre = new Vector3(-58.5f, 0f, -46.8f);
     private const float CoasterRx = 7.6f, CoasterRz = 10f;
 
@@ -23,7 +23,7 @@ public static class RedCrossFair
         WallOfDeath(t, new Vector3(-62f, 0f, -29f));
         Viking(t, new Vector3(-52.5f, 0f, -29.5f));
         Coaster(t);
-        BumperCars(t, CoasterCentre);
+        Expansion(t); // the far west wing, food street and food court; the bumper cars have their own pavilion there
         HauntedHouse(t, new Vector3(-44.6f, 0f, -55.5f));
         SnakeTent(t, new Vector3(-50.75f, 0f, -55.5f));
         Concert(root, new Vector3(-31.5f, 0f, -57f));
@@ -328,49 +328,6 @@ public static class RedCrossFair
         Zone(st, new Vector3(1.9f, 1f, -2.6f), new Vector3(1.6f, 2f, 2.4f), "coaster", "รถไฟเหาะ", seat, 26f);
     }
 
-    // รถบั๊ม: a steel floor with a rubber rail and a sparking net roof, cars bumping about (BumperCars);
-    // inside the coaster's oval, so the ticket gate is beside the coaster station
-    private static void BumperCars(Transform parent, Vector3 at)
-    {
-        var b = PrimitiveKit.Group("BumperCars_รถบั๊ม", parent, at).transform;
-        const float HX = 5f, HZ = 4f;
-        PrimitiveKit.Box("Floor", b, new Vector3(0f, 0.08f, 0f), new Vector3(HX * 2f, 0.16f, HZ * 2f), PrimitiveKit.Mat("BumperFloor", new Color(0.55f, 0.58f, 0.62f), 0.8f, 0.6f), collider: false);
-        var rubber = PrimitiveKit.Mat("BumperRail", new Color(0.95f, 0.75f, 0.15f));
-        PrimitiveKit.Box("RailN", b, new Vector3(0f, 0.35f, HZ), new Vector3(HX * 2f, 0.4f, 0.25f), rubber);
-        PrimitiveKit.Box("RailS", b, new Vector3(0f, 0.35f, -HZ), new Vector3(HX * 2f, 0.4f, 0.25f), rubber);
-        PrimitiveKit.Box("RailE", b, new Vector3(HX, 0.35f, 0f), new Vector3(0.25f, 0.4f, HZ * 2f), rubber);
-        PrimitiveKit.Box("RailW", b, new Vector3(-HX, 0.35f, 0f), new Vector3(0.25f, 0.4f, HZ * 2f), rubber);
-        var steel = PrimitiveKit.Mat("SteelFrame", new Color(0.32f, 0.42f, 0.5f));
-        foreach (float x in new[] { -HX, HX })
-            foreach (float z in new[] { -HZ, HZ })
-                PrimitiveKit.Cylinder("RoofPost", b, new Vector3(x, 1.6f, z), new Vector3(0.15f, 1.6f, 0.15f), steel, collider: false);
-        PrimitiveKit.Box("RoofNet", b, new Vector3(0f, 3.2f, 0f), new Vector3(HX * 2f, 0.04f, HZ * 2f), PrimitiveKit.Glow("BumperNet", new Color(0.35f, 0.5f, 1f), 1.2f, 0.3f), collider: false);
-        Bulbs(b, new Vector3(-HX, 3.3f, -HZ), new Vector3(HX, 3.3f, -HZ), 14);
-        Bulbs(b, new Vector3(-HX, 3.3f, HZ), new Vector3(HX, 3.3f, HZ), 14);
-        Color[] paint = { new Color(0.95f, 0.2f, 0.25f), new Color(0.2f, 0.5f, 0.95f), new Color(1f, 0.8f, 0.2f), new Color(0.3f, 0.8f, 0.4f), new Color(0.85f, 0.4f, 0.9f), new Color(1f, 0.55f, 0.2f) };
-        var cars = new Transform[6];
-        Transform seat = null;
-        for (int i = 0; i < cars.Length; i++)
-        {
-            var car = PrimitiveKit.Group("BumperCar", b, new Vector3(-3.5f + (i % 3) * 3.5f, 0.16f, i < 3 ? -1.8f : 1.8f)).transform;
-            var mat = PrimitiveKit.Mat($"BumperCar{i}", paint[i], 0.8f, 0.3f);
-            PrimitiveKit.Cylinder("Skirt", car, new Vector3(0f, 0.15f, 0f), new Vector3(1.5f, 0.12f, 1.5f), PrimitiveKit.Mat("SpeakerBlack", new Color(0.08f, 0.08f, 0.09f)), collider: false);
-            PrimitiveKit.Box("Body", car, new Vector3(0f, 0.38f, 0f), new Vector3(1.1f, 0.4f, 1.3f), mat, collider: false);
-            PrimitiveKit.Cylinder("Pole", car, new Vector3(0f, 1.7f, -0.5f), new Vector3(0.05f, 1.4f, 0.05f), steel, collider: false);
-            PrimitiveKit.Sphere("Spark", car, new Vector3(0f, 3.1f, -0.5f), Vector3.one * 0.18f, PrimitiveKit.Glow("BumperSpark", new Color(0.7f, 0.85f, 1f), 12f, 0.5f));
-            if (i == 0) seat = PrimitiveKit.Group("Seat", car, new Vector3(0f, 0.1f, 0f)).transform;
-            cars[i] = car;
-        }
-        b.gameObject.AddComponent<global::BumperCars>().Configure(cars, new Vector2(HX, HZ));
-        // Ticket gate by the coaster station (outside the oval)
-        var gate = PrimitiveKit.Group("BumperGate", parent, at + new Vector3(CoasterRx + 1.8f, 0f, 5.2f), -90f).transform;
-        PrimitiveKit.Box("SignBoard", gate, new Vector3(0f, 2.2f, 0.4f), new Vector3(2.4f, 0.7f, 0.1f), PrimitiveKit.Mat("SignYellow", new Color(1f, 0.85f, 0.15f)), collider: false);
-        Thai(PrimitiveKit.Label("รถบั๊ม →", gate, new Vector3(0f, 2.2f, 0.33f), 0.06f, new Color(0.7f, 0.08f, 0.08f)));
-        foreach (float x in new[] { -1.1f, 1.1f })
-            PrimitiveKit.Cylinder("Post", gate, new Vector3(x, 1.25f, 0.4f), new Vector3(0.08f, 1.25f, 0.08f), steel);
-        Zone(gate, new Vector3(0f, 1f, -0.6f), new Vector3(2.4f, 2f, 1.6f), "bumper", "รถบั๊ม", seat, 22f);
-    }
-
     // บ้านผีสิง: a crooked dark house with a giant skull doorway, glowing green windows, a ghost on
     // the roof and a flickering lamp. Front faces +Z (north); walk up to the skull's mouth.
     private static void HauntedHouse(Transform parent, Vector3 at)
@@ -519,7 +476,7 @@ public static class RedCrossFair
         var beam = MeshKit.Lathe("SearchBeam", new[] { new Vector2(0.35f, 0f), new Vector2(2.6f, 45f) }, 16, capTop: false, capBottom: false);
         var beamMat = PrimitiveKit.Beam("SearchBeam", new Color(0.75f, 0.8f, 1f, 1f));
         var housing = PrimitiveKit.Mat("SpeakerBlack", new Color(0.08f, 0.08f, 0.09f));
-        foreach (var p in new[] { new Vector3(-67.4f, 0f, -38f), new Vector3(-67.4f, 0f, -58f), new Vector3(-40.5f, 0f, -50.5f), new Vector3(-23.5f, 0f, -61f) })
+        foreach (var p in new[] { new Vector3(-87f, 0f, -23.5f), new Vector3(-87f, 0f, -81f), new Vector3(-40.5f, 0f, -50.5f), new Vector3(-23.5f, 0f, -61f) })
         {
             PrimitiveKit.Box("SearchlightBase", t, p + Vector3.up * 0.4f, new Vector3(1.2f, 0.8f, 1.2f), housing);
             var head = PrimitiveKit.Group("Searchlight", t, p + Vector3.up * 1f).transform;
@@ -540,7 +497,7 @@ public static class RedCrossFair
         for (int i = 0; i < c.Length; i++) mats.Add(PrimitiveKit.Glow($"Firework{i}", c[i], 25f, 0.3f));
         fw.gameObject.AddComponent<Fireworks>().Configure(mats.ToArray(), new Vector2(36f, 26f), 28f);
 
-        var corners = new[] { new Vector3(-67.8f, 0f, -24.5f), new Vector3(-48.9f, 0f, -24.5f), new Vector3(-48.9f, 0f, -35.5f), new Vector3(-67.8f, 0f, -35.5f) };
+        var corners = new[] { new Vector3(-66.8f, 0f, -24.5f), new Vector3(-48.9f, 0f, -24.5f), new Vector3(-48.9f, 0f, -35.5f), new Vector3(-66.8f, 0f, -35.5f) };
         foreach (var p in corners) FairLights.Pole(t, p, 6f);
         FairLights.Festoon(t, corners[0] + Vector3.up * 5.8f, corners[1] + Vector3.up * 5.8f, 0.7f);
         FairLights.Festoon(t, corners[1] + Vector3.up * 5.8f, corners[2] + Vector3.up * 5.8f, 0.7f);

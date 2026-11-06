@@ -89,9 +89,14 @@ M.GOODS = {
   backpack    = { name = "กระเป๋าเป้",       price = 140 },
   futon       = { name = "ฟูกนอน",          price = 250 },
   rice_cooker = { name = "หม้อหุงข้าว",       price = 350 },
+  -- ของป่า from the forest behind the tambon canal (forage.lua)
+  mushroom     = { name = "เห็ดโคน (ดอก)",       price = 35 },
+  bamboo_shoot = { name = "หน่อไม้",            price = 25 },
+  ant_eggs     = { name = "ไข่มดแดง (ห่อ)",     price = 60 },
+  pak_wan      = { name = "ผักหวานป่า (กำ)",    price = 30 },
 }
 M.GOODS_ORDER = { "soap", "fish_sauce", "toothpaste", "detergent", "spoons", "basin", "teddy", "flask",
-                  "backpack", "futon", "rice_cooker" }
+                  "backpack", "futon", "rice_cooker", "mushroom", "bamboo_shoot", "ant_eggs", "pak_wan" }
 
 -- Markets keep game-clock hours: the fresh market in the morning, the ตลาดนัด in the evening
 M.MARKETS = {

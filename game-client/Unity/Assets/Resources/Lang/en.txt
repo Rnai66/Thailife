@@ -2476,3 +2476,34 @@ Hello! สวัสดีครับ|Sawasdee ka~|ต้มยำกุ้ง �
 เสื่อหน้าบ้าน	Mat on the porch
 บ้าน	Home
 กลับบ้าน	Go home
+ถนนอาหารงานกาชาด	Red Cross Fair Food Street
+สลากกาชาด	Red Cross Lottery
+รางวัลที่ 1	First prize
+คูปอง 2 ใบ	2 coupons
+หมูปิ้ง	Grilled pork
+หอยทอด	Fried mussels
+ไอติมกะทิ	Coconut ice cream
+โรตี	Roti
+น้ำแข็งใส	Shaved ice
+ขนมครก	Khanom khrok
+ข้าวโพดคั่ว	Popcorn
+สายไหม	Cotton candy
+หิวแล้ว กินอะไรดี|หมูปิ้งหอมมาก!|ซื้อสายไหมให้หน่อย|ไอติมกะทิเย็นชื่นใจ|เดินจนเมื่อยขา|ไปนั่งกินกันตรงโน้น	I'm hungry, what shall we eat|The grilled pork smells great!|Buy me cotton candy|Coconut ice cream is so cool|My legs are tired|Let's sit and eat over there
+ไปรถบั๊มกัน!|ซื้อสลากกาชาดไหม|ลุ้นรางวัลใหญ่|รถไฟเหาะเสียงดังจัง	Let's go bumper cars!|Buy a Red Cross lottery ticket?|Hoping for the big prize|The coaster is so loud
+รอคิวรถบั๊ม|ชนเลย ชนเลย!|คันสีแดงเก่งสุด|ขอขับอีกรอบ	Queueing for bumper cars|Bump them, bump them!|The red one is the best|One more go
+ขอสลากกาชาดสองใบ|ลุ้นรถยนต์!|ปีที่แล้วได้พัดลม|ช่วยกาชาดได้บุญด้วย|ถูกรางวัลแน่ปีนี้	Two lottery tickets please|Hoping for the car!|Last year I won a fan|Helping the Red Cross earns merit too|This year I'll win for sure
+อิ่มแล้ว|อร่อยมาก|นั่งพักก่อน|เดี๋ยวไปดูคอนเสิร์ตต่อ|ลมเย็นสบาย	I'm full|So tasty|Let's rest a bit|Then we'll watch the concert|Nice cool breeze
+ป่ารกหลังคลอง\nหาของป่า: เห็ด หน่อไม้ ไข่มดแดง ผักหวาน\nกลางคืนผีดุ!	Wild forest behind the canal\nForage: mushrooms, bamboo shoots, red ant eggs, wild greens\nFierce ghosts at night!
+หาของป่า	Forage
+เก็บเห็ดโคน	Pick mushrooms
+ขุดหน่อไม้	Dig bamboo shoots
+แหย่ไข่มดแดง	Poke out red ant eggs
+เด็ดผักหวานป่า	Pick wild pak wan
+เก็บไปแล้ว · {}ขึ้นใหม่อีกราว {} นาที	Already picked · {} grows back in about {} min
+{} · ขายร้านค้าชุมชน {} บาท · ใช้พลังงาน {}	{} · sells for {} baht at the community shop · costs {} energy
++{} {}	+{} {}
+เห็ดโคน (ดอก)	Termite mushroom
+หน่อไม้	Bamboo shoot
+ไข่มดแดง (ห่อ)	Red ant eggs (pack)
+ผักหวานป่า (กำ)	Wild pak wan (bunch)
+ยังไม่ขึ้นใหม่ รอสักพัก	Not grown back yet, wait a while

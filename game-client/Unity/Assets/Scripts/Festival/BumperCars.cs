@@ -7,7 +7,7 @@ public class BumperCars : MonoBehaviour
     [SerializeField] private Transform[] cars;
     [SerializeField] private Vector2 half = new Vector2(4.5f, 3.5f); // floor half-size, local X and Z
 
-    private const float Speed = 2.4f, Radius = 0.75f;
+    private const float Speed = 2.6f, Radius = 0.85f;
 
     private Vector2[] pos;
     private float[] heading, turn, spin;

@@ -46,7 +46,7 @@ public static class TambonBuilder
         StreetFurniture.PoleLine(root, new[] { new Vector3(-40f, 0f, -10.6f), new Vector3(-12f, 0f, -10.6f), new Vector3(24f, 0f, -10.6f), new Vector3(46f, 0f, -10.6f) }, 180f, lamps: true);
     });
 
-    internal static void BuildTambon(bool ask) => BuildLocation("Assets/Scenes/Tambon.unity", "Tambon", 10f, ask, root =>
+    internal static void BuildTambon(bool ask) => BuildLocation("Assets/Scenes/Tambon.unity", "Tambon", 12f, ask, root => // 120 m: room for the forest behind the canal
     {
         // ตำบล: SAO office, health station, school, public park, canal with fishing
         Places2.SaoOffice(root, new Vector3(-24f, 0f, 10f), "อบต.");
@@ -54,7 +54,7 @@ public static class TambonBuilder
         Places.School(root, new Vector3(-10f, 0f, -28f), "โรงเรียน", 180f);
         Lane(root, -10f, -15f, -10f);
         Places2.Park(root, new Vector3(2f, 0f, 14f), "สวนสาธารณะ");
-        Places2.Canal(root, new Vector3(0f, 0f, 34f), 100f, new[] { -18f, -6f, 8f, 20f });
+        var canal = Places2.Canal(root, new Vector3(0f, 0f, 34f), 100f, new[] { -18f, -6f, 8f, 20f });
         Lane(root, 2f, -6f, 4f);
 
         Npcs.Crowd(root, new Vector3(2f, 0f, 14f), new Vector2(14f, 14f), 4, "", 7, 19, Npcs.VillageTalk); // park
@@ -65,6 +65,7 @@ public static class TambonBuilder
 
         // ป่าตำบล in the south-east corner: ghosts at night for the หมอผี (TempleLife)
         TempleLife.BuildTambon(root);
+        TempleLife.BuildCanalForest(root, canal); // ป่ารกหลังคลอง over a footbridge: forage and five more ghosts
 
         // Motorbike repair shop (skilled job: ช่าง) where the boxing ring used to be
         Schooling.RepairShop(root, new Vector3(38f, 0f, 18f), 0f);
