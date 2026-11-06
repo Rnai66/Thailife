@@ -35,7 +35,7 @@ public class CoopUI : MonoBehaviour
 
     private void Awake()
     {
-        var body = UiKit.PremiumWindow(transform, "CoopCanvas", UiKit.WindowSize(new Vector2(1640f, 940f), 1590f), 50, "icon:farm",
+        var body = UiKit.PremiumWindow(transform, "CoopCanvas", UiKit.WindowSize(new Vector2(1640f, 940f), 1700f), 50, "icon:farm",
             out backdrop, out titleText, out subtitleText, Hide, out _);
         titleText.text = "เล้าไก่";
 
@@ -47,10 +47,10 @@ public class CoopUI : MonoBehaviour
         heading.fontStyle = FontStyle.Bold;
         if (UiKit.Portrait) // upright: the three status cards stacked, the chickens in two columns below
         {
-            UiKit.Stack((RectTransform)feedButton.transform.parent, new Vector2(0f, 588f), 1.2f);
-            UiKit.Stack((RectTransform)sellEggsButton.transform.parent, new Vector2(0f, 348f), 1.2f);
-            UiKit.Stack((RectTransform)hatchButton.transform.parent, new Vector2(0f, 108f), 1.2f);
-            UiKit.Stack(heading.rectTransform, new Vector2(-190f, -38f));
+            UiKit.Stack((RectTransform)feedButton.transform.parent, new Vector2(0f, 640f), 1.2f);
+            UiKit.Stack((RectTransform)sellEggsButton.transform.parent, new Vector2(0f, 400f), 1.2f);
+            UiKit.Stack((RectTransform)hatchButton.transform.parent, new Vector2(0f, 160f), 1.2f);
+            UiKit.Stack(heading.rectTransform, new Vector2(-190f, 15f));
         }
         list = UiKit.Container(body, new Vector2(0f, 0f));
         toastText = UiKit.ToastBar(body, new Vector2(0f, -340f), 760f);
@@ -69,11 +69,13 @@ public class CoopUI : MonoBehaviour
     {
         var card = UiKit.Panel("Status", body, Color.white, new Vector2(x, 285f), new Vector2(510f, 190f), shadow: true);
         card.gameObject.AddComponent<Outline>().effectColor = UiKit.CardBorder;
-        UiKit.Label(card, 24, title, new Vector2(-75f, 62f), new Vector2(340f, 36f), UiKit.Muted, TextAnchor.MiddleLeft);
-        value = UiKit.Label(card, 40, "", new Vector2(-75f, 18f), new Vector2(340f, 56f), UiKit.Ink, TextAnchor.MiddleLeft);
+        UiKit.Label(card, 27, title, new Vector2(-15f, 66f), new Vector2(460f, 38f), UiKit.Muted, TextAnchor.MiddleLeft).fontStyle = FontStyle.Bold;
+        value = UiKit.Label(card, 42, "", new Vector2(-15f, 22f), new Vector2(460f, 56f), UiKit.Ink, TextAnchor.MiddleLeft);
         value.fontStyle = FontStyle.Bold;
-        note = UiKit.Label(card, 22, "", new Vector2(-75f, -30f), new Vector2(340f, 40f), UiKit.Muted, TextAnchor.MiddleLeft);
-        return UiKit.RoundButton(card, action, new Vector2(150f, -58f), new Vector2(190f, 60f), buttonColor, buttonInk, onClick, 26);
+        // the note sits left of the button, two lines if it needs them
+        note = UiKit.Label(card, 24, "", new Vector2(-95f, -40f), new Vector2(300f, 70f), UiKit.Muted, TextAnchor.MiddleLeft);
+        note.lineSpacing = 1.05f;
+        return UiKit.RoundButton(card, action, new Vector2(150f, -50f), new Vector2(190f, 64f), buttonColor, buttonInk, onClick, 26);
     }
 
     private void Update()
@@ -141,34 +143,35 @@ public class CoopUI : MonoBehaviour
     {
         bool upright = UiKit.Portrait; // upright: two per row, four rows
         float x = upright ? (index % 2 == 0 ? -177f : 177f) : -585f + (index % 4) * 390f;
-        float y = upright ? -125f - (index / 2) * 160f : 75f - (index / 4) * 175f;
-        var card = UiKit.Panel("Chicken", list, Color.white, new Vector2(x, y), new Vector2(370f, 160f), shadow: true);
-        if (upright) card.localScale = new Vector3(0.92f, 0.92f, 1f);
+        float y = upright ? -100f - (index / 2) * 188f : 45f - (index / 4) * 200f;
+        var card = UiKit.Panel("Chicken", list, Color.white, new Vector2(x, y), new Vector2(370f, 192f), shadow: true);
+        if (upright) card.localScale = new Vector3(0.95f, 0.95f, 1f);
         card.gameObject.AddComponent<Outline>().effectColor = UiKit.CardBorder;
 
         // Feather colour disc
         var disc = UiKit.Rect("Feather", card, CoopClient.FeatherColor(c.color));
         disc.GetComponent<Image>().sprite = UiKit.CircleSprite;
-        disc.anchoredPosition = new Vector2(-135f, 25f);
-        disc.sizeDelta = new Vector2(76f, 76f);
+        disc.anchoredPosition = new Vector2(-135f, 46f);
+        disc.sizeDelta = new Vector2(72f, 72f);
         disc.gameObject.AddComponent<Outline>().effectColor = UiKit.CardBorder;
 
-        var name = UiKit.Label(card, 26, c.name, new Vector2(30f, 50f), new Vector2(240f, 36f), UiKit.Ink, TextAnchor.MiddleLeft);
+        // name and sex/age beside the feather disc
+        var name = UiKit.Label(card, 30, c.name, new Vector2(40f, 66f), new Vector2(250f, 40f), UiKit.Ink, TextAnchor.MiddleLeft);
         name.fontStyle = FontStyle.Bold;
         string stage = c.adult ? CoopClient.SexTh(c) : $"ลูกไก่ · โตใน {CoopClient.Countdown(c.grown_in_s - age)}";
-        UiKit.PillLabel(card, stage, new Vector2(30f, 12f), new Vector2(240f, 34f),
-            c.sex == "rooster" ? UiKit.DangerTint : UiKit.Pill, c.sex == "rooster" ? UiKit.Danger : UiKit.Price, 20).alignment = TextAnchor.MiddleCenter;
-        UiKit.Label(card, 20, $"สี{c.color}", new Vector2(-110f, -30f), new Vector2(150f, 30f), UiKit.Muted);
+        UiKit.PillLabel(card, stage, new Vector2(40f, 26f), new Vector2(250f, 38f),
+            c.sex == "rooster" ? UiKit.DangerTint : UiKit.Pill, c.sex == "rooster" ? UiKit.Danger : UiKit.Price, 23).alignment = TextAnchor.MiddleCenter;
 
-        // Beauty bar
-        UiKit.Label(card, 20, $"ความสวย {c.beauty}", new Vector2(30f, -24f), new Vector2(240f, 28f), UiKit.Muted, TextAnchor.MiddleLeft);
-        var track = UiKit.Panel("BeautyTrack", card, new Color32(0xF1, 0xEF, 0xE8, 0xFF), new Vector2(30f, -46f), new Vector2(240f, 12f));
-        var fill = UiKit.Panel("BeautyFill", track, UiKit.Gold, Vector2.zero, new Vector2(240f * Mathf.Clamp01(c.beauty / 100f), 12f));
+        // feather colour on its own full-width line, then beauty and its bar — nothing shares a spot
+        UiKit.Label(card, 23, $"สี{c.color}", new Vector2(0f, -16f), new Vector2(340f, 32f), UiKit.Ink, TextAnchor.MiddleLeft);
+        UiKit.Label(card, 22, $"ความสวย {c.beauty}", new Vector2(-95f, -46f), new Vector2(150f, 28f), UiKit.Muted, TextAnchor.MiddleLeft);
+        var track = UiKit.Panel("BeautyTrack", card, new Color32(0xF1, 0xEF, 0xE8, 0xFF), new Vector2(75f, -46f), new Vector2(190f, 14f));
+        var fill = UiKit.Panel("BeautyFill", track, UiKit.Gold, Vector2.zero, new Vector2(190f * Mathf.Clamp01(c.beauty / 100f), 14f));
         fill.anchorMin = fill.anchorMax = new Vector2(0f, 0.5f);
         fill.pivot = new Vector2(0f, 0.5f);
 
-        var sell = UiKit.RoundButton(card, $"ขาย {c.price:N0}฿", new Vector2(100f, -60f), new Vector2(150f, 44f),
-            UiKit.Pill, UiKit.Price, () => Act("sell_chicken", c.id), 22);
+        var sell = UiKit.RoundButton(card, $"ขาย {c.price:N0}฿", new Vector2(0f, -76f), new Vector2(340f, 36f),
+            UiKit.Pill, UiKit.Price, () => Act("sell_chicken", c.id), 24);
         sell.interactable = !busy;
     }
 

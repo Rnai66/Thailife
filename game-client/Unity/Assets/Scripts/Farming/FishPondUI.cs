@@ -52,7 +52,7 @@ public class FishPondUI : MonoBehaviour
             cages[i] = portrait ? BuildCageRow(body, i + 1, new Vector2(0f, 427f - i * 230f))
                 : BuildCage(body, i + 1, new Vector2((i - 1) * 430f, 140f));
 
-        pickText = UiKit.Label(body, 24, "", new Vector2(0f, portrait ? -180f : -120f), new Vector2(portrait ? 680f : 1300f, 36f), UiKit.Price);
+        pickText = UiKit.Label(body, 28, "", new Vector2(0f, portrait ? -180f : -120f), new Vector2(portrait ? 680f : 1300f, 40f), UiKit.Price);
         pickText.fontStyle = FontStyle.Bold;
         speciesRow = UiKit.Container(body, new Vector2(0f, portrait ? -260f : -200f));
         toastText = UiKit.ToastBar(body, new Vector2(0f, portrait ? -490f : -300f), 1000f);
@@ -76,9 +76,9 @@ public class FishPondUI : MonoBehaviour
         var c = new CageCard();
         var card = UiKit.Panel("Cage", body, Color.white, at, new Vector2(400f, 400f), shadow: true);
         card.gameObject.AddComponent<Outline>().effectColor = UiKit.CardBorder;
-        c.title = UiKit.Label(card, 30, $"กระชัง {id}", new Vector2(0f, 160f), new Vector2(380f, 44f), UiKit.Ink);
+        c.title = UiKit.Label(card, 34, $"กระชัง {id}", new Vector2(0f, 160f), new Vector2(380f, 48f), UiKit.Ink);
         c.title.font = ThaiFont.Display;
-        c.status = UiKit.Label(card, 26, "", new Vector2(0f, 105f), new Vector2(380f, 40f), UiKit.Price);
+        c.status = UiKit.Label(card, 30, "", new Vector2(0f, 105f), new Vector2(380f, 44f), UiKit.Price);
         c.status.fontStyle = FontStyle.Bold;
         var track = UiKit.Panel("Track", card, new Color(0.9f, 0.86f, 0.78f), new Vector2(0f, 60f), new Vector2(340f, 18f));
         c.fill = UiKit.Rect("Fill", track, UiKit.PayGreen);
@@ -86,9 +86,9 @@ public class FishPondUI : MonoBehaviour
         c.fill.anchorMax = new Vector2(0f, 1f);
         c.fill.pivot = new Vector2(0f, 0.5f);
         c.fill.offsetMin = c.fill.offsetMax = Vector2.zero;
-        c.info = UiKit.Label(card, 21, "", new Vector2(0f, -30f), new Vector2(370f, 120f), UiKit.Muted);
+        c.info = UiKit.Label(card, 25, "", new Vector2(0f, -30f), new Vector2(375f, 130f), UiKit.Ink);
         c.info.lineSpacing = 1.15f;
-        c.button = UiKit.RoundButton(card, "", new Vector2(0f, -145f), new Vector2(340f, 72f), UiKit.Gold, UiKit.GoldInk, () => Act(id), 24);
+        c.button = UiKit.RoundButton(card, "", new Vector2(0f, -145f), new Vector2(350f, 76f), UiKit.Gold, UiKit.GoldInk, () => Act(id), 27);
         c.buttonText = c.button.GetComponentInChildren<Text>();
         return c;
     }
@@ -98,9 +98,9 @@ public class FishPondUI : MonoBehaviour
         var c = new CageCard();
         var card = UiKit.Panel("Cage", body, Color.white, at, new Vector2(690f, 220f), shadow: true);
         card.gameObject.AddComponent<Outline>().effectColor = UiKit.CardBorder;
-        c.title = UiKit.Label(card, 28, $"กระชัง {id}", new Vector2(-185f, 78f), new Vector2(280f, 40f), UiKit.Ink, TextAnchor.MiddleLeft);
+        c.title = UiKit.Label(card, 32, $"กระชัง {id}", new Vector2(-185f, 78f), new Vector2(280f, 44f), UiKit.Ink, TextAnchor.MiddleLeft);
         c.title.font = ThaiFont.Display;
-        c.status = UiKit.Label(card, 26, "", new Vector2(-105f, 38f), new Vector2(440f, 38f), UiKit.Price, TextAnchor.MiddleLeft);
+        c.status = UiKit.Label(card, 29, "", new Vector2(-105f, 38f), new Vector2(440f, 40f), UiKit.Price, TextAnchor.MiddleLeft);
         c.status.fontStyle = FontStyle.Bold;
         var track = UiKit.Panel("Track", card, new Color(0.9f, 0.86f, 0.78f), new Vector2(-105f, 6f), new Vector2(440f, 16f));
         c.fill = UiKit.Rect("Fill", track, UiKit.PayGreen);
@@ -108,9 +108,9 @@ public class FishPondUI : MonoBehaviour
         c.fill.anchorMax = new Vector2(0f, 1f);
         c.fill.pivot = new Vector2(0f, 0.5f);
         c.fill.offsetMin = c.fill.offsetMax = Vector2.zero;
-        c.info = UiKit.Label(card, 21, "", new Vector2(-105f, -56f), new Vector2(440f, 84f), UiKit.Muted, TextAnchor.UpperLeft);
+        c.info = UiKit.Label(card, 24, "", new Vector2(-105f, -56f), new Vector2(440f, 88f), UiKit.Ink, TextAnchor.UpperLeft);
         c.info.lineSpacing = 1.15f;
-        c.button = UiKit.RoundButton(card, "", new Vector2(232f, -10f), new Vector2(200f, 110f), UiKit.Gold, UiKit.GoldInk, () => Act(id), 24);
+        c.button = UiKit.RoundButton(card, "", new Vector2(232f, -10f), new Vector2(200f, 120f), UiKit.Gold, UiKit.GoldInk, () => Act(id), 26);
         c.buttonText = c.button.GetComponentInChildren<Text>();
         return c;
     }
@@ -152,7 +152,7 @@ public class FishPondUI : MonoBehaviour
             return;
         }
 
-        subtitleText.text = $"เลี้ยงปลา Lv {s.level} · ให้อาหารวันละครั้ง ถุงละ {s.feed_price} บาท · ปลาที่ได้กินครบโตน้ำหนักดีกว่า";
+        subtitleText.text = $"เลี้ยงปลา Lv {s.level} · อาหารถุงละ {s.feed_price} บาท วันละครั้ง";
         var pick = Find(picked);
         if (pick == null || !pick.unlocked) { picked = "tilapia"; pick = Find(picked); }
         pickText.text = pick != null ? $"ลูกปลาที่จะปล่อย: {pick.name} · {pick.price} บาท" : "เลือกลูกปลา";
@@ -167,9 +167,9 @@ public class FishPondUI : MonoBehaviour
             string label = sp.unlocked
                 ? $"{sp.name} · {sp.price} ฿\nโต {Mathf.RoundToInt(sp.grow_s / 60f)} นาที · กก.ละ {sp.per_kg} ฿"
                 : $"{sp.name}\nต้องเลี้ยงปลา Lv {sp.level}";
-            var at = portrait ? new Vector2(i % 2 == 0 ? -172f : 172f, -(i / 2) * 110f) : new Vector2((i - (s.species.Length - 1) * 0.5f) * 320f, 0f);
-            var b = UiKit.RoundButton(speciesRow, label, at, new Vector2(portrait ? 334f : 300f, 96f),
-                on ? UiKit.OkTint : UiKit.Pill, on ? UiKit.OkGreen : UiKit.GoldInk, () => { picked = id; Render(); }, 20);
+            var at = portrait ? new Vector2(i % 2 == 0 ? -172f : 172f, -(i / 2) * 110f) : new Vector2((i - (s.species.Length - 1) * 0.5f) * 322f, 0f);
+            var b = UiKit.RoundButton(speciesRow, label, at, new Vector2(portrait ? 334f : 310f, 100f),
+                on ? UiKit.OkTint : UiKit.Pill, on ? UiKit.OkGreen : UiKit.GoldInk, () => { picked = id; Render(); }, 24);
             b.interactable = sp.unlocked && !busy;
         }
     }

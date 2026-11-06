@@ -223,6 +223,7 @@ public class HomeInterior : MonoBehaviour
     {
         foreach (var go in pieces.Values) if (go != null) Destroy(go);
         pieces.Clear();
+        bed = null;
         foreach (var p in state.placed)
         {
             var go = FurnitureFactory.Build(p.item, Shader);
@@ -230,7 +231,37 @@ public class HomeInterior : MonoBehaviour
             go.transform.localPosition = new Vector3(p.x, 0f, p.z);
             go.transform.localRotation = Quaternion.Euler(0f, p.rot, 0f);
             pieces[p.id] = go;
+            if (p.item == "bed" && bed == null) bed = go.transform;
         }
+        // No bed bought yet: a rolled-out sleeping mat (ที่นอน) in the corner, so there's always somewhere to wake up
+        if (bed == null && defaultMat == null)
+        {
+            defaultMat = FurnitureFactory.Build("mat", Shader);
+            defaultMat.name = "SleepingMat_ที่นอน";
+            defaultMat.transform.SetParent(Room, false);
+            defaultMat.transform.localPosition = new Vector3(-1.6f, 0f, 0.9f);
+            added.Add(defaultMat);
+        }
+        if (defaultMat != null) defaultMat.SetActive(bed == null);
+    }
+
+    private Transform bed;
+    private GameObject defaultMat;
+
+    // Where you lie when you wake up at home (the bed if you have one, else the mat) and where you stand up
+    public bool WakePoint(out Vector3 lie, out Quaternion facing, out Vector3 stand)
+    {
+        Transform b = bed != null ? bed : defaultMat != null ? defaultMat.transform : null;
+        lie = stand = Vector3.zero;
+        facing = Quaternion.identity;
+        if (b == null) return false;
+        lie = b.TransformPoint(new Vector3(0f, bed != null ? 0.62f : 0.14f, 0.1f));
+        facing = b.rotation * Quaternion.Euler(0f, 90f, 0f);
+        // get up on the side towards the middle of the room
+        Vector3 l = b.TransformPoint(new Vector3(-1.1f, 0f, 0f)), r = b.TransformPoint(new Vector3(1.1f, 0f, 0f));
+        stand = (l - Room.position).sqrMagnitude < (r - Room.position).sqrMagnitude ? l : r;
+        stand.y = Room.position.y;
+        return true;
     }
 
     public GameObject SpawnPreview(string item)

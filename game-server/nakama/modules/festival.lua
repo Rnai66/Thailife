@@ -222,6 +222,7 @@ local function view(env, extra)
     where = f and where_of(f) or "",
     ends_in_s = math.floor((ends_in or 0) / 1000), next_in_s = math.floor((next_in or 0) / 1000),
     calendar = calendar, chance_games = chance_games(env),
+    activities = life.activities(now, 10), -- วันพระ and fight nights (alerts and the calendar)
   }
   for k, v in pairs(extra or {}) do result[k] = v end
   return nk.json_encode(result)

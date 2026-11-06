@@ -266,7 +266,7 @@ local function view(user_id, s, extra)
     ordain_level = ORDAIN.level, ordain_cost = ORDAIN.cost, exorcist_monk_level = EXORCIST_MONK_LEVEL,
     incense_cost = MEDITATE.incense, meditate_seconds = MEDITATE.seconds,
     worn_max = amulet.WORN_MAX, my_powers = powers_or_nil(amulet.totals_list(amulet.totals(s.worn))),
-    night = is_night(nk.time()), items = catalog, ghosts = ghosts,
+    night = is_night(nk.time()), wan_phra = life.wan_phra(nk.time()), items = catalog, ghosts = ghosts,
     log = (#s.log > 0) and s.log or nil, banished = (#banished > 0) and banished or nil,
   }
   for k, v in pairs(extra or {}) do result[k] = v end
@@ -401,9 +401,12 @@ nk.register_rpc(rpc(function(context, user_id, s, req)
     return { won = false, ghost_name = g.name, done = g.name .. "หนีไปได้! ลองใหม่คืนนี้" }
   end
   s.banished[c.spot] = life.game_day(now)
-  nk.wallet_update(user_id, { [data.CURRENCY] = g.baht }, { reason = "exorcise_" .. c.ghost }, true)
-  trade.gain(user_id, "exorcist", g.xp)
+  -- วันพระ: the ghosts are restless and the villagers pay double (and you learn more)
+  local holy = life.wan_phra(now)
+  local baht, xp = g.baht * (holy and 2 or 1), math.floor(g.xp * (holy and 1.5 or 1))
+  nk.wallet_update(user_id, { [data.CURRENCY] = baht }, { reason = "exorcise_" .. c.ghost, wan_phra = holy }, true)
+  trade.gain(user_id, "exorcist", xp)
   add_barami(s, 3)
-  return { won = true, ghost_name = g.name, reward = g.baht, xp = g.xp,
-           done = "ปราบ" .. g.name .. "สำเร็จ! ชาวบ้านให้ค่าครู " .. g.baht .. " บาท" }
+  return { won = true, ghost_name = g.name, reward = baht, xp = xp,
+           done = "ปราบ" .. g.name .. "สำเร็จ! ชาวบ้านให้ค่าครู " .. baht .. " บาท" .. (holy and " (คืนวันพระ ×2)" or "") }
 end), "ghost_finish")

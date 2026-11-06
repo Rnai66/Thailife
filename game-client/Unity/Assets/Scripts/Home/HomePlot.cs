@@ -52,6 +52,11 @@ public class HomePlot : MonoBehaviour
             Locations.PendingSpawnId = null;
             PutPlayerHere();
         }
+        else if (IsMine && Locations.PendingSpawnId == HomeClient.WakeId)
+        {
+            Locations.PendingSpawnId = null;
+            WakeUp();
+        }
     }
 
     public static void ApplyAll()
@@ -97,6 +102,52 @@ public class HomePlot : MonoBehaviour
             if (stilt || carport == null) car.SetPositionAndRotation(carHome, carRot);
             else car.SetPositionAndRotation(carport.position, carport.rotation);
         }
+    }
+
+    // The start of each session: you wake up in bed at home, lie a moment, sit up and get out of bed
+    public void WakeUp() => StartCoroutine(WakeRoutine());
+
+    private System.Collections.IEnumerator WakeRoutine()
+    {
+        var player = FindAnyObjectByType<PlayerController>();
+        if (player == null) yield break;
+        player.InputEnabled = false;
+        Vector3 stand = porch != null ? porch.position : transform.position;
+        float yaw = 0f;
+        bool Lie()
+        {
+            Vector3 at; Quaternion rot;
+            var room = HomeInterior.Instance;
+            if (room != null && room.gameObject == gameObject && room.WakePoint(out at, out rot, out var up)) stand = up;
+            else
+            {
+                var spot = sleep != null ? sleep.GetComponent<SleepSpot>() : null;
+                if (spot == null || spot.Bed == null) return false;
+                at = spot.Bed.position;
+                rot = spot.Bed.rotation;
+            }
+            yaw = rot.eulerAngles.y;
+            player.enabled = true;
+            player.Teleport(at, Quaternion.Euler(0f, yaw, 0f));
+            player.enabled = false; // no gravity while lying on the bed
+            player.transform.rotation = Quaternion.Euler(0f, yaw, 90f);
+            return true;
+        }
+        bool lying = Lie();
+        while (SceneLoader.Loading) yield return null;
+        yield return null;
+        lying = Lie() || lying; // the room (and your bed) may only be set up now
+        if (!lying) { player.InputEnabled = true; PutPlayerHere(); yield break; }
+        yield return new WaitForSeconds(1.4f);
+        FloatingText.Spawn(player.transform.position + Vector3.up * 1.2f, "อรุณสวัสดิ์! ตื่นแล้ว", new Color(1f, 0.9f, 0.5f));
+        for (float t = 0f; t < 0.8f; t += Time.deltaTime) // sit up
+        {
+            player.transform.rotation = Quaternion.Euler(0f, yaw, Mathf.Lerp(90f, 0f, Mathf.SmoothStep(0f, 1f, t / 0.8f)));
+            yield return null;
+        }
+        player.enabled = true;
+        player.Teleport(stand + Vector3.up * 0.1f, Quaternion.Euler(0f, yaw + 90f, 0f)); // out of bed, facing the room
+        player.InputEnabled = true;
     }
 
     public void PutPlayerHere()

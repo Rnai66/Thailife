@@ -63,18 +63,18 @@ public class ProfessionUI : MonoBehaviour
     private void Awake()
     {
         portrait = UiKit.Portrait;
-        var body = UiKit.PremiumWindow(transform, "ProfessionCanvas", UiKit.WindowSize(new Vector2(1500f, 1000f), 1720f), 56, "icon:school",
+        var body = UiKit.PremiumWindow(transform, "ProfessionCanvas", UiKit.WindowSize(new Vector2(1720f, 1000f), 1740f), 56, "icon:school",
             out backdrop, out titleText, out subtitleText, Close, out _);
         titleText.text = "อาชีพของฉัน";
-        subtitleText.text = "ทำงานไหนบ่อย อาชีพนั้นเลเวลขึ้น · ฉายาเปลี่ยนที่ Lv 10 · 25 · 50 · 75 · 100";
+        subtitleText.text = "ทำงานไหนบ่อย อาชีพนั้นเลเวลขึ้น · ฉายาใหม่ที่ Lv 10/25/50/75/100";
 
-        float top = portrait ? 712f : 362f;
-        shownText = UiKit.Label(body, 26, "", new Vector2(portrait ? -120f : -170f, top), new Vector2(portrait ? 460f : 1000f, 44f), UiKit.Ink, TextAnchor.MiddleLeft);
+        float top = portrait ? 722f : 376f;
+        shownText = UiKit.Label(body, 30, "", new Vector2(portrait ? -120f : -170f, top), new Vector2(portrait ? 460f : 1100f, 48f), UiKit.Ink, TextAnchor.MiddleLeft);
         shownText.fontStyle = FontStyle.Bold;
-        autoButton = UiKit.RoundButton(body, "อัตโนมัติ (สูงสุด)", new Vector2(portrait ? 230f : 540f, top), new Vector2(portrait ? 220f : 300f, 54f), UiKit.Pill, UiKit.GoldInk,
-            () => Show(""), 22);
+        autoButton = UiKit.RoundButton(body, "อัตโนมัติ (สูงสุด)", new Vector2(portrait ? 230f : 620f, top), new Vector2(portrait ? 230f : 320f, 56f), UiKit.Pill, UiKit.GoldInk,
+            () => Show(""), 24);
         list = UiKit.Container(body, Vector2.zero);
-        toastText = UiKit.ToastBar(body, new Vector2(0f, portrait ? -745f : -385f), 900f);
+        toastText = UiKit.ToastBar(body, new Vector2(0f, portrait ? -755f : -380f), 900f);
         backdrop.SetActive(false);
     }
 
@@ -90,31 +90,36 @@ public class ProfessionUI : MonoBehaviour
         shownText.text = $"ฉายาที่แสดง: {state.title}" + (state.picked ? "" : "  (อาชีพที่เลเวลสูงสุด)");
         autoButton.interactable = state.picked && !busy;
         for (int i = 0; i < state.trades.Length; i++)
-            Card(state.trades[i], portrait ? new Vector2(0f, 650f - i * 96f) : new Vector2(i % 2 == 0 ? -360f : 360f, 300f - (i / 2) * 92f));
+            Card(state.trades[i], portrait ? new Vector2(0f, 655f - i * 98f) : new Vector2(i % 2 == 0 ? -420f : 420f, 300f - (i / 2) * 96f));
     }
 
     private void Card(Trade t, Vector2 at)
     {
         bool shown = t.id == state.shown;
-        var card = UiKit.Panel("Trade", list, shown ? new Color32(0xFF, 0xF6, 0xDF, 0xFF) : Color.white, at, new Vector2(700f, 90f), shadow: true);
+        // landscape cards are wider (two columns); upright ones fill the width. Left: name, rank, XP bar.
+        // Right: the next title, how to earn XP, the "show" button.
+        float w = portrait ? 700f : 820f, h = 92f;
+        float colW = portrait ? 300f : 350f, rightW = portrait ? 240f : 300f;
+        float colX = -w * 0.5f + 100f + colW * 0.5f, rightX = w * 0.5f - 14f - rightW * 0.5f;
+        var card = UiKit.Panel("Trade", list, shown ? new Color32(0xFF, 0xF6, 0xDF, 0xFF) : Color.white, at, new Vector2(w, h), shadow: true);
         card.gameObject.AddComponent<Outline>().effectColor = shown ? UiKit.Gold : UiKit.CardBorder;
 
-        var tile = UiKit.Panel("Icon", card, UiKit.Pill, new Vector2(-305f, 0f), new Vector2(72f, 72f));
-        UiKit.Label(tile, 24, Short.TryGetValue(t.id, out var s) ? s : "?", Vector2.zero, new Vector2(68f, 68f), UiKit.Price).fontStyle = FontStyle.Bold;
+        var tile = UiKit.Panel("Icon", card, UiKit.Pill, new Vector2(-w * 0.5f + 50f, 0f), new Vector2(76f, 76f));
+        UiKit.Label(tile, 28, Short.TryGetValue(t.id, out var s) ? s : "?", Vector2.zero, new Vector2(72f, 72f), UiKit.Price).fontStyle = FontStyle.Bold;
 
-        UiKit.Label(card, 25, $"{t.name} · Lv {t.level}", new Vector2(-120f, 24f), new Vector2(290f, 34f), UiKit.Ink, TextAnchor.MiddleLeft).fontStyle = FontStyle.Bold;
-        UiKit.Label(card, 21, t.rank, new Vector2(-120f, -4f), new Vector2(290f, 30f), UiKit.Price, TextAnchor.MiddleLeft).fontStyle = FontStyle.Bold;
-        var track = UiKit.Panel("Track", card, new Color32(0xF1, 0xEF, 0xE8, 0xFF), new Vector2(-120f, -30f), new Vector2(290f, 12f));
+        UiKit.Label(card, 28, $"{t.name} · Lv {t.level}", new Vector2(colX, 25f), new Vector2(colW, 38f), UiKit.Ink, TextAnchor.MiddleLeft).fontStyle = FontStyle.Bold;
+        UiKit.Label(card, 23, t.rank, new Vector2(colX, -8f), new Vector2(colW, 32f), UiKit.Price, TextAnchor.MiddleLeft).fontStyle = FontStyle.Bold;
+        var track = UiKit.Panel("Track", card, new Color32(0xF1, 0xEF, 0xE8, 0xFF), new Vector2(colX, -34f), new Vector2(colW, 12f));
         var fill = UiKit.Panel("Fill", track, UiKit.PayGreen, Vector2.zero,
-            new Vector2(t.xp_to_next > 0 ? 290f * Mathf.Clamp01((float)t.xp / t.xp_to_next) : 290f, 12f));
+            new Vector2(t.xp_to_next > 0 ? colW * Mathf.Clamp01((float)t.xp / t.xp_to_next) : colW, 12f));
         fill.anchorMin = fill.anchorMax = new Vector2(0f, 0.5f);
         fill.pivot = new Vector2(0f, 0.5f);
 
-        UiKit.Label(card, 17, t.next_at > 0 ? $"Lv {t.next_at}: {t.next_rank}" : "สูงสุดแล้ว!", new Vector2(160f, 24f), new Vector2(230f, 28f), UiKit.Muted);
-        UiKit.Label(card, 16, t.how, new Vector2(160f, -4f), new Vector2(230f, 26f), UiKit.Muted);
+        UiKit.Label(card, 21, t.next_at > 0 ? $"Lv {t.next_at}: {t.next_rank}" : "สูงสุดแล้ว!", new Vector2(rightX, 28f), new Vector2(rightW, 30f), UiKit.Ink);
+        UiKit.Label(card, 20, t.how, new Vector2(rightX, 1f), new Vector2(rightW, 28f), UiKit.Muted);
         string id = t.id;
-        var b = UiKit.RoundButton(card, shown ? "กำลังแสดง" : "แสดง", new Vector2(160f, -30f), new Vector2(170f, 34f),
-            shown ? UiKit.OkTint : UiKit.Gold, shown ? UiKit.OkGreen : UiKit.GoldInk, () => Show(id), 18);
+        var b = UiKit.RoundButton(card, shown ? "กำลังแสดง" : "แสดง", new Vector2(rightX, -29f), new Vector2(190f, 34f),
+            shown ? UiKit.OkTint : UiKit.Gold, shown ? UiKit.OkGreen : UiKit.GoldInk, () => Show(id), 21);
         b.interactable = !shown && !busy;
     }
 

@@ -19,6 +19,20 @@ public class FestivalClient : MonoBehaviour
         public int in_s, ends_s;
     }
 
+    // Regular activities from life_core.lua: วันพระ (ghost pay x2) and the boxing nights every 5/10/15 days
+    [Serializable]
+    public class Activity
+    {
+        public string id;
+        public string key;   // id + game day: alert once per key
+        public string name;
+        public string where;
+        public string kind;  // "ghost" | "boxing"
+        public int day;      // day of the game month
+        public bool open;    // today
+        public int in_s, ends_s;
+    }
+
     [Serializable]
     public class State
     {
@@ -32,6 +46,7 @@ public class FestivalClient : MonoBehaviour
         public int next_in_s;
         public bool chance_games; // สอยดาว บิงโก ก.ไก่ ปาโป่ง are open (server CHANCE_GAMES switch)
         public CalendarEntry[] calendar;
+        public Activity[] activities;
         // festival_play
         public string game_name;
         public string prize;

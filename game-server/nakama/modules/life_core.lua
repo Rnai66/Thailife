@@ -235,4 +235,46 @@ function M.view(s)
   return { energy = math.floor(s.energy), max_energy = M.MAX_ENERGY, sleeping = s.sleep_ms ~= nil, injured = s.injured == true }
 end
 
+-- ── Activity days (not fairs: they run alongside them) ─────────────────────────────────────────
+-- วันพระ: the 8th and 15th of the waxing and the waning moon, days 8, 15, 23 and 30 of the game month.
+-- Ghosts are restless and the villagers pay a หมอผี double on those nights (temple.lua).
+-- มวย: fight nights at every ring: the village temple ring every 5 days, the tambon ring every 10
+-- and the town championship every 15 (boxing.lua).
+M.WAN_PHRA = { [8] = true, [15] = true, [23] = true, [30] = true }
+
+function M.day_of_month(now) return math.floor((now - M.EPOCH_MS) / M.DAY_MS) % M.MONTH_DAYS + 1 end
+function M.wan_phra(now) return M.WAN_PHRA[M.day_of_month(now)] == true end
+
+M.ACTIVITIES = {
+  { id = "wan_phra",     name = "คืนวันพระ · ปราบผีค่าครู 2 เท่า", where = "ป่าช้า ป่าชุมชน ป่าตำบล", kind = "ghost",
+    on = function(dom) return M.WAN_PHRA[dom] == true end },
+  { id = "box_village",  name = "มวยเวทีวัดหมู่บ้าน",             where = "หมู่บ้าน (ลานวัด)", kind = "boxing",
+    on = function(dom) return dom % 5 == 0 end },
+  { id = "box_tambon",   name = "มวยเวทีตำบล",                  where = "ตำบล",            kind = "boxing",
+    on = function(dom) return dom % 10 == 0 end },
+  { id = "box_champ",    name = "ศึกชิงแชมป์มวย",                where = "เมือง (ค่ายมวย)",   kind = "boxing",
+    on = function(dom) return dom % 15 == 0 end },
+}
+
+-- Which activities are on today and the next ones coming, for the calendar and the alerts
+function M.activities(now, count)
+  local t_days = (now - M.EPOCH_MS) / M.DAY_MS
+  local day0 = math.floor(t_days)
+  local out = {}
+  for ahead = 0, 30 do
+    local d = day0 + ahead
+    local dom = d % M.MONTH_DAYS + 1
+    for _, a in ipairs(M.ACTIVITIES) do
+      if a.on(dom) then
+        table.insert(out, { id = a.id, key = a.id .. "_" .. d, name = a.name, where = a.where, kind = a.kind,
+                            day = dom, open = ahead == 0,
+                            in_s = math.max(0, math.floor((d - t_days) * M.DAY_MS / 1000)),
+                            ends_s = math.floor((d + 1 - t_days) * M.DAY_MS / 1000) })
+        if #out >= count then return out end
+      end
+    end
+  end
+  return out
+end
+
 return M

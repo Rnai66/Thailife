@@ -95,9 +95,15 @@ public class ScreenFit : MonoBehaviour
         float width = PortraitWidth - 40f;
         float height = Screen.height * unitsPerPixel * 0.92f;
         cards.RemoveAll(c => c == null);
+        // Landscape: the canvas size in units (the scaler's own formula), so a big window on a short,
+        // wide phone shrinks just enough to stay on screen instead of running off the top and bottom
+        float log = Mathf.Lerp(Mathf.Log(Screen.width / landscapeReference.x, 2f), Mathf.Log(Screen.height / landscapeReference.y, 2f), landscapeMatch);
+        float factor = Mathf.Max(0.01f, Mathf.Pow(2f, log));
+        float landW = Screen.width / factor * 0.98f, landH = Screen.height / factor * 0.97f;
         foreach (var card in cards)
         {
-            float scale = portrait ? Mathf.Min(MaxPortraitScale, width / card.sizeDelta.x, height / card.sizeDelta.y) : 1f;
+            float scale = portrait ? Mathf.Min(MaxPortraitScale, width / card.sizeDelta.x, height / card.sizeDelta.y)
+                : Mathf.Min(1f, landW / card.sizeDelta.x, landH / card.sizeDelta.y);
             card.localScale = Vector3.one * scale;
         }
     }

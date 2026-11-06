@@ -31,7 +31,7 @@ public class SchoolUI : MonoBehaviour
     private float classLength = 30f;
 
     private static readonly string[] SubjectIds = { "computer", "sports", "craft", "logic", "health" };
-    private const float CardWidth = 276f, CardStep = 288f;
+    private const float CardWidth = 310f, CardStep = 322f;
 
     public static void Show(bool library = false)
     {
@@ -51,7 +51,7 @@ public class SchoolUI : MonoBehaviour
     private void Awake()
     {
         portrait = UiKit.Portrait;
-        var body = UiKit.PremiumWindow(transform, "SchoolCanvas", UiKit.WindowSize(new Vector2(1520f, 900f), 1450f), 55, "icon:school",
+        var body = UiKit.PremiumWindow(transform, "SchoolCanvas", UiKit.WindowSize(new Vector2(1700f, 940f), 1480f), 55, "icon:school",
             out backdrop, out title, out subtitle, Hide, out _);
         title.text = "ห้องเรียน · โรงเรียนตำบล";
         subtitle.text = "เรียนเพื่อเพิ่มเลเวล และเปิดอาชีพใหม่";
@@ -68,14 +68,14 @@ public class SchoolUI : MonoBehaviour
         progressFill.anchorMax = new Vector2(0f, 1f);
         progressFill.pivot = new Vector2(0f, 0.5f);
         progressFill.offsetMin = progressFill.offsetMax = Vector2.zero;
-        classText = UiKit.Label(body, 26, "", new Vector2(0f, portrait ? -290f : -140f), new Vector2(portrait ? 680f : 1200f, 40f), UiKit.Ink);
+        classText = UiKit.Label(body, 30, "", new Vector2(0f, portrait ? -290f : -140f), new Vector2(portrait ? 680f : 1200f, 44f), UiKit.Ink);
         classText.font = ThaiFont.Display;
 
         // Jobs the subjects open up
-        var jobsCard = UiKit.Panel("Jobs", body, Color.white, new Vector2(0f, portrait ? -495f : -290f), new Vector2(portrait ? 690f : 1420f, portrait ? 270f : 140f), shadow: true);
+        var jobsCard = UiKit.Panel("Jobs", body, Color.white, new Vector2(0f, portrait ? -495f : -290f), new Vector2(portrait ? 690f : 1600f, portrait ? 270f : 150f), shadow: true);
         jobsCard.gameObject.AddComponent<Outline>().effectColor = UiKit.CardBorder;
-        UiKit.Label(jobsCard, 24, "อาชีพที่ต้องใช้วิชา", new Vector2(0f, portrait ? 112f : 48f), new Vector2(portrait ? 660f : 1380f, 34f), UiKit.Price).fontStyle = FontStyle.Bold;
-        jobsText = UiKit.Label(jobsCard, 21, "", new Vector2(0f, portrait ? -18f : -14f), new Vector2(portrait ? 660f : 1380f, portrait ? 220f : 90f), UiKit.Ink);
+        UiKit.Label(jobsCard, 27, "อาชีพที่ต้องใช้วิชา", new Vector2(0f, portrait ? 112f : 52f), new Vector2(portrait ? 660f : 1560f, 36f), UiKit.Price).fontStyle = FontStyle.Bold;
+        jobsText = UiKit.Label(jobsCard, 24, "", new Vector2(0f, portrait ? -18f : -16f), new Vector2(portrait ? 660f : 1560f, portrait ? 220f : 100f), UiKit.Ink);
         jobsText.lineSpacing = 1.15f;
 
         toast = UiKit.ToastBar(body, new Vector2(0f, portrait ? -335f : -178f), 1000f);
@@ -91,17 +91,17 @@ public class SchoolUI : MonoBehaviour
         UiKit.IconTile(card, id == "health" ? "hospital" : "subj_" + id, new Vector2(0f, 128f), new Vector2(140f, 140f));
         c.name = UiKit.Label(card, 34, "", new Vector2(0f, 30f), new Vector2(w - 20f, 46f), UiKit.Ink);
         c.name.font = ThaiFont.Display;
-        c.level = UiKit.PillLabel(card, "", new Vector2(0f, -14f), new Vector2(150f, 36f), UiKit.Pill, UiKit.Price, 22);
+        c.level = UiKit.PillLabel(card, "", new Vector2(0f, -14f), new Vector2(150f, 36f), UiKit.Pill, UiKit.Price, 24);
         var bar = UiKit.Panel("XpBar", card, new Color(0.9f, 0.86f, 0.78f), new Vector2(0f, -48f), new Vector2(w - 60f, 14f));
         c.xpFill = UiKit.Rect("Fill", bar, UiKit.Gold);
         c.xpFill.anchorMin = new Vector2(0f, 0f);
         c.xpFill.anchorMax = new Vector2(0f, 1f);
         c.xpFill.pivot = new Vector2(0f, 0.5f);
         c.xpFill.offsetMin = c.xpFill.offsetMax = Vector2.zero;
-        c.desc = UiKit.Label(card, 19, "", new Vector2(0f, -84f), new Vector2(w - 24f, 50f), UiKit.Muted);
-        c.cost = UiKit.Label(card, 19, "", new Vector2(0f, -124f), new Vector2(w - 14f, 46f), UiKit.Ink);
+        c.desc = UiKit.Label(card, 22, "", new Vector2(0f, -86f), new Vector2(w - 20f, 56f), UiKit.Muted);
+        c.cost = UiKit.Label(card, 22, "", new Vector2(0f, -132f), new Vector2(w - 14f, 52f), UiKit.Ink);
         string subject = id;
-        c.button = UiKit.RoundButton(card, "เข้าเรียน", new Vector2(0f, -180f), new Vector2(w - 40f, 64f), UiKit.Gold, UiKit.GoldInk, () => StartClass(subject), 26);
+        c.button = UiKit.RoundButton(card, "เข้าเรียน", new Vector2(0f, -184f), new Vector2(w - 40f, 60f), UiKit.Gold, UiKit.GoldInk, () => StartClass(subject), 28);
         c.buttonText = c.button.GetComponentInChildren<Text>();
         return c;
     }
@@ -122,8 +122,8 @@ public class SchoolUI : MonoBehaviour
         c.xpFill.anchorMax = new Vector2(0f, 1f);
         c.xpFill.pivot = new Vector2(0f, 0.5f);
         c.xpFill.offsetMin = c.xpFill.offsetMax = Vector2.zero;
-        c.desc = UiKit.Label(card, 20, "", new Vector2(-55f, -10f), new Vector2(300f, 36f), UiKit.Muted, TextAnchor.MiddleLeft);
-        c.cost = UiKit.Label(card, 20, "", new Vector2(-55f, -55f), new Vector2(300f, 52f), UiKit.Ink, TextAnchor.MiddleLeft);
+        c.desc = UiKit.Label(card, 23, "", new Vector2(-55f, -10f), new Vector2(300f, 38f), UiKit.Muted, TextAnchor.MiddleLeft);
+        c.cost = UiKit.Label(card, 22, "", new Vector2(-55f, -55f), new Vector2(300f, 54f), UiKit.Ink, TextAnchor.MiddleLeft);
         string subject = id;
         c.button = UiKit.RoundButton(card, "เข้าเรียน", new Vector2(240f, 0f), new Vector2(180f, 96f), UiKit.Gold, UiKit.GoldInk, () => StartClass(subject), 26);
         c.buttonText = c.button.GetComponentInChildren<Text>();

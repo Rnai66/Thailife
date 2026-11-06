@@ -18,6 +18,8 @@ public class SleepSpot : MonoBehaviour
     private Quaternion standRotation;
     private bool busy;
 
+    public Transform Bed => bed;
+
     public void Configure(string placeName, string actionLabel, Transform bedPoint)
     {
         place = placeName;

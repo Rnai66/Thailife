@@ -35,6 +35,10 @@ public class HomeClient : MonoBehaviour
     [Serializable] private class ChooseRequest { public string area, style; }
 
     public const string SpawnId = "home";
+    public const string WakeId = "wake"; // the session start: wake up in bed at home
+
+    // Set once the session start has decided where you begin (SceneLoader.Enter waits for it)
+    public static bool StartDecided { get; private set; }
 
     public static HomeClient Instance { get; private set; }
     public State Current => cached; // kept across maps, so a new map knows your house at once
@@ -48,7 +52,7 @@ public class HomeClient : MonoBehaviour
     private NakamaConnection connection;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    private static void ResetStatics() { cached = null; sentHome = false; } // domain reload is off
+    private static void ResetStatics() { cached = null; sentHome = false; StartDecided = false; } // domain reload is off
 
     private void Awake()
     {
@@ -98,22 +102,26 @@ public class HomeClient : MonoBehaviour
 
     private System.Collections.IEnumerator AfterTitle()
     {
-        while (TitleScreen.Up || SceneLoader.Loading) yield return null;
+        while (TitleScreen.Up || (SceneLoader.Loading && !SceneLoader.Entering)) yield return null;
         if (!Current.chosen) HomeChoiceUI.Show(firstTime: true);
-        else GoHome();
+        else GoHome(wake: true);
+        StartDecided = true;
     }
 
     // To your own porch: travel there if home is another map
-    public void GoHome()
+    public void GoHome(bool wake = false)
     {
         if (Current == null || string.IsNullOrEmpty(Current.scene)) return;
         if (SceneManager.GetActiveScene().name != Current.scene)
         {
-            Locations.PendingSpawnId = SpawnId;
+            Locations.PendingSpawnId = wake ? WakeId : SpawnId;
             SceneLoader.Load(Current.scene, Current.style_name);
             return;
         }
-        HomePlot.Mine()?.PutPlayerHere();
+        var plot = HomePlot.Mine();
+        if (plot == null) return;
+        if (wake) plot.WakeUp();
+        else plot.PutPlayerHere();
     }
 
     private async Task<State> Call(string rpc, string payload = "{}")

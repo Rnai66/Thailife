@@ -2507,3 +2507,24 @@ Hello! สวัสดีครับ|Sawasdee ka~|ต้มยำกุ้ง �
 ไข่มดแดง (ห่อ)	Red ant eggs (pack)
 ผักหวานป่า (กำ)	Wild pak wan (bunch)
 ยังไม่ขึ้นใหม่ รอสักพัก	Not grown back yet, wait a while
+วันนี้วันพระ! ปราบผีได้ค่าครู 2 เท่า	Holy day today! Ghost banishing pays double
+วันนี้มีมวย! {}	Boxing tonight! {0}
+ไปปราบผีที่ {} · ค่าครู ×2 ค่าประสบการณ์ ×1.5 ทั้งวัน	Banish ghosts at {0} · pay ×2, XP ×1.5 all day
+ที่ {} · สมัครชกหรือไปเชียร์ได้ทั้งวัน (วันที่ {} ของเดือน)	At {0} · fight or cheer all day (day {1} of the month)
+คืนวันพระ · ปราบผีค่าครู 2 เท่า	Holy night · double ghost pay
+มวยเวทีวัดหมู่บ้าน	Village temple boxing
+มวยเวทีตำบล	Tambon boxing
+ศึกชิงแชมป์มวย	Boxing championship
+ป่าช้า ป่าชุมชน ป่าตำบล	Cemetery, community & tambon forests
+หมู่บ้าน (ลานวัด)	Village (temple ground)
+เมือง (ค่ายมวย)	City (boxing camp)
+วันพระ	Holy day
+วันที่ {}	Day {0}
+วันพระ · มวยทุก 5/10/15 วัน · งานวัด · งานประจำเดือน · คอนเสิร์ต	Holy days · boxing every 5/10/15 days · temple fairs · monthly events · concerts
+ (คืนวันพระ ×2)	 (holy night ×2)
+ทำงานต่อ · {} วิ	Back to work · {0}s
+พักอยู่ เวลางานยังนับต่อ	Resting — the shift time still counts
+แตะเพื่อลุกพัก (เวลายังนับต่อ)	Tap to take a break (time still counts)
+ทำงานไหนบ่อย อาชีพนั้นเลเวลขึ้น · ฉายาใหม่ที่ Lv 10/25/50/75/100	The more you work a trade, the higher its level · new titles at Lv 10/25/50/75/100
+แตะเลือกวัว ขายหรือผสมเทียม · กินวันละ 1 ถุง ให้นมวันละ 1 ขวด	Tap a cow to sell or breed · eats 1 bag a day, gives 1 bottle of milk a day
+เลี้ยงปลา Lv {} · อาหารถุงละ {} บาท วันละครั้ง	Fish farming Lv {0} · feed {1} baht a bag, once a day

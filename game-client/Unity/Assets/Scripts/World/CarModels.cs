@@ -83,10 +83,16 @@ public static class CarModels
         Part(PrimitiveType.Cylinder, root, new Vector3(0f, 0.66f, 0.5f), new Vector3(0.04f, 0.3f, 0.04f), frame, template, new Vector3(-15f, 0f, 0f)); // fork
     }
 
+    // A wheel group turned on its side (its local Y is the axle) so CarSway can spin it: tyre, rim, spoke
     private static void Wheel(Transform root, Material template, Vector3 at, float diameter, float width)
     {
-        Part(PrimitiveType.Cylinder, root, at, new Vector3(diameter, width * 0.5f, diameter), Tyre, template, new Vector3(0f, 0f, 90f));
-        Part(PrimitiveType.Cylinder, root, at, new Vector3(diameter * 0.55f, width * 0.5f + 0.01f, diameter * 0.55f), Rim, template, new Vector3(0f, 0f, 90f));
+        var w = new GameObject("Wheel").transform;
+        w.SetParent(root, false);
+        w.localPosition = at;
+        w.localRotation = Quaternion.Euler(0f, 0f, 90f);
+        Part(PrimitiveType.Cylinder, w, Vector3.zero, new Vector3(diameter, width * 0.5f, diameter), Tyre, template);
+        Part(PrimitiveType.Cylinder, w, Vector3.zero, new Vector3(diameter * 0.55f, width * 0.5f + 0.01f, diameter * 0.55f), Rim, template);
+        Part(PrimitiveType.Cube, w, Vector3.zero, new Vector3(diameter * 0.5f, width + 0.03f, 0.07f), Tyre, template); // a spoke, so you see it turn
     }
 
     private static void Part(PrimitiveType type, Transform parent, Vector3 position, Vector3 scale, Color color, Material template, Vector3 euler = default)

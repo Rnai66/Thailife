@@ -21,7 +21,8 @@ local FIGHT_LEVEL_CAP = 20 -- opponents and fight strength top out here; levels 
 local GRPC_INVALID_ARGUMENT = 3
 local GRPC_FAILED_PRECONDITION = 9
 
--- when: "any" | "fair" (temple fair days) | "tambon" (every 5th game day) | "champ" (day 15 of the month)
+-- when: "any" | "fair" (temple fair days, and the village ring every 5 days) | "tambon" (every 10 days)
+--       | "champ" (every 15 days) — life_core.ACTIVITIES lists the same fight nights for the calendar
 local EVENTS = {
   pads   = { name = "ซ้อมเป้าล่อกับครูฝึก", level = 6,  member = true, energy = 8,  when = "any", pads = true,
              seconds = 45, xp_per_good = 3 },
@@ -51,12 +52,12 @@ local function edition(e, now, env)
   if e.when == "fair" then
     -- The temple fair is monthly (days 1-2); only FAIR_ALWAYS_OPEN (not the boxing switch) overrides it
     local open, fair_id = life.fair(now, env ~= nil and env.fair_always_open == "true")
-    return open, "fair" .. fair_id
+    if open then return true, "fair" .. fair_id end
+    return life.day_of_month(now) % 5 == 0, "village" .. d -- fight night at the village temple ring
   end
-  if e.when == "tambon" then return always_open(env) or d % 5 == 4, "tambon" .. d end
-  if e.when == "champ" then
-    return always_open(env) or d % life.MONTH_DAYS == 14, "champ" .. math.floor(d / life.MONTH_DAYS)
-  end
+  local dom = life.day_of_month(now)
+  if e.when == "tambon" then return always_open(env) or dom % 10 == 0, "tambon" .. d end
+  if e.when == "champ" then return always_open(env) or dom % 15 == 0, "champ" .. d end
   return false, nil
 end
 

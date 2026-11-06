@@ -52,14 +52,14 @@ public class RanchUI : MonoBehaviour
         card.gameObject.AddComponent<Outline>().effectColor = UiKit.CardBorder;
         herdText = UiKit.Label(card, 34, "", new Vector2(0f, 118f), new Vector2(1100f, 52f), UiKit.Ink);
         herdText.fontStyle = FontStyle.Bold;
-        infoText = UiKit.Label(card, 22, "", new Vector2(0f, 66f), new Vector2(1120f, 56f), UiKit.Muted);
+        infoText = UiKit.Label(card, 25, "", new Vector2(0f, 62f), new Vector2(1130f, 64f), UiKit.Ink);
         growthRow = UiKit.Container(card, new Vector2(0f, -10f));
 
         for (int i = 0; i < Buttons; i++)
         {
             int index = i;
             buttons[i] = UiKit.RoundButton(body, "", new Vector2(-435f + i * 290f, -90f), new Vector2(275f, 96f), UiKit.Gold, UiKit.GoldInk,
-                () => Act(index), 22);
+                () => Act(index), 25);
             labels[i] = buttons[i].GetComponentInChildren<Text>();
         }
         toastText = UiKit.ToastBar(body, new Vector2(0f, -230f), 900f);
@@ -69,7 +69,7 @@ public class RanchUI : MonoBehaviour
             UiKit.Stack(card, new Vector2(0f, 240f));
             herdText.rectTransform.sizeDelta = new Vector2(650f, 52f);
             UiKit.Stack(herdText.rectTransform, new Vector2(0f, 222f));
-            infoText.rectTransform.sizeDelta = new Vector2(650f, 100f);
+            infoText.rectTransform.sizeDelta = new Vector2(660f, 110f);
             UiKit.Stack(infoText.rectTransform, new Vector2(0f, 148f));
             UiKit.Stack(growthRow, new Vector2(0f, 50f));
             for (int i = 0; i < Buttons; i++)
@@ -126,7 +126,7 @@ public class RanchUI : MonoBehaviour
     {
         titleText.text = mode == "sao" ? "อบต. · โครงการวัวให้ชาวบ้าน" : mode == "pen" ? "คอกวัวของคุณ" : "พ่อค้าวัว";
         subtitleText.text = mode == "sao" ? "รับวัวฟรีคนละ 1 ตัว ไปเลี้ยงที่ฟาร์มวัวข้างโคกหนองนา"
-            : mode == "pen" ? "แตะเลือกวัวเพื่อขายหรือผสมเทียม · วัวกินอาหารวันละ 1 ถุง · แม่วัวที่ได้กินให้นมวันละ 1 ขวด"
+            : mode == "pen" ? "แตะเลือกวัว ขายหรือผสมเทียม · กินวันละ 1 ถุง ให้นมวันละ 1 ขวด"
             : "ซื้อวัว · ซื้ออาหารวัว · แตะเลือกวัวที่จะขาย";
         UiKit.Clear(growthRow);
 
@@ -222,7 +222,7 @@ public class RanchUI : MonoBehaviour
     private void DrawHerd(RanchClient.Cow[] herd, RanchClient.State s)
     {
         int perRow = UiKit.Portrait ? 5 : 10;
-        float step = UiKit.Portrait ? 130f : 112f, rowStep = UiKit.Portrait ? 80f : 84f;
+        float step = UiKit.Portrait ? 132f : 114f, rowStep = UiKit.Portrait ? 86f : 86f;
         int rows = Mathf.Max(1, Mathf.CeilToInt(herd.Length / (float)perRow));
         for (int i = 0; i < herd.Length; i++)
         {
@@ -235,14 +235,14 @@ public class RanchUI : MonoBehaviour
             if (pickedTile) tile.gameObject.AddComponent<Outline>().effectColor = UiKit.PayGreen;
             tile.gameObject.AddComponent<Button>().onClick.AddListener(() => { selected = index; sellArmed = -1; Render(); });
             float bar = step - 26f;
-            UiKit.Label(tile, 17, cow.pregnant ? $"ท้อง {cow.due_days}ว." : cow.sex == "m" ? "ตัวผู้" : "ตัวเมีย",
-                new Vector2(0f, 22f), new Vector2(step - 10f, 24f), cow.pregnant ? UiKit.PayGreen : cow.sex == "m" ? UiKit.Ink : UiKit.Price).fontStyle = FontStyle.Bold;
+            UiKit.Label(tile, 22, cow.pregnant ? $"ท้อง {cow.due_days}ว." : cow.sex == "m" ? "ตัวผู้" : "ตัวเมีย",
+                new Vector2(0f, 22f), new Vector2(step - 8f, 30f), cow.pregnant ? UiKit.PayGreen : cow.sex == "m" ? UiKit.Ink : UiKit.Price).fontStyle = FontStyle.Bold;
             var track = UiKit.Panel("Track", tile, UiKit.CardBorder, new Vector2(0f, 2f), new Vector2(bar, 14f));
             var fillBar = UiKit.Panel("Fill", track, cow.g >= s.grown_days ? UiKit.Gold : UiKit.PayGreen, Vector2.zero, new Vector2(bar * cow.g / s.grown_days, 14f));
             fillBar.anchorMin = fillBar.anchorMax = new Vector2(0f, 0.5f);
             fillBar.pivot = new Vector2(0f, 0.5f);
-            UiKit.Label(tile, 15, (cow.g >= s.grown_days ? "โตแล้ว" : $"{cow.g}/{s.grown_days}") + $" · {cow.price / 1000f:0.#}k",
-                new Vector2(0f, -20f), new Vector2(step - 10f, 22f), UiKit.Muted);
+            UiKit.Label(tile, 19, (cow.g >= s.grown_days ? "โตแล้ว" : $"{cow.g}/{s.grown_days}") + $" {cow.price / 1000f:0.#}k",
+                new Vector2(0f, -21f), new Vector2(step - 6f, 26f), UiKit.Ink);
             foreach (var g in tile.GetComponentsInChildren<Graphic>()) g.raycastTarget = g.gameObject == tile.gameObject;
         }
     }

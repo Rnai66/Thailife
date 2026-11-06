@@ -9,7 +9,7 @@ public class JobDesk : MonoBehaviour
 {
     [SerializeField] private string jobId = "repair";
 
-    private bool inside, busy;
+    private bool inside, busy, resting; // resting = stepped away from the work scene mid-shift
     private Education.State state;
     private float endsAt, nextTick;
 
@@ -21,12 +21,14 @@ public class JobDesk : MonoBehaviour
     {
         if (other.GetComponent<PlayerController>() == null) return;
         inside = true;
+        resting = false;
         Load();
     }
 
     private void OnTriggerExit(Collider other)
     {
         if (other.GetComponent<PlayerController>() == null) return;
+        if (WorkScene.JobId == jobId) return; // placed at the work spot (e.g. by the bike), not leaving
         inside = false;
         ContextButton.Hide(this);
     }
@@ -72,9 +74,19 @@ public class JobDesk : MonoBehaviour
         var job = state?.FindJob(jobId);
         string name = job != null ? job.name : "งาน";
         if (remain > 0f)
-            ContextButton.Show(this, $"ทำงาน... {Mathf.CeilToInt(remain)} วิ", $"{name}\nรอให้ครบเวลาแล้วรับค่าจ้าง", () => { }, false);
+        {
+            // at work: the scene plays around the player; tapping steps away for a rest (the time still counts)
+            if (!resting && WorkScene.JobId != jobId) WorkScene.Begin(jobId, transform);
+            if (resting)
+                ContextButton.Show(this, $"ทำงานต่อ · {Mathf.CeilToInt(remain)} วิ", $"{name}\nพักอยู่ เวลางานยังนับต่อ", () => { resting = false; Tick(); }, true);
+            else
+                ContextButton.Show(this, $"ทำงาน... {Mathf.CeilToInt(remain)} วิ", $"{name}\nแตะเพื่อลุกพัก (เวลายังนับต่อ)", () => { resting = true; WorkScene.End(); Tick(); }, true);
+        }
         else
+        {
+            if (WorkScene.JobId == jobId) WorkScene.End();
             ContextButton.Show(this, "รับค่าจ้าง", $"{name} เสร็จแล้ว!", FinishShift, true, highlight: true);
+        }
     }
 
     private void Update()
@@ -121,5 +133,9 @@ public class JobDesk : MonoBehaviour
         busy = false;
     }
 
-    private void OnDestroy() => ContextButton.Hide(this);
+    private void OnDestroy()
+    {
+        if (WorkScene.JobId == jobId) WorkScene.End();
+        ContextButton.Hide(this);
+    }
 }

@@ -74,6 +74,13 @@ public class TrafficCar : MonoBehaviour
             }
         wheels = list.ToArray();
         speed = topSpeed * 0.6f;
+        // Body roll, dive and bounce on its springs (this script spins the wheels itself)
+        if (GetComponent<CarSway>() == null)
+        {
+            string kind = name.ToLowerInvariant();
+            bool bike = kind.Contains("motor") || kind.Contains("bike") || kind.Contains("cycle");
+            gameObject.AddComponent<CarSway>().Configure(bike, spin: false, pivot: kind.Contains("bus") ? 1f : 0.5f);
+        }
         Place();
     }
 

@@ -237,6 +237,7 @@ public class TitleScreen : MonoBehaviour
     {
         leaving = true;
         GameAudio.Play("coins", null, 0.4f);
+        SceneLoader.Enter(); // the loading screen covers the start until you're online and at home
         ShowOtherCanvases();
         if (follow != null) follow.enabled = true; // the follow camera glides back to the player
         Vector3 logoStart = logo.localScale;

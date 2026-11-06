@@ -61,6 +61,19 @@ public class ActivityPose : MonoBehaviour
         if (face.HasValue) p.Face(face.Value);
     }
 
+    // A job's work loop (WorkScene): the motion keeps going until Clear(), its prop in hand
+    public static void Work(string what, Vector3? face = null)
+    {
+        var p = Local;
+        if (p == null) return;
+        p.Equip(PropFor(what));
+        if (p.motion != what) p.motionStart = Time.time;
+        p.motion = what;
+        p.motionLength = 1e6f;
+        p.clearAt = -1f;
+        if (face.HasValue) p.Face(face.Value);
+    }
+
     public static void Clear()
     {
         if (local != null) local.Unequip();
@@ -82,6 +95,16 @@ public class ActivityPose : MonoBehaviour
         "scatter" => "bowl",
         "milk" => "bucket",
         "strum" => "instrument",
+        "gather" or "pluck" => "basket", // หาของป่า: stoop and pick into a basket on the other arm
+        "dig" => "spade",                // ขุดหน่อไม้ with a เสียม
+        "poke" => "pole",                // แหย่รังมดแดง with a long pole and a net bag
+        // jobs (WorkScene)
+        "type" => "hands",               // typing at the keyboard
+        "repairpc" => "screwdriver",     // working inside an open computer
+        "write" or "explain" => "marker",// at the whiteboard, then turning to the class
+        "wrench" => "wrench",            // bent over the motorbike
+        "whistle" => "whistle",          // the coach: arm raises with the kids, a blow on the whistle
+        "examine" => "stethoscope",      // listening to the patient's chest
         _ => motion,
     };
 
@@ -133,6 +156,8 @@ public class ActivityPose : MonoBehaviour
         var root = animator.transform;
         float k = motion != null ? (Time.time - motionStart) / Mathf.Max(0.01f, motionLength) : 0f;
         float wave = Mathf.Sin(k * Mathf.PI * 2f * Cycles(motion));
+        if (WorkPose(root)) return;
+        if (Forage(root, k, wave)) return;
 
         // Arm: forward and a little bent; actions swing it
         float lift = held switch { "rod" => -55f, "instrument" => -35f, "bucket" => -10f, "seedlings" => -25f, _ => -40f };
@@ -192,7 +217,155 @@ public class ActivityPose : MonoBehaviour
         UpdateExtras(k);
     }
 
-    private static float Cycles(string m) => m switch { "chop" => 3f, "plant" => 3f, "sweep" => 3f, "scatter" => 3f, "milk" => 5f, "reel" => 4f, "strum" => 6f, _ => 1f };
+    // หาของป่า: the whole body takes part — bend over at the waist (knees giving a little), the free arm
+    // carrying the basket in the crook of the elbow, the other hand reaching down and back to the basket
+    private bool Forage(Transform root, float k, float wave)
+    {
+        if (held != "basket" && held != "spade" && held != "pole") return false;
+        // ease into the stoop and back up at the end
+        float env = motion == null ? 0f : Mathf.SmoothStep(0f, 1f, Mathf.Min(k / 0.15f, (1f - k) / 0.15f));
+        float stoop = motion switch { "gather" => 70f, "pluck" => 25f, "dig" => 40f, "poke" => -8f, _ => 0f } * env;
+        Bend(HumanBodyBones.Spine, stoop * 0.55f, root.right);
+        Bend(HumanBodyBones.Chest, stoop * 0.3f, root.right);
+        Bend(HumanBodyBones.Neck, -stoop * 0.35f, root.right); // keep looking at what you're picking
+        foreach (var (upper, lower) in new[] { (HumanBodyBones.LeftUpperLeg, HumanBodyBones.LeftLowerLeg), (HumanBodyBones.RightUpperLeg, HumanBodyBones.RightLowerLeg) })
+        {
+            Bend(upper, -Mathf.Max(0f, stoop) * 0.22f, root.right);
+            Bend(lower, Mathf.Max(0f, stoop) * 0.32f, root.right);
+        }
+        float reach = Mathf.Abs(wave);
+        switch (motion ?? "")
+        {
+            case "gather":
+                Bend(HumanBodyBones.RightUpperArm, -(15f + 45f * reach) * env, root.right);
+                Bend(HumanBodyBones.RightLowerArm, -15f - 30f * (1f - reach), root.right);
+                break;
+            case "pluck":
+                Bend(HumanBodyBones.RightUpperArm, -(55f + 30f * reach) * env, root.right);
+                Bend(HumanBodyBones.RightLowerArm, -25f, root.right);
+                break;
+            case "dig": // both hands on the handle, chopping down
+                foreach (var b in new[] { HumanBodyBones.RightUpperArm, HumanBodyBones.LeftUpperArm })
+                    Bend(b, (-55f + 40f * Mathf.Max(0f, wave)) * env, root.right);
+                Bend(HumanBodyBones.RightLowerArm, -25f, root.right);
+                Bend(HumanBodyBones.LeftLowerArm, -35f, root.right);
+                break;
+            case "poke": // the pole held high, jabbing up at the nest
+                Bend(HumanBodyBones.RightUpperArm, (-140f + 18f * wave) * env, root.right);
+                Bend(HumanBodyBones.LeftUpperArm, (-115f + 18f * wave) * env, root.right);
+                Bend(HumanBodyBones.RightLowerArm, -15f, root.right);
+                Bend(HumanBodyBones.LeftLowerArm, -20f, root.right);
+                break;
+        }
+        if (held == "basket") // the basket on the left forearm
+        {
+            Bend(HumanBodyBones.LeftUpperArm, -20f, root.right);
+            Bend(HumanBodyBones.LeftLowerArm, -75f, root.right);
+        }
+
+        var hand = animator.GetBoneTransform(held == "basket" ? HumanBodyBones.LeftHand : HumanBodyBones.RightHand);
+        if (hand == null) return true;
+        Vector3 pos = hand.position;
+        Quaternion rot = root.rotation;
+        if (held == "basket") pos = hand.position + Vector3.down * 0.1f - root.right * 0.06f;
+        else if (held == "spade") rot = root.rotation * Quaternion.Euler(55f + 35f * Mathf.Max(0f, wave), 0f, 0f);
+        else rot = root.rotation * Quaternion.Euler(-62f + 5f * wave, 0f, 0f);
+        prop.SetPositionAndRotation(pos, rot);
+        return true;
+    }
+
+    // Jobs: a loop that runs as long as the shift (time-based, not a 0..1 motion)
+    private bool WorkPose(Transform root)
+    {
+        if (held != "hands" && held != "screwdriver" && held != "marker" && held != "wrench" && held != "whistle" && held != "stethoscope") return false;
+        float t = Time.time - motionStart;
+        var R = HumanBodyBones.RightUpperArm; var RL = HumanBodyBones.RightLowerArm;
+        var L = HumanBodyBones.LeftUpperArm; var LL = HumanBodyBones.LeftLowerArm;
+        Vector3 propTilt = Vector3.zero;
+        switch (motion ?? "")
+        {
+            case "type": // both hands on the keys, fingers pecking in turn, eyes on the screen
+                Bend(R, -38f + 5f * Mathf.Sin(t * 13f), root.right);
+                Bend(L, -38f + 5f * Mathf.Sin(t * 13f + 2.2f), root.right);
+                Bend(RL, -55f, root.right);
+                Bend(LL, -55f, root.right);
+                Bend(HumanBodyBones.Neck, 10f, root.right);
+                break;
+            case "repairpc": // reach into the open case and turn the screwdriver; now and then type a test
+                bool typing = t % 9f > 6f;
+                if (typing) goto case "type";
+                Bend(HumanBodyBones.Spine, 14f, root.right);
+                Bend(R, -50f + 4f * Mathf.Sin(t * 2f), root.right);
+                Bend(RL, -35f, root.right);
+                Bend(L, -42f, root.right);
+                Bend(LL, -45f, root.right);
+                var hand = animator.GetBoneTransform(HumanBodyBones.RightHand);
+                var fore = animator.GetBoneTransform(RL);
+                if (hand != null && fore != null) hand.rotation = Quaternion.AngleAxis(45f * Mathf.Sin(t * 6f), (hand.position - fore.position).normalized) * hand.rotation;
+                propTilt = new Vector3(70f, 0f, 45f * Mathf.Sin(t * 6f));
+                Bend(HumanBodyBones.Neck, 18f, root.right);
+                break;
+            case "write": // marker on the board, little strokes left to right
+                Bend(R, -105f + 8f * Mathf.Sin(t * 7f), root.right);
+                Bend(R, 12f * Mathf.Sin(t * 1.3f), root.up);
+                Bend(RL, -30f, root.right);
+                Bend(L, -10f, root.right);
+                propTilt = new Vector3(-80f, 0f, 0f);
+                break;
+            case "explain": // turned to the class: point back at the board, open hand to the students
+                Bend(R, -70f + 15f * Mathf.Sin(t * 2.4f), root.right);
+                Bend(RL, -25f, root.right);
+                Bend(L, -45f + 20f * Mathf.Sin(t * 2.4f + 1.5f), root.right);
+                Bend(LL, -50f, root.right);
+                propTilt = new Vector3(-40f, 0f, 0f);
+                break;
+            case "wrench": // bent over the bike, ratcheting a nut, the other hand steadying the frame
+                Bend(HumanBodyBones.Spine, 30f, root.right);
+                Bend(HumanBodyBones.Chest, 15f, root.right);
+                Bend(HumanBodyBones.Neck, -12f, root.right);
+                foreach (var (upper, lower) in new[] { (HumanBodyBones.LeftUpperLeg, HumanBodyBones.LeftLowerLeg), (HumanBodyBones.RightUpperLeg, HumanBodyBones.RightLowerLeg) })
+                {
+                    Bend(upper, -25f, root.right);
+                    Bend(lower, 40f, root.right);
+                }
+                Bend(R, -55f + 22f * Mathf.Sin(t * 5f), root.right);
+                Bend(RL, -30f, root.right);
+                Bend(L, -50f, root.right);
+                Bend(LL, -20f, root.right);
+                propTilt = new Vector3(60f + 25f * Mathf.Sin(t * 5f), 0f, 0f);
+                break;
+            case "whistle": // arm raises with the kids; every few seconds the whistle to the lips
+                bool blow = t % 5f > 4f;
+                if (blow)
+                {
+                    Bend(R, -75f, root.right);
+                    Bend(RL, -115f, root.right);
+                    Bend(L, -10f, root.right);
+                }
+                else
+                {
+                    float up = 0.5f + 0.5f * Mathf.Sin(t * 3.2f);
+                    Bend(R, -20f - 140f * up, root.right);
+                    Bend(L, -20f - 140f * up, root.right);
+                }
+                break;
+            case "examine": // stooping a little, the chest piece moved from place to place
+                Bend(HumanBodyBones.Spine, 16f, root.right);
+                Bend(HumanBodyBones.Neck, 10f, root.right);
+                Bend(R, -62f + 6f * Mathf.Sin(t * 0.9f), root.right);
+                Bend(R, 10f * Mathf.Sin(t * 0.6f), root.up);
+                Bend(RL, -30f, root.right);
+                Bend(L, -30f, root.right);
+                Bend(LL, -60f, root.right);
+                propTilt = new Vector3(0f, 0f, 90f);
+                break;
+        }
+        var rh = animator.GetBoneTransform(HumanBodyBones.RightHand);
+        if (rh != null) prop.SetPositionAndRotation(rh.position, root.rotation * Quaternion.Euler(propTilt));
+        return true;
+    }
+
+    private static float Cycles(string m) => m switch { "gather" => 3f, "pluck" => 3f, "dig" => 4f, "poke" => 4f, "chop" => 3f, "plant" => 3f, "sweep" => 3f, "scatter" => 3f, "milk" => 5f, "reel" => 4f, "strum" => 6f, _ => 1f };
 
     private void Bend(HumanBodyBones bone, float angle, Vector3 axis)
     {
@@ -297,6 +470,43 @@ public class ActivityPose : MonoBehaviour
             case "bucket":
                 Part(p, PrimitiveType.Cylinder, steel, new Vector3(0f, -0.25f, 0.05f), new Vector3(0.26f, 0.13f, 0.26f), Vector3.zero);
                 Part(p, PrimitiveType.Cylinder, Mat("Milk", new Color(0.98f, 0.98f, 0.95f)), new Vector3(0f, -0.13f, 0.05f), new Vector3(0.23f, 0.005f, 0.23f), Vector3.zero);
+                break;
+            case "basket": // ตะกร้าไม้ไผ่ with a few things in it already
+                Part(p, PrimitiveType.Cylinder, Mat("PropBasket", new Color(0.75f, 0.6f, 0.35f)), new Vector3(0f, -0.12f, 0f), new Vector3(0.34f, 0.12f, 0.34f), Vector3.zero);
+                Part(p, PrimitiveType.Cylinder, Mat("PropBasketRim", new Color(0.6f, 0.45f, 0.25f)), new Vector3(0f, 0f, 0f), new Vector3(0.36f, 0.015f, 0.36f), Vector3.zero);
+                Part(p, PrimitiveType.Sphere, Mat("PropForage", new Color(0.8f, 0.75f, 0.6f)), new Vector3(0.04f, -0.01f, 0.02f), new Vector3(0.22f, 0.07f, 0.2f), Vector3.zero);
+                Part(p, PrimitiveType.Sphere, Mat("PropGreens", new Color(0.45f, 0.75f, 0.3f)), new Vector3(-0.07f, 0f, -0.05f), new Vector3(0.14f, 0.06f, 0.12f), Vector3.zero);
+                Part(p, PrimitiveType.Cylinder, Mat("PropBasketRim", new Color(0.6f, 0.45f, 0.25f)), new Vector3(0f, 0.16f, 0f), new Vector3(0.02f, 0.17f, 0.02f), new Vector3(0f, 0f, 90f));
+                break;
+            case "spade": // เสียม: a long wooden handle with a narrow iron blade
+                Part(p, PrimitiveType.Cylinder, wood, new Vector3(0f, 0f, 0.45f), new Vector3(0.04f, 0.65f, 0.04f), new Vector3(90f, 0f, 0f));
+                Part(p, PrimitiveType.Cube, steel, new Vector3(0f, 0f, 1.18f), new Vector3(0.14f, 0.02f, 0.24f), Vector3.zero);
+                break;
+            case "pole": // a long bamboo pole with a cloth net bag (สวิง) at the top for the ant eggs
+                Part(p, PrimitiveType.Cylinder, bamboo, new Vector3(0f, 0f, 1.2f), new Vector3(0.035f, 1.5f, 0.035f), new Vector3(90f, 0f, 0f));
+                Part(p, PrimitiveType.Cylinder, Mat("PropRim", new Color(0.4f, 0.3f, 0.2f)), new Vector3(0f, 0f, 2.7f), new Vector3(0.32f, 0.01f, 0.32f), new Vector3(90f, 0f, 0f));
+                Part(p, PrimitiveType.Sphere, Mat("PropNet", new Color(0.9f, 0.88f, 0.8f)), new Vector3(0f, -0.15f, 2.68f), new Vector3(0.3f, 0.32f, 0.3f), Vector3.zero);
+                break;
+            case "hands": // typing: nothing in hand
+                break;
+            case "screwdriver":
+                Part(p, PrimitiveType.Cylinder, Mat("PropHandleRed", new Color(0.85f, 0.15f, 0.12f)), new Vector3(0f, 0f, 0.04f), new Vector3(0.03f, 0.045f, 0.03f), new Vector3(90f, 0f, 0f));
+                Part(p, PrimitiveType.Cylinder, steel, new Vector3(0f, 0f, 0.13f), new Vector3(0.008f, 0.06f, 0.008f), new Vector3(90f, 0f, 0f));
+                break;
+            case "marker": // whiteboard marker
+                Part(p, PrimitiveType.Cylinder, Mat("PropMarker", new Color(0.15f, 0.3f, 0.8f)), new Vector3(0f, 0f, 0.05f), new Vector3(0.022f, 0.065f, 0.022f), new Vector3(90f, 0f, 0f));
+                Part(p, PrimitiveType.Cylinder, Mat("PropMarkerCap", Color.white), new Vector3(0f, 0f, -0.02f), new Vector3(0.024f, 0.012f, 0.024f), new Vector3(90f, 0f, 0f));
+                break;
+            case "wrench": // ประแจ
+                Part(p, PrimitiveType.Cube, steel, new Vector3(0f, 0f, 0.1f), new Vector3(0.025f, 0.012f, 0.22f), Vector3.zero);
+                Part(p, PrimitiveType.Cylinder, steel, new Vector3(0f, 0f, 0.23f), new Vector3(0.06f, 0.012f, 0.06f), Vector3.zero);
+                break;
+            case "whistle": // on a lanyard
+                Part(p, PrimitiveType.Cube, Mat("PropWhistle", new Color(0.95f, 0.75f, 0.1f)), new Vector3(0f, 0f, 0.03f), new Vector3(0.025f, 0.025f, 0.06f), Vector3.zero);
+                break;
+            case "stethoscope": // the chest piece in the hand, the tube up to the ears
+                Part(p, PrimitiveType.Cylinder, steel, new Vector3(0f, 0f, 0.05f), new Vector3(0.045f, 0.008f, 0.045f), new Vector3(90f, 0f, 0f));
+                Part(p, PrimitiveType.Cylinder, Mat("PropTube", new Color(0.1f, 0.1f, 0.12f)), new Vector3(0f, 0.15f, 0.02f), new Vector3(0.012f, 0.15f, 0.012f), new Vector3(-10f, 0f, 0f));
                 break;
             case "instrument": // a phin-like guitar across the chest
                 Part(p, PrimitiveType.Sphere, Mat("PropGuitar", new Color(0.75f, 0.45f, 0.2f)), new Vector3(0f, 0f, 0f), new Vector3(0.32f, 0.36f, 0.1f), Vector3.zero);

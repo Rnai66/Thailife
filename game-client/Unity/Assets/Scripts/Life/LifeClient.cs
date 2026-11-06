@@ -89,6 +89,7 @@ public class LifeClient : MonoBehaviour
         if (GetComponent<ForageClient>() == null) gameObject.AddComponent<ForageClient>();
         if (GetComponent<BoxingClient>() == null) gameObject.AddComponent<BoxingClient>();
         if (GetComponent<FestivalClient>() == null) gameObject.AddComponent<FestivalClient>();
+        if (GetComponent<ActivityAlerts>() == null) gameObject.AddComponent<ActivityAlerts>();
         if (GetComponent<FairClient>() == null) gameObject.AddComponent<FairClient>();
         if (GetComponent<BankClient>() == null) gameObject.AddComponent<BankClient>();
         if (GetComponent<RanchClient>() == null) gameObject.AddComponent<RanchClient>();

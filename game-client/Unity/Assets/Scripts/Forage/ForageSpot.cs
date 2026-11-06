@@ -68,9 +68,17 @@ public class ForageSpot : MonoBehaviour
         var client = ForageClient.Instance;
         if (busy || client == null) return;
         busy = true;
+        ContextButton.Hide(this);
+        // Bend down and pick (or dig, or poke the nest) while the server weighs it up
+        const float Seconds = 2.6f;
+        float started = Time.time;
+        ActivityPose.Do(Motion, Seconds, face: transform.position);
         try
         {
             var s = await client.PickAsync(spot);
+            float left = Seconds * 0.75f - (Time.time - started); // it's in the basket near the end of the motion
+            if (left > 0f) await System.Threading.Tasks.Task.Delay((int)(left * 1000f));
+            if (this == null) return;
             GameAudio.Play("pickup", transform.position);
             UiKit.FloatAbovePlayer($"+{s.got} {s.name}", new Color(0.6f, 1f, 0.5f));
             if (crop != null) crop.SetActive(false);
@@ -78,11 +86,15 @@ public class ForageSpot : MonoBehaviour
         }
         catch (Exception e)
         {
+            ActivityPose.Clear();
             UiKit.FloatAbovePlayer(ForageClient.Explain(e), new Color(1f, 0.6f, 0.4f));
         }
+        if (this == null) return;
         busy = false;
         if (near) Offer();
     }
+
+    private string Motion => kind switch { "mushroom" => "gather", "bamboo" => "dig", "ant_eggs" => "poke", _ => "pluck" };
 
     private void OnDestroy() => ContextButton.Hide(this);
 }

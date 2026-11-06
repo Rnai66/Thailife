@@ -39,7 +39,7 @@ public class EventCalendarUI : MonoBehaviour
         var body = UiKit.PremiumWindow(transform, "CalendarCanvas", UiKit.WindowSize(new Vector2(1500f, 930f), 1480f), 56, "icon:fair",
             out backdrop, out var title, out var subtitle, Close, out _);
         title.text = "ปฏิทินงานและอีเวนต์";
-        subtitle.text = "งานวัด · งานประจำเดือน · คอนเสิร์ตระดับประเทศ";
+        subtitle.text = "วันพระ · มวยทุก 5/10/15 วัน · งานวัด · งานประจำเดือน · คอนเสิร์ต";
         list = UiKit.Container(body, Vector2.zero);
         emptyText = UiKit.Label(body, 28, "ต้องออนไลน์ก่อนจึงจะเห็นปฏิทิน", Vector2.zero, new Vector2(680f, 60f), UiKit.Muted);
         backdrop.SetActive(false);
@@ -56,7 +56,7 @@ public class EventCalendarUI : MonoBehaviour
     private void Render()
     {
         UiKit.Clear(list);
-        var entries = FestivalClient.Instance?.Current?.calendar;
+        var entries = Merge(FestivalClient.Instance?.Current);
         emptyText.gameObject.SetActive(entries == null || entries.Length == 0);
         if (entries == null) return;
 
@@ -105,8 +105,30 @@ public class EventCalendarUI : MonoBehaviour
         note.lineSpacing = 1.1f;
     }
 
+    // The next วันพระ and boxing nights (up to 4) come first, then the festivals
+    private static FestivalClient.CalendarEntry[] Merge(FestivalClient.State s)
+    {
+        if (s?.calendar == null) return null;
+        var list = new System.Collections.Generic.List<FestivalClient.CalendarEntry>();
+        if (s.activities != null)
+            foreach (var a in s.activities)
+            {
+                if (list.Count >= 4) break;
+                list.Add(new FestivalClient.CalendarEntry
+                {
+                    name = a.name, where = a.where, date = $"วันที่ {a.day}",
+                    kind = a.kind == "ghost" ? "วันพระ" : "มวย",
+                    open = a.open, in_s = a.in_s, ends_s = a.ends_s,
+                });
+            }
+        list.AddRange(s.calendar);
+        return list.ToArray();
+    }
+
     private static Color KindColor(string kind) =>
-        kind == "ระดับประเทศ" ? new Color32(0x7B, 0x3F, 0xC4, 0xFF)
+        kind == "วันพระ" ? new Color32(0x6A, 0x3F, 0xB5, 0xFF)
+        : kind == "มวย" ? new Color32(0xC6, 0x28, 0x28, 0xFF)
+        : kind == "ระดับประเทศ" ? new Color32(0x7B, 0x3F, 0xC4, 0xFF)
         : kind == "งานประเพณี" ? new Color32(0xC8, 0x8A, 0x1E, 0xFF)
         : (Color)UiKit.PayGreen;
 

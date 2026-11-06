@@ -10,7 +10,7 @@ public class BumperCars : MonoBehaviour
     private const float Speed = 2.6f, Radius = 0.85f;
 
     private Vector2[] pos;
-    private float[] heading, turn, spin;
+    private float[] heading, turn, spin, jolt; // jolt: how hard it was just hit (rocks the car, decays)
 
     public void Configure(Transform[] bumperCars, Vector2 floorHalfSize)
     {
@@ -25,6 +25,7 @@ public class BumperCars : MonoBehaviour
         heading = new float[n];
         turn = new float[n];
         spin = new float[n];
+        jolt = new float[n];
         for (int i = 0; i < n; i++)
         {
             pos[i] = new Vector2(cars[i].localPosition.x, cars[i].localPosition.z);
@@ -44,8 +45,8 @@ public class BumperCars : MonoBehaviour
             float rad = heading[i] * Mathf.Deg2Rad;
             pos[i] += new Vector2(Mathf.Sin(rad), Mathf.Cos(rad)) * Speed * dt;
             // Rails round the floor: turn back in
-            if (Mathf.Abs(pos[i].x) > half.x - Radius) { pos[i].x = Mathf.Sign(pos[i].x) * (half.x - Radius); heading[i] = -heading[i]; spin[i] = 260f; }
-            if (Mathf.Abs(pos[i].y) > half.y - Radius) { pos[i].y = Mathf.Sign(pos[i].y) * (half.y - Radius); heading[i] = 180f - heading[i]; spin[i] = -260f; }
+            if (Mathf.Abs(pos[i].x) > half.x - Radius) { pos[i].x = Mathf.Sign(pos[i].x) * (half.x - Radius); heading[i] = -heading[i]; spin[i] = 260f; jolt[i] = 0.7f; }
+            if (Mathf.Abs(pos[i].y) > half.y - Radius) { pos[i].y = Mathf.Sign(pos[i].y) * (half.y - Radius); heading[i] = 180f - heading[i]; spin[i] = -260f; jolt[i] = 0.7f; }
         }
         // Bumps: push apart and spin both cars
         for (int i = 0; i < pos.Length; i++)
@@ -61,11 +62,17 @@ public class BumperCars : MonoBehaviour
                 heading[j] += 140f;
                 spin[i] = 320f;
                 spin[j] = -320f;
+                jolt[i] = jolt[j] = 1f;
             }
         for (int i = 0; i < pos.Length; i++)
         {
             cars[i].localPosition = new Vector3(pos[i].x, cars[i].localPosition.y, pos[i].y);
-            cars[i].localRotation = Quaternion.Euler(0f, heading[i], 0f);
+            // Rocks after a bump, and a little buzz from the motor all the time
+            jolt[i] = Mathf.MoveTowards(jolt[i], 0f, dt * 1.6f);
+            float t = Time.time * 24f + i * 3.1f;
+            float rock = jolt[i] * jolt[i] * 9f, buzz = 0.5f;
+            cars[i].localRotation = Quaternion.Euler(0f, heading[i], 0f) *
+                Quaternion.Euler(Mathf.Sin(t) * rock + Mathf.Sin(t * 3.7f) * buzz, 0f, Mathf.Cos(t * 0.9f) * rock * 0.8f + Mathf.Sin(t * 4.3f) * buzz);
         }
     }
 }

@@ -33,6 +33,64 @@ public class SceneLoader : MonoBehaviour
     };
 
     public static bool Loading => instance != null && instance.loading;
+    public static bool Entering => instance != null && instance.entering;
+
+    private bool entering;
+    private string pendingScene, pendingName; // a map asked for while entering the game: loaded behind the same screen
+
+    // Leaving the title screen: the loading screen stays up until you're online, your life is loaded and
+    // the game has decided where you start (HomeClient); if that's another map it loads behind the same screen
+    public static void Enter()
+    {
+        if (instance == null)
+        {
+            var go = new GameObject("SceneLoader");
+            DontDestroyOnLoad(go);
+            instance = go.AddComponent<SceneLoader>();
+        }
+        if (instance.loading) return;
+        instance.StartCoroutine(instance.EnterRun());
+    }
+
+    private IEnumerator EnterRun()
+    {
+        loading = entering = true;
+        pendingScene = null;
+        group.gameObject.SetActive(true);
+        heading.text = "กำลังเข้าสู่เกม…";
+        tip.text = "เคล็ดลับ: " + Tips[Random.Range(0, Tips.Length)];
+        Show(0f, null);
+        float started = Time.unscaledTime;
+        for (float t = 0f; t < 0.2f; t += Time.unscaledDeltaTime) { group.alpha = t / 0.2f; yield return null; }
+        group.alpha = 1f;
+
+        // online, life loaded and the start decided (0-60%)
+        float waitFrom = Time.unscaledTime;
+        while (Time.unscaledTime - waitFrom < MaxWaitOnline)
+        {
+            var life = LifeClient.Instance;
+            bool online = life != null && life.IsOnline;
+            if (online && (HomeClient.StartDecided || pendingScene != null)) break;
+            float k = (Time.unscaledTime - waitFrom) / MaxWaitOnline;
+            Show(0.6f * (1f - Mathf.Exp(-4f * k)), online ? "กำลังเตรียมบ้านของคุณ…" : "กำลังเชื่อมต่อ…");
+            yield return null;
+        }
+        if (pendingScene != null)
+        {
+            heading.text = string.IsNullOrEmpty(pendingName) ? "กำลังโหลด…" : $"กำลังเดินทางไป{pendingName}…";
+            var op = SceneManager.LoadSceneAsync(pendingScene);
+            pendingScene = null;
+            while (op != null && !op.isDone) { Show(0.6f + Mathf.Clamp01(op.progress / 0.9f) * 0.35f, null); yield return null; }
+            for (int i = 0; i < 3; i++) yield return null;
+            float w = Time.unscaledTime;
+            while (Time.unscaledTime - w < MaxWaitOnline && !(LifeClient.Instance != null && LifeClient.Instance.IsOnline)) yield return null;
+        }
+        Show(1f, null);
+        for (int i = 0; i < 3; i++) yield return null;
+        while (Time.unscaledTime - started < 1.2f) yield return null;
+        entering = false;
+        yield return Hide();
+    }
 
     // Use instead of SceneManager.LoadScene
     public static void Load(string scene, string placeName = null)
@@ -43,7 +101,11 @@ public class SceneLoader : MonoBehaviour
             DontDestroyOnLoad(go);
             instance = go.AddComponent<SceneLoader>();
         }
-        if (instance.loading) return;
+        if (instance.loading)
+        {
+            if (instance.entering) { instance.pendingScene = scene; instance.pendingName = placeName; }
+            return;
+        }
         instance.StartCoroutine(instance.Run(scene, placeName));
     }
 

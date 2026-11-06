@@ -220,11 +220,14 @@ public static class UiKit
         float left = -size.x * 0.5f;
         var badge = Panel("Logo", header, Gold, new Vector2(left + 70f, 0f), new Vector2(76f, 76f));
         Badge(badge, logo);
-        float titleWidth = Mathf.Min(Portrait ? 900f : 520f, size.x - 250f); // between the badge and the close button
+        float titleWidth = size.x - 245f; // between the badge and the close button
         float titleX = left + 120f + titleWidth * 0.5f;
-        title = Cartoon(Label(header, 40, "", new Vector2(titleX, 14f), new Vector2(titleWidth, 54f), WoodInk, TextAnchor.MiddleLeft), 3f);
-        subtitle = Label(header, 24, "", new Vector2(titleX, -26f), new Vector2(titleWidth, 34f), new Color32(0xFF, 0xE2, 0xA8, 0xFF), TextAnchor.MiddleLeft);
+        // one line each, so a long title never wraps down into the subtitle (they shrink a bit instead)
+        title = Cartoon(Label(header, 42, "", new Vector2(titleX, 18f), new Vector2(titleWidth, 54f), WoodInk, TextAnchor.MiddleLeft), 3f);
+        OneLineFit.Apply(title, 30);
+        subtitle = Label(header, 27, "", new Vector2(titleX, -28f), new Vector2(titleWidth, 36f), new Color32(0xFF, 0xE2, 0xA8, 0xFF), TextAnchor.MiddleLeft);
         subtitle.gameObject.AddComponent<Outline>().effectColor = WoodEdge;
+        OneLineFit.Apply(subtitle, 20);
         if (onClose != null)
             RoundButton(header, "X", new Vector2(-left - 60f, 0f), new Vector2(70f, 70f), new Color32(0x5A, 0x3A, 0x26, 0xFF), HeaderText, onClose, 32, circle: true);
         if (onClose != null) // walking away fades the window out instead of leaving it on screen
