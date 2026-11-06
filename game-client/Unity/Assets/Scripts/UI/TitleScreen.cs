@@ -59,8 +59,12 @@ public class TitleScreen : MonoBehaviour
     private readonly List<Canvas> hidden = new List<Canvas>();
     private Canvas own;
 
+    // Still on screen (other windows wait for it to go)
+    public static bool Up { get; private set; }
+
     private void Awake()
     {
+        Up = true;
         start = Time.unscaledTime;
         var canvasGo = new GameObject("TitleCanvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster), typeof(CanvasGroup));
         canvasGo.transform.SetParent(transform, false);
@@ -248,6 +252,7 @@ public class TitleScreen : MonoBehaviour
 
     private void OnDestroy()
     {
+        Up = false;
         if (follow != null) follow.enabled = true;
         ShowOtherCanvases();
     }

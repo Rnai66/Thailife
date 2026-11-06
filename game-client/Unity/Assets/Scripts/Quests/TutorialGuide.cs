@@ -31,7 +31,7 @@ public class TutorialGuide : MonoBehaviour
     {
         new Step { Scene = "ThaiVillage", Target = "ShopCounterZone", Text = "ซื้ออาหาร 1 อย่างที่ร้านค้าชุมชน", Done = g => g.FoodCount() > g.baseFood },
         new Step { Scene = "", Target = "", Text = "กดปุ่ม \"กระเป๋า\" ทางซ้าย แล้วแตะของกินเพื่อกิน", Done = g => g.FoodCount() < g.baseFood },
-        new Step { Scene = "ThaiVillage", Target = "SleepZone", Text = "นอนพักบนเสื่อที่ชานบ้าน (ฟื้นพลังงาน)", Done = g => LifeClient.Instance != null && LifeClient.Instance.IsSleeping },
+        new Step { Scene = "", Target = "SleepZone", Text = "กลับบ้าน แล้วนอนพักที่บ้านของคุณ (ฟื้นพลังงาน)", Done = g => LifeClient.Instance != null && LifeClient.Instance.IsSleeping },
         new Step { Scene = "ThaiVillage", Target = "BusStop_ป้ายรถสองแถว", Text = "ยืนใต้ป้ายรถสองแถว แล้วเลือกไป \"ตำบล\"", Done = g => SceneManager.GetActiveScene().name == "Tambon" },
         new Step { Scene = "Tambon", Target = "CowProjectDesk", Text = "รับวัวฟรี 1 ตัวที่โต๊ะข้าง อบต.", Done = g => RanchClient.Instance?.Current != null && RanchClient.Instance.Current.claimed },
         new Step { Scene = "Tambon", Target = "FishingSpot_ท่าน้ำ", Text = "ตกปลาที่คลอง 1 ตัว", Done = g => g.FishCount() > g.baseFish },

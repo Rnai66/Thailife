@@ -2429,3 +2429,50 @@ Hello! สวัสดีครับ|Sawasdee ka~|ต้มยำกุ้ง �
 ขึ้นรถสองแถวที่ป้ายเพื่อเดินทางไปที่อื่น	Take the songthaew at the stop to travel
 เรียนที่โรงเรียนเพื่อเปิดอาชีพใหม่	Study at school to unlock new jobs
 กดปุ่มออโต้ ให้ตัวละครทำภารกิจเอง	Press Auto to let your character do quests
+กลับบ้าน แล้วนอนพักที่บ้านของคุณ (ฟื้นพลังงาน)	Go home and sleep there (restores energy)
+ย้ายบ้าน	Move house
+เลือกที่อยู่	Where to live
+จะเริ่มชีวิตที่ไหนดี?	Where will you start your life?
+{} · เลือกครั้งแรกฟรี	{} · first choice is free
+{} · ค่าย้ายบ้าน {} บาท · ตอนนี้อยู่{}	{} · moving costs {} baht · now living in {}
+เลือกบ้านใน{}	Choose a house in {}
+บ้าน {} แบบ	{} house styles
+ที่อยู่ตอนนี้	Living here
+ดูบ้าน	See houses
+บ้านปัจจุบัน	Your house
+อยู่บ้านนี้แล้ว	Already yours
+อยู่บ้านนี้	Live here
+← เลือกพื้นที่อื่น	← Other areas
+เงินไม่พอค่าย้ายบ้าน	Not enough money to move
+อยู่บ้านนี้อยู่แล้ว	You already live here
+ได้บ้านแล้ว!	You have a home!
+ได้บ้านแล้ว! {} · {}	You have a home! {} · {}
+ย้ายบ้านแล้ว! {} · {}	Moved house! {} · {}
+บ้านนอก · หมู่บ้าน	Countryside · Village
+ในเมือง	In town
+กรุงเทพฯ	Bangkok
+อากาศดี ใกล้ทุ่งนา วัด เล้าไก่ เหมาะกับผู้เล่นใหม่	Fresh air, near the rice fields, temple and coop · good for new players
+ใกล้ตลาด ร้านค้า โรงพยาบาล งานในเมือง ผับ	Near the market, shops, hospital, town jobs and pubs
+เมืองหลวง วัดพระแก้ว แม่น้ำเจ้าพระยา สนามบิน รถไฟฟ้า	The capital · Wat Phra Kaew, the Chao Phraya, the airport, the skytrain
+บ้านไม้ใต้ถุนสูง	Wooden stilt house
+บ้านปูนชั้นเดียว	Single-storey concrete house
+บ้านไม้ชั้นเดียวยกพื้น	Raised single-storey wooden house
+บ้านครึ่งปูนครึ่งไม้ 2 ชั้น	Two-storey half-concrete, half-wood house
+ทาวน์เฮาส์ 2 ชั้น	Two-storey townhouse
+บ้านเดี่ยวในเมือง	Detached house in town
+ทาวน์โฮมโมเดิร์น	Modern townhome
+บ้านเดี่ยวหมู่บ้านจัดสรร	Detached house on an estate
+บ้านไทยดั้งเดิม ชานบ้านกว้าง จอดรถใต้ถุน	Traditional Thai house · wide porch · parking underneath
+บ้านปูนทาสีครีม หลังคากระเบื้อง มีระเบียงหน้าบ้าน	Cream plaster house · tiled roof · front veranda
+บ้านไม้สักยกพื้นเตี้ย หลังคาสังกะสี บรรยากาศชนบท	Teak house on low posts · tin roof · country feel
+ชั้นล่างปูน ชั้นบนไม้ มีระเบียงชั้นสอง	Concrete below, wood above, upstairs balcony
+ห้องแถวในซอยหมู่บ้านในเมือง เดินไปตลาดได้	A row house in a town lane · walk to the market
+บ้านเดี่ยวมีรั้ว สนามหญ้าหน้าบ้าน	Detached house with a fence and front lawn
+ทาวน์โฮมสไตล์โมเดิร์น หลังคาแบน ใกล้รถไฟฟ้า	Modern flat-roofed townhome near the skytrain
+บ้านเดี่ยวสองชั้นในหมู่บ้านจัดสรรริมเมือง	Two-storey detached house on an estate at the city edge
+ซอยบ้านใหม่ →\nบ้านปูน · บ้านไม้ · บ้านสองชั้น	New houses lane →\nConcrete · wooden · two-storey
+หมู่บ้านในเมือง	Town Estate
+หมู่บ้านจัดสรร	Housing Estate
+เสื่อหน้าบ้าน	Mat on the porch
+บ้าน	Home
+กลับบ้าน	Go home

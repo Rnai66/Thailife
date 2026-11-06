@@ -187,6 +187,7 @@ public class HealthHud : MonoBehaviour
         Round(left, 0, "bag", "กระเป๋า", BagUI.Toggle, out _, out _, out _);
         Round(left, 1, "menu", "เมนู", ToggleMenu, out menuDisc, out menuGlyph, out menuCaption);
         Round(left, 2, "auto", "ออโต้", AutoQuest.Toggle, out autoDisc, out _, out autoCaption); // the character does today's quests
+        Round(left, 3, "home", "บ้าน", () => HomeChoiceUI.Show(), out _, out _, out _); // where you live: go home or move house
 
         menuColumn = Column(canvasGo.transform, "MenuColumn", 120f + Disc + 34f);
         int row = 0;

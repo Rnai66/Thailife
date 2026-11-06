@@ -73,8 +73,10 @@ public class SoundUI : MonoBehaviour
             qualityButtons.Add(b.GetComponent<Image>());
         }
 
-        UiKit.RoundButton(body, "บัญชี · รหัสกู้คืน", new Vector2(0f, P ? -390f : -375f), new Vector2(380f, 70f), UiKit.Gold, UiKit.GoldInk,
+        UiKit.RoundButton(body, "บัญชี · รหัสกู้คืน", new Vector2(P ? -175f : -200f, P ? -390f : -375f), new Vector2(P ? 330f : 380f, 70f), UiKit.Gold, UiKit.GoldInk,
             () => { Close(); AccountUI.Show(); }, 26);
+        UiKit.RoundButton(body, "ย้ายบ้าน", new Vector2(P ? 175f : 200f, P ? -390f : -375f), new Vector2(P ? 330f : 380f, 70f), UiKit.Gold, UiKit.GoldInk,
+            () => { Close(); HomeChoiceUI.Show(); }, 26);
 
         // Language (ภาษา): written in both, so it reads right whichever is on
         float ly = P ? -480f : -440f;

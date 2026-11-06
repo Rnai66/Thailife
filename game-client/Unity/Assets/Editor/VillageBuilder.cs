@@ -77,6 +77,7 @@ public static class VillageBuilder
         var v = root.transform;
         BuildRoad(v);
         BuildStiltHouse(v, new Vector3(7f, 0f, 7f));
+        Homes.Village(v); // the other houses to choose from, on a lane east of the village hall
         BuildSpiritHouse(v, new Vector3(2.8f, 0f, 3.2f));
         BuildShop(v, new Vector3(-7f, 0f, -12f), yaw: 180f);
 
@@ -296,6 +297,9 @@ public static class VillageBuilder
         matPoint.transform.localPosition = new Vector3(-1.6f, 2.76f, -3.3f); // on the mat, lying along it
         matPoint.transform.localRotation = Quaternion.Euler(0f, 90f, 0f);
         bed.AddComponent<SleepSpot>().Configure("เสื่อบนชานบ้าน", "นอนพัก", matPoint.transform);
+        // One of the houses a player can choose (Homes, HomePlot): you arrive on the porch by the stairs
+        var porchPoint = PrimitiveKit.Group("HomePorch", t, new Vector3(1.4f, 2.6f, -3.4f), 180f).transform;
+        house.AddComponent<HomePlot>().Configure("stilt", 2.6f, porchPoint, bed);
 
         // Porch railing (gap left for the stairs)
         PrimitiveKit.Box("Rail", t, new Vector3(-0.7f, 3.35f, -4.15f), new Vector3(4.6f, 0.08f, 0.08f), darkWood);

@@ -1,7 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// Turns the village stilt house into a room you can walk into and decorate (แต่งบ้าน).
+// Turns your house (HomePlot you live in; the village stilt house by default) into a room you can walk
+// into and decorate (แต่งบ้าน).
 // Done at runtime, so the scene doesn't need rebuilding: the solid "Walls" box is swapped for
 // four thin walls with a doorway, the roof and walls hide while you're inside (so the camera can
 // see in), and your furniture from HouseClient is placed on the floor.
@@ -9,9 +10,12 @@ public class HomeInterior : MonoBehaviour
 {
     public const string HouseName = "StiltHouse_บ้านไม้ใต้ถุนสูง";
 
-    // House-local measurements (VillageBuilder.BuildStiltHouse)
-    private const float FloorY = 2.6f, WallTop = 5f, HalfX = 2.8f, HalfZ = 2.3f;
-    private const float WallThickness = 0.12f, DoorHalfWidth = 0.75f, DoorTop = 4.8f;
+    // House-local measurements (VillageBuilder.BuildStiltHouse; every HomePlot's room is the same size,
+    // only the floor height differs)
+    private const float HalfX = 2.8f, HalfZ = 2.3f;
+    private const float WallThickness = 0.12f, DoorHalfWidth = 0.75f;
+    private float FloorY = 2.6f, WallTop = 5f, DoorTop = 4.8f;
+    private readonly List<GameObject> added = new List<GameObject>();
     public const float BoundX = 2.5f, BoundZ = 2.0f; // same as house.lua
 
     public static HomeInterior Instance { get; private set; }
@@ -31,15 +35,25 @@ public class HomeInterior : MonoBehaviour
     private Light ceilingLight;
     private float nextLightCheck;
 
+    // On the house you live in (moving house moves it)
     public static void Setup()
     {
-        var go = GameObject.Find(HouseName);
+        var plot = HomePlot.Mine();
+        var go = plot != null ? plot.gameObject : (HomeClient.MyStyle == "stilt" ? GameObject.Find(HouseName) : null);
+        if (Instance != null && (go == null || Instance.gameObject != go)) Destroy(Instance);
         if (go != null && go.GetComponent<HomeInterior>() == null) go.AddComponent<HomeInterior>();
     }
 
     private void Awake()
     {
         Instance = this;
+        var plot = GetComponent<HomePlot>();
+        if (plot != null)
+        {
+            FloorY = plot.FloorY;
+            WallTop = FloorY + 2.4f;
+            DoorTop = FloorY + 2.2f;
+        }
 
         var walls = transform.Find("Walls");
         if (walls != null)
@@ -70,12 +84,14 @@ public class HomeInterior : MonoBehaviour
                 cutaway.AddRange(child.GetComponentsInChildren<Renderer>());
 
         Room = new GameObject("Room").transform;
+        added.Add(Room.gameObject);
         Room.SetParent(transform, false);
         Room.localPosition = new Vector3(0f, FloorY, 0f);
 
         // Ceiling bulb (หลอดไฟ) on a cord: lights the room whenever you're inside, and at night
         var cord = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
         cord.name = "BulbCord";
+        added.Add(cord);
         Destroy(cord.GetComponent<Collider>());
         cord.transform.SetParent(transform, false);
         cord.transform.localPosition = new Vector3(0f, WallTop - 0.25f, 0f);
@@ -83,6 +99,7 @@ public class HomeInterior : MonoBehaviour
         cord.GetComponent<Renderer>().sharedMaterial = new Material(Shader) { color = new Color(0.1f, 0.1f, 0.1f) };
         bulb = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         bulb.name = "CeilingBulb";
+        added.Add(bulb);
         Destroy(bulb.GetComponent<Collider>());
         bulb.transform.SetParent(transform, false);
         bulb.transform.localPosition = new Vector3(0f, WallTop - 0.6f, 0f);
@@ -91,6 +108,7 @@ public class HomeInterior : MonoBehaviour
         bulbMaterial.EnableKeyword("_EMISSION");
         bulb.GetComponent<Renderer>().sharedMaterial = bulbMaterial;
         var lightGo = new GameObject("CeilingLight");
+        added.Add(lightGo);
         lightGo.transform.SetParent(transform, false);
         lightGo.transform.localPosition = new Vector3(0f, WallTop - 0.75f, 0f);
         ceilingLight = lightGo.AddComponent<Light>();
@@ -101,6 +119,7 @@ public class HomeInterior : MonoBehaviour
         ceilingLight.shadows = LightShadows.None;
 
         var zone = new GameObject("RoomZone");
+        added.Add(zone);
         zone.transform.SetParent(transform, false);
         zone.transform.localPosition = new Vector3(0f, FloorY + 1f, 0f);
         var box = zone.AddComponent<BoxCollider>();
@@ -131,12 +150,27 @@ public class HomeInterior : MonoBehaviour
         if (house != null) house.Changed -= OnHouseChanged;
         if (Instance == this) Instance = null;
         ContextButton.Hide(this);
+        // moved out: the house goes back to a plain closed house
+        foreach (var go in added) if (go != null) Destroy(go);
+        foreach (var go in pieces.Values) if (go != null) Destroy(go);
+        foreach (var r in cutaway) if (r != null) r.enabled = true;
+        var walls = transform.Find("Walls");
+        if (walls != null)
+        {
+            var r = walls.GetComponent<Renderer>();
+            if (r != null) r.enabled = true;
+            var c = walls.GetComponent<Collider>();
+            if (c != null) c.enabled = true;
+        }
+        var door = transform.Find("Door");
+        if (door != null) door.gameObject.SetActive(true);
     }
 
     private void AddWall(Vector3 position, Vector3 size)
     {
         var wall = GameObject.CreatePrimitive(PrimitiveType.Cube);
         wall.name = "RoomWall";
+        added.Add(wall);
         wall.transform.SetParent(transform, false);
         wall.transform.localPosition = position;
         wall.transform.localScale = size;

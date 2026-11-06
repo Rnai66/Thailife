@@ -149,6 +149,9 @@ public static class HudIcons
                 return (x, y) => ((Box(x, y, 0f, -0.15f, 0.88f, 0.26f, 0.1f) || Box(x, y, -0.05f, 0.2f, 0.48f, 0.26f, 0.14f))
                                   && !Circle(x, y, -0.5f, -0.45f, 0.28f) && !Circle(x, y, 0.5f, -0.45f, 0.28f))
                                  || Circle(x, y, -0.5f, -0.45f, 0.2f) || Circle(x, y, 0.5f, -0.45f, 0.2f);
+            case "home": // a house: pitched roof over a body with a door
+                return (x, y) => (y > 0.02f && y < 0.92f - 0.95f * Mathf.Abs(x) && Mathf.Abs(x) < 0.9f)
+                                 || (Box(x, y, 0f, -0.42f, 0.6f, 0.46f, 0.06f) && !Box(x, y, 0f, -0.6f, 0.17f, 0.3f, 0.04f));
             case "coin":
                 return (x, y) => Circle(x, y, 0f, 0f, 0.9f) && !(Circle(x, y, 0f, 0f, 0.72f) && !Circle(x, y, 0f, 0f, 0.62f));
             case "bolt": // energy

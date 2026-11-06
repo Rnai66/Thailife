@@ -85,6 +85,7 @@ public class LifeClient : MonoBehaviour
         // Daily quests ride along with the life systems (no scene setup needed)
         if (GetComponent<QuestClient>() == null) gameObject.AddComponent<QuestClient>();
         if (GetComponent<HouseClient>() == null) gameObject.AddComponent<HouseClient>();
+        if (GetComponent<HomeClient>() == null) gameObject.AddComponent<HomeClient>();
         if (GetComponent<BoxingClient>() == null) gameObject.AddComponent<BoxingClient>();
         if (GetComponent<FestivalClient>() == null) gameObject.AddComponent<FestivalClient>();
         if (GetComponent<FairClient>() == null) gameObject.AddComponent<FairClient>();

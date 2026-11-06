@@ -454,29 +454,32 @@ public static class TempleLife
         PrimitiveKit.Box("Bench", s, new Vector3(0f, 0.6f, 0.8f), new Vector3(2.8f, 0.08f, 0.5f), wood);
     }
 
-    // ── Community forest (ป่าชุมชน), NE of the village ───────────────────────────────────────
+    // ── Community forest (ป่าชุมชน), north of the village ─────────────────────────────────────
+    // (moved 40 m west, out of the NE corner, so it is well away from the houses players live in)
+    private static readonly Vector3 ForestShift = new Vector3(-40f, 0f, 0f);
+
     private static void CommunityForest(Transform parent)
     {
         var f = PrimitiveKit.Group("CommunityForest_ป่าชุมชน", parent, Vector3.zero).transform;
-        Trail(f, new Vector3(36f, 0f, 24f), new Vector3(40f, 0f, 36f));
-        Trail(f, new Vector3(40f, 0f, 36f), new Vector3(47f, 0f, 46f));
-        Trail(f, new Vector3(47f, 0f, 46f), new Vector3(44f, 0f, 54f));
-        Places.Sign(f, new Vector3(38.5f, 0f, 27f), "ป่าชุมชน\nกลางคืนมีผี · หมอผีปราบได้", 0f);
+        Trail(f, new Vector3(36f, 0f, 24f) + ForestShift, new Vector3(40f, 0f, 36f) + ForestShift);
+        Trail(f, new Vector3(40f, 0f, 36f) + ForestShift, new Vector3(47f, 0f, 46f) + ForestShift);
+        Trail(f, new Vector3(47f, 0f, 46f) + ForestShift, new Vector3(44f, 0f, 54f) + ForestShift);
+        Places.Sign(f, new Vector3(38.5f, 0f, 27f) + ForestShift, "ป่าชุมชน\nกลางคืนมีผี · หมอผีปราบได้", 0f);
         foreach (var p in new[]
         {
-            new Vector3(36f, 0f, 40f), new Vector3(52f, 0f, 37f), new Vector3(55f, 0f, 47f), new Vector3(38f, 0f, 52f),
-            new Vector3(50.5f, 0f, 55.5f), new Vector3(43f, 0f, 41f), new Vector3(56f, 0f, 30f),
+            new Vector3(36f, 0f, 40f) + ForestShift, new Vector3(52f, 0f, 37f) + ForestShift, new Vector3(55f, 0f, 47f) + ForestShift, new Vector3(38f, 0f, 52f) + ForestShift,
+            new Vector3(50.5f, 0f, 55.5f) + ForestShift, new Vector3(43f, 0f, 41f) + ForestShift, new Vector3(58f, 0f, 34f) + ForestShift,
         })
-            Places.ShadeTree(f, p, 0.85f + (p.x * 7 % 3) * 0.1f);
-        Takhian(f, new Vector3(51f, 0f, 50f));
-        BananaClump(f, new Vector3(39.5f, 0f, 46.5f));
-        DeadTree(f, new Vector3(46f, 0f, 35f), 1f, 5);
-        for (int i = 0; i < 10; i++) Nature.Bush(f, new Vector3(35f + (i * 2.3f) % 22f, 0f, 33f + (i * 5.7f) % 24f), 0.9f + (i % 3) * 0.2f, 80 + i);
-        for (int i = 0; i < 4; i++) Nature.Rock(f, new Vector3(37f + i * 5f, 0f, 57f - (i % 2) * 20f), 0.7f + (i % 2) * 0.4f, 90 + i);
+            Places.ShadeTree(f, p, 0.85f + (Mathf.Abs(p.x) * 7 % 3) * 0.1f);
+        Takhian(f, new Vector3(51f, 0f, 50f) + ForestShift);
+        BananaClump(f, new Vector3(39.5f, 0f, 46.5f) + ForestShift);
+        DeadTree(f, new Vector3(46f, 0f, 35f) + ForestShift, 1f, 5);
+        for (int i = 0; i < 10; i++) Nature.Bush(f, new Vector3(35f + (i * 2.3f) % 22f, 0f, 33f + (i * 5.7f) % 24f) + ForestShift, 0.9f + (i % 3) * 0.2f, 80 + i);
+        for (int i = 0; i < 4; i++) Nature.Rock(f, new Vector3(37f + i * 5f, 0f, 57f - (i % 2) * 20f) + ForestShift, 0.7f + (i % 2) * 0.4f, 90 + i);
 
-        Spot(f, new Vector3(45.5f, 0f, 40f), "forest1", "krahang");
-        Spot(f, new Vector3(41.5f, 0f, 47.5f), "forest2", "tani");
-        Spot(f, new Vector3(49f, 0f, 48f), "forest3", "takhian");
+        Spot(f, new Vector3(45.5f, 0f, 40f) + ForestShift, "forest1", "krahang");
+        Spot(f, new Vector3(41.5f, 0f, 47.5f) + ForestShift, "forest2", "tani");
+        Spot(f, new Vector3(49f, 0f, 48f) + ForestShift, "forest3", "takhian");
     }
 
     // ── Pieces ─────────────────────────────────────────────────────────────────────────────

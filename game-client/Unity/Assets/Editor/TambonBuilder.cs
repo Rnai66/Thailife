@@ -175,6 +175,7 @@ public static class TambonBuilder
 
         TempleGround(root);
         LandParcels.BuildCity(root); // ที่ดินติดถนน next to the bank (a shophouse to let once it's yours)
+        Homes.City(root); // หมู่บ้านในเมือง: the townhouse and the detached house players can live in
 
         // ตลาดสดเทศบาล east of the clock tower (morning market, 05:00-13:00)
         Markets.FreshMarket(root, new Vector3(39f, 0f, 11f), "ตลาดสดเทศบาล", "05:00-13:00");
@@ -284,6 +285,8 @@ public static class TambonBuilder
         }, 180f, lamps: true);
         foreach (var p in new[] { new Vector3(-6f, 0f, 9f), new Vector3(6f, 0f, 9f), new Vector3(-16f, 0f, 16f), new Vector3(16f, 0f, 16f) })
             StreetFurniture.LampPost(root, p);
+
+        Homes.Bangkok(root); // หมู่บ้านจัดสรร: the modern townhome and the detached house players can live in
 
         // Start on the lawn rather than in the side street (arrivals use the SpawnPoints)
         var player = UnityEngine.Object.FindAnyObjectByType<PlayerController>();
