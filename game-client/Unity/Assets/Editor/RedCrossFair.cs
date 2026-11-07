@@ -39,7 +39,7 @@ public static partial class RedCrossFair
     // Thai vowels like ำ need the game font (Mitr); the built-in one drops them
     private static TextMesh Thai(TextMesh label)
     {
-        var font = Resources.Load<Font>("Fonts/Mitr-SemiBold");
+        var font = Resources.Load<Font>("Fonts/Mitr-Medium");
         if (font == null) return label;
         label.font = font;
         label.GetComponent<MeshRenderer>().sharedMaterial = font.material;

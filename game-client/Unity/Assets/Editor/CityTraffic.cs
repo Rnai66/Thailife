@@ -24,12 +24,13 @@ public static class CityTraffic
     // gantryWest/East: the overhead direction signs; shelter: the bus shelter's name board (it is
     // also the stop for long-distance coaches, บขส.)
     public static void Build(Transform root, string gantryWest = "↑ ตลาดสด · ชายหาด\n← หอนาฬิกา · ย่านผับ",
-        string gantryEast = "↑ วัด · ค่ายมวย · ลานวัด\nสถานีรถไฟฟ้า ↑", string shelter = "ป้ายรถเมล์ · รถทัวร์ บขส.")
+        string gantryEast = "↑ วัด · ค่ายมวย · ลานวัด\nสถานีรถไฟ ↑", string shelter = "ป้ายรถเมล์ · รถทัวร์ บขส.",
+        bool roundabout = false)
     {
         var avenue = PrimitiveKit.Group("Avenue_ถนนสี่เลน", root, Vector3.zero).transform;
         Road(avenue);
         var lights = Junction(avenue);
-        Traffic(avenue, lights);
+        Traffic(avenue, lights, roundabout);
         Gantries(avenue, gantryWest, gantryEast);
         BusShelter(avenue, new Vector3(40f, 0f, SouthEdge - 1.5f), 180f, shelter);
         BusPole(avenue, new Vector3(-40f, 0f, NorthEdge + 0.5f));
@@ -193,7 +194,7 @@ public static class CityTraffic
     }
 
     // ── Traffic ──────────────────────────────────────────────────────────────
-    private static void Traffic(Transform t, TrafficLight lights)
+    private static void Traffic(Transform t, TrafficLight lights, bool roundabout)
     {
         var traffic = PrimitiveKit.Group("Traffic_รถสัญจร", t, Vector3.zero).transform;
         float half = Length / 2f;
@@ -205,7 +206,7 @@ public static class CityTraffic
         var eastKerb = Straight(EastKerb, true);
         var westFast = Straight(WestFast, false);
         var westKerb = Straight(WestKerb, false);
-        var side = SideLoop();
+        var side = SideLoop(roundabout);
 
         float StopE(Vector3[] p, float z) => TrafficCar.DistanceTo(p, new Vector3(-StopX, 0f, z));
         float StopW(Vector3[] p, float z) => TrafficCar.DistanceTo(p, new Vector3(StopX, 0f, z));
@@ -245,7 +246,9 @@ public static class CityTraffic
         Add("taxi", 0, side, 190f, sideStops, sideFor);
     }
 
-    private static Vector3[] SideLoop()
+    // roundabout: the street ends at the clock-tower roundabout (CityStreets) — go once round it
+    // (clockwise, keeping left) instead of the U-turn
+    private static Vector3[] SideLoop(bool roundabout)
     {
         var p = new List<Vector3> { new Vector3(-Length / 2f, 0f, EastKerb), new Vector3(-4.5f, 0f, EastKerb) };
         const float r = 3f;
@@ -258,8 +261,25 @@ public static class CityTraffic
             }
         }
         Arc(new Vector3(-4.5f, 0f, EastKerb + r), -90f, 0f, r);      // left into the street, heading north on x -1.5
-        p.Add(new Vector3(-1.5f, 0f, 6f));
-        Arc(new Vector3(0f, 0f, 6f), 180f, 0f, 1.5f);                // U-turn before the tower island
+        if (roundabout)
+        {
+            var c = CityStreets.Roundabout;
+            const float ring = 6.6f;
+            float enter = Mathf.Atan2(-Mathf.Sqrt(ring * ring - 2.25f), -1.5f) * Mathf.Rad2Deg; // about -103
+            float leave = Mathf.Atan2(-Mathf.Sqrt(ring * ring - 2.25f), 1.5f) * Mathf.Rad2Deg - 360f;
+            p.Add(new Vector3(-1.5f, 0f, c.z - 9.5f));
+            for (int i = 0; i <= 28; i++)
+            {
+                float a = Mathf.Lerp(enter, leave, i / 28f) * Mathf.Deg2Rad;
+                p.Add(c + new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a)) * ring);
+            }
+            p.Add(new Vector3(1.5f, 0f, c.z - 9.5f));
+        }
+        else
+        {
+            p.Add(new Vector3(-1.5f, 0f, 6f));
+            Arc(new Vector3(0f, 0f, 6f), 180f, 0f, 1.5f);                // U-turn before the tower island
+        }
         p.Add(new Vector3(1.5f, 0f, EastKerb + r));                    // down past the stop line
         Arc(new Vector3(4.5f, 0f, EastKerb + r), 180f, 270f, r);      // left onto the avenue, heading east
         p.Add(new Vector3(Length / 2f, 0f, EastKerb));
@@ -269,7 +289,7 @@ public static class CityTraffic
     // ── Vehicles (front along +Z, wheels on the ground) ──────────────────────
     private static readonly Color Tinted = new Color(0.2f, 0.28f, 0.36f);
 
-    private static Transform Vehicle(Transform parent, string kind, int variant, out float halfLength, out float speed)
+    internal static Transform Vehicle(Transform parent, string kind, int variant, out float halfLength, out float speed)
     {
         var v = PrimitiveKit.Group("Vehicle_" + kind, parent, Vector3.zero).transform;
         Vector3 size;
@@ -418,7 +438,7 @@ public static class CityTraffic
     }
 
     // ตุ๊กตุ๊ก: one wheel in front, an open cab under a bright canopy with a gold fringe, bench seat behind
-    private static Vector3 TukTuk(Transform v, int variant)
+    internal static Vector3 TukTuk(Transform v, int variant)
     {
         Color[] canopies = { new Color(0.1f, 0.45f, 0.85f), new Color(0.15f, 0.6f, 0.3f), new Color(0.85f, 0.15f, 0.2f) };
         var paint = M("TukTukPaint" + variant, canopies[variant % 3], 0.85f, 0.3f);

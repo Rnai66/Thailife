@@ -14,6 +14,7 @@ public static class Bangkok
     public static readonly Vector3 Shrine = new Vector3(0f, 0f, 14f);
     public static readonly Vector3 Terminal = new Vector3(-20f, 0f, -38f);
     public static readonly Vector3 Arun = new Vector3(0f, 0f, 92f); // across the river (ฝั่งธนฯ)
+    public const float PierX = 44f; // the ferry piers, well to the side: the view of วัดอรุณ stays open
     public const float RiverZ = 62f, RiverHalf = 13f; // the river: 26 m wide, between the city and วัดอรุณ
 
     private static Material White => PrimitiveKit.Mat("TempleWhite", new Color(0.95f, 0.94f, 0.9f));
@@ -21,6 +22,7 @@ public static class Bangkok
 
     public static void Build(Transform root)
     {
+        giants = 0;
         Lawn(root);
         WatPhraKaew(root, Wat);
         BrahmaShrine(root, Shrine);
@@ -94,8 +96,9 @@ public static class Bangkok
         Spire(t, new Vector3(GateX, 8.4f, -hd), 7f, gold, orange);
         PrimitiveKit.Box("GateBoard", t, new Vector3(GateX, 6.6f, -hd - 0.95f), new Vector3(7f, 0.9f, 0.08f), lacquer, collider: false);
         PrimitiveKit.Label("วัดพระศรีรัตนศาสดาราม · วัดพระแก้ว", t, new Vector3(GateX, 6.6f, -hd - 1f), 0.05f, new Color(1f, 0.85f, 0.4f));
-        Yaksha(t, new Vector3(GateX - 5.6f, 0f, -hd + 4f), new Color(0.15f, 0.5f, 0.35f));
-        Yaksha(t, new Vector3(GateX + 5.6f, 0f, -hd + 4f), new Color(0.7f, 0.15f, 0.12f));
+        // the two guardian giants out in front, either side of the entrance, facing the visitors
+        Yaksha(t, new Vector3(GateX - 6.4f, 0f, -hd - 3.4f), new Color(0.15f, 0.5f, 0.35f));
+        Yaksha(t, new Vector3(GateX + 6.4f, 0f, -hd - 3.4f), new Color(0.7f, 0.15f, 0.12f));
 
         Cloister(t, hw, hd, wallH, white, lacquer, orange, gold);
 
@@ -279,7 +282,7 @@ public static class Bangkok
     private static void River(Transform root)
     {
         var t = PrimitiveKit.Group("ChaoPhraya_แม่น้ำเจ้าพระยา", root, new Vector3(0f, 0f, RiverZ)).transform;
-        const float len = 220f, pierX = 12f, gap = 3.2f;
+        const float len = 220f, pierX = PierX, gap = 3.2f;
         var white = White;
         var pave = PrimitiveKit.Mat("Pavement", new Color(0.72f, 0.7f, 0.66f));
         var wood = PrimitiveKit.Mat("WoodPlank", new Color(0.6f, 0.4f, 0.22f));
@@ -351,11 +354,14 @@ public static class Bangkok
         FerryBoat(t, new Vector3(pierX - 4.4f, 0f, 0f));
         DinnerCruise(t, new Vector3(0f, 0f, -4.5f));
 
-        // Out on the water: a longtail with tourists and a river-express boat
-        Seaside.LongtailBoat(t, new Vector3(-26f, 0f, 3f), 95f, new Color(0.95f, 0.8f, 0.2f));
-        Seaside.LongtailBoat(t, new Vector3(-48f, 0f, -4f), -85f, new Color(0.3f, 0.85f, 0.6f));
-        ExpressBoat(t, new Vector3(50f, 0f, 4f));
-        ExpressBoat(t, new Vector3(-75f, 0f, -5f));
+        // Moored along the city bank, out of the procession's way: longtails and river-express boats
+        Seaside.LongtailBoat(t, new Vector3(-26f, 0f, -10.8f), 95f, new Color(0.95f, 0.8f, 0.2f));
+        Seaside.LongtailBoat(t, new Vector3(-48f, 0f, -10.8f), -85f, new Color(0.3f, 0.85f, 0.6f));
+        ExpressBoat(t, new Vector3(72f, 0f, -10.6f));
+        ExpressBoat(t, new Vector3(-75f, 0f, -10.6f));
+
+        // ขบวนเรือพระราชพิธี down the middle, crowds on both banks, the royal landing (RoyalBarges)
+        RoyalBarges.Build(t, RiverHalf, len);
     }
 
     // Crossing by เรือหางยาว: a longtail with its boatman at the tiller and a few passengers, going to
@@ -822,28 +828,14 @@ public static class Bangkok
         return mat;
     }
 
-    // A temple guardian giant (ยักษ์): a body in colour, gold armour and crown, both hands on a club
+    // A temple guardian giant (ยักษ์) after the วัดพระแก้ว ones (GuardianGiant): glazed colour skin,
+    // gold armour, both hands on the club, the tall tiered crown. Each one a different crown and flaps.
+    private static int giants;
     private static void Yaksha(Transform t, Vector3 at, Color skin)
     {
-        var y = PrimitiveKit.Group("Yaksha_ยักษ์", t, at).transform;
-        var body = PrimitiveKit.Mat("Yaksha" + ColorUtility.ToHtmlStringRGB(skin), skin, 0.5f);
-        var gold = Gold;
-        var plinth = PrimitiveKit.Mat("PlinthGrey", new Color(0.55f, 0.53f, 0.5f));
-        PrimitiveKit.Box("Plinth", y, new Vector3(0f, 0.4f, 0f), new Vector3(1.8f, 0.8f, 1.8f), plinth);
-        foreach (float s in new[] { -0.35f, 0.35f })
-            PrimitiveKit.Box("Leg", y, new Vector3(s, 1.7f, 0f), new Vector3(0.45f, 1.8f, 0.5f), body, collider: false);
-        PrimitiveKit.Box("Skirt", y, new Vector3(0f, 2.4f, 0f), new Vector3(1.3f, 0.9f, 0.8f), gold, collider: false);
-        PrimitiveKit.Box("Chest", y, new Vector3(0f, 3.4f, 0f), new Vector3(1.4f, 1.3f, 0.8f), body, collider: false);
-        PrimitiveKit.Box("Armour", y, new Vector3(0f, 3.5f, -0.42f), new Vector3(1f, 0.9f, 0.06f), gold, collider: false);
-        PrimitiveKit.Sphere("Head", y, new Vector3(0f, 4.45f, 0f), new Vector3(0.75f, 0.8f, 0.7f), body);
-        PrimitiveKit.Cylinder("Crown", y, new Vector3(0f, 5.2f, 0f), new Vector3(0.55f, 0.45f, 0.55f), gold, collider: false);
-        PrimitiveKit.Cylinder("CrownTip", y, new Vector3(0f, 5.85f, 0f), new Vector3(0.22f, 0.3f, 0.22f), gold, collider: false);
-        foreach (float s in new[] { -0.85f, 0.85f })
-            PrimitiveKit.Box("Arm", y, new Vector3(s, 3.1f, -0.25f), new Vector3(0.35f, 1.2f, 0.4f), body, new Vector3(25f, 0f, -s * 15f), collider: false);
-        PrimitiveKit.Cylinder("Club", y, new Vector3(0f, 1.9f, -0.75f), new Vector3(0.22f, 1.5f, 0.22f), PrimitiveKit.Mat("TempleLacquer", new Color(0.45f, 0.07f, 0.06f), 0.6f), collider: false);
-        var col = y.gameObject.AddComponent<BoxCollider>();
-        col.center = new Vector3(0f, 2.5f, 0f);
-        col.size = new Vector3(1.8f, 5f, 1.8f);
+        Color[] flaps = { new Color(0.75f, 0.12f, 0.12f), new Color(0.15f, 0.45f, 0.3f), new Color(0.2f, 0.3f, 0.7f) };
+        int n = giants++;
+        GuardianGiant.Build(t, at, skin, flaps[(n + 1) % 3], n % 3, $"{t.name.Split('_')[0]}{n}");
     }
 
     // ── ศาลพระพรหม ─────────────────────────────────────────────────────────────

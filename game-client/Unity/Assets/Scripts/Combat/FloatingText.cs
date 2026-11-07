@@ -3,8 +3,8 @@ using UnityEngine;
 // Short-lived world-space text (damage numbers) that rises and fades.
 public class FloatingText : MonoBehaviour
 {
-    private const float Lifetime = 0.9f;
-    private const float RiseSpeed = 1.2f;
+    private const float Lifetime = 1.6f;
+    private const float RiseSpeed = 0.7f;
 
     private TextMesh text;
     private Color startColor;
@@ -12,6 +12,13 @@ public class FloatingText : MonoBehaviour
 
     public static void Spawn(Vector3 position, string message, Color color)
     {
+        // Words (done!, level up, what auto is doing) go to a readable pill on the screen; only short
+        // numbers like "+50 ฿" or damage float over the head
+        if (message != null && message.Trim().Length > 10)
+        {
+            ScreenToast.Show(message, color);
+            return;
+        }
         var go = new GameObject("FloatingText");
         go.transform.position = position;
 
@@ -20,7 +27,7 @@ public class FloatingText : MonoBehaviour
         mesh.font = font;
         go.GetComponent<MeshRenderer>().sharedMaterial = font.material;
         mesh.text = message;
-        mesh.characterSize = 0.1f;
+        mesh.characterSize = 0.07f;
         mesh.fontSize = 56;
         mesh.fontStyle = FontStyle.Normal;
         mesh.anchor = TextAnchor.MiddleCenter;
@@ -38,7 +45,7 @@ public class FloatingText : MonoBehaviour
         transform.position += Vector3.up * (RiseSpeed * Time.deltaTime);
 
         var c = startColor;
-        c.a = 1f - age / Lifetime;
+        c.a = Mathf.Clamp01((Lifetime - age) / (Lifetime * 0.4f)); // solid, then fades over the last part
         text.color = c;
 
         if (age >= Lifetime) Destroy(gameObject);

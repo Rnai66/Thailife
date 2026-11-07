@@ -47,6 +47,62 @@ public static class MeshKit
     // Save a mesh built elsewhere (e.g. merged grass) under a key
     public static Mesh SaveCombined(string key, Mesh mesh) => Save(key, mesh);
 
+    // Merge every plain mesh under `root` into one mesh per material (saved under `key`), so a figure
+    // made of hundreds of little parts draws in a few calls. Parts that carry anything else (a
+    // collider, a script) keep that and only lose their mesh; emptied parts are removed.
+    public static void MergeByMaterial(Transform root, string key)
+    {
+        var groups = new Dictionary<Material, List<CombineInstance>>();
+        var merged = new List<MeshFilter>();
+        var toRoot = root.worldToLocalMatrix;
+        foreach (var mf in root.GetComponentsInChildren<MeshFilter>(true))
+        {
+            var r = mf.GetComponent<MeshRenderer>();
+            if (r == null || mf.sharedMesh == null || r.sharedMaterial == null || mf.GetComponent<TextMesh>() != null) continue;
+            var mats = r.sharedMaterials;
+            for (int sub = 0; sub < mf.sharedMesh.subMeshCount; sub++)
+            {
+                var m = mats[Mathf.Min(sub, mats.Length - 1)];
+                if (m == null) continue;
+                if (!groups.TryGetValue(m, out var list)) groups[m] = list = new List<CombineInstance>();
+                list.Add(new CombineInstance { mesh = mf.sharedMesh, subMeshIndex = sub, transform = toRoot * mf.transform.localToWorldMatrix });
+            }
+            merged.Add(mf);
+        }
+        int i = 0;
+        foreach (var kv in groups)
+        {
+            var mesh = new Mesh { indexFormat = UnityEngine.Rendering.IndexFormat.UInt32 };
+            mesh.CombineMeshes(kv.Value.ToArray(), true, true);
+            mesh.RecalculateBounds();
+            var saved = Save($"{key}_{i++}", mesh);
+            var go = Place("Merged_" + kv.Key.name, root, saved, kv.Key, Vector3.zero);
+            go.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        }
+        // deepest first, so a parent emptied by its children goes too
+        merged.Sort((a, b) => Depth(b.transform).CompareTo(Depth(a.transform)));
+        foreach (var mf in merged)
+        {
+            if (mf == null) continue;
+            var go = mf.gameObject;
+            Object.DestroyImmediate(go.GetComponent<MeshRenderer>());
+            Object.DestroyImmediate(mf);
+            Prune(go.transform, root);
+        }
+    }
+
+    private static int Depth(Transform t) { int d = 0; for (; t != null; t = t.parent) d++; return d; }
+
+    private static void Prune(Transform t, Transform root)
+    {
+        while (t != null && t != root && t.childCount == 0 && t.GetComponents<Component>().Length == 1)
+        {
+            var parent = t.parent;
+            Object.DestroyImmediate(t.gameObject);
+            t = parent;
+        }
+    }
+
     private static Mesh Finish(string key, List<Vector3> v, List<int> t, List<Vector2> uv = null, bool flat = false)
     {
         var mesh = new Mesh();

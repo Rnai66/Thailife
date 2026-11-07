@@ -276,6 +276,30 @@ public static class Homes
         }
     }
 
+    // รั้วเหล็กดัด: a white plinth and posts with black wrought-iron bars between, from a to b (plot-local);
+    // one collider for the whole run, the visible parts merged
+    private static void Railing(Transform t, string name, Vector3 a, Vector3 b, Material plinth, Material iron, string key)
+    {
+        var d = b - a;
+        float len = d.magnitude;
+        var g = PrimitiveKit.Group(name, t, (a + b) * 0.5f, -Mathf.Atan2(d.z, d.x) * Mathf.Rad2Deg).transform;
+        PrimitiveKit.Box("Plinth", g, new Vector3(0f, 0.22f, 0f), new Vector3(len, 0.44f, 0.2f), plinth, collider: false);
+        PrimitiveKit.Box("PlinthCap", g, new Vector3(0f, 0.46f, 0f), new Vector3(len + 0.02f, 0.04f, 0.24f), plinth, collider: false);
+        int posts = Mathf.Max(1, Mathf.RoundToInt(len / 2f));
+        for (int i = 0; i <= posts; i++)
+            PrimitiveKit.Box("Post", g, new Vector3(-len * 0.5f + len * i / posts, 0.62f, 0f), new Vector3(0.18f, 1.24f, 0.18f), plinth, collider: false);
+        PrimitiveKit.Box("TopRail", g, new Vector3(0f, 1.15f, 0f), new Vector3(len, 0.05f, 0.05f), iron, collider: false);
+        PrimitiveKit.Box("MidRail", g, new Vector3(0f, 0.62f, 0f), new Vector3(len, 0.04f, 0.04f), iron, collider: false);
+        for (float x = -len * 0.5f + 0.17f; x < len * 0.5f - 0.1f; x += 0.17f)
+            PrimitiveKit.Box("Bar", g, new Vector3(x, 0.82f, 0f), new Vector3(0.022f, 0.66f, 0.022f), iron, collider: false);
+        MeshKit.MergeByMaterial(g, $"Homes/{key}_{name}");
+        var block = new GameObject("FenceCollider");
+        block.transform.SetParent(g, false);
+        var box = block.AddComponent<BoxCollider>();
+        box.center = new Vector3(0f, 0.6f, 0f);
+        box.size = new Vector3(len, 1.2f, 0.22f);
+    }
+
     // A detached house behind a fence with a lawn: a gable roof (town) or a flat-roofed two-storey with
     // a cantilevered upper floor (Bangkok estate)
     private static void Single(Transform parent, Vector3 at, float yaw, string style, bool modern)
@@ -287,7 +311,7 @@ public static class Homes
         var slab = PrimitiveKit.Mat("Concrete", new Color(0.75f, 0.75f, 0.72f));
         var glass = PrimitiveKit.Mat("WindowGlassBlue", new Color(0.45f, 0.6f, 0.7f));
         var lawn = PrimitiveKit.Mat("Grass", new Color(0.36f, 0.56f, 0.24f));
-        PrimitiveKit.Box("Lawn", t, new Vector3(0f, 0.02f, -1f), new Vector3(12f, 0.04f, 11f), lawn, collider: false);
+        PrimitiveKit.Box("Lawn", t, new Vector3(0f, 0.035f, -1f), new Vector3(11.9f, 0.04f, 10.9f), lawn, collider: false); // a hair above the soi, so they don't flicker
         PrimitiveKit.Box("Foundation", t, new Vector3(0f, floorY * 0.5f, 0f), new Vector3(RoomW + 0.4f, floorY, RoomD + 0.4f), slab);
         Room(t, floorY, white, PrimitiveKit.Mat("DoorTeak", new Color(0.42f, 0.24f, 0.12f)), glass, 1.6f, slab);
         float up = floorY + RoomH;
@@ -309,12 +333,13 @@ public static class Homes
         }
         Steps(t, floorY, 1.6f, -3.9f, slab);
         // a fence round the lawn with a gate in front, a carport bay at the side
+        // (sides stop short of the front and back runs, so no two faces share a plane and flicker)
         var fence = PrimitiveKit.Mat("FenceMetal", new Color(0.2f, 0.22f, 0.24f));
-        PrimitiveKit.Box("FenceFrontL", t, new Vector3(-3.6f, 0.6f, -6.4f), new Vector3(4.8f, 1.2f, 0.08f), fence);
-        PrimitiveKit.Box("FenceFrontR", t, new Vector3(4.2f, 0.6f, -6.4f), new Vector3(3.6f, 1.2f, 0.08f), fence);
-        foreach (float x in new[] { -6f, 6f })
-            PrimitiveKit.Box("FenceSide", t, new Vector3(x, 0.6f, -1f), new Vector3(0.08f, 1.2f, 10.8f), fence);
-        PrimitiveKit.Box("FenceBack", t, new Vector3(0f, 0.6f, 4.4f), new Vector3(12f, 1.2f, 0.08f), fence);
+        Railing(t, "FenceFrontL", new Vector3(-6f, 0f, -6.4f), new Vector3(-1.2f, 0f, -6.4f), white, fence, style);
+        Railing(t, "FenceFrontR", new Vector3(2.4f, 0f, -6.4f), new Vector3(6f, 0f, -6.4f), white, fence, style);
+        Railing(t, "FenceSideL", new Vector3(-6f, 0f, -6.2f), new Vector3(-6f, 0f, 4.2f), white, fence, style);
+        Railing(t, "FenceSideR", new Vector3(6f, 0f, -6.2f), new Vector3(6f, 0f, 4.2f), white, fence, style);
+        Railing(t, "FenceBack", new Vector3(-6f, 0f, 4.4f), new Vector3(6f, 0f, 4.4f), white, fence, style);
         Pot(t, new Vector3(-2.7f, 0f, -4.4f), 9);
         Nature.Bush(t, new Vector3(-4.8f, 0f, 2.5f), 1.2f, 11, flowers: true);
         Finish(t, style, floorY, -3.1f);

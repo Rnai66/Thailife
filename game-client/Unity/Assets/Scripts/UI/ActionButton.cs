@@ -51,6 +51,7 @@ public class ActionButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
             image.preserveAspect = true;
             image.raycastTarget = false;
             image.color = new Color(1f, 1f, 1f, 0.95f);
+            IconRibbon.AddUI(rt, icon);
         }
 
         if (!string.IsNullOrEmpty(label))

@@ -13,6 +13,7 @@ public class Localizer : MonoBehaviour
     private class Seen
     {
         public string thai, shown;
+        public float size = -1f; // a world text's own characterSize, before fitting the English
     }
 
     private readonly Dictionary<Object, Seen> seen = new Dictionary<Object, Seen>();
@@ -46,7 +47,11 @@ public class Localizer : MonoBehaviour
         {
             if (kv.Key == null) continue;
             if (kv.Key is Text t) { if (t.text == kv.Value.shown) t.text = kv.Value.thai; }
-            else if (kv.Key is TextMesh m) { if (m.text == kv.Value.shown) m.text = kv.Value.thai; }
+            else if (kv.Key is TextMesh m)
+            {
+                if (m.text == kv.Value.shown) m.text = kv.Value.thai;
+                if (kv.Value.size > 0f) m.characterSize = kv.Value.size;
+            }
         }
         seen.Clear();
         frame = 0;
@@ -89,10 +94,34 @@ public class Localizer : MonoBehaviour
             if (m.GetComponentInParent<NoTranslate>() != null) continue;
             string en = Lang.T(now);
             if (s == null) seen[m] = s = new Seen();
+            if (s.size < 0f) s.size = m.characterSize;
             s.thai = now;
             s.shown = en;
             if (!ReferenceEquals(en, now)) m.text = en;
+            m.characterSize = s.size * Fit(m.font, now, en, m.fontSize, m.fontStyle);
         }
+    }
+
+    // English is usually wider than the Thai a sign was made for: shrink it to about the Thai's width
+    // so it stays on its board (never larger than it was)
+    private static float Fit(Font font, string thai, string english, int size, FontStyle style)
+    {
+        if (font == null || ReferenceEquals(thai, english)) return 1f;
+        float th = Widest(font, thai, size, style), en = Widest(font, english, size, style);
+        return th <= 0f || en <= 0f ? 1f : Mathf.Min(1f, th * 1.1f / en);
+    }
+
+    private static float Widest(Font font, string text, int size, FontStyle style)
+    {
+        if (size <= 0) size = font.fontSize > 0 ? font.fontSize : 32;
+        font.RequestCharactersInTexture(text, size, style);
+        float widest = 0f, line = 0f;
+        foreach (char c in text)
+        {
+            if (c == '\n') { widest = Mathf.Max(widest, line); line = 0f; continue; }
+            if (font.GetCharacterInfo(c, out var info, size, style)) line += info.advance;
+        }
+        return Mathf.Max(widest, line);
     }
 
     // What the player types, and texts marked to keep, stay as they are

@@ -13,7 +13,7 @@ public static class IOSBuild
     private const string BundleId = "com.rnai66.thailife";
     private const string TeamId = "H4X9654279";
     private const string OutputPath = "Builds/iOS";
-    private const string Version = "1.2"; // marketing version shown in TestFlight / the App Store
+    private const string Version = "1.3"; // marketing version shown in TestFlight / the App Store
 
     [MenuItem("Thai Life/Build iOS (Xcode project)")]
     private static void Build() => Build(release: false);

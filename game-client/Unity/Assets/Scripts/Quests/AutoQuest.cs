@@ -195,6 +195,21 @@ public class AutoQuest : MonoBehaviour
             status = $"เดินไป{doing} · {next.title}";
             yield return WalkTo(place, place.bounds.center);
         }
+        // Chickens: through the gate into the pen, to the feed tray (the gate only opens the coop window)
+        Vector3? workAt = null;
+        if ((next.kind == "feed" || next.kind == "sell_eggs") && place != null)
+        {
+            var coop = place.transform.parent;
+            if (coop != null)
+            {
+                var tray = coop.Find("FeedTray");
+                workAt = tray != null ? tray.position : coop.TransformPoint(new Vector3(-1.8f, 0f, -0.8f));
+                Vector3 inside = coop.TransformPoint(next.kind == "feed" ? new Vector3(-1.0f, 0f, -0.9f) : new Vector3(0f, 0f, 0.4f));
+                status = $"เข้าไปในเล้า · {doing}";
+                yield return WalkTo(null, inside);
+                if (next.kind == "sell_eggs") workAt = coop.TransformPoint(new Vector3(0f, 0.8f, 1.7f)); // the roost, where the eggs are
+            }
+        }
         player.AutoMove = Vector3.zero;
         // Walking in opens each place's window; keep the view clear while the character works
         if (next.kind == "feed" || next.kind == "sell_eggs") CoopUI.Hide();
@@ -237,7 +252,8 @@ public class AutoQuest : MonoBehaviour
             if (q == null || q.done || q.kind != next.kind) break;
             float left = q.auto_left_s - quests.Age;
             status = $"กำลัง{doing}… อีก {Mathf.Max(0, Mathf.CeilToInt(left))} วินาที";
-            if (place != null && next.kind != "music") Face(place.bounds.center);
+            if (workAt.HasValue) Face(workAt.Value);
+            else if (place != null && next.kind != "music") Face(place.bounds.center);
             if (next.kind == "music" && song == null)
             {
                 // a หมอลำ tune from the stage while the character strums along
@@ -269,11 +285,7 @@ public class AutoQuest : MonoBehaviour
                     default: if (model != null) model.Play(next.kind == "study" ? PlayerAction.Wai : PlayerAction.Wave); break;
                 }
             }
-            if (Time.time >= nextWord)
-            {
-                nextWord = Time.time + 6f;
-                FloatingText.Spawn(player.transform.position + Vector3.up * 2.2f, doing + "…", new Color(0.6f, 0.9f, 1f));
-            }
+            // (what it's doing is on the auto status bar; no words popping up every few seconds)
             if (Time.time - started > (quests.Current?.auto_seconds ?? 20) + 40f) { quests.Refresh(); started = Time.time; }
             yield return null;
         }

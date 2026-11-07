@@ -9,7 +9,7 @@ using UnityEngine.UI;
 [RequireComponent(typeof(PlayerCombat))]
 public class HealthHud : MonoBehaviour
 {
-    private const float Disc = 96f, Step = 128f;
+    private const float Disc = 116f, Step = 158f; // big enough to hit and read on a phone
     private static readonly Color DiscColor = new Color(0.17f, 0.11f, 0.07f, 0.88f);
     private static readonly Color DiscAlert = new Color(0.86f, 0.6f, 0.16f, 0.95f);
 
@@ -140,13 +140,13 @@ public class HealthHud : MonoBehaviour
         energyBg.anchorMin = energyBg.anchorMax = new Vector2(0f, 1f);
         energyBg.pivot = new Vector2(0f, 1f);
         energyBg.anchoredPosition = new Vector2(120f, -26f);
-        energyBg.sizeDelta = new Vector2(400f, 40f);
+        energyBg.sizeDelta = new Vector2(440f, 48f);
         energyFill = CreateRect("Fill", energyBg, new Color(1f, 0.8f, 0.2f));
         energyFill.anchorMin = Vector2.zero;
         energyFill.anchorMax = Vector2.one;
         energyFill.offsetMin = new Vector2(4f, 4f);
         energyFill.offsetMax = new Vector2(-4f, -4f);
-        energyLabel = CreateText("EnergyLabel", energyBg, font, 24, TextAnchor.MiddleCenter);
+        energyLabel = CreateText("EnergyLabel", energyBg, font, 28, TextAnchor.MiddleCenter);
         energyLabel.rectTransform.anchorMin = Vector2.zero;
         energyLabel.rectTransform.anchorMax = Vector2.one;
         energyLabel.rectTransform.offsetMin = energyLabel.rectTransform.offsetMax = Vector2.zero;
@@ -189,17 +189,23 @@ public class HealthHud : MonoBehaviour
         Round(left, 2, "auto", "ออโต้", AutoQuest.Toggle, out autoDisc, out _, out autoCaption); // the character does today's quests
         Round(left, 3, "home", "บ้าน", () => HomeChoiceUI.Show(), out _, out _, out _); // where you live: go home or move house
 
-        menuColumn = Column(canvasGo.transform, "MenuColumn", 120f + Disc + 34f);
+        menuColumn = Column(canvasGo.transform, "MenuColumn", 120f + Disc + 56f);
         int row = 0;
-        void Entry(string icon, string caption, UnityAction open, out Image disc, out Text label) =>
-            Round(menuColumn, row++, icon, caption, () => { open(); ToggleMenu(); }, out disc, out _, out label);
+        int perColumn = ScreenFit.Portrait ? 8 : 5; // landscape: a second column instead of running off the screen
+        void Entry(string icon, string caption, UnityAction open, out Image disc, out Text label)
+        {
+            int r = row++;
+            Round(menuColumn, r % perColumn, icon, caption, () => { open(); ToggleMenu(); }, out disc, out _, out label, (r / perColumn) * (Disc + 56f));
+        }
         Entry("person", "ตั้งชื่อ", () => NameUI.Show(firstTime: false), out _, out nameCaption);
         Entry("star", "อาชีพ", ProfessionUI.Toggle, out _, out careerCaption);
         Entry("quest", "ภารกิจ", QuestUI.Toggle, out questDisc, out questCaption);
         Entry("food", "กิน", FoodUI.Toggle, out _, out _);
+        Entry("hammer", "ก่อสร้าง", BuildUI.Toggle, out _, out _);
         Entry("chat", "ทักทาย", EmoteUI.Toggle, out _, out _);
         Entry("friends", "เพื่อน/แชท", SocialUI.Toggle, out socialDisc, out socialCaption);
         Entry("calendar", "ปฏิทินงาน", EventCalendarUI.Toggle, out calendarDisc, out _);
+        Entry("auto", "ติดอยู่?", StuckRescue.Rescue, out _, out _);
         Entry("gear", "ตั้งค่า", SoundUI.Toggle, out _, out _);
         menuColumn.gameObject.SetActive(false);
 
@@ -221,34 +227,34 @@ public class HealthHud : MonoBehaviour
         rt.SetParent(parent, false);
         rt.anchorMin = rt.anchorMax = new Vector2(0f, 1f);
         rt.pivot = new Vector2(0f, 1f);
-        rt.anchoredPosition = new Vector2(x, -86f);
+        rt.anchoredPosition = new Vector2(x, -92f);
         rt.sizeDelta = new Vector2(Disc, Disc);
         return rt;
     }
 
     // A round button: dark disc with a gold ring, a white pictogram and a small caption under it
-    private static void Round(RectTransform column, int row, string icon, string caption, UnityAction onClick, out Image disc, out Image glyph, out Text label)
+    private static void Round(RectTransform column, int row, string icon, string caption, UnityAction onClick, out Image disc, out Image glyph, out Text label, float x = 0f)
     {
         var rt = CreateRect("Round_" + icon, column, DiscColor);
         rt.anchorMin = rt.anchorMax = new Vector2(0f, 1f);
         rt.pivot = new Vector2(0.5f, 0.5f);
-        rt.anchoredPosition = new Vector2(Disc * 0.5f, -Disc * 0.5f - row * Step);
+        rt.anchoredPosition = new Vector2(x + Disc * 0.5f, -Disc * 0.5f - row * Step);
         rt.sizeDelta = new Vector2(Disc, Disc);
         disc = rt.GetComponent<Image>();
         disc.sprite = UiKit.CircleSprite;
         disc.raycastTarget = true;
         var ring = rt.gameObject.AddComponent<Outline>();
         ring.effectColor = UiKit.Gold;
-        ring.effectDistance = new Vector2(2.5f, -2.5f);
+        ring.effectDistance = new Vector2(3f, -3f);
         rt.gameObject.AddComponent<Button>().onClick.AddListener(onClick);
         rt.gameObject.AddComponent<PressScale>();
 
         var g = CreateRect("Glyph", rt, UiKit.WoodInk);
-        g.sizeDelta = new Vector2(Disc * 0.56f, Disc * 0.56f);
+        g.sizeDelta = new Vector2(Disc * 0.6f, Disc * 0.6f);
         glyph = g.GetComponent<Image>();
         glyph.sprite = HudIcons.Get(icon);
 
-        label = UiKit.Cartoon(UiKit.Label(rt, 20, caption, new Vector2(0f, -Disc * 0.5f - 13f), new Vector2(150f, 26f), UiKit.WoodInk), 2f);
+        label = UiKit.Cartoon(UiKit.Label(rt, 26, caption, new Vector2(0f, -Disc * 0.5f - 17f), new Vector2(170f, 34f), UiKit.WoodInk), 2f);
     }
 
     // Anchor a rect by its top-right corner to the top-right of its parent

@@ -977,6 +977,7 @@ public static class Places
             var icon = PrimitiveKit.Create(PrimitiveType.Quad, "Icon", t, new Vector3(0f, centre, side * 0.058f), Vector3.one * radius * 1.45f,
                 SignIcon(IconFor(text)), new Vector3(0f, side < 0 ? 0f : 180f, 0f), collider: false);
             icon.GetComponent<Renderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            IconRibbon.MarkWorld(icon, IconFor(text)); // English name plate over the picture's Thai ribbon
         }
         // Gold finial on top
         PrimitiveKit.Sphere("Finial", t, new Vector3(0f, centre + radius + 0.1f, 0f), Vector3.one * 0.1f, gold);

@@ -235,7 +235,7 @@ public class RanchUI : MonoBehaviour
             if (pickedTile) tile.gameObject.AddComponent<Outline>().effectColor = UiKit.PayGreen;
             tile.gameObject.AddComponent<Button>().onClick.AddListener(() => { selected = index; sellArmed = -1; Render(); });
             float bar = step - 26f;
-            UiKit.Label(tile, 22, cow.pregnant ? $"ท้อง {cow.due_days}ว." : cow.sex == "m" ? "ตัวผู้" : "ตัวเมีย",
+            UiKit.Label(tile, 22, cow.pregnant ? $"ท้อง {cow.due_days}ว." : cow.sex == "m" ? Lang.Pick("ตัวผู้", "Bull") : Lang.Pick("ตัวเมีย", "Cow"),
                 new Vector2(0f, 22f), new Vector2(step - 8f, 30f), cow.pregnant ? UiKit.PayGreen : cow.sex == "m" ? UiKit.Ink : UiKit.Price).fontStyle = FontStyle.Bold;
             var track = UiKit.Panel("Track", tile, UiKit.CardBorder, new Vector2(0f, 2f), new Vector2(bar, 14f));
             var fillBar = UiKit.Panel("Fill", track, cow.g >= s.grown_days ? UiKit.Gold : UiKit.PayGreen, Vector2.zero, new Vector2(bar * cow.g / s.grown_days, 14f));

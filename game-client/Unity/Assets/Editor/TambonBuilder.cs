@@ -149,7 +149,7 @@ public static class TambonBuilder
     internal static void BuildCity(bool ask) => BuildLocation("Assets/Scenes/City.unity", "City", 18f, ask, root =>
     {
         // Four-lane avenue with traffic lights and traffic (CityTraffic)
-        CityTraffic.Build(root);
+        CityTraffic.Build(root, roundabout: true);
         // ตัวเมือง (อำเภอ/จังหวัด): clock tower roundabout, shophouses, boxing camp (career tier 3)
         Places2.ClockTower(root, new Vector3(0f, 0f, 14f));
         Places2.Shophouses(root, new Vector3(-20f, 0f, 2f), 0f, 5, new[] { "ร้านทอง", "ร้านขายยา", "ออฟฟิศไอที", "ร้านข้าวมันไก่", "ร้านเสื้อผ้า" });
@@ -172,7 +172,7 @@ public static class TambonBuilder
         Places2.Pub(root, new Vector3(-22f, 0f, 22f), 0f, "pub_puea_chiwit", "ผับเพื่อชีวิต", new Color(0.35f, 0.22f, 0.12f), new Color(1f, 0.7f, 0.25f));
         Places2.Pub(root, new Vector3(-36f, 0f, 22f), 0f, "pub_blues", "ผับบลูส์", new Color(0.1f, 0.14f, 0.3f), new Color(0.35f, 0.65f, 1f));
         Places2.Pub(root, new Vector3(26f, 0f, 24f), 0f, "pub_indie", "ผับอินดี้", new Color(0.18f, 0.12f, 0.25f), new Color(1f, 0.35f, 0.8f));
-        Places.Sign(root, new Vector3(-16f, 0f, 16f), "ย่านผับ · เพื่อชีวิต บลูส์ อินดี้\nนักดนตรี Lv 10 · กลางคืน ร้านละครั้ง", 0f);
+        Places.Sign(root, new Vector3(-14f, 0f, 18.4f), "ย่านผับ · เพื่อชีวิต บลูส์ อินดี้\nนักดนตรี Lv 10 · กลางคืน ร้านละครั้ง", 0f);
 
         TempleGround(root);
         LandParcels.BuildCity(root); // ที่ดินติดถนน next to the bank (a shophouse to let once it's yours)
@@ -186,6 +186,8 @@ public static class TambonBuilder
         // Cross street up to the camp, past the clock tower
         var asphalt = PrimitiveKit.Mat("Asphalt", new Color(0.22f, 0.22f, 0.24f));
         PrimitiveKit.Box("CrossStreet", root, new Vector3(0f, 0.02f, 12.3f), new Vector3(6f, 0.04f, 35.4f), asphalt);
+        // the roundabout round the tower, the pub street, the station road and the sois, with town traffic
+        CityStreets.Build(root);
 
         // Songthaew stop to the village on the south pavement; arrivals step off onto the pavement, not the road
         var songthaew = Places.BusStop(root, new Vector3(-2.5f, 0f, -19.3f), 180f);
@@ -198,13 +200,14 @@ public static class TambonBuilder
 
         Npcs.TouristCrowd(root, new Vector3(0f, 0f, -4.2f), new Vector2(76f, 1.0f), 9, 3, 6, 23);           // pavement along the shops
         Npcs.TouristCrowd(root, new Vector3(20f, 0f, -19.3f), new Vector2(50f, 0.8f), 5, 2, 6, 22);         // south pavement
-        Npcs.TouristCrowd(root, new Vector3(0f, 0f, 22f), new Vector2(10f, 6f), 5, 3, 7, 22);               // by the clock tower
+        Npcs.TouristCrowd(root, new Vector3(-9f, 0f, 19.2f), new Vector2(8f, 1.6f), 5, 3, 7, 22);            // by the clock tower, off the roundabout
         Npcs.TouristCrowd(root, new Vector3(-28f, 0f, 19f), new Vector2(22f, 3f), 6, 4, 18, 2);              // pub street at night
 
-        // Noodle shop (ร้านก๋วยเตี๋ยว) by the fresh market, skytrain (รถไฟฟ้า) over the main road
+        // Noodle shop (ร้านก๋วยเตี๋ยว) by the fresh market; the railway (ทางรถไฟ, on the ground: no skytrain
+        // out in the provinces) along the north of the town, its station up the walk past the clock tower
         Seaside.NoodleShop(root, new Vector3(36f, 0f, 20f), 180f);
         ShopZone(root, new Vector3(36f, 0f, 18.2f), "noodle");
-        Seaside.SkyTrainLine(root);
+        ThaiRailway.Line(root, 62f, "สถานีรถไฟตัวเมือง");
 
         // Hospital, hotel, police station and pawn shop (north row); district office and อบจ. (south of the road)
         CityCivic.Build(root);
@@ -238,14 +241,14 @@ public static class TambonBuilder
         var streetPalms = new[]
         {
             new Vector3(-34f, 0f, -4.3f), new Vector3(-6f, 0f, -4.3f), new Vector3(6f, 0f, -4.3f), new Vector3(36f, 0f, -4.3f),
-            new Vector3(-4.2f, 0f, 6f), new Vector3(4.2f, 0f, 6f), new Vector3(-4.2f, 0f, 20f), new Vector3(4.2f, 0f, 20f),
+            new Vector3(-5.2f, 0f, 4.6f), new Vector3(5.2f, 0f, 4.6f), new Vector3(-6.5f, 0f, 22.6f), new Vector3(6.5f, 0f, 22.6f), // clear of the roundabout
         };
         for (int i = 0; i < streetPalms.Length; i++)
         {
             PrimitiveKit.Box("Planter", root, streetPalms[i] + new Vector3(0f, 0.25f, 0f), new Vector3(1.2f, 0.5f, 1.2f), planter);
             Nature.CoconutPalm(root, streetPalms[i] + new Vector3(0f, 0.5f, 0f), 0.85f + (i % 3) * 0.1f, i + 3);
         }
-        foreach (var pos in new[] { new Vector3(-10f, 0f, 30f), new Vector3(10f, 0f, 30f), new Vector3(-30f, 0f, 14f), new Vector3(-44f, 0f, 4f) })
+        foreach (var pos in new[] { new Vector3(-10f, 0f, 30f), new Vector3(10f, 0f, 30f), new Vector3(-30f, 0f, 9.3f), new Vector3(-44f, 0f, 4f) })
             Nature.Bush(root, pos, 1.2f, (int)(pos.x + pos.z), flowers: true);
     }, road: false);
 
@@ -269,7 +272,7 @@ public static class TambonBuilder
         ShopZone(root, new Vector3(19.25f, 0f, inShop), "community");   // ร้านสะดวกซื้อ
         ShopZone(root, new Vector3(32.75f, 0f, inShop), "city_food");   // ร้านข้าวผัด
         // Boat noodles and food on the floating market's south deck
-        Places.Sign(root, Bangkok.Wat + new Vector3(19f, 0f, -19.5f), "วัดพระแก้ว · เข้าชมฟรี\nแต่งกายสุภาพ", 0f);
+        Places.Sign(root, Bangkok.Wat + new Vector3(25f, 0f, -19.5f), "วัดพระแก้ว · เข้าชมฟรี\nแต่งกายสุภาพ", 0f);
         Places.Sign(root, new Vector3(-8f, 0f, -20f), "สนามบินสุวรรณภูมิ →\nเที่ยวบินในประเทศ", 180f);
         Places.Sign(root, new Vector3(-6f, 0f, 31f), "ท่าเรือหางยาว ข้ามไปวัดอรุณ ↑\nค่าเรือ 10 บาท", 0f);
 
@@ -288,6 +291,7 @@ public static class TambonBuilder
             StreetFurniture.LampPost(root, p);
 
         Homes.Bangkok(root); // หมู่บ้านจัดสรร: the modern townhome and the detached house players can live in
+        RoyalBarges.Plaza(root); // ลานชมขบวนเรือ: live screen, seats, riverside market, food carts, tuk-tuks
 
         // Start on the lawn rather than in the side street (arrivals use the SpawnPoints)
         var player = UnityEngine.Object.FindAnyObjectByType<PlayerController>();

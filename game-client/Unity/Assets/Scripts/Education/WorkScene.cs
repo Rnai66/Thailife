@@ -84,6 +84,19 @@ public class WorkScene : MonoBehaviour
     // ── Layout per job (local space of the job spot: +z = the spot's forward) ─────
     private void Build(Transform spot)
     {
+        // indoor work gets a ceiling lamp so the board / screens / patient are clearly lit day and night
+        if (job == "tutor" || job == "office" || job == "programmer" || job == "doctor")
+        {
+            var lamp = new GameObject("WorkLamp").AddComponent<Light>();
+            lamp.transform.SetParent(transform, false);
+            lamp.transform.localPosition = job == "doctor" ? new Vector3(0.7f, 2.6f, 0.2f) : new Vector3(0f, 2.6f, job == "tutor" ? 0.2f : -0.3f);
+            lamp.type = LightType.Point;
+            lamp.range = 7f;
+            lamp.intensity = 3.5f;
+            lamp.color = new Color(1f, 0.97f, 0.9f);
+            lamp.shadows = LightShadows.None;
+            lamp.renderMode = LightRenderMode.ForcePixel;
+        }
         switch (job)
         {
             case "tutor": Tutor(); break;
@@ -100,14 +113,14 @@ public class WorkScene : MonoBehaviour
     {
         var t = transform;
         // whiteboard on its stand, its back to the wall
-        Box("Board", t, new Vector3(0f, 1.5f, -1.25f), new Vector3(2.1f, 1.05f, 0.05f), Mat("WB", new Color(0.97f, 0.97f, 0.97f)));
+        Box("Board", t, new Vector3(0f, 1.5f, -1.25f), new Vector3(2.1f, 1.05f, 0.05f), Mat("WBLit", new Color(0.95f, 0.96f, 0.97f), unlit: true)); // a bright white board
         Box("BoardFrame", t, new Vector3(0f, 1.5f, -1.28f), new Vector3(2.2f, 1.15f, 0.04f), Mat("WBFrame", new Color(0.55f, 0.57f, 0.6f)));
         Box("Tray", t, new Vector3(0f, 0.96f, -1.18f), new Vector3(1.6f, 0.03f, 0.1f), Mat("WBFrame", new Color(0.55f, 0.57f, 0.6f)));
         foreach (float x in new[] { -0.9f, 0.9f })
             Box("Leg", t, new Vector3(x, 0.5f, -1.3f), new Vector3(0.05f, 1f, 0.05f), Mat("WBFrame", new Color(0.55f, 0.57f, 0.6f)));
         // the working, hidden until written: rows of strokes (an equation, a box, more lines)
-        var ink = Mat("Ink", new Color(0.15f, 0.25f, 0.7f));
-        var red = Mat("InkRed", new Color(0.8f, 0.15f, 0.15f));
+        var ink = Mat("InkLit", new Color(0.1f, 0.2f, 0.75f), unlit: true);
+        var red = Mat("InkRedLit", new Color(0.85f, 0.1f, 0.1f), unlit: true);
         for (int row = 0; row < 6; row++)
         {
             float y = 1.88f - row * 0.15f;
@@ -116,7 +129,7 @@ public class WorkScene : MonoBehaviour
             for (int i = 0; i < strokes; i++)
             {
                 float w = 0.08f + ((row * 5 + i * 3) % 5) * 0.04f;
-                var s = Box("Stroke", t, new Vector3(x + w * 0.5f, y, -1.22f), new Vector3(w, 0.025f, 0.005f), row == 3 && i == 1 ? red : ink);
+                var s = Box("Stroke", t, new Vector3(x + w * 0.5f, y, -1.22f), new Vector3(w, 0.035f, 0.005f), row == 3 && i == 1 ? red : ink);
                 s.gameObject.SetActive(false);
                 boardLines.Add(s);
                 x += w + 0.06f;

@@ -42,7 +42,11 @@ public class HomePlot : MonoBehaviour
     }
 
     private void OnEnable() => all.Add(this);
-    private void OnDisable() => all.Remove(this);
+    private void OnDisable()
+    {
+        all.Remove(this);
+        FreeWaking(); // a disabled object's coroutines stop: don't leave the player frozen
+    }
 
     private void Start()
     {
@@ -104,21 +108,45 @@ public class HomePlot : MonoBehaviour
         }
     }
 
-    // The start of each session: you wake up in bed at home, lie a moment, sit up and get out of bed
+    // The start of each session: you wake up in bed at home, lie a moment, then get up the way people
+    // do — roll up to sit on the edge of the bed with your feet on the floor, a breath, then stand up
+    // and turn towards the door (so the way out is right in front of you)
     public void WakeUp() => StartCoroutine(WakeRoutine());
+
+    private PlayerController waking; // set while the wake-up plays; freed if it is cut short
+
+    private void OnDestroy() => FreeWaking();
+
+    private void FreeWaking()
+    {
+        if (waking == null) return;
+        foreach (var pose in waking.GetComponents<SeatedPose>()) Destroy(pose);
+        waking.enabled = true;
+        waking.InputEnabled = true;
+        waking = null;
+    }
 
     private System.Collections.IEnumerator WakeRoutine()
     {
         var player = FindAnyObjectByType<PlayerController>();
         if (player == null) yield break;
         player.InputEnabled = false;
+        waking = player;
         Vector3 stand = porch != null ? porch.position : transform.position;
-        float yaw = 0f;
+        Vector3 hipsOffset = SeatedPose.HipsOffset(player.transform); // measured standing, before lying down
+        Vector3 lieAt = Vector3.zero;
+        bool inRoom = false;
+        float yaw = 0f, roll = 90f;
         bool Lie()
         {
             Vector3 at; Quaternion rot;
             var room = HomeInterior.Instance;
-            if (room != null && room.gameObject == gameObject && room.WakePoint(out at, out rot, out var up)) stand = up;
+            if (room != null && room.gameObject == gameObject && room.WakePoint(out at, out rot, out var up))
+            {
+                stand = up;
+                roll = -90f; // head on the pillow (the bed's head end is its -z side)
+                inRoom = true;
+            }
             else
             {
                 var spot = sleep != null ? sleep.GetComponent<SleepSpot>() : null;
@@ -127,27 +155,88 @@ public class HomePlot : MonoBehaviour
                 rot = spot.Bed.rotation;
             }
             yaw = rot.eulerAngles.y;
+            lieAt = at;
             player.enabled = true;
             player.Teleport(at, Quaternion.Euler(0f, yaw, 0f));
             player.enabled = false; // no gravity while lying on the bed
-            player.transform.rotation = Quaternion.Euler(0f, yaw, 90f);
+            player.transform.rotation = Quaternion.Euler(0f, yaw, roll);
             return true;
         }
         bool lying = Lie();
         while (SceneLoader.Loading) yield return null;
         yield return null;
         lying = Lie() || lying; // the room (and your bed) may only be set up now
-        if (!lying) { player.InputEnabled = true; PutPlayerHere(); yield break; }
+        if (!lying) { waking = null; player.InputEnabled = true; PutPlayerHere(); yield break; }
         yield return new WaitForSeconds(1.4f);
         FloatingText.Spawn(player.transform.position + Vector3.up * 1.2f, "อรุณสวัสดิ์! ตื่นแล้ว", new Color(1f, 0.9f, 0.5f));
-        for (float t = 0f; t < 0.8f; t += Time.deltaTime) // sit up
+        var room = HomeInterior.Instance;
+        Vector3 door = room != null && room.gameObject == gameObject ? room.DoorPoint : stand + Quaternion.Euler(0f, yaw + 90f, 0f) * Vector3.forward;
+        Quaternion Facing(Vector3 from, Vector3 to)
         {
-            player.transform.rotation = Quaternion.Euler(0f, yaw, Mathf.Lerp(90f, 0f, Mathf.SmoothStep(0f, 1f, t / 0.8f)));
+            var d = to - from;
+            d.y = 0f;
+            return d.sqrMagnitude > 1e-4f ? Quaternion.LookRotation(d.normalized, Vector3.up) : Quaternion.Euler(0f, yaw + 90f, 0f);
+        }
+        if (!inRoom)
+        {
+            for (float t = 0f; t < 0.8f; t += Time.deltaTime) // sit up
+            {
+                player.transform.rotation = Quaternion.Euler(0f, yaw, Mathf.Lerp(roll, 0f, Mathf.SmoothStep(0f, 1f, t / 0.8f)));
+                yield return null;
+            }
+            player.enabled = true;
+            player.Teleport(stand + Vector3.up * 0.1f, Facing(stand, door));
+            player.InputEnabled = true;
+            waking = null;
+            yield break;
+        }
+
+        // 1. roll up to sit on the edge of the bed, facing out, legs over the side
+        Vector3 outward = stand - lieAt;
+        outward.y = 0f;
+        var sitRot = Facing(lieAt, stand);
+        Vector3 edge = lieAt + outward * 0.42f;                        // the bed's edge, on the way out
+        Vector3 sitRoot = SeatedPose.RootFor(new Vector3(edge.x, lieAt.y + 0.04f, edge.z), sitRot, hipsOffset);
+        Vector3 lieRoot = player.transform.position;
+        Quaternion lieRot = player.transform.rotation;
+        var pose = player.gameObject.AddComponent<SeatedPose>();
+        pose.CrossLegged = lieAt.y - stand.y < 0.3f; // a sleeping mat on the floor: sit up cross-legged on it
+        const float sitUp = 1.1f;
+        for (float t = 0f; t < sitUp; t += Time.deltaTime)
+        {
+            float k = Mathf.SmoothStep(0f, 1f, t / sitUp);
+            player.transform.SetPositionAndRotation(Vector3.Lerp(lieRoot, sitRoot, k), Quaternion.Slerp(lieRot, sitRot, k));
+            yield return null;
+        }
+        player.transform.SetPositionAndRotation(sitRoot, sitRot);
+        yield return new WaitForSeconds(0.7f);                          // a breath, sitting
+
+        // 2. stand up: lean forward, rise onto the feet just in front of the bed
+        Destroy(pose);
+        yield return null;
+        Vector3 standRoot = stand + Vector3.up * 0.02f;
+        const float rise = 0.6f;
+        for (float t = 0f; t < rise; t += Time.deltaTime)
+        {
+            float k = Mathf.SmoothStep(0f, 1f, t / rise);
+            var p = Vector3.Lerp(sitRoot, standRoot, k);
+            p.y = Mathf.Lerp(sitRoot.y, standRoot.y, Mathf.Sqrt(k));
+            player.transform.SetPositionAndRotation(p, sitRot * Quaternion.Euler(Mathf.Sin(k * Mathf.PI) * 18f, 0f, 0f));
+            yield return null;
+        }
+
+        // 3. turn to the door
+        var doorRot = Facing(stand, door);
+        for (float t = 0f; t < 0.5f; t += Time.deltaTime)
+        {
+            player.transform.rotation = Quaternion.Slerp(sitRot, doorRot, Mathf.SmoothStep(0f, 1f, t / 0.5f));
             yield return null;
         }
         player.enabled = true;
-        player.Teleport(stand + Vector3.up * 0.1f, Quaternion.Euler(0f, yaw + 90f, 0f)); // out of bed, facing the room
+        player.Teleport(standRoot + Vector3.up * 0.08f, doorRot);
         player.InputEnabled = true;
+        waking = null;
+        ScreenToast.Show("ทางออกอยู่ตามลูกศรสีเขียวที่ประตู", new Color(0.3f, 0.85f, 0.45f));
     }
 
     public void PutPlayerHere()

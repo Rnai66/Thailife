@@ -1,6 +1,6 @@
 using UnityEngine;
 
-// รถไฟฟ้า: runs along the elevated track over the main road, slows into the station in the
+// รถไฟฟ้า (and the town's diesel train, ThaiRailway): runs along the elevated track over the main road, slows into the station in the
 // middle, opens its doors (SlideDoor) while it waits, then carries on and loops round (it
 // disappears past the edge of town).
 public class SkyTrain : MonoBehaviour
@@ -14,6 +14,15 @@ public class SkyTrain : MonoBehaviour
     private float x, dwell;
     private SlideDoor[] doors;
     private bool open;
+
+    // For trains built in code (ThaiRailway): run from..to along local X, stopping with the lead at stationX
+    public void Configure(float fromX, float toX, float runSpeed, float stopX)
+    {
+        from = fromX;
+        to = toX;
+        speed = runSpeed;
+        stationX = stopX;
+    }
 
     private void Start()
     {

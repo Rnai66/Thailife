@@ -15,14 +15,17 @@ public static class ThaiFont
     private static Font legacy;
     private static Font display;
 
-    // Rounded, friendly display font (Mitr SemiBold, SIL OFL) for signs, buttons, titles and
+    // Rounded, friendly display font (Mitr Medium, SIL OFL) for signs, buttons, titles and
     // floating text — the cartoon look of the game art. Body text stays in Sarabun.
     public static Font Display
     {
         get
         {
             if (display != null) return display;
-            display = Resources.Load<Font>("Fonts/Mitr-SemiBold");
+            // Mitr Medium: still round and friendly, but the SemiBold was so heavy (Latin letters most of
+            // all) that titles, buttons and signs clogged up
+            display = Resources.Load<Font>("Fonts/Mitr-Medium");
+            if (display == null) display = Resources.Load<Font>("Fonts/Mitr-SemiBold");
             if (display == null) display = Font;
             return display;
         }

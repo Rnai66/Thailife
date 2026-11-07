@@ -2528,3 +2528,88 @@ Hello! สวัสดีครับ|Sawasdee ka~|ต้มยำกุ้ง �
 ทำงานไหนบ่อย อาชีพนั้นเลเวลขึ้น · ฉายาใหม่ที่ Lv 10/25/50/75/100	The more you work a trade, the higher its level · new titles at Lv 10/25/50/75/100
 แตะเลือกวัว ขายหรือผสมเทียม · กินวันละ 1 ถุง ให้นมวันละ 1 ขวด	Tap a cow to sell or breed · eats 1 bag a day, gives 1 bottle of milk a day
 เลี้ยงปลา Lv {} · อาหารถุงละ {} บาท วันละครั้ง	Fish farming Lv {0} · feed {1} baht a bag, once a day
+กำลังเข้าสู่เกม…	Entering the game…
+กำลังเตรียมบ้านของคุณ…	Getting your home ready…
+อรุณสวัสดิ์! ตื่นแล้ว	Good morning! Up and awake
+เข้าไปในเล้า · {}	Into the coop · {}
+เซิร์ฟเวอร์ปฏิเสธ ({}): {}	Server refused ({}): {}
+ต่อ {} ไม่ได้: {} {}	Could not reach {}: {} {}
+ปราบ{}สำเร็จ! ชาวบ้านให้ค่าครู {} บาท (คืนวันพระ ×2)	Banished the {}! The villagers paid you {} baht (holy night ×2)
+ซื้อได้ที่ธนาคารในเมือง	Buy at the bank in the city
+ซื้อได้ที่ธนาคารข้างๆ	Buy at the bank next door
+แปลงนา 7-12	Paddies 7-12
+เดินเข้าแปลงเพื่อทำนา	Walk into a plot to farm
+แตะป้าย	Tap the sign
+สร้าง · ทำไร่ · เก็บค่าเช่า	Build · farm · collect rent
+สร้างตึกแถว · เก็บค่าเช่า	Build a shophouse · collect rent
+ทรงพระเจริญ	Long Live the King
+ถ่ายทอดสด	Live
+ขบวนเรือพระราชพิธี	Royal Barge Procession
+ตลาดริมน้ำ	Riverside Market
+ชมขบวนเรือ	Watch the barges
+ไก่ย่าง ส้มตำ	Grilled chicken & som tam
+น้ำมะพร้าว	Coconut water
+ตุ๊กตุ๊ก	Tuk-tuk
+ไปสนามหลวง วัดพระแก้ว	To Sanam Luang, Wat Phra Kaew
+เริ่ม 60 บาท	From 60 baht
+ก่อสร้าง	Build
+ก่อสร้างรอบบ้าน	Build around your home
+แก้ไขสิ่งก่อสร้าง	Edit buildings
+ย้ายสิ่งก่อสร้าง	Move a building
+รั้วไม้ระแนง	Wooden picket fence
+รั้วไม้ไผ่	Bamboo fence
+รั้วลวดหนาม (ฟาร์ม)	Barbed-wire fence (farm)
+รั้วเหล็กดัด	Wrought-iron fence
+กำแพงปูน	Concrete wall
+ประตูรั้วไม้	Wooden gate
+ประตูรั้วเหล็ก	Iron gate
+โรงรถ	Carport
+ศาลาพักผ่อน	Garden sala
+กระถางไม้ดอก	Flower planter
+สีธรรมชาติ	Natural
+ครีม	Cream
+หมุน ⟳	Rotate ⟳
+ต่อแนว: เปิด	Chain: on
+ต่อแนว: ปิด	Chain: off
+วางหน้าตัว	In front
+สี: {}	Paint: {}
+แก้ไข	Edit
+เปลี่ยนสี	Repaint
+รื้อถอน	Demolish
+ยืนยันรื้อ (คืน {})	Confirm (refund {})
+ถัดไป	Next
+กลับไปสร้าง	Back to building
+วางที่นี่	Place here
+สร้างแล้ว {}/{} ชิ้น	Built {}/{} pieces
+ห่างบ้านไม่เกิน {} ม.	within {} m of home
+ยังไม่มีอะไรใกล้ตัว	Nothing built nearby
+เดินไปใกล้ชิ้นที่จะแก้	walk up to the piece to edit
+เดินไปที่ใหม่ แล้วกด วางที่นี่	Walk to the new spot, then tap Place here
+ต้องออนไลน์ก่อนจึงจะก่อสร้างได้	You need to be online to build
+ก่อสร้างได้ที่บ้านของคุณ	You can build at your home
+เมนูบ้าน → กลับบ้าน	Home menu → Go home
+เดินไปใกล้บ้านของคุณก่อน แล้วค่อยเปิดโหมดก่อสร้าง	Walk near your home first, then open build mode
+ออกจากโหมดก่อสร้างแล้ว (ไกลบ้าน)	Left build mode (too far from home)
+ไกลบ้านเกินไป	Too far from home
+สร้างได้ห่างบ้านไม่เกิน {} เมตร	Build within {} m of home
+สร้างได้สูงสุดแล้ว	Build limit reached
+รื้อบางชิ้นก่อน	demolish something first
+สร้าง{}แล้ว	Built {}
+แก้ไขแล้ว	Edited
+รื้อถอนแล้ว	Demolished
+ได้คืน {} บาท	{} baht back
+สถานีรถไฟตัวเมือง	Town Railway Station
+ขายตั๋ว	Tickets
+ไปต่างจังหวัด	To other provinces
+สถานีรถไฟ ↑	Railway station ↑
+ชั้น 3	3rd class
+บชส.{}	Car {}
+รฟท.	SRT
+ถนนย่านผับ	Pub Street
+ถนนสถานี	Station Street
+ถนนหน้าสถานีรถไฟ	Station Road
+ซอย 1	Soi 1
+ซอยหมู่บ้าน	Estate Soi
+ทางออกอยู่ตามลูกศรสีเขียวที่ประตู	The way out is the green arrow at the door
+ติดอยู่?	Stuck?
+กลับมาที่จุดเริ่มของแผนที่นี้แล้ว	Back at this map's arrival point

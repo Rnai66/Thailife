@@ -26,9 +26,16 @@ public class MapBounds : MonoBehaviour
     private static void Build()
     {
         if (FindAnyObjectByType<MapBounds>() != null) return;
-        var ground = GameObject.Find("Ground");
-        if (ground == null) return;
-        var r = ground.GetComponent<Renderer>();
+        // The map's own ground: the biggest thing called "Ground" (not, say, the fair ground's floor,
+        // which is also called Ground and may be found first — walling you in on it)
+        Renderer r = null;
+        foreach (var t in FindObjectsByType<Transform>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
+        {
+            if (t.name != "Ground") continue;
+            var candidate = t.GetComponent<Renderer>();
+            if (candidate == null) continue;
+            if (r == null || candidate.bounds.size.x * candidate.bounds.size.z > r.bounds.size.x * r.bounds.size.z) r = candidate;
+        }
         if (r == null) return;
         var b = r.bounds;
         if (b.size.x < 20f || b.size.z < 20f) return;

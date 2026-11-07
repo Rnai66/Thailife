@@ -27,6 +27,12 @@ public class HomeInterior : MonoBehaviour
 
     private readonly Dictionary<int, GameObject> pieces = new Dictionary<int, GameObject>();
     private readonly List<Renderer> cutaway = new List<Renderer>();
+    private readonly List<GameObject> lowWalls = new List<GameObject>(); // shown while you're inside
+    private GameObject exitMarker;
+    private Material exitMaterial;
+
+    // The middle of the doorway, on the floor (world space)
+    public Vector3 DoorPoint => transform.TransformPoint(new Vector3(0f, FloorY, -HalfZ));
     private Material wallMaterial;
     private bool frozen; // DecorateUI is carrying a piece: don't rebuild under it
     private HouseClient house;
@@ -78,6 +84,8 @@ public class HomeInterior : MonoBehaviour
         AddWall(new Vector3(-(DoorHalfWidth + side * 0.5f), cy, -HalfZ + t * 0.5f), new Vector3(side, h, t));
         AddWall(new Vector3(DoorHalfWidth + side * 0.5f, cy, -HalfZ + t * 0.5f), new Vector3(side, h, t));
         AddWall(new Vector3(0f, (DoorTop + WallTop) * 0.5f, -HalfZ + t * 0.5f), new Vector3(DoorHalfWidth * 2f, WallTop - DoorTop, t));
+
+        BuildExitMarker();
 
         foreach (Transform child in transform)
             if (child.name.StartsWith("Roof") || child.name.StartsWith("Finial") || child.name.StartsWith("Window"))
@@ -138,6 +146,8 @@ public class HomeInterior : MonoBehaviour
 
     private void Update()
     {
+        if (exitMarker != null && exitMarker.activeSelf)
+            exitMaterial.SetColor("_EmissionColor", new Color(0.25f, 0.9f, 0.4f) * (1.2f + Mathf.Sin(Time.time * 4f) * 0.8f));
         if (ceilingLight == null || Time.time < nextLightCheck) return;
         nextLightCheck = Time.time + 0.5f;
         bool on = PlayerInside || RenderSettings.ambientIntensity < 0.8f;
@@ -177,6 +187,45 @@ public class HomeInterior : MonoBehaviour
         var r = wall.GetComponent<Renderer>();
         r.sharedMaterial = wallMaterial;
         cutaway.Add(r);
+
+        // the same wall cut down to waist height: while you're inside the tall walls hide so the camera
+        // can see in, but these stay, so the room keeps its shape and the doorway gap shows the way out
+        if (position.y - size.y * 0.5f > FloorY + 0.1f) return; // the lintel over the door
+        const float low = 0.85f;
+        var stub = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        stub.name = "RoomWallLow";
+        Destroy(stub.GetComponent<Collider>());
+        added.Add(stub);
+        lowWalls.Add(stub);
+        stub.transform.SetParent(transform, false);
+        stub.transform.localPosition = new Vector3(position.x, FloorY + low * 0.5f, position.z);
+        stub.transform.localScale = new Vector3(size.x, low, size.z);
+        stub.GetComponent<Renderer>().sharedMaterial = wallMaterial;
+        stub.SetActive(false);
+    }
+
+    // Green chevrons on the floor at the doorway, pointing out, glowing gently while you're inside
+    private void BuildExitMarker()
+    {
+        exitMarker = new GameObject("ExitMarker_ทางออก");
+        added.Add(exitMarker);
+        exitMarker.transform.SetParent(transform, false);
+        exitMarker.transform.localPosition = new Vector3(0f, FloorY + 0.03f, -HalfZ + 0.55f);
+        exitMaterial = new Material(Shader) { color = new Color(0.25f, 0.9f, 0.4f) };
+        exitMaterial.EnableKeyword("_EMISSION");
+        foreach (float z in new[] { 0.3f, -0.1f })
+            foreach (float s in new[] { -1f, 1f })
+            {
+                var bar = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                bar.name = "Chevron";
+                Destroy(bar.GetComponent<Collider>());
+                bar.transform.SetParent(exitMarker.transform, false);
+                bar.transform.localPosition = new Vector3(s * 0.15f, 0f, z - 0.15f);
+                bar.transform.localRotation = Quaternion.Euler(0f, s * -45f, 0f);
+                bar.transform.localScale = new Vector3(0.44f, 0.02f, 0.11f);
+                bar.GetComponent<Renderer>().sharedMaterial = exitMaterial;
+            }
+        exitMarker.SetActive(false);
     }
 
     // ── Inside / outside ────────────────────────────────────────────────────────
@@ -185,6 +234,8 @@ public class HomeInterior : MonoBehaviour
         if (inside == PlayerInside) return;
         PlayerInside = inside;
         foreach (var r in cutaway) if (r != null) r.enabled = !inside;
+        foreach (var w in lowWalls) if (w != null) w.SetActive(inside);
+        if (exitMarker != null) exitMarker.SetActive(inside);
 
         if (inside)
         {

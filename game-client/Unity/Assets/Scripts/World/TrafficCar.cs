@@ -80,6 +80,7 @@ public class TrafficCar : MonoBehaviour
             string kind = name.ToLowerInvariant();
             bool bike = kind.Contains("motor") || kind.Contains("bike") || kind.Contains("cycle");
             gameObject.AddComponent<CarSway>().Configure(bike, spin: false, pivot: kind.Contains("bus") ? 1f : 0.5f);
+            if (GetComponent<CarHeadlights>() == null) gameObject.AddComponent<CarHeadlights>().Configure(bike);
         }
         Place();
     }

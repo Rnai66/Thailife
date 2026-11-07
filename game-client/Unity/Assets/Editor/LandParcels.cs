@@ -15,23 +15,35 @@ public static class LandParcels
     // Thai vowels like ำ need the game font (Mitr); the built-in one drops them
     private static TextMesh Thai(TextMesh label)
     {
-        var font = Resources.Load<Font>("Fonts/Mitr-SemiBold");
+        var font = Resources.Load<Font>("Fonts/Mitr-Medium");
         if (font == null) return label;
         label.font = font;
         label.GetComponent<MeshRenderer>().sharedMaterial = font.material;
         return label;
     }
 
-    // A painted board on two posts, read from its local -Z side
+    // A painted board on two posts, read from its local -Z side: a dark wooden frame, a coloured
+    // header band with the title, a thin gold rule, then the details on the face (two lines: "\n" in sub)
     private static void Board(Transform parent, Vector3 at, float yaw, string title, string sub, Color face, Color ink)
     {
         var g = PrimitiveKit.Group("Board", parent, at, yaw).transform;
-        var post = PrimitiveKit.Mat("BoardPost", new Color(0.35f, 0.24f, 0.15f));
-        foreach (float x in new[] { -1.3f, 1.3f })
-            PrimitiveKit.Box("Post", g, new Vector3(x, 1.1f, 0f), new Vector3(0.12f, 2.2f, 0.12f), post);
-        PrimitiveKit.Box("Face", g, new Vector3(0f, 1.75f, 0f), new Vector3(3f, 1.3f, 0.08f), PrimitiveKit.Mat("Board" + face.GetHashCode(), face), collider: false);
-        Thai(PrimitiveKit.Label(title, g, new Vector3(0f, 2.05f, -0.06f), 0.075f, ink));
-        Thai(PrimitiveKit.Label(sub, g, new Vector3(0f, 1.5f, -0.06f), 0.04f, ink));
+        bool light = face.grayscale > 0.6f;
+        Color band = light ? ink : Color.Lerp(face, Color.black, 0.35f);
+        Color body = light ? new Color(0.28f, 0.17f, 0.1f) : ink; // details: dark brown on cream, cream on green
+        var wood = PrimitiveKit.Mat("BoardPost", new Color(0.35f, 0.24f, 0.15f));
+        var frame = PrimitiveKit.Mat("BoardFrame", new Color(0.24f, 0.15f, 0.09f));
+        var gold = PrimitiveKit.Mat("BoardGold", new Color(0.91f, 0.71f, 0.3f), 0.6f, 0.4f);
+        foreach (float x in new[] { -1.4f, 1.4f })
+        {
+            PrimitiveKit.Box("Post", g, new Vector3(x, 1.25f, 0.02f), new Vector3(0.14f, 2.5f, 0.14f), wood);
+            PrimitiveKit.Sphere("Cap", g, new Vector3(x, 2.56f, 0.02f), Vector3.one * 0.16f, gold);
+        }
+        PrimitiveKit.Box("Frame", g, new Vector3(0f, 1.78f, 0.02f), new Vector3(3.2f, 1.5f, 0.1f), frame, collider: false);
+        PrimitiveKit.Box("Face", g, new Vector3(0f, 1.78f, -0.02f), new Vector3(3f, 1.3f, 0.06f), PrimitiveKit.Mat("Board" + face.GetHashCode(), face), collider: false);
+        PrimitiveKit.Box("Band", g, new Vector3(0f, 2.2f, -0.055f), new Vector3(3f, 0.46f, 0.02f), PrimitiveKit.Mat("BoardBand" + band.GetHashCode(), band), collider: false);
+        PrimitiveKit.Box("Rule", g, new Vector3(0f, 1.95f, -0.055f), new Vector3(2.7f, 0.025f, 0.02f), gold, collider: false);
+        Thai(PrimitiveKit.Label(title, g, new Vector3(0f, 2.2f, -0.075f), 0.06f, Cream));
+        Thai(PrimitiveKit.Label(sub, g, new Vector3(0f, 1.48f, -0.065f), 0.034f, body));
     }
 
     private static void Counter(Transform parent, Vector3 at, Vector3 size, string parcel)
@@ -97,8 +109,8 @@ public static class LandParcels
         var land = site.gameObject.AddComponent<LandSite>();
         land.Configure("rice");
         // The board at the north-west corner, facing west toward Kok Nong Na's pond
-        SaleAndOwned(site, new Vector3(-13.2f, 0f, 6.5f), 90f, "ที่นาขาย ติดคลอง 5 ไร่", "ซื้อได้ที่ธนาคารในเมือง · แปลงนา 7-12",
-            "ที่นาของคุณ", "แปลงนา 7-12 · เดินเข้าแปลงเพื่อทำนา");
+        SaleAndOwned(site, new Vector3(-13.2f, 0f, 6.5f), 90f, "ที่นาขาย ติดคลอง 5 ไร่", "ซื้อได้ที่ธนาคารในเมือง\nแปลงนา 7-12",
+            "ที่นาของคุณ", "แปลงนา 7-12\nเดินเข้าแปลงเพื่อทำนา");
         Counter(site, new Vector3(-14.4f, 1f, 6.5f), new Vector3(2.4f, 2f, 3f), "rice");
     }
 
@@ -116,8 +128,8 @@ public static class LandParcels
             PrimitiveKit.Box("StakeTop", site, new Vector3(x, 0.62f, z), new Vector3(0.16f, 0.06f, 0.16f), red, collider: false);
         }
         site.gameObject.AddComponent<LandSite>().Configure("plain");
-        var (_, owned) = SaleAndOwned(site, new Vector3(0f, 0f, -hz - 0.6f), 0f, "ที่ดินขาย 1 ไร่", "ซื้อได้ที่ธนาคารในเมือง · เลเวล 50",
-            "ที่ดินของคุณ 1 ไร่", "แตะป้าย: สร้าง · ทำไร่ · เก็บค่าเช่า");
+        var (_, owned) = SaleAndOwned(site, new Vector3(0f, 0f, -hz - 0.6f), 0f, "ที่ดินขาย 1 ไร่", "ซื้อได้ที่ธนาคารในเมือง\nเลเวล 50",
+            "ที่ดินของคุณ 1 ไร่", "แตะป้าย\nสร้าง · ทำไร่ · เก็บค่าเช่า");
         PrimitiveKit.Box("Cleared", owned, new Vector3(0f, 0.012f, 0f), new Vector3(hx * 2f, 0.02f, hz * 2f), PrimitiveKit.Mat("FieldDirt", new Color(0.52f, 0.4f, 0.26f)), collider: false);
         Counter(site, new Vector3(0f, 1f, -hz - 2f), new Vector3(3f, 2f, 2.4f), "plain");
 
@@ -204,8 +216,8 @@ public static class LandParcels
         const float hx = 8f, hz = 6.5f;
         PrimitiveKit.Box("LotGround", site, new Vector3(0f, 0.01f, 0f), new Vector3(hx * 2f, 0.012f, hz * 2f), PrimitiveKit.Mat("LotGravel", new Color(0.6f, 0.57f, 0.5f)), collider: false);
         site.gameObject.AddComponent<LandSite>().Configure("city");
-        var (sale, _) = SaleAndOwned(site, new Vector3(-4.5f, 0f, -hz + 0.4f), 0f, "ที่ดินติดถนนขาย", "ซื้อได้ที่ธนาคารข้างๆ · เลเวล 50",
-            "ที่ดินของคุณ", "แตะป้าย: สร้างตึกแถว · เก็บค่าเช่า");
+        var (sale, _) = SaleAndOwned(site, new Vector3(-4.5f, 0f, -hz + 0.4f), 0f, "ที่ดินติดถนนขาย", "ซื้อได้ที่ธนาคารข้างๆ\nเลเวล 50",
+            "ที่ดินของคุณ", "แตะป้าย\nสร้างตึกแถว · เก็บค่าเช่า");
         var post = PrimitiveKit.Mat("LotPost", new Color(0.8f, 0.8f, 0.78f));
         for (float x = -hx; x <= hx + 0.01f; x += 4f)
             PrimitiveKit.Box("LotPost", sale, new Vector3(x, 0.45f, -hz), new Vector3(0.12f, 0.9f, 0.12f), post);

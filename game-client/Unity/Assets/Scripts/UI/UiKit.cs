@@ -103,6 +103,8 @@ public static class UiKit
         t.font = ThaiFont.Display;     // Mitr: rounded cartoon lettering
         t.fontStyle = FontStyle.Normal;
         t.verticalOverflow = VerticalWrapMode.Overflow; // Mitr's lines are taller than Sarabun's: never let uGUI drop the line
+        // dark lettering on a light card needs no brown outline: it only clogs the letters into a blob
+        if (t.color.grayscale < 0.45f) return t;
         var o = t.gameObject.AddComponent<Outline>();
         o.effectColor = WoodEdge;
         o.effectDistance = new Vector2(outline, -outline);
@@ -173,6 +175,7 @@ public static class UiKit
         var image = img.GetComponent<Image>();
         image.sprite = Art("Icons/" + name);
         image.raycastTarget = false;
+        IconRibbon.AddUI(img, name); // English name over the painted Thai one
         return tile;
     }
 

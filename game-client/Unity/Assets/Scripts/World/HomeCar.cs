@@ -41,6 +41,7 @@ public class HomeCar : MonoBehaviour
         var template = player != null ? player.GetComponent<Renderer>()?.sharedMaterial : null;
         CarModels.Build(id, root.transform, template);
         root.AddComponent<CarSway>().Configure(CarModels.TwoWheels(id), spin: true); // rocks on its springs, wheels turn
+        root.AddComponent<CarHeadlights>().Configure(CarModels.TwoWheels(id));        // lights on after dark
         car = root.AddComponent<DrivableCar>();
         car.Configure(id, best.name);
     }

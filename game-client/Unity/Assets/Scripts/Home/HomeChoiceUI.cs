@@ -118,8 +118,8 @@ public class HomeChoiceUI : MonoBehaviour
         {
             float x0 = -size.x * 0.5f;
             UiKit.IconTile(card, icon, new Vector2(x0 + 90f, 0f), new Vector2(130f, 130f));
-            UiKit.Cartoon(UiKit.Label(card, 32, name, new Vector2(x0 + 180f + (size.x - 420f) * 0.5f, size.y * 0.5f - 40f), new Vector2(size.x - 420f, 50f), UiKit.Ink, TextAnchor.MiddleLeft), 1f);
-            UiKit.Label(card, 22, desc, new Vector2(x0 + 180f + (size.x - 420f) * 0.5f, -14f), new Vector2(size.x - 420f, size.y - 90f), UiKit.Muted, TextAnchor.UpperLeft);
+            OneLineFit.Apply(UiKit.Cartoon(UiKit.Label(card, 32, name, new Vector2(x0 + 180f + (size.x - 420f) * 0.5f, size.y * 0.5f - 40f), new Vector2(size.x - 420f, 50f), UiKit.Ink, TextAnchor.MiddleLeft), 1f), 22);
+            UiKit.Label(card, 26, desc, new Vector2(x0 + 180f + (size.x - 420f) * 0.5f, -14f), new Vector2(size.x - 420f, size.y - 90f), UiKit.Muted, TextAnchor.UpperLeft);
             if (badge != null) UiKit.PillLabel(card, badge, new Vector2(size.x * 0.5f - 115f, size.y * 0.5f - 34f), new Vector2(200f, 40f), UiKit.OkTint, UiKit.OkGreen, 20);
             var b = UiKit.RoundButton(card, button, new Vector2(size.x * 0.5f - 115f, -size.y * 0.5f + 50f), new Vector2(200f, 66f), UiKit.Gold, UiKit.GoldInk, () => onClick?.Invoke(), 24);
             b.interactable = onClick != null;
@@ -128,8 +128,8 @@ public class HomeChoiceUI : MonoBehaviour
         {
             float top = size.y * 0.5f;
             UiKit.IconTile(card, icon, new Vector2(0f, top - 110f), new Vector2(160f, 160f));
-            UiKit.Cartoon(UiKit.Label(card, 32, name, new Vector2(0f, top - 230f), new Vector2(size.x - 30f, 56f), UiKit.Ink), 1f);
-            UiKit.Label(card, 22, desc, new Vector2(0f, top - 330f), new Vector2(size.x - 40f, 140f), UiKit.Muted, TextAnchor.UpperCenter);
+            OneLineFit.Apply(UiKit.Cartoon(UiKit.Label(card, 32, name, new Vector2(0f, top - 230f), new Vector2(size.x - 30f, 56f), UiKit.Ink), 1f), 22);
+            UiKit.Label(card, 26, desc, new Vector2(0f, top - 330f), new Vector2(size.x - 40f, 140f), UiKit.Muted, TextAnchor.UpperCenter);
             if (badge != null) UiKit.PillLabel(card, badge, new Vector2(0f, top - 24f), new Vector2(200f, 38f), UiKit.OkTint, UiKit.OkGreen, 20);
             var b = UiKit.RoundButton(card, button, new Vector2(0f, -top + 52f), new Vector2(size.x - 60f, 72f), UiKit.Gold, UiKit.GoldInk, () => onClick?.Invoke(), 26);
             b.interactable = onClick != null;

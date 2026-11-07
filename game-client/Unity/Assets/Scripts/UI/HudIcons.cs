@@ -104,6 +104,8 @@ public static class HudIcons
                 return (x, y) => (Box(x, y, 0f, -0.12f, 0.62f, 0.66f, 0.2f) && !Line(x, y, -0.36f, -0.12f, 0.36f, -0.12f, 0.1f)
                                   && !Frame(x, y, 0f, -0.42f, 0.36f, 0.26f, 0.08f, 0.09f))
                                  || (Frame(x, y, 0f, 0.62f, 0.3f, 0.24f, 0.18f, 0.12f) && y > 0.5f);
+            case "hammer": // a claw hammer: handle and head
+                return (x, y) => Line(x, y, -0.7f, -0.75f, 0.25f, 0.3f, 0.16f) || Line(x, y, -0.05f, 0.65f, 0.6f, 0f, 0.32f);
             case "menu":
                 return (x, y) => Line(x, y, -0.6f, 0.48f, 0.6f, 0.48f, 0.2f) || Line(x, y, -0.6f, 0f, 0.6f, 0f, 0.2f) || Line(x, y, -0.6f, -0.48f, 0.6f, -0.48f, 0.2f);
             case "close":

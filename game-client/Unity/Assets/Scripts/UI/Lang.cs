@@ -79,7 +79,7 @@ public static class Lang
                 int literal = 0;
                 for (int i = 0; i < parts.Length; i++)
                 {
-                    if (i > 0) sb.Append("(.+?)");
+                    if (i > 0) sb.Append("(.*?)"); // a hole may be empty ("…ต่ำกว่า{}" with nothing after)
                     sb.Append(Regex.Escape(parts[i]));
                     literal += parts[i].Trim().Length;
                 }

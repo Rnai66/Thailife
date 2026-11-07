@@ -5,6 +5,8 @@ public class SpawnPoint : MonoBehaviour
 {
     [SerializeField] private string id = "busstop";
 
+    public string Id => id;
+
     public void Configure(string spawnId) => id = spawnId;
 
     private void Start()
