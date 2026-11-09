@@ -41,6 +41,9 @@ public class ContextButton : MonoBehaviour
         instance.root.SetActive(false);
     }
 
+    // Someone else's button is up (don't take it over)
+    public static bool TakenByOther(object who) => instance != null && instance.root.activeSelf && instance.owner != null && instance.owner != who;
+
     public static bool IsShownBy(object who) => instance != null && instance.owner == who && instance.root.activeSelf;
 
     private void Awake() => Build();

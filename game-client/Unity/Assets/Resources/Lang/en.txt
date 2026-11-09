@@ -2613,3 +2613,131 @@ Hello! สวัสดีครับ|Sawasdee ka~|ต้มยำกุ้ง �
 ทางออกอยู่ตามลูกศรสีเขียวที่ประตู	The way out is the green arrow at the door
 ติดอยู่?	Stuck?
 กลับมาที่จุดเริ่มของแผนที่นี้แล้ว	Back at this map's arrival point
+โบกตุ๊กตุ๊ก	Hail a tuk-tuk
+เที่ยวรอบเมือง	Tour round the town
+ค่ารถ 40 บาท	Fare 40 baht
+กด "ลงรถ" ได้ทุกเมื่อ	Press "Get off" any time
+รอตุ๊กตุ๊ก...	Waiting for the tuk-tuk...
+ตุ๊กตุ๊กกำลังจอดรับ	The tuk-tuk is pulling up for you
+จ่ายค่ารถ...	Paying the fare...
+ขึ้นตุ๊กตุ๊ก	On the tuk-tuk
+ค่ารถ {} บาท	fare {} baht
+เงินไม่พอค่าตุ๊กตุ๊ก 40 บาท	Not enough money for the 40-baht tuk-tuk fare
+ต้องออนไลน์ก่อนนั่งตุ๊กตุ๊ก	You need to be online to take a tuk-tuk
+เรียกตุ๊กตุ๊กไม่สำเร็จ ลองใหม่	Couldn't get the tuk-tuk, try again
+ลงรถ	Get off
+นั่งตุ๊กตุ๊กเที่ยวรอบเมือง	Riding a tuk-tuk round the town
+กดเพื่อลงรถ	press to get off
+กำลังจอด...	Pulling over...
+ลงรถแล้ว	You got off
+ขอบคุณที่ใช้บริการ	Thank you for riding
+ถนนวงแหวนรอบเมือง	Town Ring Road
+ระวังรถไฟ	Beware of trains
+ทางรถไฟ	Railway crossing
+TICKETS	TICKETS
+ตารางเวลาเดินรถ	Train timetable
+ขบวน 7  กรุงเทพฯ  08:30	Train 7  Bangkok  08:30
+ขบวน 51 เชียงใหม่ 13:15	Train 51 Chiang Mai 13:15
+ขบวน 85 หาดใหญ่  19:40	Train 85 Hat Yai  19:40
+เรียกแท็กซี่	Hail a taxi
+แท็กซี่เที่ยวรอบเมือง	Taxi round the town
+ค่าโดยสาร 60 บาท	Fare 60 baht
+รอแท็กซี่...	Waiting for the taxi...
+แท็กซี่กำลังจอดรับ	The taxi is pulling up for you
+ขึ้นแท็กซี่	In the taxi
+ค่าโดยสาร {} บาท	fare {} baht
+เงินไม่พอค่าแท็กซี่ 60 บาท	Not enough money for the 60-baht taxi fare
+ต้องออนไลน์ก่อนเรียกรถ	You need to be online to hail a ride
+เรียกรถไม่สำเร็จ ลองใหม่	Couldn't get a ride, try again
+นั่งแท็กซี่เที่ยวรอบเมือง	Riding a taxi round the town
+สะพานพระพุทธยอดฟ้า	Memorial Bridge (Phra Phuttha Yodfa)
+สะพานพระราม ๘	Rama VIII Bridge
+ถนนวิทยุ	Witthayu Road
+ถนนพระราม 4	Rama IV Road
+การ์ดโน้ตกลอง · จังหวะ 1 ห้อง (ตีแพดตามโน้ต)	Drum notation cards · one-bar grooves (hit the pads as written)
+การ์ดอ่านโน้ตกุญแจฟา · โน้ตรากของคอร์ด · บันไดเสียง	Bass-clef reading cards · chord roots · scales
+การ์ดอ่านโน้ต · คอร์ด (พร้อมตารางจับคอร์ด) · บันไดเสียง	Note-reading cards · chords (with chord charts) · scales
+การ์ดอ่านโน้ต · คอร์ด · บันไดเสียง	Note-reading cards · chords · scales
+การ์ดอ่านโน้ต (โด เร มี) · ลายแคน/ลายพิณ · บันไดเสียง	Note-reading cards (Do Re Mi) · khaen/phin modes · scales
+การ์ด {}/{}	Card {}/{}
+คำตอบ: {}	Answer: {}
+ความมันของคนดู	Crowd hype
+โด	Do
+เร	Re
+ฟา	Fa
+ซอล	Sol
+ที	Ti
+เมเจอร์	major
+ไมเนอร์	minor
+โดมินันต์เซเว่น	dominant seventh
+ลายใหญ่	Lai Yai
+ลายน้อย	Lai Noi
+ลายโป้ซ้าย	Lai Po Sai
+ลายสุดสะแนน	Lai Sut Sanaen
+เพนทาโทนิก A ไมเนอร์	A minor pentatonic
+เพนทาโทนิก D ไมเนอร์	D minor pentatonic
+เพนทาโทนิก C เมเจอร์	C major pentatonic
+เพนทาโทนิก G เมเจอร์	G major pentatonic
+{} เมเจอร์	{} major
+{} ไมเนอร์	{} minor
+กลองเบส	Kick drum
+สแนร์	Snare
+ไฮแฮต	Hi-hat
+ทอม	Tom
+แฉ	Crash
+อ่านโน้ต	Read the note
+โน้ตตัวนี้คืออะไร?	What is this note?
+กดคีย์ให้ตรงกับโน้ตบนบรรทัด 5 เส้น	Press the key that matches the note on the staff
+คอร์ด	Chord
+คอร์ด {}	Chord {}
+{} · กดโน้ตทั้ง {} ตัวในคอร์ด (ลำดับไหนก็ได้)	{} · press all {} notes of the chord (any order)
+คอร์ด {} = {}	Chord {} = {}
+บันไดเสียง	Scale
+บันไดเสียง {}	{} scale
+โน้ตที่หายไปคือตัวไหน?	Which note is missing?
+ลายอีสาน	Isan mode
+{} · กดโน้ตทั้ง 5 ตัวของลาย	{} · press all 5 notes of the mode
+โน้ตราก	Root note
+มือเบสเล่นโน้ตรากของคอร์ด: กดโน้ตราก	Bass players play the chord root: press the root
+รากของคอร์ด {} คือ {}	The root of chord {} is {}
+โน้ตกลอง	Drum notation
+เสียงนี้ตีอะไร?	What do you hit here?
+ดูตำแหน่งบนบรรทัดกับหัวโน้ต แล้วตีให้ถูก	Read the staff position and note head, then hit the right pad
+จังหวะ	Groove
+ตีตามโน้ต 1 ห้อง	Play one bar as written
+ตีทีละตัวจากซ้ายไปขวา	Hit them one by one, left to right
+บทที่ 1 · รู้จักตัวโน้ต	Lesson 1 · Meet the notes
+บทที่ 2 · ตัวหยุดและการนับจังหวะ	Lesson 2 · Rests and counting beats
+บทที่ 3 · อ่านโน้ตกลอง	Lesson 3 · Reading drum notation
+บทที่ 3 · อ่านโน้ตบนบรรทัด 5 เส้น	Lesson 3 · Reading the staff
+บทที่ 4 · จังหวะพื้นฐาน	Lesson 4 · Basic grooves
+บทที่ 4 · บันไดเสียง	Lesson 4 · Scales
+บทที่ 5 · จังหวะกับกลองทอม	Lesson 5 · Grooves with toms
+บทที่ 5 · โน้ตรากของคอร์ด	Lesson 5 · Chord roots
+บทที่ 5 · ลายแคน ลายพิณ	Lesson 5 · Khaen and phin modes
+บทที่ 5 · คอร์ด	Lesson 5 · Chords
+บทที่ 6 · จังหวะกับแฉ	Lesson 6 · Grooves with crash
+บทที่ 6 · ไมเนอร์และเครื่องหมายแปลงเสียง	Lesson 6 · Minors and accidentals
+บทที่ 7 · มืออาชีพ	Lesson 7 · Professional
+<b>{}</b> · บทต่อไปที่ Lv {}	<b>{}</b> · next lesson at Lv {}
+{} · เพลง "{}" · {}	{} · Song "{}" · {}
+ตัวกลม	Whole note
+ตัวขาว	Half note
+ตัวดำ	Quarter note
+ตัวเขบ็ด 1 ชั้น	Eighth note
+ตัวเขบ็ด 2 ชั้น	Sixteenth note
+ตัวหยุดตัวกลม	Whole rest
+ตัวหยุดตัวขาว	Half rest
+ตัวหยุดตัวดำ	Quarter rest
+ตัวหยุดเขบ็ด 1 ชั้น	Eighth rest
+สัญลักษณ์	Symbol
+สัญลักษณ์นี้ชื่ออะไร?	What is this symbol called?
+ตัวหยุด = เงียบ ไม่เล่นเสียง ตามจำนวนจังหวะ	A rest = silence for that many beats
+ดูหัวโน้ต (โปร่ง/ทึบ) หาง และเขบ็ด	Look at the head (open/filled), the stem and the flags
+{} = {} จังหวะ	{} = {} beats
+ค่าจังหวะ	Note value
+สัญลักษณ์นี้ยาวกี่จังหวะ?	How many beats is this?
+ตัวกลม 4 · ตัวขาว 2 · ตัวดำ 1 · เขบ็ด 1 ชั้น ครึ่งจังหวะ	Whole 4 · half 2 · quarter 1 · eighth half a beat
+นับจังหวะ	Count the beats
+รวมกันกี่จังหวะ?	How many beats altogether?
+บวกค่าจังหวะของทุกตัว (ตัวหยุดก็นับ)	Add up every value (rests count too)

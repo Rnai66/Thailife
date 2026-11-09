@@ -41,6 +41,19 @@ public static class GuardianGiant
         P("PlinthTop", cube, plinth, new Vector3(0f, 0.72f, 0f), new Vector3(2.1f, 0.36f, 2.1f));
         const float B = 0.9f;
 
+        // the sculpted giant (AI-made, Assets/Art/Models/AI) when there is one: green skin → GiantGreen,
+        // any other → GiantWhite; it stands on the same plinth, facing -Z like the built one
+        string model = skinColor.g > skinColor.r + 0.1f ? "GiantGreen" : "GiantWhite";
+        if (AiModels.Has(model))
+        {
+            AiModels.Place(model, g, new Vector3(0f, B, 0f), 5.4f, 180f);
+            MeshKit.MergeByMaterial(g, "Yaksha/" + key);
+            var box = y.gameObject.AddComponent<BoxCollider>();
+            box.center = new Vector3(0f, 3.1f, 0f);
+            box.size = new Vector3(2.5f, 6.2f, 2.5f);
+            return;
+        }
+
         // feet in pointed gold shoes, legs in patterned trousers, gold knee guards
         foreach (float s in new[] { -1f, 1f })
         {

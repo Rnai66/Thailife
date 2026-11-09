@@ -1,7 +1,8 @@
 -- Musician career (นักดนตรี): play a rhythm game at a venue to earn tips and skill.
 --   music_get     {}                         -> stats, instruments, venues (open/locked)
 --   music_equip   {"instrument": id}         -> switch to an owned instrument
---   music_start   {"venue": id}              -> {session, song, notes:[{t, lane}], duration_ms}
+--   music_start   {"venue": id, "cards"?: true} -> {session, song, notes:[{t, lane}], duration_ms, cards}
+--                 cards: the card game (MusicUI) — a deck of music cards instead of the old rhythm chart
 --   music_finish  {"session": n, "perfect": a, "good": b} -> tips, xp, level
 -- The server writes the note chart, checks the venue (level, fair, night), charges energy,
 -- refuses to pay before the song could have ended, and caps hits at the note count.
@@ -167,12 +168,16 @@ local function rpc_start(context, payload)
   local notes, bpm = make_chart()
   local session = s.next_session
   s.next_session = session + 1
-  s.session = { id = session, venue = req.venue, start_ms = now, notes = #notes }
+  -- the card game: a bigger deck as the musician levels up; each card is one "note" to score
+  local cards = 0
+  if req.cards == true then cards = math.min(14, 8 + math.floor(s.level / 8)) end
+  s.session = { id = session, venue = req.venue, start_ms = now, notes = cards > 0 and cards or #notes, cards = cards }
   write_stats(user_id, s)
 
   return nk.json_encode({
     session = session, venue = req.venue, venue_name = v.name, song = SONGS[math.random(#SONGS)],
     bpm = bpm, notes = notes, duration_ms = LEAD_IN_MS + SONG_MS, energy = math.floor(life.state(user_id).energy),
+    cards = cards,
   })
 end
 
@@ -183,7 +188,8 @@ local function rpc_finish(context, payload)
   local session = s.session
   if not session or session.id ~= tonumber(req.session) then error({ "no such performance", GRPC_FAILED_PRECONDITION }) end
   local now = nk.time()
-  if now - session.start_ms < LEAD_IN_MS + SONG_MS - 3000 then
+  local least = (session.cards or 0) > 0 and session.cards * 1500 - 1000 or LEAD_IN_MS + SONG_MS - 3000
+  if now - session.start_ms < least then
     error({ "song not finished", GRPC_FAILED_PRECONDITION })
   end
   s.session = nil

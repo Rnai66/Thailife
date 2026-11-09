@@ -46,7 +46,7 @@ public static class CityStreets
         StreetX(t, "ถนนย่านผับ", PubZ, -52f, -RingOuter + 0.5f, 6f);
         StreetX(t, "ถนนย่านผับ", PubZ, RingOuter - 0.5f, 29f, 6f);
         StreetZ(t, "ถนนสถานี", 0f, 22f, StationZ - 2.4f, 6f);
-        StreetX(t, "ถนนหน้าสถานีรถไฟ", StationZ, -52f, 58f, 4.8f);
+        StreetX(t, "ถนนหน้าสถานีรถไฟ", StationZ, -CityRingRoad.Town.Inner, CityRingRoad.Town.Inner, 4.8f); // out to the ring road both ends
         StreetZ(t, "ซอย1", WestSoiX, -5.4f, StationZ + 2.4f, 5f);
         StreetZ(t, "ซอยหมู่บ้าน", EastSoiX, 40f, StationZ + 2.4f, 5f, centreLine: false);
         // the market end of the pub street: a turning circle
@@ -174,6 +174,7 @@ public static class CityStreets
             var v = CityTraffic.Vehicle(t, kind, variant, out float halfLen, out _);
             var pts = path.ToArray();
             v.gameObject.AddComponent<TrafficCar>().Configure(pts, true, kind == "tuktuk" ? 6f : 7f, halfLen, start, null, null, null);
+            CityTraffic.Hailable(v, kind); // wave one down for a ride round town
             var body = v.GetComponent<Rigidbody>();
             body.isKinematic = true;
             body.useGravity = false;

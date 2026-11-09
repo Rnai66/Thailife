@@ -71,9 +71,11 @@ public class MusicClient : MonoBehaviour
         public Note[] notes;
         public int duration_ms;
         public int energy;
+        public int cards;      // the card game: how many cards in the deck (0: an old server, rhythm chart only)
     }
 
     [Serializable] private class VenueRequest { public string venue; }
+    [Serializable] private class StartRequest { public string venue; public bool cards; }
     [Serializable] private class EquipRequest { public string instrument; }
     [Serializable] private class FinishRequest { public int session; public int perfect; public int good; }
 
@@ -119,7 +121,7 @@ public class MusicClient : MonoBehaviour
     // Throws ApiResponseException (locked venue, closed, not enough energy) when refused
     public async Task<Chart> StartAsync(string venue)
     {
-        var result = await connection.Client.RpcAsync(connection.Session, "music_start", JsonUtility.ToJson(new VenueRequest { venue = venue }));
+        var result = await connection.Client.RpcAsync(connection.Session, "music_start", JsonUtility.ToJson(new StartRequest { venue = venue, cards = true }));
         var chart = JsonUtility.FromJson<Chart>(result.Payload);
         LifeClient.Instance?.Refresh();
         return chart;

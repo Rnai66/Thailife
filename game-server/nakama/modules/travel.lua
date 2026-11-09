@@ -7,6 +7,7 @@
 --   travel_quote {from, mode}        -> { mode, from, trips = [{to, fare, hours}] }
 --   travel_buy   {from, to, mode}    -> { to, mode, fare, hours, done }
 --   ferry_ride   {}                  -> { fare }
+--   tuktuk_ride  { kind? }           -> { fare }   (a hailed ตุ๊กตุ๊ก, or kind "taxi" a แท็กซี่, round the town, flat fare)
 
 local nk = require("nakama")
 local data = require("shop_data")
@@ -52,6 +53,8 @@ local function trip(from, to, mode)
 end
 
 local FERRY_FARE = 10
+local TUKTUK_FARE = 40
+local TAXI_FARE = 60
 
 local function charge(user_id, fare, meta)
   local account = nk.account_get_id(user_id)
@@ -94,3 +97,11 @@ nk.register_rpc(function(context, payload)
   charge(context.user_id, FERRY_FARE, { reason = "ferry" })
   return nk.json_encode({ fare = FERRY_FARE })
 end, "ferry_ride")
+
+nk.register_rpc(function(context, payload)
+  local ok, args = pcall(nk.json_decode, payload ~= "" and payload or "{}")
+  local taxi = ok and type(args) == "table" and args.kind == "taxi"
+  local fare = taxi and TAXI_FARE or TUKTUK_FARE
+  charge(context.user_id, fare, { reason = taxi and "taxi" or "tuktuk" })
+  return nk.json_encode({ fare = fare })
+end, "tuktuk_ride")

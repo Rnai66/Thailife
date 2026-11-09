@@ -508,7 +508,9 @@ public static class RoyalBarges
         var root = Barge(p, "Anantanakkharat", at, L, B, D, 1.3f, 2f, hullMat, red, crewRed, hatGold, gold, -2.4f, 2.4f, out var body, out float deck);
         float top = D + 1.3f;
         int mark = body.childCount;
-        for (int k = -3; k <= 3; k++)
+        // the sculpted seven-headed naga (AI-made from a photo) when present, else the swept necks
+        if (AiModels.Has("Naga")) AiModels.Place("Naga", body, new Vector3(0f, -0.3f, L * 0.5f - 0.6f), 5.2f);
+        else for (int k = -3; k <= 3; k++)
         {
             var neck = MeshKit.Curve(new Vector3(0f, top - 0.2f, L * 0.5f - 0.6f),
                 new Vector3(k * 0.3f, top + 1.9f, L * 0.5f + 0.7f),
@@ -519,7 +521,7 @@ public static class RoyalBarges
             Part("NagaCrest", body, Cone, gold, head + new Vector3(0f, 0.12f, -0.08f), new Vector3(0.18f, 0.55f, 0.18f), new Vector3(-15f, 0f, k * 8f));
             Part("NagaJaw", body, Cone, glassGreen, head + new Vector3(0f, -0.08f, 0.28f), new Vector3(0.16f, 0.3f, 0.16f), new Vector3(90f, 0f, 0f));
         }
-        Enlarge(body, mark, new Vector3(0f, top - 0.2f, L * 0.5f - 0.6f), 1.7f);
+        if (!AiModels.Has("Naga")) Enlarge(body, mark, new Vector3(0f, top - 0.2f, L * 0.5f - 0.6f), 1.7f);
         mark = body.childCount;
         var tail = MeshKit.Curve(new Vector3(0f, D + 1.7f, -L * 0.5f + 0.5f), new Vector3(0f, D + 4f, -L * 0.5f - 1f), new Vector3(0f, D + 4.4f, -L * 0.5f + 0.6f), 12);
         MeshKit.Place("NagaTail", body, MeshKit.Sweep("Barges/NagaTail", tail, MeshKit.Taper(12, 0.4f, 0.05f), 8), gold, Vector3.zero);
@@ -561,6 +563,13 @@ public static class RoyalBarges
         var hullMat = Pattern("BargeLaiBlack", new Color(0.07f, 0.06f, 0.06f), new Color(0.88f, 0.68f, 0.25f), 0.8f, 0.4f);
         var root = Barge(p, name, at, L, B, D, 0.9f, 1.2f, hullMat, black, pink, red, gold, 0f, 0f, out var body, out float deck);
         var figure = PrimitiveKit.Mat(monkey ? "KrabiWhite" : "AsuraGreen", monkey ? new Color(0.92f, 0.92f, 0.9f) : new Color(0.15f, 0.42f, 0.3f), 0.6f, 0.2f);
+        if (monkey && AiModels.Has("Hanuman"))
+        {
+            // the sculpted monkey warrior (AI-made from a photo): gilded, dark-skinned, banners in hand
+            AiModels.Place("Hanuman", body, new Vector3(0f, -0.15f, L * 0.5f - 1.5f), 4.2f);
+            Finish(root, name);
+            return root;
+        }
         var f = new Vector3(0f, D + 0.9f, L * 0.5f - 0.9f);
         int mark = body.childCount;
         Part("Seat", body, Cube, gold, f + new Vector3(0f, -0.1f, 0f), new Vector3(1f, 0.3f, 1.2f));

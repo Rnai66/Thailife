@@ -19,6 +19,15 @@ public class TrafficCar : MonoBehaviour
     [SerializeField] private int[] stopFor;             // ...and the light approach each obeys
     [SerializeField] private float[] dwellAt;           // bus stops: metres along the path
 
+    private float holdAt = -1f;                         // metres along the path to pull up at (TukTukHail), -1 none
+
+    // Gridlock: cars waiting on each other in a ring (two loops crossing at a junction, cars spawned
+    // on top of each other). One of them — the lowest id in the ring — eases through for a moment.
+    private TrafficCar blocker, ghost;
+    private float ghostUntil, blockedSince = -1f;
+    private static int made;
+    private readonly int order = ++made;
+
     private float[] dist;
     private float length, s, speed, dwell, lastDwell = -1f;
     private Transform[] wheels;
@@ -37,6 +46,29 @@ public class TrafficCar : MonoBehaviour
         stopFor = approaches;
         dwellAt = busStops;
     }
+
+    public bool IsStopped => speed < 0.05f && dwell <= 0f;
+
+    // Pull up beside a point (someone hailing): at the nearest place on the route a little way ahead,
+    // or as soon as it can if that place is behind or far off
+    public void StopNear(Vector3 world)
+    {
+        if (dist == null) return;
+        var local = transform.parent != null ? transform.parent.InverseTransformPoint(world) : world;
+        float d = DistanceTo(path, local);
+        float ahead = Mathf.Repeat(d - s, length);
+        float need = speed * speed / (2f * Brake) + 0.5f;
+        holdAt = ahead > need && ahead < 45f ? d : Mathf.Repeat(s + need, length);
+    }
+
+    // Stop as soon as is comfortable (a passenger getting off)
+    public void StopSoon()
+    {
+        if (dist == null) return;
+        holdAt = Mathf.Repeat(s + speed * speed / (2f * Brake) + 0.5f, length);
+    }
+
+    public void Release() => holdAt = -1f;
 
     // Distance along a path to the point nearest p (for placing stop lines by position)
     public static float DistanceTo(Vector3[] points, Vector3 p)
@@ -99,8 +131,7 @@ public class TrafficCar : MonoBehaviour
     private void Place()
     {
         var p = At(s);
-        var ahead = At(s + 1.5f) - At(s - 1.5f); // look along the curve: smooth turns
-        ahead.y = 0f;
+        var ahead = At(s + 1.5f) - At(s - 1.5f); // look along the curve: smooth turns, nose up a bridge ramp
         var rot = ahead.sqrMagnitude > 0.0001f ? Quaternion.LookRotation(ahead) : transform.rotation;
         bool jump = (p - transform.position).sqrMagnitude > 25f;
         if (jump) transform.SetPositionAndRotation(p, rot); // wrapped round to the start
@@ -117,16 +148,42 @@ public class TrafficCar : MonoBehaviour
         float look = 4f + speed * 1.2f;
         var origin = transform.position + Vector3.up * 0.9f;
         float best = look;
+        TrafficCar nearest = null;
         foreach (var hit in Physics.SphereCastAll(origin, 0.8f, transform.forward, look + halfLength, ~0, QueryTriggerInteraction.Ignore))
         {
             if (hit.collider.transform.IsChildOf(transform)) continue;
-            bool blocks = hit.collider.GetComponentInParent<TrafficCar>() != null
+            var car = hit.collider.GetComponentInParent<TrafficCar>();
+            if (car != null)
+            {
+                if (car == ghost && Time.time < ghostUntil) continue;
+                // already overlapping (the cast starts inside it): only what is ahead of us counts
+                if (hit.distance <= 0f && Vector3.Dot(car.transform.position - transform.position, transform.forward) <= 0f) continue;
+            }
+            bool blocks = car != null
                        || hit.collider.GetComponentInParent<PlayerController>() != null
                        || hit.collider.GetComponentInParent<DrivableCar>() != null
-                       || hit.collider is CharacterController;
-            if (blocks) best = Mathf.Min(best, Mathf.Max(0f, hit.distance - halfLength));
+                       || hit.collider is CharacterController
+                       || hit.collider.GetComponent<TrafficBlock>() != null; // a lowered level-crossing gate
+            if (!blocks) continue;
+            float d = Mathf.Max(0f, hit.distance - halfLength);
+            if (d < best) { best = d; nearest = car; }
         }
+        blocker = best < 1.6f ? nearest : null;
         return best;
+    }
+
+    // Is the queue we are stuck in a closed ring, with us as its lowest id?
+    private bool GridlockedHere()
+    {
+        int lowest = order;
+        var c = blocker;
+        for (int i = 0; i < 16 && c != null; i++)
+        {
+            if (c == this) return lowest == order;
+            lowest = Mathf.Min(lowest, c.order);
+            c = c.blocker;
+        }
+        return false;
     }
 
     private float ToStopLine()
@@ -175,9 +232,26 @@ public class TrafficCar : MonoBehaviour
                 float ahead = Mathf.Repeat(d - s, length);
                 if (ahead < 25f && lastDwell != d) room = Mathf.Min(room, ahead + 0.5f);
             }
+        if (holdAt >= 0f)
+        {
+            float ahead = Mathf.Repeat(holdAt - s, length);
+            if (ahead > length - 3f) ahead = 0f; // just past it: stay put
+            room = Mathf.Min(room, ahead);
+        }
         float want = room <= 0f ? 0f : Mathf.Min(Cruise(), Mathf.Sqrt(2f * Brake * room));
         speed = want < speed ? Mathf.Max(want, speed - Brake * 2f * Time.deltaTime) : Mathf.Min(want, speed + Accel * Time.deltaTime);
         if (room <= 0f) speed = 0f;
+        if (blocker != null && speed < 0.05f)
+        {
+            if (blockedSince < 0f) blockedSince = Time.time;
+            else if (Time.time - blockedSince > 3f && GridlockedHere())
+            {
+                ghost = blocker;
+                ghostUntil = Time.time + 4f;
+                blockedSince = -1f;
+            }
+        }
+        else blockedSince = -1f;
         s = Mathf.Repeat(s + speed * Time.deltaTime, length);
         Place();
 

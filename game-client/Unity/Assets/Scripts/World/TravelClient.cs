@@ -38,6 +38,14 @@ public static class TravelClient
 
     [Serializable] private class FerryFare { public int fare; }
 
+    // A hailed ตุ๊กตุ๊ก round the town: a flat fare when you get in (TukTukHail)
+    public static async Task<int> TukTukAsync(bool taxi = false)
+    {
+        var r = JsonUtility.FromJson<FerryFare>(await Call("tuktuk_ride", taxi ? "{\"kind\":\"taxi\"}" : "{}"));
+        if (WalletClient.Instance != null) _ = WalletClient.Instance.RefreshAsync();
+        return r.fare;
+    }
+
     private static async Task<string> Call(string rpc, string payload)
     {
         var conn = Connection;

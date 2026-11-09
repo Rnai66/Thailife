@@ -10,6 +10,10 @@ public static class CityTraffic
     public const float RoadZ = -11.5f;               // centre line of the avenue
     private const float Lane = 2.8f, MedianHalf = 0.6f;
     private const float Length = 180f;                // the ends run out past the edge of town
+    // With a ring road (RingSpec): the avenue ends at it and its traffic turns round here, short of it
+    private static float UTurnX => ring != null ? ring.Inner - 9f : Length / 2f;
+    // The road's length: in the provincial town it ends at the ring road (CityRingRoad)
+    private static float Len => ring != null ? ring.Inner * 2f : Length;
     private const float NorthEdge = RoadZ + MedianHalf + 2f * Lane;  // -5.3
     private const float SouthEdge = RoadZ - MedianHalf - 2f * Lane;  // -17.7
     private const float ZebraX = 10f, StopX = 12.5f;  // zebra crossings either side of the junction
@@ -25,9 +29,10 @@ public static class CityTraffic
     // also the stop for long-distance coaches, บขส.)
     public static void Build(Transform root, string gantryWest = "↑ ตลาดสด · ชายหาด\n← หอนาฬิกา · ย่านผับ",
         string gantryEast = "↑ วัด · ค่ายมวย · ลานวัด\nสถานีรถไฟ ↑", string shelter = "ป้ายรถเมล์ · รถทัวร์ บขส.",
-        bool roundabout = false)
+        bool roundabout = false, RingSpec ringRoad = null)
     {
         var avenue = PrimitiveKit.Group("Avenue_ถนนสี่เลน", root, Vector3.zero).transform;
+        ring = ringRoad;
         Road(avenue);
         var lights = Junction(avenue);
         Traffic(avenue, lights, roundabout);
@@ -48,11 +53,12 @@ public static class CityTraffic
         var pavement = PrimitiveKit.Mat("Pavement", new Color(0.72f, 0.7f, 0.66f));
         float width = SouthEdge < NorthEdge ? NorthEdge - SouthEdge : 0f;
 
-        PrimitiveKit.Box("Road", t, new Vector3(0f, 0.02f, RoadZ), new Vector3(Length, 0.04f, width), asphalt);
-        PrimitiveKit.Box("SouthPavement", t, new Vector3(0f, 0.01f, SouthEdge - 1.9f), new Vector3(Length, 0.02f, 3.8f), pavement, collider: false);
+        PrimitiveKit.Box("Road", t, new Vector3(0f, 0.02f, RoadZ), new Vector3(Len, 0.04f, width), asphalt);
+        PrimitiveKit.Box("SouthPavement", t, new Vector3(0f, 0.01f, SouthEdge - 1.9f), new Vector3(Len - 1f, 0.02f, 3.8f), pavement, collider: false);
 
         // Median: raised kerb with a grass strip and clipped shrubs, open at the zebra crossings
-        foreach (var (a, b) in new[] { (-Length / 2f, -ZebraX - 1.6f), (-ZebraX + 1.6f, ZebraX - 1.6f), (ZebraX + 1.6f, Length / 2f) })
+        float ends = ring != null ? UTurnX - 4f : Length / 2f; // open at the ends for the traffic to turn round
+        foreach (var (a, b) in new[] { (-ends, -ZebraX - 1.6f), (-ZebraX + 1.6f, ZebraX - 1.6f), (ZebraX + 1.6f, ends) })
         {
             float mid = (a + b) / 2f, len = b - a;
             PrimitiveKit.Box("Median", t, new Vector3(mid, 0.1f, RoadZ), new Vector3(len, 0.16f, MedianHalf * 2f), concrete, collider: false);
@@ -68,10 +74,10 @@ public static class CityTraffic
 
         // Lane lines (dashed) and edge lines (solid)
         foreach (float z in new[] { RoadZ + MedianHalf + Lane, RoadZ - MedianHalf - Lane })
-            for (float x = -Length / 2f + 2f; x < Length / 2f; x += 9f)
+            for (float x = -Len / 2f + 2f; x < Len / 2f; x += 9f)
                 if (Mathf.Abs(Mathf.Abs(x) - ZebraX) > 3f) PrimitiveKit.Box("LaneDash", t, new Vector3(x, 0.042f, z), new Vector3(3f, 0.005f, 0.13f), white, collider: false);
         foreach (float z in new[] { NorthEdge - 0.25f, SouthEdge + 0.25f })
-            PrimitiveKit.Box("EdgeLine", t, new Vector3(0f, 0.042f, z), new Vector3(Length, 0.005f, 0.12f), white, collider: false);
+            PrimitiveKit.Box("EdgeLine", t, new Vector3(0f, 0.042f, z), new Vector3(Len, 0.005f, 0.12f), white, collider: false);
 
         // Black-and-white kerbs through town (the north side opens onto the clock tower street)
         foreach (float z in new[] { NorthEdge + 0.12f, SouthEdge - 0.12f })
@@ -211,14 +217,67 @@ public static class CityTraffic
         float StopE(Vector3[] p, float z) => TrafficCar.DistanceTo(p, new Vector3(-StopX, 0f, z));
         float StopW(Vector3[] p, float z) => TrafficCar.DistanceTo(p, new Vector3(StopX, 0f, z));
 
-        void Add(string kind, int variant, Vector3[] path, float start, float[] stops, int[] approaches, float[] busStops = null)
+        void Add(string kind, int variant, Vector3[] path, float start, float[] stops, int[] approaches, float[] busStops = null, bool closed = false)
         {
             var v = Vehicle(traffic, kind, variant, out float halfLen, out float speed);
-            v.gameObject.AddComponent<TrafficCar>().Configure(path, false, speed, halfLen, start, lights, stops, approaches, busStops);
+            v.gameObject.AddComponent<TrafficCar>().Configure(path, closed, closed ? Mathf.Min(speed, 9f) : speed, halfLen, start, lights, stops, approaches, busStops);
+            if (closed) Hailable(v, kind); // wave one down for a ride
             var body = v.GetComponent<Rigidbody>();
             body.isKinematic = true;
             body.useGravity = false;
             v.position = traffic.TransformPoint(path[0]);
+        }
+
+        if (ring != null)
+        {
+            // A town with a ring road: the avenue ends at the ring road, so its traffic turns round at
+            // each end (U-turns through the gap in the median) and goes back and forth for ever
+            var fast = UTurnLoop(EastFast, WestFast);
+            var kerb = UTurnLoop(EastKerb, WestKerb);
+            float[] fs = { StopE(fast, EastFast), StopW(fast, WestFast) };
+            float[] ks = { StopE(kerb, EastKerb), StopW(kerb, WestKerb) };
+            int[] both = { 0, 0 };
+            float[] busStops = { TrafficCar.DistanceTo(kerb, new Vector3(-40f, 0f, EastKerb)), TrafficCar.DistanceTo(kerb, new Vector3(40f, 0f, WestKerb)) };
+            Add("super", 0, fast, 10f, fs, both, closed: true);
+            Add("taxi", 0, fast, 70f, fs, both, closed: true);
+            Add("sedan", 0, fast, 130f, fs, both, closed: true);
+            Add("super", 1, fast, 190f, fs, both, closed: true);
+            Add("taxi", 2, fast, 250f, fs, both, closed: true);
+            Add("sedan", 1, fast, 305f, fs, both, closed: true);
+            Add("bus", 0, kerb, 40f, ks, both, busStops, closed: true);
+            Add("taxi", 1, kerb, 100f, ks, both, closed: true);
+            Add("limo", 0, kerb, 150f, ks, both, closed: true);
+            Add("bus", 1, kerb, 215f, ks, both, busStops, closed: true);
+            Add("tuktuk", 0, kerb, 275f, ks, both, closed: true);
+            Add("taxi", 3, kerb, 320f, ks, both, closed: true);
+            float[] ss = { StopE(side, EastKerb), TrafficCar.DistanceTo(side, new Vector3(1.5f, 0f, SideStopZ)), StopW(side, WestKerb) };
+            int[] sf = { 0, 1, 0 };
+            Add("tuktuk", 1, side, 15f, ss, sf, closed: true);
+            Add("tuktuk", 2, side, 62f, ss, sf, closed: true);
+            Add("taxi", 0, side, 330f, ss, sf, closed: true);
+
+            // The ring road (CityRingRoad): round the edge of town both ways, over the level crossings.
+            // Its tuk-tuks can be hailed for a ride round the town.
+            void Ring(string kind, int variant, Vector3[] path, float start)
+            {
+                var v = Vehicle(traffic, kind, variant, out float halfLen, out float speed);
+                v.gameObject.AddComponent<TrafficCar>().Configure(path, true, Mathf.Min(speed, 10f), halfLen, start, null, null, null);
+                Hailable(v, kind);
+                var body = v.GetComponent<Rigidbody>();
+                body.isKinematic = true;
+                body.useGravity = false;
+                v.position = traffic.TransformPoint(path[0]);
+            }
+            var ringA = CityRingRoad.Loop(ring, anticlockwise: true);
+            var ringB = CityRingRoad.Loop(ring, anticlockwise: false);
+            Ring("tuktuk", 0, ringA, 20f);
+            Ring("sedan", 1, ringA, 200f);
+            Ring("tuktuk", 2, ringA, 380f);
+            Ring("taxi", 1, ringA, 560f);
+            Ring("tuktuk", 1, ringB, 60f);
+            Ring("sedan", 0, ringB, 300f);
+            Ring("tuktuk", 0, ringB, 520f);
+            return;
         }
 
         float[] e0 = { StopE(eastFast, EastFast) }, e1 = { StopE(eastKerb, EastKerb) };
@@ -244,13 +303,15 @@ public static class CityTraffic
         Add("tuktuk", 1, side, 15f, sideStops, sideFor);
         Add("tuktuk", 2, side, 62f, sideStops, sideFor);
         Add("taxi", 0, side, 190f, sideStops, sideFor);
+
     }
 
     // roundabout: the street ends at the clock-tower roundabout (CityStreets) — go once round it
     // (clockwise, keeping left) instead of the U-turn
     private static Vector3[] SideLoop(bool roundabout)
     {
-        var p = new List<Vector3> { new Vector3(-Length / 2f, 0f, EastKerb), new Vector3(-4.5f, 0f, EastKerb) };
+        float end = ring != null ? UTurnX : Length / 2f;
+        var p = new List<Vector3> { new Vector3(-end, 0f, EastKerb), new Vector3(-4.5f, 0f, EastKerb) };
         const float r = 3f;
         void Arc(Vector3 c, float from, float to, float radius)
         {
@@ -282,12 +343,46 @@ public static class CityTraffic
         }
         p.Add(new Vector3(1.5f, 0f, EastKerb + r));                    // down past the stop line
         Arc(new Vector3(4.5f, 0f, EastKerb + r), 180f, 270f, r);      // left onto the avenue, heading east
-        p.Add(new Vector3(Length / 2f, 0f, EastKerb));
+        p.Add(new Vector3(end, 0f, EastKerb));
+        if (ring != null) // back along the avenue westbound and round again (closed loop)
+        {
+            var back = UTurnLoop(EastKerb, WestKerb);
+            for (int i = 2; i < back.Length; i++) p.Add(back[i]);
+        }
+        return p.ToArray();
+    }
+
+    // A closed loop on the avenue between a pair of lanes: east along eastLane, U-turn at the east end,
+    // west along westLane, U-turn at the west end (the provincial town, where the avenue ends at the ring)
+    private static Vector3[] UTurnLoop(float eastLane, float westLane)
+    {
+        float zc = (eastLane + westLane) * 0.5f, r = (eastLane - westLane) * 0.5f;
+        var p = new List<Vector3> { new Vector3(-UTurnX, 0f, eastLane) };
+        for (int i = 0; i <= 10; i++) // east end: right round from heading east to heading west
+        {
+            float a = Mathf.Lerp(90f, -90f, i / 10f) * Mathf.Deg2Rad;
+            p.Add(new Vector3(UTurnX + Mathf.Cos(a) * r, 0f, zc + Mathf.Sin(a) * r));
+        }
+        for (int i = 0; i < 10; i++) // west end: round from heading west to heading east (the loop closes)
+        {
+            float a = Mathf.Lerp(270f, 90f, i / 10f) * Mathf.Deg2Rad;
+            p.Add(new Vector3(-UTurnX + Mathf.Cos(a) * r, 0f, zc + Mathf.Sin(a) * r));
+        }
         return p.ToArray();
     }
 
     // ── Vehicles (front along +Z, wheels on the ground) ──────────────────────
     private static readonly Color Tinted = new Color(0.2f, 0.28f, 0.36f);
+
+    private static int tukTuks;
+    private static RingSpec ring; // the town's ring road, which the avenue ends at (null: it runs off the map)
+
+    // Tuk-tuks and taxis on a closed loop can be waved down for a ride round town (TukTukHail)
+    internal static void Hailable(Transform v, string kind)
+    {
+        if (kind == "tuktuk") v.gameObject.AddComponent<TukTukHail>();
+        else if (kind == "taxi") v.gameObject.AddComponent<TukTukHail>().Configure(isTaxi: true);
+    }
 
     internal static Transform Vehicle(Transform parent, string kind, int variant, out float halfLength, out float speed)
     {
@@ -297,7 +392,12 @@ public static class CityTraffic
         {
             case "bus": size = Bus(v, variant); speed = 7.5f; break;
             case "taxi": size = Taxi(v, variant); speed = 10f; break;
-            case "tuktuk": size = TukTuk(v, variant); speed = 8f; break;
+            case "tuktuk":
+                size = TukTuk(v, variant); speed = 8f;
+                // a driver at the handlebar, and on some of them passengers on the back bench
+                v.gameObject.AddComponent<TukTukRider>().Configure(variant * 7 + tukTuks, (tukTuks + variant) % 3);
+                tukTuks++;
+                break;
             case "super": size = Supercar(v, variant); speed = 12f; break;
             case "limo": size = Sedan(v, new Color(0.05f, 0.05f, 0.07f), 5.2f, 1.9f, chrome: true); speed = 10.5f; break;
             default: size = Sedan(v, variant == 0 ? new Color(0.95f, 0.95f, 0.96f) : new Color(0.7f, 0.72f, 0.75f), 4.4f, 1.78f, chrome: false); speed = 10f; break;

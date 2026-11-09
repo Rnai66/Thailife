@@ -11,11 +11,11 @@ using UnityEngine;
 // The platform's ticket point is where you take the train to other provinces (TravelStop).
 public static class ThaiRailway
 {
-    private const float Half = 89f;          // the line runs right across the map
+    private const float Half = 99f;          // the line runs right across the map
     private const float RailTop = 0.62f;     // embankment + ballast + sleeper + rail
     private const float Gauge = 1f;          // metre gauge (ทางกว้าง 1 เมตร)
 
-    public static void Line(Transform root, float z, string stationName)
+    public static Transform Line(Transform root, float z, string stationName)
     {
         var line = PrimitiveKit.Group("Railway_ทางรถไฟ", root, new Vector3(0f, 0f, z)).transform;
         var earth = PrimitiveKit.Mat("EmbankmentEarth", new Color(0.55f, 0.42f, 0.3f));
@@ -44,11 +44,11 @@ public static class ThaiRailway
         var pole = PrimitiveKit.Mat("TelegraphPole", new Color(0.36f, 0.27f, 0.18f));
         var wire = PrimitiveKit.Mat("WireBlack", new Color(0.08f, 0.08f, 0.08f));
         var poles = PrimitiveKit.Group("TelegraphPoles", line, Vector3.zero).transform;
-        for (float x = -Half + 4f; x < Half; x += 16f)
+        for (float x = -Half + 12f; x < Half - 12f; x += 16f) // clear of the ring road's crossings (x ±94)
         {
             PrimitiveKit.Cylinder("Pole", poles, new Vector3(x, 3f, 4.2f), new Vector3(0.18f, 3f, 0.18f), pole, collider: false);
             PrimitiveKit.Box("CrossArm", poles, new Vector3(x, 5.6f, 4.2f), new Vector3(0.1f, 0.1f, 1.4f), pole, collider: false);
-            if (x + 16f < Half)
+            if (x + 16f < Half - 12f)
                 foreach (float s in new[] { -0.55f, 0.55f })
                     PrimitiveKit.Box("Wire", poles, new Vector3(x + 8f, 5.55f, 4.2f + s), new Vector3(16f, 0.02f, 0.02f), wire, collider: false);
         }
@@ -69,6 +69,7 @@ public static class ThaiRailway
         }
         MeshKit.MergeByMaterial(train, "Railway/Train");
         train.gameObject.AddComponent<SkyTrain>().Configure(-Half - 6f, Half + 76f, 9f, 36f);
+        return line;
     }
 
     // ── The station ──────────────────────────────────────────────────────────────
@@ -110,42 +111,109 @@ public static class ThaiRailway
             PrimitiveKit.Box("Lamp", st, new Vector3(x + 2f, ph + 2.85f, pz + 0.2f), new Vector3(0.3f, 0.25f, 0.3f), PrimitiveKit.Glow("StationLamp", new Color(1f, 0.85f, 0.55f), 1.4f), collider: false);
         }
 
-        // the station building behind the platform: cream boards, maroon pilasters, tall louvred windows
+        // the station building behind the platform: cream boards, maroon pilasters, tall louvred windows.
+        // A walk-through hall (โถงสถานี): up the steps from the forecourt, through the wide doorway, past
+        // the ticket office (ห้องขายตั๋ว) with its clerk behind the window, out the back onto the platform.
         var b = PrimitiveKit.Group("StationHouse", st, new Vector3(-14f, 0f, -8f)).transform;
-        const float bw = 16f, bd = 5.6f, bh = 3.6f;
-        PrimitiveKit.Box("Plinth", b, new Vector3(0f, 0.25f, 0f), new Vector3(bw + 0.6f, 0.5f, bd + 0.6f), maroon);
-        PrimitiveKit.Box("Walls", b, new Vector3(0f, 0.5f + bh * 0.5f, 0f), new Vector3(bw, bh, bd), cream);
+        const float bw = 16f, bd = 5.6f, bh = 3.6f, fy = 0.5f, gap = 2.4f, doorH = 2.7f, wt = 0.2f;
+        PrimitiveKit.Box("Plinth", b, new Vector3(0f, fy * 0.5f, 0f), new Vector3(bw + 0.6f, fy, bd + 0.6f), maroon); // the hall floor
+        PrimitiveKit.Box("HallFloor", b, new Vector3(0f, fy + 0.005f, 0f), new Vector3(bw - 0.4f, 0.01f, bd - 0.4f), PrimitiveKit.Mat("StationTiles", new Color(0.82f, 0.74f, 0.6f)), collider: false);
+        // front and back walls with the wide doorway in the middle; the two ends solid
+        foreach (float s in new[] { -1f, 1f })
+        {
+            float z = s * (bd * 0.5f - wt * 0.5f);
+            foreach (float k in new[] { -1f, 1f })
+                PrimitiveKit.Box("Wall", b, new Vector3(k * (gap + bw * 0.5f) * 0.5f, fy + bh * 0.5f, z), new Vector3(bw * 0.5f - gap, bh, wt), cream);
+            PrimitiveKit.Box("Lintel", b, new Vector3(0f, fy + doorH + (bh - doorH) * 0.5f, z), new Vector3(gap * 2f, bh - doorH, wt), cream);
+            PrimitiveKit.Box("EndWall", b, new Vector3(s * (bw * 0.5f - wt * 0.5f), fy + bh * 0.5f, 0f), new Vector3(wt, bh, bd), cream);
+            // the folding doors standing open against the wall inside, the frame round the opening
+            foreach (float k in new[] { -1f, 1f })
+            {
+                PrimitiveKit.Box("DoorLeaf", b, new Vector3(k * (gap + 0.65f), fy + 1.3f, z - s * 0.15f), new Vector3(1.2f, 2.6f, 0.05f), wood, collider: false);
+                PrimitiveKit.Box("DoorJamb", b, new Vector3(k * gap, fy + doorH * 0.5f, s * (bd * 0.5f + 0.03f)), new Vector3(0.18f, doorH, 0.08f), maroon, collider: false);
+            }
+            PrimitiveKit.Box("DoorHead", b, new Vector3(0f, fy + doorH + 0.1f, s * (bd * 0.5f + 0.04f)), new Vector3(gap * 2f + 0.4f, 0.22f, 0.08f), maroon, collider: false);
+        }
         for (float x = -bw * 0.5f; x <= bw * 0.5f + 0.01f; x += bw / 6f)
-            foreach (float s in new[] { -1f, 1f })
-                PrimitiveKit.Box("Pilaster", b, new Vector3(x, 0.5f + bh * 0.5f, s * (bd * 0.5f + 0.04f)), new Vector3(0.25f, bh, 0.08f), maroon, collider: false);
-        for (int i = 0; i < 6; i++)
+            if (Mathf.Abs(x) > gap)
+                foreach (float s in new[] { -1f, 1f })
+                    PrimitiveKit.Box("Pilaster", b, new Vector3(x, fy + bh * 0.5f, s * (bd * 0.5f + 0.04f)), new Vector3(0.25f, bh, 0.08f), maroon, collider: false);
+        foreach (int i in new[] { 0, 1, 4, 5 }) // louvred windows either side of the doorway
         {
             float x = -bw * 0.5f + bw / 12f + i * bw / 6f;
             foreach (float s in new[] { -1f, 1f })
             {
-                bool door = i == 2 || i == 3;
-                float h = door ? 2.6f : 1.8f, y = door ? 0.5f + h * 0.5f : 1.5f + h * 0.5f;
-                PrimitiveKit.Box(door ? "Door" : "Window", b, new Vector3(x, y, s * (bd * 0.5f + 0.03f)), new Vector3(1.3f, h, 0.05f), door ? wood : dark, collider: false);
+                const float h = 1.8f, y = 1.5f + h * 0.5f;
+                PrimitiveKit.Box("Window", b, new Vector3(x, y, s * (bd * 0.5f + 0.03f)), new Vector3(1.3f, h, 0.05f), dark, collider: false);
                 PrimitiveKit.Box("ArchTop", b, new Vector3(x, y + h * 0.5f + 0.12f, s * (bd * 0.5f + 0.05f)), new Vector3(1.5f, 0.22f, 0.05f), maroon, collider: false);
-                if (!door)
-                    for (float ly = y - h * 0.5f + 0.15f; ly < y + h * 0.5f; ly += 0.22f) // louvres
-                        PrimitiveKit.Box("Louvre", b, new Vector3(x, ly, s * (bd * 0.5f + 0.06f)), new Vector3(1.2f, 0.05f, 0.04f), wood, collider: false);
+                for (float ly = y - h * 0.5f + 0.15f; ly < y + h * 0.5f; ly += 0.22f) // louvres
+                    PrimitiveKit.Box("Louvre", b, new Vector3(x, ly, s * (bd * 0.5f + 0.06f)), new Vector3(1.2f, 0.05f, 0.04f), wood, collider: false);
             }
         }
+        // steps up from the forecourt to the doorway
+        for (int i = 0; i < 3; i++)
+        {
+            float top = fy * (3 - i) / 3f;
+            PrimitiveKit.Box("Step", b, new Vector3(0f, top * 0.5f, -bd * 0.5f - 0.3f - 0.35f * (i + 0.5f)), new Vector3(gap * 2f + 1f, top, 0.35f), concrete);
+        }
+        // the back opens straight onto the platform (its edge meets the plinth)
+
+        // ห้องขายตั๋ว: the west end of the hall, behind a counter with a glazed window and a clerk
+        const float counterX = -3.3f;
+        PrimitiveKit.Box("TicketCounter", b, new Vector3(counterX, fy + 0.55f, 0f), new Vector3(0.5f, 1.1f, bd - wt * 2f), wood);
+        PrimitiveKit.Box("CounterTop", b, new Vector3(counterX + 0.05f, fy + 1.13f, 0f), new Vector3(0.7f, 0.06f, bd - wt * 2f), maroon, collider: false);
+        var glass = PrimitiveKit.Mat("TicketGlass", new Color(0.7f, 0.85f, 0.9f), 0.95f, 0.1f);
+        PrimitiveKit.Box("Glass", b, new Vector3(counterX, fy + 1.85f, 0f), new Vector3(0.03f, 1.3f, bd - wt * 2f), glass);
+        for (float z = -bd * 0.5f + 0.3f; z <= bd * 0.5f - 0.2f; z += 1.3f)
+            PrimitiveKit.Box("GlassBar", b, new Vector3(counterX - 0.02f, fy + 1.85f, z), new Vector3(0.06f, 1.3f, 0.06f), wood, collider: false);
+        PrimitiveKit.Box("Speaker", b, new Vector3(counterX + 0.04f, fy + 1.45f, -0.4f), new Vector3(0.03f, 0.3f, 0.4f), dark, collider: false);
+        PrimitiveKit.Box("TicketSign", b, new Vector3(counterX + 0.05f, fy + 2.85f, 0f), new Vector3(0.05f, 0.5f, 3.2f), maroon, collider: false);
+        PrimitiveKit.Label("ขายตั๋ว · TICKETS", b, new Vector3(counterX + 0.09f, fy + 2.85f, 0f), 0.03f, new Color(1f, 0.88f, 0.5f), -90f);
+        var clerk = new GameObject("TicketClerk_พนักงานขายตั๋ว");
+        clerk.transform.SetParent(b, false);
+        clerk.transform.localPosition = new Vector3(counterX - 0.9f, fy, 0.3f);
+        clerk.transform.localRotation = Quaternion.Euler(0f, 90f, 0f);
+        clerk.AddComponent<MarketVendor>().Configure(11);
+        PrimitiveKit.Box("Desk", b, new Vector3(-6.5f, fy + 0.4f, 1.6f), new Vector3(1.4f, 0.8f, 0.7f), wood);
+        PrimitiveKit.Box("Safe", b, new Vector3(-7.4f, fy + 0.5f, -1.9f), new Vector3(0.6f, 1f, 0.6f), PrimitiveKit.Mat("SteelFrame", new Color(0.7f, 0.72f, 0.75f)));
+        // the waiting side: wooden benches and the timetable board (ตารางเวลาเดินรถ) on the east wall
+        foreach (float z in new[] { -1.2f, 1.2f })
+        {
+            PrimitiveKit.Box("HallBench", b, new Vector3(5f, fy + 0.42f, z), new Vector3(3.2f, 0.08f, 0.5f), wood);
+            PrimitiveKit.Box("HallBenchBack", b, new Vector3(5f, fy + 0.72f, z + Mathf.Sign(z) * 0.25f), new Vector3(3.2f, 0.5f, 0.06f), wood, collider: false);
+        }
+        PrimitiveKit.Box("Timetable", b, new Vector3(bw * 0.5f - wt - 0.04f, fy + 2f, 0f), new Vector3(0.04f, 1.4f, 2.6f), PrimitiveKit.Mat("BoardBlack", new Color(0.08f, 0.1f, 0.09f)), collider: false);
+        PrimitiveKit.Label("ตารางเวลาเดินรถ\nขบวน 7  กรุงเทพฯ  08:30\nขบวน 51 เชียงใหม่ 13:15\nขบวน 85 หาดใหญ่  19:40", b,
+            new Vector3(bw * 0.5f - wt - 0.07f, fy + 2f, 0f), 0.018f, new Color(1f, 0.9f, 0.4f), 90f);
+        // a light in the hall
+        PrimitiveKit.Box("HallLamp", b, new Vector3(0f, fy + bh - 0.15f, 0f), new Vector3(0.6f, 0.08f, 0.6f), PrimitiveKit.Glow("StationLamp", new Color(1f, 0.85f, 0.55f), 1.4f), collider: false);
+
         // two-tier Thai roof: the lower one broad with deep eaves, a smaller one stacked on top, gable
-        // fronts in maroon edged in gold, ช่อฟ้า finials curling up at the ridge ends
-        float roofY = 0.5f + bh;
-        MeshKit.Place("RoofLower", b, MeshKit.Gable("Railway/StationRoofLow", bd + 2.2f, 1.7f, 1f), tile, new Vector3(-bw * 0.5f - 0.9f, roofY, 0f), new Vector3(0f, 90f, 0f), new Vector3(1f, 1f, bw + 1.8f));
-        MeshKit.Place("RoofUpper", b, MeshKit.Gable("Railway/StationRoofHigh", bd * 0.75f, 1.6f, 1f), tile, new Vector3(-bw * 0.32f, roofY + 1.15f, 0f), new Vector3(0f, 90f, 0f), new Vector3(1f, 1f, bw * 0.64f));
+        // fronts in maroon edged in gold, ช่อฟ้า finials curling up at the ridge ends. Kept apart from the
+        // merged station so it can stop drawing while you're in the hall (InteriorReveal).
+        var roof = PrimitiveKit.Group("StationRoof", line, new Vector3(-14f, 0f, -8f)).transform;
+        float roofY = fy + bh;
+        MeshKit.Place("RoofLower", roof, MeshKit.Gable("Railway/StationRoofLow", bd + 2.2f, 1.7f, 1f), tile, new Vector3(-bw * 0.5f - 0.9f, roofY, 0f), new Vector3(0f, 90f, 0f), new Vector3(1f, 1f, bw + 1.8f));
+        MeshKit.Place("RoofUpper", roof, MeshKit.Gable("Railway/StationRoofHigh", bd * 0.75f, 1.6f, 1f), tile, new Vector3(-bw * 0.32f, roofY + 1.15f, 0f), new Vector3(0f, 90f, 0f), new Vector3(1f, 1f, bw * 0.64f));
         foreach (float s in new[] { -1f, 1f })
         {
-            MeshKit.Place("GableFront", b, MeshKit.Gable("Railway/StationGable", bd * 0.72f, 1.5f, 1f), maroon, new Vector3(s * (bw * 0.32f + 0.02f), roofY + 1.17f, 0f), new Vector3(0f, s * 90f, 0f), new Vector3(1f, 1f, 0.06f));
-            PrimitiveKit.Box("BargeBoard", b, new Vector3(s * (bw * 0.32f + 0.08f), roofY + 1.95f, -bd * 0.19f), new Vector3(0.08f, 0.12f, 2.5f), gold, new Vector3(-31f, 0f, 0f), collider: false);
-            PrimitiveKit.Box("BargeBoard", b, new Vector3(s * (bw * 0.32f + 0.08f), roofY + 1.95f, bd * 0.19f), new Vector3(0.08f, 0.12f, 2.5f), gold, new Vector3(31f, 0f, 0f), collider: false);
-            PrimitiveKit.Box("Chofa", b, new Vector3(s * (bw * 0.32f + 0.2f), roofY + 3f, 0f), new Vector3(0.5f, 0.12f, 0.12f), gold, new Vector3(0f, 0f, s * -50f), collider: false);
-            PrimitiveKit.Box("Chofa", b, new Vector3(s * (bw * 0.5f + 1f), roofY + 1.95f, 0f), new Vector3(0.45f, 0.1f, 0.1f), gold, new Vector3(0f, 0f, s * -50f), collider: false);
+            MeshKit.Place("GableFront", roof, MeshKit.Gable("Railway/StationGable", bd * 0.72f, 1.5f, 1f), maroon, new Vector3(s * (bw * 0.32f + 0.02f), roofY + 1.17f, 0f), new Vector3(0f, s * 90f, 0f), new Vector3(1f, 1f, 0.06f));
+            PrimitiveKit.Box("BargeBoard", roof, new Vector3(s * (bw * 0.32f + 0.08f), roofY + 1.95f, -bd * 0.19f), new Vector3(0.08f, 0.12f, 2.5f), gold, new Vector3(-31f, 0f, 0f), collider: false);
+            PrimitiveKit.Box("BargeBoard", roof, new Vector3(s * (bw * 0.32f + 0.08f), roofY + 1.95f, bd * 0.19f), new Vector3(0.08f, 0.12f, 2.5f), gold, new Vector3(31f, 0f, 0f), collider: false);
+            PrimitiveKit.Box("Chofa", roof, new Vector3(s * (bw * 0.32f + 0.2f), roofY + 3f, 0f), new Vector3(0.5f, 0.12f, 0.12f), gold, new Vector3(0f, 0f, s * -50f), collider: false);
+            PrimitiveKit.Box("Chofa", roof, new Vector3(s * (bw * 0.5f + 1f), roofY + 1.95f, 0f), new Vector3(0.45f, 0.1f, 0.1f), gold, new Vector3(0f, 0f, s * -50f), collider: false);
         }
-        PrimitiveKit.Box("Ridge", b, new Vector3(0f, roofY + 2.77f, 0f), new Vector3(bw * 0.64f, 0.1f, 0.14f), gold, collider: false);
+        PrimitiveKit.Box("Ridge", roof, new Vector3(0f, roofY + 2.77f, 0f), new Vector3(bw * 0.64f, 0.1f, 0.14f), gold, collider: false);
+        PrimitiveKit.Box("Ceiling", roof, new Vector3(0f, roofY + 0.02f, 0f), new Vector3(bw, 0.04f, bd), cream, collider: false);
+        MeshKit.MergeByMaterial(roof, "Railway/StationRoof");
+        var hall = new GameObject("StationHall_โถงสถานี");
+        hall.transform.SetParent(line, false);
+        hall.transform.localPosition = new Vector3(-14f, fy + 1.6f, -8f);
+        var inside = hall.AddComponent<BoxCollider>();
+        inside.isTrigger = true;
+        inside.size = new Vector3(bw - 0.6f, 3f, bd - 0.5f);
+        hall.AddComponent<InteriorReveal>().Configure(roof);
+
         // the name over the door (the street side) and the clock
         PrimitiveKit.Box("NameBoard", b, new Vector3(0f, roofY - 0.45f, -bd * 0.5f - 0.08f), new Vector3(6.4f, 0.6f, 0.06f), maroon, collider: false);
         PrimitiveKit.Label(stationName, b, new Vector3(0f, roofY - 0.45f, -bd * 0.5f - 0.13f), 0.045f, new Color(1f, 0.88f, 0.5f));
@@ -178,15 +246,15 @@ public static class ThaiRailway
         MeshKit.MergeByMaterial(st, "Railway/Station");
 
         // the ticket point: take the train to another province from the platform; arrivals step off here
+        // the ticket point: at the ticket office window in the hall (buy a ticket to another province);
+        // arrivals step off the train onto the platform
         var gate = new GameObject("TrainGate_ไปต่างจังหวัด");
         gate.transform.SetParent(line, false);
-        gate.transform.localPosition = new Vector3(0f, ph + 1f, pz);
+        gate.transform.localPosition = new Vector3(-14f - 3.3f + 1.2f, 0.5f + 1f, -8f);
         var zone = gate.AddComponent<BoxCollider>();
         zone.isTrigger = true;
-        zone.size = new Vector3(3f, 2f, 3f);
+        zone.size = new Vector3(1.8f, 2f, 3.4f);
         gate.AddComponent<TravelStop>().Configure("สถานีรถไฟ · ไปต่างจังหวัด", longDistance: TravelMode.Train);
-        PrimitiveKit.Box("TicketWindow", line, new Vector3(0f, ph + 1f, pz - 1.45f), new Vector3(1.4f, 1.6f, 0.3f), maroon);
-        PrimitiveKit.Label("ขายตั๋ว · ไปต่างจังหวัด", line, new Vector3(0f, ph + 2.05f, pz - 1.29f), 0.03f, new Color(1f, 0.9f, 0.6f), 180f);
         PrimitiveKit.Group("SpawnPoint_Train", line, new Vector3(-3.5f, ph + 0.05f, pz + 0.4f), 90f).AddComponent<SpawnPoint>().Configure(TravelMode.Train);
     }
 
@@ -195,14 +263,15 @@ public static class ThaiRailway
     {
         var paddy = PrimitiveKit.Mat("PaddyGreen", new Color(0.45f, 0.65f, 0.25f));
         var dyke = PrimitiveKit.Mat("PaddyDyke", new Color(0.52f, 0.42f, 0.28f));
-        for (float x = -84f; x < 84f; x += 24f)
+        // inside the ring road (x ±81, north side from z +19.8 out here)
+        for (float x = -78f; x < 78f; x += 26f)
         {
-            PrimitiveKit.Box("Paddy", line, new Vector3(x + 12f, 0.02f, 13f), new Vector3(23f, 0.03f, 13f), paddy, collider: false);
-            PrimitiveKit.Box("Dyke", line, new Vector3(x, 0.08f, 13f), new Vector3(0.6f, 0.16f, 13f), dyke, collider: false);
+            PrimitiveKit.Box("Paddy", line, new Vector3(x + 13f, 0.02f, 12.5f), new Vector3(25f, 0.03f, 12f), paddy, collider: false);
+            PrimitiveKit.Box("Dyke", line, new Vector3(x, 0.08f, 12.5f), new Vector3(0.6f, 0.16f, 12f), dyke, collider: false);
         }
         int seed = 3;
-        for (float x = -80f; x < 84f; x += 13f)
-            Nature.CoconutPalm(line, new Vector3(x + (seed % 3) * 2f, 0f, 7.5f + (seed % 2) * 12f), 0.9f + (seed % 3) * 0.1f, seed++);
+        for (float x = -76f; x < 74f; x += 13f)
+            Nature.CoconutPalm(line, new Vector3(x + (seed % 3) * 2f, 0f, 7.5f + (seed % 2) * 9f), 0.9f + (seed % 3) * 0.1f, seed++);
     }
 
     // ── The train ────────────────────────────────────────────────────────────────

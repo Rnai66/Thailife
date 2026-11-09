@@ -282,7 +282,7 @@ public static class Bangkok
     private static void River(Transform root)
     {
         var t = PrimitiveKit.Group("ChaoPhraya_แม่น้ำเจ้าพระยา", root, new Vector3(0f, 0f, RiverZ)).transform;
-        const float len = 220f, pierX = PierX, gap = 3.2f;
+        const float len = 250f, pierX = PierX, gap = 3.2f; // the full width of the map: under the ring road's bridges
         var white = White;
         var pave = PrimitiveKit.Mat("Pavement", new Color(0.72f, 0.7f, 0.66f));
         var wood = PrimitiveKit.Mat("WoodPlank", new Color(0.6f, 0.4f, 0.22f));
@@ -361,7 +361,7 @@ public static class Bangkok
         ExpressBoat(t, new Vector3(-75f, 0f, -10.6f));
 
         // ขบวนเรือพระราชพิธี down the middle, crowds on both banks, the royal landing (RoyalBarges)
-        RoyalBarges.Build(t, RiverHalf, len);
+        RoyalBarges.Build(t, RiverHalf, 220f);
     }
 
     // Crossing by เรือหางยาว: a longtail with its boatman at the tiller and a few passengers, going to

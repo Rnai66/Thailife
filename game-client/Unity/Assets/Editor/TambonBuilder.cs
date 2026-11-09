@@ -146,10 +146,10 @@ public static class TambonBuilder
             new Vector4(-11.3f, -15f, -8.7f, -10f), new Vector4(0.7f, -6f, 3.3f, 4f));
     });
 
-    internal static void BuildCity(bool ask) => BuildLocation("Assets/Scenes/City.unity", "City", 18f, ask, root =>
+    internal static void BuildCity(bool ask) => BuildLocation("Assets/Scenes/City.unity", "City", 20f, ask, root =>
     {
         // Four-lane avenue with traffic lights and traffic (CityTraffic)
-        CityTraffic.Build(root, roundabout: true);
+        CityTraffic.Build(root, roundabout: true, ringRoad: CityRingRoad.Town);
         // ตัวเมือง (อำเภอ/จังหวัด): clock tower roundabout, shophouses, boxing camp (career tier 3)
         Places2.ClockTower(root, new Vector3(0f, 0f, 14f));
         Places2.Shophouses(root, new Vector3(-20f, 0f, 2f), 0f, 5, new[] { "ร้านทอง", "ร้านขายยา", "ออฟฟิศไอที", "ร้านข้าวมันไก่", "ร้านเสื้อผ้า" });
@@ -207,7 +207,9 @@ public static class TambonBuilder
         // out in the provinces) along the north of the town, its station up the walk past the clock tower
         Seaside.NoodleShop(root, new Vector3(36f, 0f, 20f), 180f);
         ShopZone(root, new Vector3(36f, 0f, 18.2f), "noodle");
-        ThaiRailway.Line(root, 62f, "สถานีรถไฟตัวเมือง");
+        var railway = ThaiRailway.Line(root, CityRingRoad.RailZ, "สถานีรถไฟตัวเมือง");
+        // ถนนวงแหวน round the edge of town, over the railway at two level crossings (its traffic is the avenue's)
+        CityRingRoad.Build(root, CityRingRoad.Town, railway);
 
         // Hospital, hotel, police station and pawn shop (north row); district office and อบจ. (south of the road)
         CityCivic.Build(root);
@@ -255,12 +257,14 @@ public static class TambonBuilder
     // กรุงเทพฯ: another province, reached by coach, train or plane (TravelMenu). The same avenue and
     // skytrain as the home town, วัดพระแก้ว, ศาลพระพรหม, the river with วัดอรุณ across it and
     // สุวรรณภูมิ (Bangkok)
-    internal static void BuildBangkok(bool ask) => BuildLocation("Assets/Scenes/Bangkok.unity", "Bangkok", 22f, ask, root =>
+    internal static void BuildBangkok(bool ask) => BuildLocation("Assets/Scenes/Bangkok.unity", "Bangkok", 25f, ask, root =>
     {
         CityTraffic.Build(root, "↑ ศาลพระพรหม · วัดอรุณ\n← วัดพระแก้ว · สนามหลวง", "↑ สนามบินสุวรรณภูมิ\nรถไฟฟ้า สถานีสยาม ↑",
-            "ป้ายรถเมล์ · รถทัวร์ หมอชิต");
+            "ป้ายรถเมล์ · รถทัวร์ หมอชิต", ringRoad: CityRingRoad.Capital);
         Seaside.SkyTrainLine(root, "สถานีสยาม");
         Bangkok.Build(root);
+        CityRingRoad.Build(root, CityRingRoad.Capital); // round the city, over the river on two bridges
+        BangkokStreets.Build(root, CityRingRoad.Capital);
 
         var pave = PrimitiveKit.Mat("Pavement", new Color(0.72f, 0.7f, 0.66f));
         PrimitiveKit.Box("Pavement", root, new Vector3(0f, 0.008f, 19f), new Vector3(96f, 0.012f, 49f), pave, collider: false);
