@@ -2788,3 +2788,25 @@ TICKETS	TICKETS
 นา 7-12\nซื้อที่นาติดคลองที่ธนาคาร	Paddies 7-12\nBuy the canal-side land at the bank
 พ่อค้าวัว\nซื้อวัวเข้าคอกในแปลงเกษตร	Cattle dealer\nBuy cows for your farm lot pen
 แปลงเกษตรเลขที่ {} {}	Farm lot No. {} {}
+{} · เลือกบ้านเลขที่	{} · choose a house number
+กำลังโหลดแปลง…	Loading lots…
+ว่าง {}/{} แปลง	{}/{} lots free
+ว่าง {}/{} แปลง · เพื่อนอยู่ที่นี่ {} คน	{}/{} lots free · {} friends live here
+ไปหมู่ที่มีเพื่อน (หมู่ {})	Go to a moo with friends (moo {})
+เขียว = ว่าง · ฟ้า = เพื่อน · ทอง = บ้านคุณ · เทา = มีคนอยู่	Green = free · blue = friend · gold = your home · grey = taken
+แปลง 1–6 ซอยข้างศาลากลางบ้าน · 7–22 ซอยตะวันออก	Lots 1–6 by the village hall · 7–22 on the East Soi
+แตะแปลงที่ว่างเพื่อเลือก	Tap a free lot to choose it
+ให้เกมเลือกแปลงให้	Let the game pick
+← เลือกแบบบ้าน	← Choose house style
+เลือกแปลง	Choose lot
+อยู่บ้านเลขที่ {} หมู่ที่ {}	Live at house No. {} moo {}
+เปลี่ยนเป็น{}ที่บ้านเลขที่ {}	Change to {} at house No. {}
+{}\nว่าง	{}\nFree
+{}\nบ้านคุณ	{}\nYour home
+{}\nมีคนอยู่	{}\nTaken
+ย้ายแปลงเกษตรมาหมู่ที่ {} (ฟรี)	Move my farm lot to moo {} (free)
+ย้ายแปลงเกษตรแล้ว	Farm lot moved
+ย้ายแปลงเกษตรมาที่แปลงเกษตรเลขที่ {} {} แล้ว	Farm lot moved to farm lot No. {} {}
+หมู่นี้แปลงเกษตรเต็มแล้ว	This moo has no free farm lots
+แปลงเกษตรอยู่หมู่นี้อยู่แล้ว	Your farm lot is already in this moo
+แปลงเกษตรของคุณอยู่{} · ย้ายมาหมู่บ้านของคุณได้ที่เมนูย้ายบ้าน	Your farm lot is in {} · move it to your moo from the Move house menu

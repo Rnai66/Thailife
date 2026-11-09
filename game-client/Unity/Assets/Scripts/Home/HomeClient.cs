@@ -37,8 +37,8 @@ public class HomeClient : MonoBehaviour
     [Serializable] private class LotsRequest { public string area; public int moo; }
 
     // lots_get: one หมู่'s lots and how full each หมู่ is
-    [Serializable] public class LotEntry { public int no; public bool vacant, mine; public string owner, owner_id, style; }
-    [Serializable] public class MooEntry { public int no, used, total; public string name; }
+    [Serializable] public class LotEntry { public int no; public bool vacant, mine, friend; public string owner, owner_id, style; }
+    [Serializable] public class MooEntry { public int no, used, total, friends; public string name; }
     [Serializable] public class LotsView
     {
         public string area, moo_name;

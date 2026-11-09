@@ -6,7 +6,8 @@
 --   home_choose  {"area": "city", "style": "townhouse", "moo": 3?, "lot": 5?}
 --                -> the same view; the first choice is free, moving later costs move_fee
 --                   (changing only the style of the house on your lot is a move too)
---   lots_get     {"area": "city"?, "moo": 3?}            -> who lives on which lot of one หมู่
+--   lots_get     {"area": "city"?, "moo": 3?}            -> who lives on which lot of one หมู่ (and which
+--                                                          are your friends), how full each หมู่ is
 --
 -- Players from before this was added count as living in the village stilt house until they choose.
 --
@@ -95,6 +96,23 @@ local function display_name(user_id)
   local name = u.display_name
   if not name or name == "" then name = u.username or "เพื่อนบ้าน" end
   return name
+end
+
+-- The player's friends (both sides agreed: state 0), as a set of user ids
+local function friend_set(user_id)
+  local set, cursor = {}, nil
+  for _ = 1, 10 do
+    local ok, friends, next_cursor = pcall(nk.friends_list, user_id, 100, 0, cursor)
+    if not ok then break end
+    for _, f in ipairs(friends or {}) do
+      local u = f.user or {}
+      local id = u.user_id or u.id
+      if id then set[id] = true end
+    end
+    cursor = next_cursor
+    if cursor == nil or cursor == "" then break end
+  end
+  return set
 end
 
 local function lot_key(area_id, moo) return area_id .. "_" .. moo end
@@ -259,22 +277,30 @@ nk.register_rpc(function(context, payload)
   moo = math.floor(moo)
   local count = LOTS[area_id]
   local lots, moos = {}, {}
+  local friends = friend_set(context.user_id)
   local doc = read_lots(area_id, moo)
   for no = 1, count do
     local l = doc.lots[tostring(no)]
     table.insert(lots, { no = no, vacant = l == nil, owner = l and l.name or "", owner_id = l and l.user or "",
-                         style = l and l.style or "", mine = l ~= nil and l.user == context.user_id })
+                         style = l and l.style or "", mine = l ~= nil and l.user == context.user_id,
+                         friend = l ~= nil and friends[l.user] == true })
   end
   local keys = {}
   for m = 1, MOOS do table.insert(keys, { collection = LOT_STORE, key = lot_key(area_id, m), user_id = SYSTEM }) end
-  local used = {}
+  local used, pals = {}, {}
   for _, o in ipairs(nk.storage_read(keys)) do
-    local n, now = 0, nk.time()
-    for _, l in pairs(o.value.lots or {}) do if now - (l.seen or 0) <= IDLE_MS then n = n + 1 end end
-    used[o.key] = n
+    local n, f, now = 0, 0, nk.time()
+    for _, l in pairs(o.value.lots or {}) do
+      if now - (l.seen or 0) <= IDLE_MS then
+        n = n + 1
+        if friends[l.user] then f = f + 1 end
+      end
+    end
+    used[o.key], pals[o.key] = n, f
   end
   for m = 1, MOOS do
-    table.insert(moos, { no = m, name = moo_name(area_id, m), used = used[lot_key(area_id, m)] or 0, total = count })
+    table.insert(moos, { no = m, name = moo_name(area_id, m), used = used[lot_key(area_id, m)] or 0, total = count,
+                         friends = pals[lot_key(area_id, m)] or 0 })
   end
   return nk.json_encode({ area = area_id, moo = moo, moo_name = moo_name(area_id, moo), lot_count = count,
                           idle_days = IDLE_DAYS, lots = lots, moos = moos })

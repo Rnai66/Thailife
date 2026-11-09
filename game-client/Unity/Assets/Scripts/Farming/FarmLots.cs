@@ -25,6 +25,7 @@ public class FarmLots : MonoBehaviour
     [Serializable] private class SetLayout { public string[] layout; }
     [Serializable] private class SetFence { public string side, fence; }
     [Serializable] private class GetRequest { public int moo; }
+    [Serializable] private class MoveRequest { public int moo; }
 
     [SerializeField] private Transform templates;
 
@@ -115,6 +116,8 @@ public class FarmLots : MonoBehaviour
 
     private void Accept(View view)
     {
+        if (!Loaded && view?.mine != null && HomeClient.LivesIn("village") && view.mine.moo != HomeClient.MyMoo)
+            UiKit.FloatAbovePlayer($"แปลงเกษตรของคุณอยู่{view.mine.moo_name} · ย้ายมาหมู่บ้านของคุณได้ที่เมนูย้ายบ้าน", new Color(1f, 0.8f, 0.4f));
         Last = view;
         Loaded = true;
         if (this != null) Apply(view);
@@ -153,6 +156,31 @@ public class FarmLots : MonoBehaviour
         return view;
     }
 
+    // Your farm lot wherever you are (e.g. the move-house window): the first answer gives you one if needed
+    public static async Task<View> FetchMineAsync()
+    {
+        var conn = Connection();
+        if (conn == null) return Last;
+        var result = await conn.Client.RpcAsync(conn.Session, "farmlot_get", JsonUtility.ToJson(new GetRequest { moo = 0 }));
+        var view = JsonUtility.FromJson<View>(result.Payload);
+        Last = view;
+        Changed?.Invoke(view);
+        return view;
+    }
+
+    // Move your farm (free): a village resident to their own หมู่; others to `moo`
+    public static async Task<View> MoveAsync(int moo = 0)
+    {
+        var conn = Connection();
+        if (conn == null) throw new Exception("offline");
+        var result = await conn.Client.RpcAsync(conn.Session, "farmlot_move", JsonUtility.ToJson(new MoveRequest { moo = moo }));
+        var view = JsonUtility.FromJson<View>(result.Payload);
+        Last = view;
+        if (Current != null) { Current.nextRefresh = 0f; foreach (var lot in Current.lots.Values) lot.Clear(false); }
+        Changed?.Invoke(view);
+        return view;
+    }
+
     public static string Explain(Exception e)
     {
         string m = e.Message ?? "";
@@ -160,6 +188,8 @@ public class FarmLots : MonoBehaviour
         if (m.Contains("same layout")) return "จัดโซนแบบนี้อยู่แล้ว";
         if (m.Contains("same fence")) return "ด้านนี้เป็นรั้วแบบนี้อยู่แล้ว";
         if (m.Contains("offline")) return "ต้องออนไลน์ก่อน";
+        if (m.Contains("farms full")) return "หมู่นี้แปลงเกษตรเต็มแล้ว";
+        if (m.Contains("same farm")) return "แปลงเกษตรอยู่หมู่นี้อยู่แล้ว";
         return "เชื่อมต่อไม่ได้ ลองใหม่";
     }
 }

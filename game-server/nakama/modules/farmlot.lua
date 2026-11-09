@@ -9,6 +9,9 @@
 --                                 lots:[{no, vacant, owner, owner_id, layout, fences, mine}],
 --                                 fences_list:[{id, name, price}], modules:[{id, name}], layout_fee}
 --   farmlot_set {"layout": ["pond","rice","cows","coop"]?, "side": "back", "fence": "wood"?}
+--   farmlot_move {"moo": 3?, "lot": 7?} -> move your farm (free, everything on it comes along): a
+--                village resident to their own หมู่ (so farm and house are neighbours), anyone else to
+--                the หมู่ they pick; leave out lot for the first free one there
 --
 -- Like the house lots (home.lua): 12 หมู่ of FARM_LOTS lots, one shared record per หมู่ written with
 -- version checks, idle owners let go after IDLE_DAYS (their animals and rice stay theirs). A village
@@ -179,6 +182,42 @@ local function pay(user_id, amount, reason)
   if (w[data.CURRENCY] or 0) < amount then err("not enough baht") end
   nk.wallet_update(user_id, { [data.CURRENCY] = -amount }, { reason = reason }, true)
 end
+
+nk.register_rpc(function(context, payload)
+  local user_id = context.user_id
+  local req = decode(payload)
+  local s = read(user_id)
+  ensure(user_id, s)
+  local home = home_moo(user_id)
+  local moo = home or math.floor(tonumber(req.moo) or 0)
+  if moo < 1 or moo > MOOS then err("bad moo", GRPC_INVALID_ARGUMENT) end
+  local lot = req.lot and math.floor(tonumber(req.lot) or 0) or nil
+  if lot and (lot < 1 or lot > FARM_LOTS) then err("bad lot", GRPC_INVALID_ARGUMENT) end
+  if moo == s.moo and (lot == nil or lot == s.lot) then err("same farm") end
+  local old_moo, old_lot = s.moo, s.lot
+  local new_lot
+  if lot then
+    if not put(moo, lot, user_id, s) then err("lot taken") end
+    new_lot = lot
+  else
+    for _ = 1, 3 do
+      local doc = read_lots(moo)
+      local free
+      for no = 1, FARM_LOTS do if not doc.lots[tostring(no)] then free = no break end end
+      if not free then err("farms full") end
+      if put(moo, free, user_id, s) then new_lot = free break end
+    end
+    if not new_lot then err("busy, try again") end
+  end
+  s.moo, s.lot = moo, new_lot
+  write(user_id, s)
+  update_lots(old_moo, function(doc)
+    local cur = doc.lots[tostring(old_lot)]
+    if not cur or cur.user ~= user_id then return false end
+    doc.lots[tostring(old_lot)] = nil
+  end)
+  return view(user_id, s, moo, { done = "ย้ายแปลงเกษตรมาที่แปลงเกษตรเลขที่ " .. new_lot .. " " .. moo_name(moo) .. " แล้ว" })
+end, "farmlot_move")
 
 nk.register_rpc(function(context, payload)
   local req = decode(payload)
