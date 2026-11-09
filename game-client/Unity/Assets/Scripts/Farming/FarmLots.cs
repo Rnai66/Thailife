@@ -12,7 +12,7 @@ public class FarmLots : MonoBehaviour
 {
     [Serializable] public class Fences { public string front = "none", back = "none", left = "none", right = "none"; }
     [Serializable] public class Mine { public int moo, lot; public string[] layout; public Fences fences; public string moo_name, address; }
-    [Serializable] public class LotEntry { public int no; public bool vacant, mine; public string owner, owner_id; public string[] layout; public Fences fences; }
+    [Serializable] public class LotEntry { public int no; public bool vacant, mine; public string owner, owner_id; public string[] layout; public Fences fences; public BuildClient.Piece[] pieces; }
     [Serializable] public class Option { public string id, name; public int price; }
     [Serializable] public class View
     {
@@ -131,7 +131,7 @@ public class FarmLots : MonoBehaviour
         {
             if (!lots.TryGetValue(l.no, out var lot)) continue;
             if (l.vacant) lot.Clear(true);
-            else lot.Show(this, l.layout, l.fences, l.owner, l.mine);
+            else lot.Show(this, l.layout, l.fences, l.owner, l.mine, l.mine ? null : l.pieces); // your own pieces: BuiltPieces
         }
     }
 

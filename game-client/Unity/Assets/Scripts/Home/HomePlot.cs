@@ -31,6 +31,15 @@ public class HomePlot : MonoBehaviour
     public bool IsMine => lot > 0
         ? HouseLots.Current != null && HouseLots.Current.ShowingMyMoo && lot == HomeClient.MyLot
         : !HomeClient.HasLot && style == HomeClient.MyStyle;
+    // The village's own stilt house for the game's own account once it has a lot too: a second home
+    // (its own room with the same furniture, a mat to sleep on), though the shrine and the car stay with the lot
+    public bool IsSecondHome => lot == 0 && style == "stilt" && HomeClient.HasLot && HomeClient.IsAdmin
+        && name == HomeInterior.HouseName;
+    public static HomePlot SecondHome()
+    {
+        foreach (var p in all) if (p != null && p.IsSecondHome) return p;
+        return null;
+    }
 
     public void SetLot(int number) => lot = number;
     public void SetCarport(Transform point) => carport = point;
@@ -83,7 +92,7 @@ public class HomePlot : MonoBehaviour
         bool mine = IsMine;
         if (sleep != null)
         {
-            sleep.SetActive(mine);
+            sleep.SetActive(mine || IsSecondHome);
             sleep.name = mine ? "SleepZone" : "SleepZone_" + style; // the tutorial's arrow finds your own mat
         }
         if (mine) MoveBelongings();

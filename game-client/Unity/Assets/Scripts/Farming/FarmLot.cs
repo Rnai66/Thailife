@@ -5,7 +5,8 @@ using UnityEngine;
 // left, front right, back left, back right, each 12 x 11 m facing the lot's front, local -Z) that take
 // the owner's zones, four sides that take their fences, a sign with the lot number and owner, a "ว่าง"
 // board, and the spot by the sign where you arrange your own farm (FarmLotCounter, yours only).
-// A neighbour's farm is only to look at: the parts that would work your own rice, fish, cows and
+// What the owner built on it (fences, gates…: build.lua site "farm") stands on it too; your own are
+// drawn by BuiltPieces. A neighbour's farm is only to look at: the parts that would work your own rice, fish, cows and
 // chickens are taken off their copy before it wakes up.
 public class FarmLot : MonoBehaviour
 {
@@ -19,7 +20,8 @@ public class FarmLot : MonoBehaviour
     [SerializeField] private Transform[] sides = new Transform[4]; // front, back, left, right
 
     private readonly List<GameObject> built = new List<GameObject>();
-    private string shown;
+    private string shown, builtKey;
+    private Transform builtRoot;
 
     public int Number => number;
 
@@ -33,8 +35,9 @@ public class FarmLot : MonoBehaviour
         sides = sidePoints;
     }
 
-    public void Show(FarmLots owner, string[] layout, FarmLots.Fences fences, string ownerName, bool mine)
+    public void Show(FarmLots owner, string[] layout, FarmLots.Fences fences, string ownerName, bool mine, BuildClient.Piece[] pieces = null)
     {
+        ShowBuilt(pieces);
         fences ??= new FarmLots.Fences();
         string[] f = { fences.front, fences.back, fences.left, fences.right };
         string key = (layout != null ? string.Join(",", layout) : "") + "|" + string.Join(",", f) + "|" + mine;
@@ -58,11 +61,33 @@ public class FarmLot : MonoBehaviour
 
     public void Clear(bool known)
     {
+        ShowBuilt(null);
         Remove();
         shown = null;
         if (plate != null) plate.text = $"แปลงเกษตร {number}";
         if (vacant != null) vacant.SetActive(known);
         if (manage != null) manage.SetActive(false);
+    }
+
+    [System.Serializable] private class PieceList { public BuildClient.Piece[] items; }
+
+    private void ShowBuilt(BuildClient.Piece[] pieces)
+    {
+        string key = pieces == null || pieces.Length == 0 ? "" : JsonUtility.ToJson(new PieceList { items = pieces });
+        if (key == builtKey && (key == "" || builtRoot != null)) return;
+        builtKey = key;
+        if (builtRoot != null) Destroy(builtRoot.gameObject);
+        builtRoot = null;
+        if (key == "") return;
+        builtRoot = new GameObject("BuiltPieces_เพื่อนบ้าน").transform; // (the name keeps them out of GroundAt)
+        builtRoot.SetParent(transform, false);
+        foreach (var p in pieces)
+        {
+            var go = BuildKit.Make(p.kind, p.color, builtRoot);
+            if (go == null) continue;
+            BuiltPieces.Place(go.transform, transform, p.x, p.z, p.yaw);
+            go.name = "Built_" + p.id;
+        }
     }
 
     private void Remove()

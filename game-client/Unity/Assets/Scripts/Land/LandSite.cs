@@ -11,6 +11,7 @@ public class LandSite : MonoBehaviour
     private GameObject[] builds;
     private LandClient land;
 
+    public string Parcel => parcel;
     public void Configure(string parcelId) => parcel = parcelId;
 
     private void Awake()

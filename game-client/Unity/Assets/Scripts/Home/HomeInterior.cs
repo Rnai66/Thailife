@@ -19,6 +19,8 @@ public class HomeInterior : MonoBehaviour
     public const float BoundX = 2.5f, BoundZ = 2.0f; // same as house.lua
 
     public static HomeInterior Instance { get; private set; }
+    public static HomeInterior Second { get; private set; } // the admin's second home (HomePlot.IsSecondHome)
+    private static bool addingSecond;
 
     public Transform Room { get; private set; }   // furniture origin: middle of the floor
     public Shader Shader { get; private set; }
@@ -46,13 +48,26 @@ public class HomeInterior : MonoBehaviour
     {
         var plot = HomePlot.Mine();
         var go = plot != null ? plot.gameObject : (!HomeClient.HasLot && HomeClient.MyStyle == "stilt" ? GameObject.Find(HouseName) : null);
+        var second = HomePlot.SecondHome();
+        var extra = second != null && second.gameObject != go ? second.gameObject : null;
+        // a room can change role (the stilt house: your home until you have a lot, then the admin's second one)
+        if (Instance != null && extra != null && Instance.gameObject == extra && Second == null) { Second = Instance; Instance = null; }
+        if (Second != null && go != null && Second.gameObject == go && Instance == null) { Instance = Second; Second = null; }
         if (Instance != null && (go == null || Instance.gameObject != go)) Destroy(Instance);
+        if (Second != null && (extra == null || Second.gameObject != extra)) Destroy(Second);
         if (go != null && go.GetComponent<HomeInterior>() == null) go.AddComponent<HomeInterior>();
+        if (extra != null && extra.GetComponent<HomeInterior>() == null)
+        {
+            addingSecond = true;
+            try { extra.AddComponent<HomeInterior>(); }
+            finally { addingSecond = false; }
+        }
     }
 
     private void Awake()
     {
-        Instance = this;
+        if (addingSecond) Second = this;
+        else Instance = this;
         var plot = GetComponent<HomePlot>();
         if (plot != null)
         {
@@ -159,6 +174,7 @@ public class HomeInterior : MonoBehaviour
     {
         if (house != null) house.Changed -= OnHouseChanged;
         if (Instance == this) Instance = null;
+        if (Second == this) Second = null;
         ContextButton.Hide(this);
         // moved out: the house goes back to a plain closed house
         foreach (var go in added) if (go != null) Destroy(go);

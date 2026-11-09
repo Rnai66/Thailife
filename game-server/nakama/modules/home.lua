@@ -6,6 +6,7 @@
 --   home_choose  {"area": "city", "style": "townhouse", "moo": 3?, "lot": 5?}
 --                -> the same view; the first choice is free, moving later costs move_fee
 --                   (changing only the style of the house on your lot is a move too)
+--   home_visit   {"user_id": friend}                      -> where that friend lives (to go and visit them)
 --   lots_get     {"area": "city"?, "moo": 3?}            -> who lives on which lot of one หมู่ (and which
 --                                                          are your friends), how full each หมู่ is
 --
@@ -20,6 +21,7 @@
 
 local nk = require("nakama")
 local data = require("shop_data")
+local admin = require("admin_core")
 
 local STATE = { collection = "home", key = "choice" }
 local GRPC_INVALID_ARGUMENT, GRPC_FAILED_PRECONDITION = 3, 9
@@ -209,12 +211,14 @@ local function ensure_lot(user_id, s)
   return notice
 end
 
-local function view(s, extra)
+local function view(s, extra, user_id)
   local area, style = find(s.area or "village", s.style or "stilt")
   local r = { chosen = s.chosen == true, area = area.id, area_name = area.name, scene = area.scene,
               style = style.id, style_name = style.name, move_fee = MOVE_FEE, areas = AREAS,
               moo = s.moo or 0, lot = s.lot or 0, moo_name = s.moo and moo_name(area.id, s.moo) or "",
               address = (s.chosen and s.lot) and ("บ้านเลขที่ " .. s.lot .. " " .. moo_name(area.id, s.moo)) or "" }
+  -- the game's own account (admin_core) also keeps the village's stilt house as a second home
+  if user_id and admin.is(user_id) then r.admin = true end
   for k, v in pairs(extra or {}) do r[k] = v end
   return nk.json_encode(r)
 end
@@ -228,7 +232,7 @@ end
 nk.register_rpc(function(context)
   local s = read(context.user_id)
   local notice = ensure_lot(context.user_id, s)
-  return view(s, notice and { notice = notice } or nil)
+  return view(s, notice and { notice = notice } or nil, context.user_id)
 end, "home_get")
 
 nk.register_rpc(function(context, payload)
@@ -263,8 +267,23 @@ nk.register_rpc(function(context, payload)
   s.chosen, s.area, s.style, s.since_ms, s.moo, s.lot = true, area.id, style.id, nk.time(), new_moo, new_lot
   write(user_id, s)
   return view(s, { paid = paid, done = (paid > 0 and "ย้ายบ้านแล้ว! " or "ได้บ้านแล้ว! ") .. style.name
-    .. " · บ้านเลขที่ " .. new_lot .. " " .. moo_name(area.id, new_moo) .. " · " .. area.name })
+    .. " · บ้านเลขที่ " .. new_lot .. " " .. moo_name(area.id, new_moo) .. " · " .. area.name }, user_id)
 end, "home_choose")
+
+-- Where a friend lives, to go and visit (friends on both sides only)
+nk.register_rpc(function(context, payload)
+  local req = decode(payload)
+  local other = tostring(req.user_id or "")
+  if other == "" or other == context.user_id then err("bad friend", GRPC_INVALID_ARGUMENT) end
+  if not friend_set(context.user_id)[other] then err("not friends") end
+  local h = read(other)
+  if not (h.chosen and h.moo and h.lot) then err("no home yet") end
+  local area = find(h.area or "village", h.style or "stilt")
+  if not area then err("no home yet") end
+  return nk.json_encode({ user_id = other, name = display_name(other), area = area.id, area_name = area.name,
+                          scene = area.scene, moo = h.moo, lot = h.lot,
+                          address = "บ้านเลขที่ " .. h.lot .. " " .. moo_name(area.id, h.moo) .. " · " .. area.name })
+end, "home_visit")
 
 -- One หมู่'s lots (who lives where) and how full every หมู่ of that area is
 nk.register_rpc(function(context, payload)

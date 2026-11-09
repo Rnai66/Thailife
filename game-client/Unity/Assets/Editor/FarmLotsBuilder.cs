@@ -21,6 +21,12 @@ public static class FarmLotsBuilder
         Places.Sign(v, new Vector3(76.6f, 0f, -12.5f), "แปลงเกษตร โคกหนองนา ↓\nนา · บ่อปลา · คอกวัว · เล้าไก่", 0f);
         foreach (float z in new[] { -30f, -60f, -100f, -120f })
             StreetFurniture.LampPost(v, new Vector3(81.6f, 0f, z));
+        // solar lamps along both farm roads, in the 1 m gaps between the lots, leaning over the road
+        foreach (float road in new[] { RoadA, RoadB })
+            foreach (float x in new[] { -31.5f, -4.5f, 22.5f, 49.5f })
+                StreetFurniture.SolarLamp(v, new Vector3(x, 0f, road + RoadHalf + 0.5f), 0f);
+        // the cow seller (พ่อค้าวัว) on the strip beside the east soi, just past farm road A, facing the soi
+        Seaside.CowSeller(v, new Vector3(83f, 0f, RoadA - 8f), 90f);
 
         var root = PrimitiveKit.Group("FarmLots_village", v, Vector3.zero).transform;
         var tpl = PrimitiveKit.Group("FarmTemplates", root, new Vector3(0f, -60f, 0f)).transform;

@@ -29,12 +29,16 @@ public class HomeClient : MonoBehaviour
         public bool chosen;
         public string area, area_name, scene, style, style_name, done, moo_name, address, notice;
         public int move_fee, paid, moo, lot;
+        public bool admin; // the game's own account: keeps the village stilt house too (HomePlot.IsSecondHome)
         public Area[] areas;
     }
 
     [Serializable] private class ChooseRequest { public string area, style; }
     [Serializable] private class ChooseLotRequest { public string area, style; public int moo, lot; }
     [Serializable] private class LotsRequest { public string area; public int moo; }
+    [Serializable] private class VisitRequest { public string user_id; }
+    // A friend's home you're visiting (home_visit): you see and play in their หมู่ until you go home
+    [Serializable] public class VisitInfo { public string user_id, name, area, area_name, scene, address; public int moo, lot; }
 
     // lots_get: one หมู่'s lots and how full each หมู่ is
     [Serializable] public class LotEntry { public int no; public bool vacant, mine, friend; public string owner, owner_id, style; }
@@ -49,6 +53,8 @@ public class HomeClient : MonoBehaviour
 
     public const string SpawnId = "home";
     public const string WakeId = "wake"; // the session start: wake up in bed at home
+    public const string VisitSpawnId = "visit"; // in front of the friend's lot (HouseLots)
+    public static VisitInfo Visiting { get; private set; }
 
     // Set once the session start has decided where you begin (SceneLoader.Enter waits for it)
     public static bool StartDecided { get; private set; }
@@ -65,10 +71,12 @@ public class HomeClient : MonoBehaviour
     public static int MyLot => cached != null && cached.chosen ? cached.lot : 0;
     public static int MyMoo => cached != null && cached.chosen ? cached.moo : 0;
     public static bool HasLot => MyLot > 0;
+    public static bool IsAdmin => cached != null && cached.admin;
     public static bool LivesIn(string area) => HasLot && cached.area == area;
     // Which หมู่ of an area you see (and play with): your own there, else หมู่ที่ 1
     // (in the village without a home there: the หมู่ your farm lot is in, FarmLots)
-    public static int MooIn(string area) => LivesIn(area) && cached.moo > 0 ? cached.moo
+    public static int MooIn(string area) => Visiting != null && Visiting.area == area ? Visiting.moo
+        : LivesIn(area) && cached.moo > 0 ? cached.moo
         : area == "village" && FarmLots.MyMoo > 0 ? FarmLots.MyMoo : 1;
     public bool IsOnline => connection != null && connection.IsConnected;
 
@@ -76,7 +84,7 @@ public class HomeClient : MonoBehaviour
     private NakamaConnection connection;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    private static void ResetStatics() { cached = null; sentHome = false; StartDecided = false; } // domain reload is off
+    private static void ResetStatics() { cached = null; sentHome = false; StartDecided = false; Visiting = null; } // domain reload is off
 
     private void Awake()
     {
@@ -86,11 +94,33 @@ public class HomeClient : MonoBehaviour
 
     private void OnEnable()
     {
+        SceneManager.sceneLoaded += OnSceneLoaded;
         connection.Connected += OnConnected;
         if (connection.IsConnected) OnConnected(connection);
     }
 
-    private void OnDisable() => connection.Connected -= OnConnected;
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+        connection.Connected -= OnConnected;
+    }
+
+    // Travelling anywhere but the friend's map ends a visit
+    private static void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (Visiting != null && mode == LoadSceneMode.Single && scene.name != Visiting.scene) Visiting = null;
+    }
+
+    // Go and visit a friend: to their map and หมู่, in front of their house
+    public async Task<VisitInfo> VisitAsync(string friendId)
+    {
+        var result = await connection.Client.RpcAsync(connection.Session, "home_visit", JsonUtility.ToJson(new VisitRequest { user_id = friendId }));
+        var v = JsonUtility.FromJson<VisitInfo>(result.Payload);
+        Visiting = v;
+        Locations.PendingSpawnId = VisitSpawnId;
+        SceneLoader.Load(v.scene, $"บ้าน{v.name}"); // a fresh load even on this map: another หมู่ is another crowd
+        return v;
+    }
 
     private void OnDestroy()
     {
@@ -150,7 +180,9 @@ public class HomeClient : MonoBehaviour
     public void GoHome(bool wake = false)
     {
         if (Current == null || string.IsNullOrEmpty(Current.scene)) return;
-        if (SceneManager.GetActiveScene().name != Current.scene)
+        bool wasVisiting = Visiting != null;
+        Visiting = null;
+        if (wasVisiting || SceneManager.GetActiveScene().name != Current.scene)
         {
             Locations.PendingSpawnId = wake ? WakeId : SpawnId;
             SceneLoader.Load(Current.scene, Current.style_name);
@@ -181,6 +213,8 @@ public class HomeClient : MonoBehaviour
         if (m.Contains("same home")) return "อยู่บ้านนี้อยู่แล้ว";
         if (m.Contains("lot taken")) return "แปลงนี้มีคนจองไปแล้ว เลือกแปลงอื่น";
         if (m.Contains("area full")) return "ย่านนี้เต็มทุกหมู่แล้ว";
+        if (m.Contains("no home yet")) return "เพื่อนยังไม่ได้เลือกบ้าน";
+        if (m.Contains("not friends")) return "ต้องเป็นเพื่อนกันก่อน";
         return "เชื่อมต่อไม่ได้ ลองใหม่";
     }
 }

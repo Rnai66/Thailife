@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-// โหมดก่อสร้าง: build round your home. A strip at the top of the screen (clear of the joystick and the
+// โหมดก่อสร้าง: build round your home, or on your farm lot or your land (whichever you're standing on
+// when you open it: the `site`, BuiltPieces.AnchorOf). A strip at the top of the screen (clear of the joystick and the
 // action buttons, so you can walk while you build) holds the catalogue, and the buttons below it.
 //   Building: pick a piece; its ghost stands in front of you (green: OK, red: too far from the house)
 //     and follows as you walk. หมุน turns it, สี picks the paint, วาง builds it. With ต่อแนว on, the
@@ -35,6 +36,45 @@ public class BuildUI : MonoBehaviour
     private string ghostKey;
     private Transform player;
     private float ghostX, ghostZ, ghostYaw;
+    private string site = "home";
+
+    private static string SiteTitle(string s) => s == "farm" ? "ก่อสร้างในแปลงเกษตร" : s == "home" ? "ก่อสร้างรอบบ้าน" : "ก่อสร้างในที่ดินของคุณ";
+    private static string SiteWhere(string s) => s == "farm" ? "แปลงเกษตรของคุณ" : s == "home" ? "แปลงบ้านของคุณ" : "ที่ดินของคุณ";
+
+    // How far from the site's middle you may wander while building there
+    private float Reach(BuildClient client)
+    {
+        if (site == "home") return client.Current.radius;
+        var b = client.SiteBounds(site);
+        return b == null ? 0f : Mathf.Max(Mathf.Max(-b.x0, b.x1), Mathf.Max(-b.z0, b.z1));
+    }
+
+    // The site you're on: another site you hold whose ground you stand on (a little past its edge is
+    // fine), else home when you're near it, else the nearest site within reach
+    private string PickSite(BuildClient client)
+    {
+        string best = null;
+        float bestD = float.MaxValue;
+        foreach (var s in BuildClient.OtherSites)
+        {
+            var b = client.SiteBounds(s);
+            var a = BuiltPieces.AnchorOf(s);
+            if (b == null || a == null) continue;
+            var l = a.InverseTransformPoint(player.position);
+            if (l.x >= b.x0 - 2f && l.x <= b.x1 + 2f && l.z >= b.z0 - 3f && l.z <= b.z1 + 2f) return s;
+        }
+        var home = BuiltPieces.Anchor;
+        if (home != null && Flat(player.position - home.position).magnitude <= client.Current.radius + 10f) return "home";
+        foreach (var s in BuildClient.OtherSites)
+        {
+            var b = client.SiteBounds(s);
+            var a = BuiltPieces.AnchorOf(s);
+            if (b == null || a == null) continue;
+            float d = Flat(player.position - a.position).magnitude;
+            if (d < bestD && d <= Mathf.Max(b.x1, b.z1) + 10f) { best = s; bestD = d; }
+        }
+        return best;
+    }
 
     public static bool IsOpen => instance != null && instance.canvasGo != null && instance.canvasGo.activeSelf;
 
@@ -47,18 +87,30 @@ public class BuildUI : MonoBehaviour
 
     private void Awake() => DontDestroyOnLoad(gameObject);
 
-    private void Open()
+    private bool opening;
+
+    private async void Open()
     {
         var client = BuildClient.Instance;
         if (client == null || !client.IsOnline) { ScreenToast.Show("ต้องออนไลน์ก่อนจึงจะก่อสร้างได้", UiKit.Danger); return; }
-        var house = BuiltPieces.Anchor;
+        if (opening) return;
+        opening = true;
+        // the sites you hold may have changed since you came online (a farm lot, land from the bank)
+        try { await client.RefreshAsync(); }
+        catch (Exception) { }
+        finally { opening = false; }
+        if (this == null || IsOpen || client == null || client.Current == null) return;
         player = FindAnyObjectByType<PlayerController>()?.transform;
-        if (house == null || player == null) { ScreenToast.Show("ก่อสร้างได้ที่บ้านของคุณ · เมนูบ้าน → กลับบ้าน", UiKit.Danger); return; }
-        if (Flat(player.position - house.position).magnitude > client.Current.radius + 10f)
+        if (player == null) return;
+        var picked = PickSite(client);
+        if (picked == null)
         {
-            ScreenToast.Show("เดินไปใกล้บ้านของคุณก่อน แล้วค่อยเปิดโหมดก่อสร้าง", UiKit.Danger);
+            ScreenToast.Show(BuiltPieces.Anchor == null && client.SiteBounds("farm") == null
+                ? "ก่อสร้างได้ที่บ้าน แปลงเกษตร หรือที่ดินของคุณ"
+                : "เดินไปที่บ้าน แปลงเกษตร หรือที่ดินของคุณก่อน แล้วค่อยเปิดโหมดก่อสร้าง", UiKit.Danger);
             return;
         }
+        site = picked;
         if (canvasGo == null) Build();
         canvasGo.SetActive(true);
         mode = Mode.Place;
@@ -158,7 +210,7 @@ public class BuildUI : MonoBehaviour
 
         if (mode == Mode.Place)
         {
-            title.text = "ก่อสร้างรอบบ้าน";
+            title.text = SiteTitle(site);
             UiKit.Clear(tiles);
             float x = 6f;
             foreach (var k in state.catalog)
@@ -179,7 +231,7 @@ public class BuildUI : MonoBehaviour
             var kd = client.GetKind(kind);
             bool line = kd != null && kd.group != "build";
             int count = state.pieces?.Length ?? 0;
-            info.text = $"สร้างแล้ว {count}/{state.max} ชิ้น · ห่างบ้านไม่เกิน {state.radius:0} ม.";
+            info.text = site != "home" ? $"สร้างแล้ว {count}/{state.max} ชิ้น · วางได้ใน{SiteWhere(site)}" : client.OnLot ? $"สร้างแล้ว {count}/{state.max} ชิ้น · วางได้ในแปลงบ้านของคุณ" : $"สร้างแล้ว {count}/{state.max} ชิ้น · ห่างบ้านไม่เกิน {state.radius:0} ม.";
             SetButtons(
                 ($"วาง · {kd?.price ?? 0:N0} บาท", UiKit.OkTint, (Action)PlaceNow),
                 ("หมุน ⟳", UiKit.Cream, () => { yawTurn = (yawTurn + 45) % 360; }),
@@ -216,7 +268,7 @@ public class BuildUI : MonoBehaviour
             SetButtons(
                 ("วางที่นี่", UiKit.OkTint, () =>
                 {
-                    if (p == null || !ghostValid) { ScreenToast.Show("ไกลบ้านเกินไป", UiKit.Danger); return; }
+                    if (p == null || !ghostValid) { ScreenToast.Show(site == "home" ? "ไกลบ้านเกินไป" : $"ต้องวางใน{SiteWhere(site)}", UiKit.Danger); return; }
                     p.x = ghostX; p.z = ghostZ; p.yaw = ghostYaw;
                     Send(client.EditAsync(p), () => { mode = Mode.Edit; ClearGhost(); BuiltPieces.Hide(-1); Render(); });
                 }),
@@ -236,15 +288,15 @@ public class BuildUI : MonoBehaviour
     {
         if (!IsOpen) return;
         var client = BuildClient.Instance;
-        var house = BuiltPieces.Anchor;
+        var house = BuiltPieces.AnchorOf(site);
         if (client?.Current == null || house == null || player == null)
         {
             Close();
             return;
         }
-        if (Flat(player.position - house.position).magnitude > client.Current.radius + 14f)
+        if (Flat(player.position - house.position).magnitude > Reach(client) + 14f)
         {
-            ScreenToast.Show("ออกจากโหมดก่อสร้างแล้ว (ไกลบ้าน)", UiKit.Muted);
+            ScreenToast.Show(site == "home" ? "ออกจากโหมดก่อสร้างแล้ว (ไกลบ้าน)" : "ออกจากโหมดก่อสร้างแล้ว (ออกนอกพื้นที่)", UiKit.Muted);
             Close();
             return;
         }
@@ -297,8 +349,7 @@ public class BuildUI : MonoBehaviour
             x = Mathf.Round(c.x / Grid) * Grid;
             z = Mathf.Round(c.z / Grid) * Grid;
         }
-        float radius = client.Current.radius;
-        ghostValid = Mathf.Abs(x) <= radius && Mathf.Abs(z) <= radius;
+        ghostValid = client.Inside(site, x, z);
         ghostX = x; ghostZ = z; ghostYaw = yaw;
         ShowGhost(pieceKind, ghostValid ? new Color(0.3f, 0.95f, 0.4f) : new Color(0.95f, 0.25f, 0.2f), $"{pieceKind}/{ghostValid}");
         BuiltPieces.Place(ghost.transform, house, x, z, yaw);
@@ -325,7 +376,7 @@ public class BuildUI : MonoBehaviour
     private void SelectNearest(int after)
     {
         var client = BuildClient.Instance;
-        var house = BuiltPieces.Anchor;
+        var house = BuiltPieces.AnchorOf(site);
         selected = -1;
         armedRemove = -1;
         if (client?.Current?.pieces == null || house == null || player == null) return;
@@ -333,6 +384,7 @@ public class BuildUI : MonoBehaviour
         var near = new List<(float d, int id)>();
         foreach (var p in client.Current.pieces)
         {
+            if (BuildClient.SiteOf(p) != site) continue;
             float d = new Vector2(p.x - local.x, p.z - local.z).magnitude;
             if (d < 10f) near.Add((d, p.id));
         }
@@ -347,8 +399,12 @@ public class BuildUI : MonoBehaviour
     {
         var client = BuildClient.Instance;
         if (busy || client == null) return;
-        if (!ghostValid) { ScreenToast.Show($"ไกลบ้านเกินไป · สร้างได้ห่างบ้านไม่เกิน {client.Current.radius:0} เมตร", UiKit.Danger); return; }
-        Send(client.PlaceAsync(kind, ghostX, ghostZ, ghostYaw, paint), () =>
+        if (!ghostValid)
+        {
+            ScreenToast.Show(site != "home" ? $"ต้องวางใน{SiteWhere(site)}" : client.OnLot ? "ต้องวางในแปลงบ้านของคุณ" : $"ไกลบ้านเกินไป · สร้างได้ห่างบ้านไม่เกิน {client.Current.radius:0} เมตร", UiKit.Danger);
+            return;
+        }
+        Send(client.PlaceAsync(kind, ghostX, ghostZ, ghostYaw, paint, site), () =>
         {
             var kd = client.GetKind(kind);
             if (chain && kd != null && kd.group != "build") { chainId = client.Current.placed; yawTurn = 0; }
@@ -369,6 +425,8 @@ public class BuildUI : MonoBehaviour
             string m = e.Message;
             ScreenToast.Show(m.Contains("not enough baht") ? "เงินไม่พอ"
                 : m.Contains("too far") ? "ไกลบ้านเกินไป"
+                : m.Contains("outside lot") ? $"ต้องวางใน{SiteWhere(site)}"
+                : m.Contains("not your site") ? "พื้นที่นี้ไม่ใช่ของคุณ"
                 : m.Contains("too many") ? "สร้างได้สูงสุดแล้ว · รื้อบางชิ้นก่อน"
                 : "ทำรายการไม่สำเร็จ ลองใหม่", UiKit.Danger);
             try { await BuildClient.Instance.RefreshAsync(); } catch (Exception) { }

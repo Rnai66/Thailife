@@ -83,6 +83,37 @@ public class HouseLots : MonoBehaviour
         HomePlot.ApplyAll();
     }
 
+    // What the neighbours built round their houses (your own: BuiltPieces)
+    private async System.Threading.Tasks.Task ShowBuilt()
+    {
+        var build = BuildClient.Instance;
+        if (build == null || !build.IsOnline) return;
+        var list = await build.LotsAsync(area, Moo);
+        if (this == null) return;
+        var byLot = new Dictionary<int, BuildClient.LotPieces>();
+        foreach (var l in list) if (l != null) byLot[l.no] = l;
+        foreach (var lot in lots.Values)
+        {
+            bool mine = ShowingMyMoo && lot.Number == HomeClient.MyLot;
+            var got = !mine && byLot.TryGetValue(lot.Number, out var l2) ? l2 : null;
+            lot.ShowBuilt(got?.pieces, got?.anchor);
+        }
+    }
+
+    // Come to visit a friend (HomeClient.VisitAsync): stand in front of their lot once it's known
+    private void ArriveForVisit()
+    {
+        var v = HomeClient.Visiting;
+        if (v == null || v.area != area || Locations.PendingSpawnId != HomeClient.VisitSpawnId) return;
+        if (!lots.TryGetValue(v.lot, out var lot)) return;
+        Locations.PendingSpawnId = null;
+        var player = FindAnyObjectByType<PlayerController>();
+        if (player == null) return;
+        lot.FrontPoint(out var at, out var facing);
+        player.Teleport(at, facing);
+        UiKit.FloatAbovePlayer($"มาเยี่ยมบ้าน{v.name} · {v.address}", new Color(0.6f, 0.9f, 1f));
+    }
+
     private static string MyName()
     {
         return ProfileClient.Instance != null ? ProfileClient.Instance.DisplayName ?? "" : "";
@@ -104,6 +135,8 @@ public class HouseLots : MonoBehaviour
                 else lot.Show(Template(l.style), l.style, l.owner);
             }
             HomePlot.ApplyAll();
+            ArriveForVisit();
+            await ShowBuilt();
         }
         catch (System.Exception e) { Debug.LogWarning($"[Lots] {e.Message}"); }
         finally { busy = false; }

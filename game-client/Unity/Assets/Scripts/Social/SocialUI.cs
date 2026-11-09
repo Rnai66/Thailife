@@ -169,7 +169,7 @@ public class SocialUI : MonoBehaviour
         var card = Top(UiKit.Panel("Row", content, Color.white, new Vector2(0f, y), new Vector2(Width - 20f, h), shadow: false));
         card.gameObject.AddComponent<Outline>().effectColor = UiKit.CardBorder;
         bool upright = UiKit.Portrait;
-        float bw = upright ? 128f : 170f;
+        float bw = buttons.Length > 3 ? (upright ? 108f : 150f) : (upright ? 128f : 170f);
         float labelW = Width - 60f - buttons.Length * (bw + 10f);
         UiKit.Label(card, 24, label, new Vector2(-(Width - 20f) * 0.5f + 20f + labelW * 0.5f, 0f), new Vector2(labelW, h - 10f), ink, TextAnchor.MiddleLeft);
         float x = (Width - 20f) * 0.5f - 12f - bw * 0.5f;
@@ -327,6 +327,7 @@ public class SocialUI : MonoBehaviour
             Action propose = married || proposed ? null : (Action)(() => Arm(proposeKey, c => c.ProposeAsync(id)));
             Row((f.online ? "● " : "○ ") + f.name + (spouse ? "  · คู่ชีวิต" : ""), f.online ? UiKit.OkGreen : UiKit.Ink,
                 ("แชท", UiKit.PayGreen, Color.white, () => { talkingTo = id; tab = ChatTab; Render(); }),
+                ("เยี่ยมบ้าน", new Color(0.8f, 0.9f, 1f), new Color(0.1f, 0.25f, 0.5f), () => Visit(id)),
                 (spouse ? "คู่ชีวิต" : armed == proposeKey ? $"ยืนยัน {ring:N0}฿" : "ขอแต่งงาน", new Color(1f, 0.85f, 0.9f), new Color(0.6f, 0.1f, 0.3f), spouse ? null : propose),
                 (armed == removeKey ? "ยืนยันลบ" : "ลบเพื่อน", plain.Item1, plain.Item2, spouse ? null : (Action)(() => Arm(removeKey, c => c.RemoveFriendAsync(id), "ลบเพื่อนแล้ว"))));
         }
@@ -460,6 +461,21 @@ public class SocialUI : MonoBehaviour
             busy = false;
             Render();
         }
+    }
+
+    // To a friend's home (HomeClient.VisitAsync): their map and หมู่, in front of their house
+    private async void Visit(string friendId)
+    {
+        var home = HomeClient.Instance;
+        if (busy || home == null) return;
+        busy = true;
+        try
+        {
+            await home.VisitAsync(friendId);
+            Close();
+        }
+        catch (Exception e) { Notify(HomeClient.Explain(e), UiKit.Danger); }
+        finally { busy = false; }
     }
 
     private void Notify(string message, Color color) => toast = UiKit.Toast(this, toastText, message, color, toast);

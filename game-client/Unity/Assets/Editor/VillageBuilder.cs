@@ -112,7 +112,6 @@ public static class VillageBuilder
             Places.ShadeTree(v, pos);
 
         DressNature(v);
-        Seaside.CowSeller(v, new Vector3(21f, 0f, -26.5f), 180f); // พ่อค้าวัว at the end of the old cow-farm lane (the pens are in the farm lots)
         Lane(v, 21f, -10.6f, -23f);
         LandParcels.BuildVillage(v); // land you buy at the bank: rice land by the canal, a 1-rai plot
         TempleLife.BuildVillage(v);  // monks, the abbot, meditation, amulets; the cemetery and community forest; the home shrine
@@ -131,7 +130,7 @@ public static class VillageBuilder
         StreetFurniture.ServiceDrop(v, poles[2], new Vector3(9.6f, 4.9f, 4.6f));   // stilt house eave
         StreetFurniture.ServiceDrop(v, poles[1], new Vector3(-7f, 3.3f, -10f));    // community shop roof
 
-        // Lamp posts at every place, solar lamps along the Kok Nong Na paddies
+        // Lamp posts at every place (the solar lamps and the cow seller are by the farm lots, FarmLotsBuilder)
         foreach (var p in new[]
         {
             new Vector3(4.4f, 0f, 1.2f),                                      // home yard
@@ -143,12 +142,6 @@ public static class VillageBuilder
             new Vector3(21.5f, 0f, 12.5f), new Vector3(34.5f, 0f, 12.5f),     // village hall
         })
             StreetFurniture.LampPost(v, p);
-        foreach (var p in new[]
-        {
-            new Vector3(-33.5f, 0f, -27.5f), new Vector3(-20f, 0f, -27.5f), new Vector3(-7f, 0f, -27.5f),
-            new Vector3(-33.5f, 0f, -45f), new Vector3(-7f, 0f, -45f),
-        })
-            StreetFurniture.SolarLamp(v, p, p.z < -36f ? 180f : 0f);
 
         // Every location scene needs its own Network and controls
         NakamaSetup.Setup();

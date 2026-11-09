@@ -157,14 +157,31 @@ local function decode(payload)
   return req
 end
 
+-- What each owner built on their farm lot (build.lua pieces with site "farm"), by user
+local function farm_pieces(doc)
+  local keys = {}
+  for _, l in pairs(doc.lots) do
+    if l.user then table.insert(keys, { collection = "build", key = "pieces", user_id = l.user }) end
+  end
+  local by = {}
+  if #keys == 0 then return by end
+  for _, o in ipairs(nk.storage_read(keys)) do
+    local list = {}
+    for _, p in ipairs(o.value.pieces or {}) do if p.site == "farm" then table.insert(list, p) end end
+    if #list > 0 then by[o.user_id] = list end
+  end
+  return by
+end
+
 local function view(user_id, s, moo, extra)
   local doc = read_lots(moo)
+  local built = farm_pieces(doc)
   local lots = {}
   for no = 1, FARM_LOTS do
     local l = doc.lots[tostring(no)]
     table.insert(lots, { no = no, vacant = l == nil, owner = l and l.name or "", owner_id = l and l.user or "",
                          layout = l and l.layout or DEFAULT_LAYOUT, fences = l and l.fences or NO_FENCES,
-                         mine = l ~= nil and l.user == user_id })
+                         mine = l ~= nil and l.user == user_id, pieces = l and built[l.user] or nil })
   end
   local r = { mine = { moo = s.moo or 0, lot = s.lot or 0, layout = s.layout, fences = s.fences,
                        moo_name = s.moo and moo_name(s.moo) or "",

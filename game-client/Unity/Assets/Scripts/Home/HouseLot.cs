@@ -11,6 +11,8 @@ public class HouseLot : MonoBehaviour
 
     private GameObject house;
     private string houseStyle;
+    private Transform built;    // what the owner built round the house (build.lua), for the neighbours to see
+    private string builtKey;
 
     public int Number => number;
     public string Style => house != null ? houseStyle : null;
@@ -39,9 +41,44 @@ public class HouseLot : MonoBehaviour
                 house.SetActive(true);
             }
             houseStyle = style;
+            built = null;
+            builtKey = null;
         }
         if (plate != null) plate.text = string.IsNullOrEmpty(owner) ? $"บ้านเลขที่ {number}" : $"บ้านเลขที่ {number}\n{owner}";
         if (vacant != null) vacant.SetActive(false);
+    }
+
+    // The owner's fences, gates and so on, each where they put it relative to their house
+    public void ShowBuilt(BuildClient.Piece[] pieces, string anchor = null)
+    {
+        string key = pieces == null || pieces.Length == 0 ? "" : anchor + JsonUtility.ToJson(new PieceList { items = pieces });
+        if (key == builtKey && (key == "" || built != null)) return;
+        builtKey = key;
+        if (built != null) Destroy(built.gameObject);
+        built = null;
+        // round their lot's house, or a fixed one (BuiltPieces.AnchorFor) for pieces built before house lots
+        var plot = !string.IsNullOrEmpty(anchor) ? BuiltPieces.AnchorFor(anchor)
+                 : house != null && house.GetComponentInChildren<HomePlot>() != null ? house.GetComponentInChildren<HomePlot>().transform : null;
+        if (key == "" || plot == null) return;
+        built = new GameObject("BuiltPieces_เพื่อนบ้าน").transform; // (the name keeps them out of GroundAt)
+        built.SetParent(plot, false);
+        foreach (var p in pieces)
+        {
+            var go = BuildKit.Make(p.kind, p.color, built);
+            if (go == null) continue;
+            BuiltPieces.Place(go.transform, plot, p.x, p.z, p.yaw);
+            go.name = "Built_" + p.id;
+        }
+    }
+
+    [System.Serializable] private class PieceList { public BuildClient.Piece[] items; }
+
+    // Where a visitor arrives: in the soi in front of the lot, facing it
+    public void FrontPoint(out Vector3 at, out Quaternion facing)
+    {
+        float frontZ = plate != null ? plate.transform.parent.localPosition.z - 1.4f : -8f;
+        at = transform.TransformPoint(new Vector3(0f, 0.1f, frontZ));
+        facing = Quaternion.LookRotation(transform.forward, Vector3.up);
     }
 
     // Nobody lives here (or it isn't known yet: offline)
@@ -50,6 +87,8 @@ public class HouseLot : MonoBehaviour
         if (house != null) Destroy(house);
         house = null;
         houseStyle = null;
+        built = null;
+        builtKey = null;
         if (plate != null) plate.text = $"บ้านเลขที่ {number}";
         if (vacant != null) vacant.SetActive(known);
     }
