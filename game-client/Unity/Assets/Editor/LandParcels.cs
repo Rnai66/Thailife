@@ -72,8 +72,7 @@ public static class LandParcels
     // ── Village ─────────────────────────────────────────────────────────────────────────────
     public static void BuildVillage(Transform v)
     {
-        RiceParcel(v);
-        PlainParcel(v);
+        PlainParcel(v); // (the canal-side rice land is now the back six paddies of your farm lot, FarmLotsBuilder)
     }
 
     // ที่นาติดคลอง: 3x2 paddies like Kok Nong Na's (FarmPlot 7..12) with a canal along the south side
@@ -84,34 +83,34 @@ public static class LandParcels
         var dike = PrimitiveKit.Mat("Dirt", new Color(0.55f, 0.42f, 0.28f));
         var water = PrimitiveKit.Mat("CanalWater", new Color(0.25f, 0.45f, 0.5f));
         int id = 6;
-        foreach (float x in new[] { -8f, 0f, 8f })
-        foreach (float z in new[] { 3.75f, -3.75f })
+        foreach (float x in new[] { -6f, 0f, 6f }) // small paddies (5.6 x 5.1 m), like Kok Nong Na's
+        foreach (float z in new[] { 2.75f, -2.75f })
         {
-            PrimitiveKit.Box("Paddy", site, new Vector3(x, 0.015f, z), new Vector3(7.6f, 0.03f, 7.1f), paddy, collider: false);
+            PrimitiveKit.Box("Paddy", site, new Vector3(x, 0.015f, z), new Vector3(5.6f, 0.03f, 5.1f), paddy, collider: false);
             var plot = new GameObject($"FarmPlot_{++id}");
             plot.transform.SetParent(site, false);
             plot.transform.localPosition = new Vector3(x, 1f, z);
             var trigger = plot.AddComponent<BoxCollider>();
             trigger.isTrigger = true;
-            trigger.size = new Vector3(7.2f, 2f, 6.7f);
-            plot.AddComponent<FarmPlot>().Configure(id, new Vector2(7.5f, 7.0f));
-            PrimitiveKit.Box("DikeW", site, new Vector3(x - 3.85f, 0.12f, z), new Vector3(0.3f, 0.25f, 7.6f), dike);
+            trigger.size = new Vector3(5.3f, 2f, 4.8f);
+            plot.AddComponent<FarmPlot>().Configure(id, new Vector2(5.5f, 5.0f));
+            PrimitiveKit.Box("DikeW", site, new Vector3(x - 2.85f, 0.12f, z), new Vector3(0.3f, 0.25f, 5.5f), dike);
         }
-        foreach (float z in new[] { 7.4f, 0f, -7.4f })
-            PrimitiveKit.Box("DikeEW", site, new Vector3(0f, 0.12f, z), new Vector3(24.3f, 0.25f, 0.3f), dike);
-        PrimitiveKit.Box("DikeE", site, new Vector3(12f, 0.12f, 0f), new Vector3(0.3f, 0.25f, 15f), dike);
+        foreach (float z in new[] { 5.4f, 0f, -5.4f })
+            PrimitiveKit.Box("DikeEW", site, new Vector3(0f, 0.12f, z), new Vector3(18.3f, 0.25f, 0.3f), dike);
+        PrimitiveKit.Box("DikeE", site, new Vector3(9f, 0.12f, 0f), new Vector3(0.3f, 0.25f, 11f), dike);
 
         // คลอง along the south: water between grassy banks, a little footbridge-free plank landing
-        PrimitiveKit.Box("CanalBank", site, new Vector3(0f, 0.01f, -9f), new Vector3(26f, 0.02f, 3.4f), dike, collider: false);
-        PrimitiveKit.Box("Canal", site, new Vector3(0f, 0.02f, -9.1f), new Vector3(26f, 0.02f, 2.2f), water, collider: false);
-        PrimitiveKit.Box("Landing", site, new Vector3(-6f, 0.08f, -7.9f), new Vector3(1.6f, 0.06f, 0.9f), PrimitiveKit.Mat("WoodPlank", new Color(0.55f, 0.38f, 0.22f)), collider: false);
+        PrimitiveKit.Box("CanalBank", site, new Vector3(0f, 0.01f, -7f), new Vector3(20f, 0.02f, 3.4f), dike, collider: false);
+        PrimitiveKit.Box("Canal", site, new Vector3(0f, 0.02f, -7.1f), new Vector3(20f, 0.02f, 2.2f), water, collider: false);
+        PrimitiveKit.Box("Landing", site, new Vector3(-4.5f, 0.08f, -5.9f), new Vector3(1.6f, 0.06f, 0.9f), PrimitiveKit.Mat("WoodPlank", new Color(0.55f, 0.38f, 0.22f)), collider: false);
 
         var land = site.gameObject.AddComponent<LandSite>();
         land.Configure("rice");
         // The board at the north-west corner, facing west toward Kok Nong Na's pond
-        SaleAndOwned(site, new Vector3(-13.2f, 0f, 6.5f), 90f, "ที่นาขาย ติดคลอง 5 ไร่", "ซื้อได้ที่ธนาคารในเมือง\nแปลงนา 7-12",
+        SaleAndOwned(site, new Vector3(-10f, 0f, 5f), 90f, "ที่นาขาย ติดคลอง 5 ไร่", "ซื้อได้ที่ธนาคารในเมือง\nแปลงนา 7-12",
             "ที่นาของคุณ", "แปลงนา 7-12\nเดินเข้าแปลงเพื่อทำนา");
-        Counter(site, new Vector3(-14.4f, 1f, 6.5f), new Vector3(2.4f, 2f, 3f), "rice");
+        Counter(site, new Vector3(-11.2f, 1f, 5f), new Vector3(2.4f, 2f, 3f), "rice");
     }
 
     // ที่ดินเปล่า 1 ไร่: front (local -Z) to the road; a field, a pen or a house goes up on it

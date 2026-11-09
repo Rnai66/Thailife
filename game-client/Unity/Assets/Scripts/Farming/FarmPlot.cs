@@ -210,7 +210,7 @@ public class FarmPlot : MonoBehaviour
         }
 
         int energy = Mathf.FloorToInt(LifeClient.Instance != null ? LifeClient.Instance.Energy : 0f);
-        string header = $"แปลงนา {plotId} · พลังงาน {energy}";
+        string header = $"แปลงนา {plotId} (1 งาน) · พลังงาน {energy}";
         switch (plot.stage)
         {
             case "empty":
@@ -250,7 +250,9 @@ public class FarmPlot : MonoBehaviour
             var player = FindAnyObjectByType<PlayerController>();
             Vector3 at = (player != null ? player.transform.position : transform.position) + Vector3.up * 2f;
             if (action == "harvest")
-                FloatingText.Spawn(at, $"ได้{state.harvested_name} {state.harvested_kg} กก. เข้ายุ้งแล้ว!", Golden);
+                FloatingText.Spawn(at, state.harvested_value > 0
+                    ? $"ได้{state.harvested_name} {state.harvested_kg} กก. (ราว {state.harvested_value:N0} บาท) เข้ายุ้งแล้ว!\nนำไปขายที่ร้านค้าชุมชน"
+                    : $"ได้{state.harvested_name} {state.harvested_kg} กก. เข้ายุ้งแล้ว!", Golden);
             else
                 FloatingText.Spawn(at, action == "plow" ? "ไถแล้ว" : action == "plant" ? "ดำนาแล้ว" : "รดน้ำแล้ว", new Color(0.6f, 0.9f, 0.5f));
         }

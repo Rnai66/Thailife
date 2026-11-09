@@ -52,6 +52,7 @@ public class WalletClient : MonoBehaviour
         public CatalogItem[] catalog;
         public Market[] markets;
         public string bought;
+        public int welcome_gift; // เงินขวัญถุง: given once, on a new player's first load
         public int spent;
     }
 
@@ -109,12 +110,22 @@ public class WalletClient : MonoBehaviour
     {
         try
         {
-            await RefreshAsync();
+            var snapshot = await RefreshAsync();
+            if (snapshot != null && snapshot.welcome_gift > 0) StartCoroutine(ShowWelcome(snapshot.welcome_gift));
         }
         catch (Exception e)
         {
             Debug.LogWarning($"[Wallet] Could not load: {e.Message}");
         }
+    }
+
+    // Wait for the player to be on the map, then show the gift over their head
+    private static System.Collections.IEnumerator ShowWelcome(int baht)
+    {
+        float until = Time.time + 30f;
+        while (FindAnyObjectByType<PlayerController>() == null && Time.time < until) yield return null;
+        yield return new WaitForSeconds(1.5f);
+        UiKit.FloatAbovePlayer($"เงินขวัญถุงผู้เล่นใหม่ +{baht:N0} บาท", new Color(1f, 0.85f, 0.2f));
     }
 
     public async Task<Snapshot> RefreshAsync() => Apply(await CallAsync("economy_get"));

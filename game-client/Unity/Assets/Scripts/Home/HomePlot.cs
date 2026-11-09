@@ -13,6 +13,7 @@ public class HomePlot : MonoBehaviour
     [SerializeField] private Transform porch;
     [SerializeField] private GameObject sleep;
     [SerializeField] private Transform carport;
+    [SerializeField] private int lot; // 0: a house of the map itself (the village stilt house); N: on house lot N
 
     private static readonly List<HomePlot> all = new List<HomePlot>();
 
@@ -24,7 +25,15 @@ public class HomePlot : MonoBehaviour
 
     public string Style => style;
     public float FloorY => floorY;
-    public bool IsMine => style == HomeClient.MyStyle;
+    public int Lot => lot;
+    // On a lot: yours when it's your number in the หมู่ on show. The map's own house (the stilt house):
+    // yours until you have a lot.
+    public bool IsMine => lot > 0
+        ? HouseLots.Current != null && HouseLots.Current.ShowingMyMoo && lot == HomeClient.MyLot
+        : !HomeClient.HasLot && style == HomeClient.MyStyle;
+
+    public void SetLot(int number) => lot = number;
+    public void SetCarport(Transform point) => carport = point;
 
     public void Configure(string styleId, float floorHeight, Transform porchPoint, GameObject sleepZone, Transform carportPoint = null)
     {
@@ -93,17 +102,18 @@ public class HomePlot : MonoBehaviour
             if (c != null) { car = c.transform; carHome = car.position; carRot = car.rotation; }
         }
         bool stilt = style == "stilt";
+        bool original = stilt && lot == 0; // the village's own stilt house, where they were built
         if (shrine != null)
         {
             // built for the stilt house (floor 2.6 m up): same place over this house's front door
-            if (stilt) shrine.SetPositionAndRotation(shrineHome, shrineRot);
+            if (original) shrine.SetPositionAndRotation(shrineHome, shrineRot);
             else shrine.SetPositionAndRotation(transform.TransformPoint(new Vector3(0f, floorY - 2.6f, 0f)), transform.rotation);
             var dog = shrine.Find("Guardians/dog");
             if (dog != null) dog.localPosition = stilt ? Vector3.zero : new Vector3(-5.6f, 2.6f - floorY, 0.5f); // kennel in the side yard
         }
         if (car != null)
         {
-            if (stilt || carport == null) car.SetPositionAndRotation(carHome, carRot);
+            if (original || carport == null) car.SetPositionAndRotation(carHome, carRot);
             else car.SetPositionAndRotation(carport.position, carport.rotation);
         }
     }

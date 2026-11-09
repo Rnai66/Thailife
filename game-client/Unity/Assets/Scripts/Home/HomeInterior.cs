@@ -45,7 +45,7 @@ public class HomeInterior : MonoBehaviour
     public static void Setup()
     {
         var plot = HomePlot.Mine();
-        var go = plot != null ? plot.gameObject : (HomeClient.MyStyle == "stilt" ? GameObject.Find(HouseName) : null);
+        var go = plot != null ? plot.gameObject : (!HomeClient.HasLot && HomeClient.MyStyle == "stilt" ? GameObject.Find(HouseName) : null);
         if (Instance != null && (go == null || Instance.gameObject != go)) Destroy(Instance);
         if (go != null && go.GetComponent<HomeInterior>() == null) go.AddComponent<HomeInterior>();
     }

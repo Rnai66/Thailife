@@ -1,6 +1,6 @@
 using UnityEngine;
 
-// The houses players can choose to live in (home.lua, HomePlot), beside the village stilt house:
+// The houses players can live in (home.lua, HomePlot), built as templates for the house lots (HouseLotsBuilder):
 //   village  บ้านปูนชั้นเดียว · บ้านไม้ชั้นเดียวยกพื้น · บ้านครึ่งปูนครึ่งไม้ 2 ชั้น (a lane east of the hall)
 //   City     ทาวน์เฮาส์ 2 ชั้น · บ้านเดี่ยวในเมือง (หมู่บ้านในเมือง, north-east of the avenue)
 //   Bangkok  ทาวน์โฮมโมเดิร์น · บ้านเดี่ยวหมู่บ้านจัดสรร (north-east of the avenue)
@@ -13,43 +13,96 @@ public static class Homes
     private const float RoomW = 5.6f, RoomD = 4.6f, RoomH = 2.4f;
 
     // ── Where they stand ──────────────────────────────────────────────────────────────────
+    // House lots (home.lua LOTS: village 22, city 16, bangkok 29). Lot fronts face their soi.
+    private static HouseLotsBuilder.Lot L(int no, float x, float z, float yaw, float w, float d) => new HouseLotsBuilder.Lot(no, x, z, yaw, w, d);
+
+    private static HouseLotsBuilder.Lot[] VillageLots()
+    {
+        var lots = new System.Collections.Generic.List<HouseLotsBuilder.Lot>
+        {
+            L(1, 47f, 12f, 90f, 14f, 14f), L(2, 47f, 26f, 90f, 14f, 14f), L(3, 47f, 40f, 90f, 14f, 14f),  // east of the lane
+            L(4, 30f, 27f, -90f, 12f, 12f), L(5, 30f, 39f, -90f, 12f, 12f), L(6, 30f, 51f, -90f, 12f, 12f), // west of the lane
+        };
+        float[] north = { 3f, 15f, 27f, 39f }, south = { -17.75f, -29.25f, -40.75f, -52.25f };
+        int no = 7;
+        foreach (float z in north) lots.Add(L(no++, 71f, z, -90f, 12f, 14f));  // ซอยตะวันออก, west side
+        foreach (float z in north) lots.Add(L(no++, 89f, z, 90f, 12f, 14f));   // east side
+        foreach (float z in south) lots.Add(L(no++, 71f, z, -90f, 11.5f, 14f));
+        foreach (float z in south) lots.Add(L(no++, 89f, z, 90f, 11.5f, 14f));
+        return lots.ToArray();
+    }
+
     public static void Village(Transform v)
     {
         var dirt = PrimitiveKit.Mat("Dirt", new Color(0.55f, 0.42f, 0.28f));
-        PrimitiveKit.Box("DirtLane", v, new Vector3(38f, 0.012f, 17f), new Vector3(2.6f, 0.02f, 46f), dirt, collider: false);
-        Places.Sign(v, new Vector3(36f, 0f, -4.5f), "ซอยบ้านใหม่ →\nบ้านปูน · บ้านไม้ · บ้านสองชั้น", 0f);
-        Concrete1(v, new Vector3(46f, 0f, 12f), 90f);
-        Wood1(v, new Vector3(46f, 0f, 26f), 90f);
-        Half2(v, new Vector3(46f, 0f, 40f), 90f);
+        PrimitiveKit.Box("DirtLane", v, new Vector3(38f, 0.012f, 25.5f), new Vector3(2.6f, 0.02f, 63f), dirt, collider: false);
+        Places.Sign(v, new Vector3(36f, 0f, -4.5f), "ซอยบ้านใหม่ →\nแปลงบ้าน 1–6", 0f);
+        // ซอยตะวันออก: a concrete soi across the main road, lots 7–22 on both sides
+        var concrete = PrimitiveKit.Mat("Concrete", new Color(0.75f, 0.75f, 0.72f));
+        PrimitiveKit.Box("EastSoi", v, new Vector3(80f, 0.014f, -50.25f), new Vector3(4f, 0.028f, 190.5f), concrete, collider: false); // on down to the farm roads
+        Places.Sign(v, new Vector3(77f, 0f, -4.5f), "ซอยตะวันออก\nแปลงบ้าน 7–22", 0f);
+        foreach (float z in new[] { -46f, -24f, 21f, 40f })
+            StreetFurniture.LampPost(v, new Vector3(81.6f, 0f, z));
+        HouseLotsBuilder.Build(v, "village", VillageLots(), tpl =>
+        {
+            VillageBuilder.StiltTemplate(HouseLotsBuilder.Template(tpl, "stilt"), new Vector3(-0.2f, 0f, 2f));
+            Concrete1(HouseLotsBuilder.Template(tpl, "concrete1"), new Vector3(-0.3f, 0f, 1f), 0f);
+            Wood1(HouseLotsBuilder.Template(tpl, "wood1"), new Vector3(-0.3f, 0f, 1f), 0f);
+            Half2(HouseLotsBuilder.Template(tpl, "half2"), new Vector3(-0.3f, 0f, 1f), 0f);
+        }, lawn: false);
     }
 
     public static void City(Transform root)
     {
-        Estate(root, "หมู่บ้านในเมือง");
-        Townhouse(root, new Vector3(64f, 0f, 14f), 90f, modern: false);
-        Single(root, new Vector3(64f, 0f, 31f), 90f, "city_single", modern: false);
+        Estate(root, "หมู่บ้านในเมือง", 50f);
+        var asphalt = PrimitiveKit.Mat("Asphalt", new Color(0.22f, 0.22f, 0.24f));
+        PrimitiveKit.Box("Soi", root, new Vector3(56f, 0.02f, -66f), new Vector3(76f, 0.04f, 6f), asphalt);
+        PrimitiveKit.Box("Soi", root, new Vector3(-84f, 0.02f, 25f), new Vector3(5f, 0.04f, 52f), asphalt);
+        var lots = new System.Collections.Generic.List<HouseLotsBuilder.Lot>();
+        int no = 1;
+        for (int i = 0; i < 6; i++) lots.Add(L(no++, 23f + 12f * i, -77f, 180f, 12f, 16f));
+        for (int i = 0; i < 2; i++) lots.Add(L(no++, 70f + 12f * i, -55f, 0f, 12f, 16f));
+        for (int i = 0; i < 4; i++) lots.Add(L(no++, 66.5f, 6f + 12f * i, 90f, 12f, 17f));
+        for (int i = 0; i < 4; i++) lots.Add(L(no++, -73f, 8f + 12f * i, 90f, 12f, 17f));
+        HouseLotsBuilder.Build(root, "city", lots.ToArray(), tpl =>
+        {
+            Townhouse(HouseLotsBuilder.Template(tpl, "townhouse"), new Vector3(-2.4f, 0f, 1.5f), 0f, modern: false, solo: true);
+            Single(HouseLotsBuilder.Template(tpl, "city_single"), new Vector3(0f, 0f, 1.5f), 0f, "city_single", modern: false);
+        }, lawn: true);
     }
 
     public static void Bangkok(Transform root)
     {
-        Estate(root, "หมู่บ้านจัดสรร");
-        Townhouse(root, new Vector3(64f, 0f, 14f), 90f, modern: true);
-        Single(root, new Vector3(64f, 0f, 31f), 90f, "bkk_single", modern: true);
+        Estate(root, "หมู่บ้านจัดสรร", 45f);
+        var asphalt = PrimitiveKit.Mat("Asphalt", new Color(0.22f, 0.22f, 0.24f));
+        PrimitiveKit.Box("Soi", root, new Vector3(89f, 0.02f, -52f), new Vector3(62f, 0.04f, 6f), asphalt);
+        var lots = new System.Collections.Generic.List<HouseLotsBuilder.Lot>();
+        int no = 1;
+        for (int i = 0; i < 4; i++) lots.Add(L(no++, 69f + 12f * i, -41f, 0f, 12f, 16f));
+        for (int i = 0; i < 4; i++) lots.Add(L(no++, 69f + 12f * i, -63f, 180f, 12f, 16f));
+        for (int i = 0; i < 13; i++) lots.Add(L(no++, -107f + 12f * i, -104f, 0f, 12f, 16f)); // along the ring road
+        for (int i = 0; i < 4; i++) lots.Add(L(no++, 69f + 12f * i, -104f, 0f, 12f, 16f));
+        for (int i = 0; i < 4; i++) lots.Add(L(no++, 66.5f, 5.5f + 11f * i, 90f, 11f, 17f));
+        HouseLotsBuilder.Build(root, "bangkok", lots.ToArray(), tpl =>
+        {
+            Townhouse(HouseLotsBuilder.Template(tpl, "townhome"), new Vector3(-2.4f, 0f, 1.5f), 0f, modern: true, solo: true);
+            Single(HouseLotsBuilder.Template(tpl, "bkk_single"), new Vector3(0f, 0f, 1.5f), 0f, "bkk_single", modern: true);
+        }, lawn: true);
     }
 
     // A paved soi from the avenue's north pavement up past the houses, with an arch over its mouth
-    private static void Estate(Transform root, string name)
+    private static void Estate(Transform root, string name, float soiEnd)
     {
         var road = PrimitiveKit.Mat("Asphalt", new Color(0.22f, 0.22f, 0.24f));
         var white = PrimitiveKit.Mat("PlasterWhite", new Color(0.93f, 0.92f, 0.88f));
-        PrimitiveKit.Box("Soi", root, new Vector3(55.5f, 0.02f, 18f), new Vector3(5f, 0.04f, 46f), road);
+        PrimitiveKit.Box("Soi", root, new Vector3(55.5f, 0.02f, (soiEnd - 5f) * 0.5f), new Vector3(5f, 0.04f, soiEnd + 5f), road);
         PrimitiveKit.Box("SoiPavement", root, new Vector3(55.5f, 0.015f, -3f), new Vector3(5f, 0.03f, 4f), PrimitiveKit.Mat("Pavement", new Color(0.72f, 0.7f, 0.66f)), collider: false);
         foreach (float x in new[] { 52.6f, 58.4f })
             PrimitiveKit.Box("GatePost", root, new Vector3(x, 1.6f, -1.2f), new Vector3(0.5f, 3.2f, 0.5f), white);
         PrimitiveKit.Box("GateBeam", root, new Vector3(55.5f, 3.4f, -1.2f), new Vector3(6.4f, 0.6f, 0.5f), white, collider: false);
         PrimitiveKit.Label(name, root, new Vector3(55.5f, 3.4f, -1.5f), 0.05f, new Color(0.15f, 0.25f, 0.45f));
         foreach (float z in new[] { 6f, 22f, 38f })
-            StreetFurniture.LampPost(root, new Vector3(58.5f, 0f, z));
+            StreetFurniture.LampPost(root, new Vector3(52.6f, 0f, z)); // the lots line the east side
         Nature.Bush(root, new Vector3(52.5f, 0f, 9f), 1.1f, 7, flowers: true);
         Nature.Bush(root, new Vector3(52.5f, 0f, 30f), 1.1f, 8, flowers: true);
     }
@@ -150,7 +203,7 @@ public static class Homes
         Steps(t, floorY, 1.6f, -4.3f, slab);
         Pot(t, new Vector3(-2.6f, 0f, -4.9f), 1);
         Pot(t, new Vector3(2.9f, 0f, -4.9f), 2);
-        Finish(t, "concrete1", floorY, -3.4f, Carport(t, new Vector3(5.2f, 0f, -1f), 180f));
+        Finish(t, "concrete1", floorY, -3.4f, Carport(t, new Vector3(4.6f, 0f, -1f), 180f));
     }
 
     // บ้านไม้ชั้นเดียวยกพื้น: teak boards on low concrete posts, a grey corrugated tin roof
@@ -184,8 +237,8 @@ public static class Homes
         Steps(t, floorY, 2.2f, -4.1f, PrimitiveKit.Mat("StairWood", new Color(0.66f, 0.47f, 0.28f)));
         // a water jar and a bench under the eaves, a banana clump by the side
         PrimitiveKit.Box("Bench", t, new Vector3(-3.6f, 0.4f, -1f), new Vector3(0.5f, 0.06f, 1.8f), dark);
-        Places.BananaTree(t, new Vector3(-4.8f, 0f, 2.2f), trainable: false);
-        Finish(t, "wood1", floorY, -3.4f, Carport(t, new Vector3(5.2f, 0f, -0.5f), 180f));
+        Places.BananaTree(t, new Vector3(-4.6f, 0f, 2.2f), trainable: false);
+        Finish(t, "wood1", floorY, -3.4f, Carport(t, new Vector3(4.6f, 0f, -0.5f), 180f));
     }
 
     // บ้านครึ่งปูนครึ่งไม้ 2 ชั้น: a white ground floor, a teak upper storey with a balcony, tiled roof
@@ -213,13 +266,13 @@ public static class Homes
             PrimitiveKit.Box("Column", t, new Vector3(x, floorY + 1.2f, -2.85f), new Vector3(0.25f, 2.4f, 0.25f), white);
         Steps(t, floorY, 1.6f, -4.1f, slab);
         Pot(t, new Vector3(-2.7f, 0f, -4.6f), 3);
-        Finish(t, "half2", floorY, -3.2f, Carport(t, new Vector3(5.2f, 0f, -1f), 180f));
+        Finish(t, "half2", floorY, -3.2f, Carport(t, new Vector3(4.6f, 0f, -1f), 180f));
     }
 
     // ── Town and Bangkok ──────────────────────────────────────────────────────────────────
     // A row of three two-storey units; yours is the middle one. modern = the Bangkok townhome (grey and
     // white, wood slats, a glass balcony, flat roof); otherwise a plain cream town ทาวน์เฮาส์.
-    private static void Townhouse(Transform parent, Vector3 at, float yaw, bool modern)
+    private static void Townhouse(Transform parent, Vector3 at, float yaw, bool modern, bool solo = false)
     {
         const float floorY = 0.3f;
         string style = modern ? "townhome" : "townhouse";
@@ -231,7 +284,7 @@ public static class Homes
         var shutter = PrimitiveKit.Mat("ShutterMetal", new Color(0.55f, 0.57f, 0.6f));
         var slats = PrimitiveKit.Mat("WoodTeak", new Color(0.5f, 0.3f, 0.16f));
         const float unit = RoomW + 0.6f;
-        for (int u = -1; u <= 1; u++)
+        for (int u = solo ? 0 : -1; u <= (solo ? 0 : 1); u++) // solo: one unit with a carport beside it (a house lot)
         {
             bool mine = u == 0;
             var t = mine ? Plot(row, "Home_" + style, Vector3.zero, 0f) : Plot(row, "Neighbour", new Vector3(u * unit, 0f, 0f), 0f);
@@ -265,12 +318,12 @@ public static class Homes
             // the small front yard behind a low wall with a gate gap
             PrimitiveKit.Box("YardWallL", t, new Vector3(-1.7f, 0.6f, -4.5f), new Vector3(unit * 0.5f - 0.6f, 0.9f, 0.15f), white);
             PrimitiveKit.Box("YardWallR", t, new Vector3(2.15f, 0.6f, -4.5f), new Vector3(unit * 0.5f - 1.5f, 0.9f, 0.15f), white);
-            if (u == -1) PrimitiveKit.Box("YardSide", t, new Vector3(-unit * 0.5f, 0.6f, -3.4f), new Vector3(0.15f, 0.9f, 2.2f), white);
-            if (u == 1) PrimitiveKit.Box("YardSide", t, new Vector3(unit * 0.5f, 0.6f, -3.4f), new Vector3(0.15f, 0.9f, 2.2f), white);
+            if (u == -1 || solo) PrimitiveKit.Box("YardSide", t, new Vector3(-unit * 0.5f, 0.6f, -3.4f), new Vector3(0.15f, 0.9f, 2.2f), white);
+            if (u == 1 || solo) PrimitiveKit.Box("YardSide", t, new Vector3(unit * 0.5f, 0.6f, -3.4f), new Vector3(0.15f, 0.9f, 2.2f), white);
             if (mine)
             {
                 Steps(t, floorY, 1.4f, -3.7f, slab);
-                Finish(t, style, floorY, -3.3f);
+                Finish(t, style, floorY, -3.3f, solo ? Carport(t, new Vector3(5.7f, 0f, -1.5f), 180f) : null);
             }
             else Pot(t, new Vector3(-2.4f, floorY, -3.6f), u + 5);
         }
@@ -311,7 +364,7 @@ public static class Homes
         var slab = PrimitiveKit.Mat("Concrete", new Color(0.75f, 0.75f, 0.72f));
         var glass = PrimitiveKit.Mat("WindowGlassBlue", new Color(0.45f, 0.6f, 0.7f));
         var lawn = PrimitiveKit.Mat("Grass", new Color(0.36f, 0.56f, 0.24f));
-        PrimitiveKit.Box("Lawn", t, new Vector3(0f, 0.035f, -1f), new Vector3(11.9f, 0.04f, 10.9f), lawn, collider: false); // a hair above the soi, so they don't flicker
+        PrimitiveKit.Box("Lawn", t, new Vector3(0f, 0.035f, -1f), new Vector3(10.7f, 0.04f, 10.9f), lawn, collider: false); // a hair above the soi, so they don't flicker
         PrimitiveKit.Box("Foundation", t, new Vector3(0f, floorY * 0.5f, 0f), new Vector3(RoomW + 0.4f, floorY, RoomD + 0.4f), slab);
         Room(t, floorY, white, PrimitiveKit.Mat("DoorTeak", new Color(0.42f, 0.24f, 0.12f)), glass, 1.6f, slab);
         float up = floorY + RoomH;
@@ -335,13 +388,13 @@ public static class Homes
         // a fence round the lawn with a gate in front, a carport bay at the side
         // (sides stop short of the front and back runs, so no two faces share a plane and flicker)
         var fence = PrimitiveKit.Mat("FenceMetal", new Color(0.2f, 0.22f, 0.24f));
-        Railing(t, "FenceFrontL", new Vector3(-6f, 0f, -6.4f), new Vector3(-1.2f, 0f, -6.4f), white, fence, style);
-        Railing(t, "FenceFrontR", new Vector3(2.4f, 0f, -6.4f), new Vector3(6f, 0f, -6.4f), white, fence, style);
-        Railing(t, "FenceSideL", new Vector3(-6f, 0f, -6.2f), new Vector3(-6f, 0f, 4.2f), white, fence, style);
-        Railing(t, "FenceSideR", new Vector3(6f, 0f, -6.2f), new Vector3(6f, 0f, 4.2f), white, fence, style);
-        Railing(t, "FenceBack", new Vector3(-6f, 0f, 4.4f), new Vector3(6f, 0f, 4.4f), white, fence, style);
+        Railing(t, "FenceFrontL", new Vector3(-5.4f, 0f, -6.4f), new Vector3(-1.2f, 0f, -6.4f), white, fence, style);
+        Railing(t, "FenceFrontR", new Vector3(2.4f, 0f, -6.4f), new Vector3(5.4f, 0f, -6.4f), white, fence, style);
+        Railing(t, "FenceSideL", new Vector3(-5.4f, 0f, -6.2f), new Vector3(-5.4f, 0f, 4.2f), white, fence, style);
+        Railing(t, "FenceSideR", new Vector3(5.4f, 0f, -6.2f), new Vector3(5.4f, 0f, 4.2f), white, fence, style);
+        Railing(t, "FenceBack", new Vector3(-5.4f, 0f, 4.4f), new Vector3(5.4f, 0f, 4.4f), white, fence, style);
         Pot(t, new Vector3(-2.7f, 0f, -4.4f), 9);
-        Nature.Bush(t, new Vector3(-4.8f, 0f, 2.5f), 1.2f, 11, flowers: true);
+        Nature.Bush(t, new Vector3(-4.3f, 0f, 2.5f), 1.1f, 11, flowers: true);
         Finish(t, style, floorY, -3.1f);
     }
 }

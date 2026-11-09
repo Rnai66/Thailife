@@ -125,7 +125,7 @@ public class RanchUI : MonoBehaviour
     private void Render()
     {
         titleText.text = mode == "sao" ? "อบต. · โครงการวัวให้ชาวบ้าน" : mode == "pen" ? "คอกวัวของคุณ" : "พ่อค้าวัว";
-        subtitleText.text = mode == "sao" ? "รับวัวฟรีคนละ 1 ตัว ไปเลี้ยงที่ฟาร์มวัวข้างโคกหนองนา"
+        subtitleText.text = mode == "sao" ? "รับวัวฟรีคนละ 1 ตัว ไปเลี้ยงที่คอกวัวในแปลงเกษตรของคุณ"
             : mode == "pen" ? "แตะเลือกวัว ขายหรือผสมเทียม · กินวันละ 1 ถุง ให้นมวันละ 1 ขวด"
             : "ซื้อวัว · ซื้ออาหารวัว · แตะเลือกวัวที่จะขาย";
         UiKit.Clear(growthRow);
@@ -147,7 +147,7 @@ public class RanchUI : MonoBehaviour
 
         if (mode == "sao")
         {
-            infoText.text = s.claimed ? "คุณรับวัวจาก อบต. ไปแล้ว — ซื้อเพิ่มได้จากพ่อค้าวัวที่ฟาร์มวัวข้างโคกหนองนา" : "อบต. แจกวัวให้ชาวบ้านคนละ 1 ตัว (รับได้ครั้งเดียว)";
+            infoText.text = s.claimed ? "คุณรับวัวจาก อบต. ไปแล้ว — ซื้อเพิ่มได้จากพ่อค้าวัวริมถนนใหญ่ในหมู่บ้าน" : "อบต. แจกวัวให้ชาวบ้านคนละ 1 ตัว (รับได้ครั้งเดียว)";
             SetButton(0, s.claimed ? "รับไปแล้ว" : "รับวัวฟรี 1 ตัว", !s.claimed && !full, r => r.ClaimAsync());
             for (int i = 1; i < Buttons; i++) SetButton(i, null, false, null);
             Arrange();

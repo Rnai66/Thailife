@@ -587,25 +587,26 @@ public static class Places
         var thatch = PrimitiveKit.Mat("Thatch", new Color(0.75f, 0.62f, 0.35f));
         var wood = PrimitiveKit.Mat("DarkWood", DarkWood);
 
-        // นา: 3x2 rice paddies separated by low dikes (0.25 m — walkable); each is a farm plot (ids 1..6)
+        // นา: 3x2 rice paddies separated by low dikes (0.25 m — walkable); each is a farm plot (ids 1..6).
+        // Kept small (5.6 x 5.1 m) to leave the village room for players' houses.
         int plotId = 0;
-        foreach (float x in new[] { -16f, -8f, 0f })
-        foreach (float z in new[] { -4f, 3.5f })
+        foreach (float x in new[] { -12f, -6f, 0f })
+        foreach (float z in new[] { -2.75f, 2.75f })
         {
-            PrimitiveKit.Box("Paddy", t, new Vector3(x, 0.015f, z), new Vector3(7.6f, 0.03f, 7.1f), rice, collider: false);
+            PrimitiveKit.Box("Paddy", t, new Vector3(x, 0.015f, z), new Vector3(5.6f, 0.03f, 5.1f), rice, collider: false);
 
             var plotZone = new GameObject($"FarmPlot_{++plotId}");
             plotZone.transform.SetParent(t, false);
             plotZone.transform.localPosition = new Vector3(x, 1f, z);
             var trigger = plotZone.AddComponent<BoxCollider>();
             trigger.isTrigger = true;
-            trigger.size = new Vector3(7.2f, 2f, 6.7f);
-            plotZone.AddComponent<FarmPlot>().Configure(plotId, new Vector2(7.5f, 7.0f)); // rice fills the paddy (7.6 x 7.1)
-            PrimitiveKit.Box("DikeN", t, new Vector3(x, 0.12f, z + 3.65f), new Vector3(8f, 0.25f, 0.3f), dike);
-            PrimitiveKit.Box("DikeS", t, new Vector3(x, 0.12f, z - 3.65f), new Vector3(8f, 0.25f, 0.3f), dike);
-            PrimitiveKit.Box("DikeW", t, new Vector3(x - 3.85f, 0.12f, z), new Vector3(0.3f, 0.25f, 7.6f), dike);
+            trigger.size = new Vector3(5.3f, 2f, 4.8f);
+            plotZone.AddComponent<FarmPlot>().Configure(plotId, new Vector2(5.5f, 5.0f)); // rice fills the paddy (5.6 x 5.1)
+            PrimitiveKit.Box("DikeN", t, new Vector3(x, 0.12f, z + 2.6f), new Vector3(6f, 0.25f, 0.3f), dike);
+            PrimitiveKit.Box("DikeS", t, new Vector3(x, 0.12f, z - 2.6f), new Vector3(6f, 0.25f, 0.3f), dike);
+            PrimitiveKit.Box("DikeW", t, new Vector3(x - 2.85f, 0.12f, z), new Vector3(0.3f, 0.25f, 5.5f), dike);
         }
-        PrimitiveKit.Box("DikeE", t, new Vector3(3.85f, 0.12f, 0f), new Vector3(0.3f, 0.25f, 15f), dike);
+        PrimitiveKit.Box("DikeE", t, new Vector3(2.85f, 0.12f, 0f), new Vector3(0.3f, 0.25f, 11f), dike);
 
         // หนอง: farm pond
         PrimitiveKit.Box("PondRim", t, new Vector3(11f, 0.01f, -3f), new Vector3(9f, 0.02f, 11f), earth, collider: false);
@@ -654,8 +655,22 @@ public static class Places
         BananaTree(t, new Vector3(13f, 0.6f, 8f), trainable: false);
         ShadeTree(t, new Vector3(11f, 0.6f, 10.5f), 0.7f);
 
-        // เถียงนา: small rest hut on stilts
-        var hut = PrimitiveKit.Group("Hut_เถียงนา", t, new Vector3(-8f, 0f, 11f));
+        FieldHut(t, new Vector3(-8f, 0f, 11f));
+
+        // เล้าไก่ส่วนกลาง: a coop by the lane for players whose home has no yard for one (town houses,
+        // small lots); it shows your own chickens like the one by the stilt house
+        Places2.ChickenCoop(t, new Vector3(-2f, 0f, 10f), 180f);
+
+        Sign(t, new Vector3(2f, 0f, 14f), "โคก หนอง นา\nทำนา · เลี้ยงปลาในกระชัง · เล้าไก่", 180f);
+        return farm;
+    }
+
+    // เถียงนา: small rest hut on stilts, a mat and bolster on its floor to rest on (Kok Nong Na, farm lots)
+    public static GameObject FieldHut(Transform t, Vector3 position)
+    {
+        var thatch = PrimitiveKit.Mat("Thatch", new Color(0.75f, 0.62f, 0.35f));
+        var wood = PrimitiveKit.Mat("DarkWood", DarkWood);
+        var hut = PrimitiveKit.Group("Hut_เถียงนา", t, position);
         foreach (float x in new[] { -1.2f, 1.2f })
         foreach (float z in new[] { -1f, 1f })
             PrimitiveKit.Cylinder("Stilt", hut.transform, new Vector3(x, 0.5f, z), new Vector3(0.15f, 0.5f, 0.15f), wood);
@@ -684,9 +699,7 @@ public static class Places
         restZone.isTrigger = true;
         restZone.size = new Vector3(3f, 2f, 1.6f);
         rest.AddComponent<SleepSpot>().Configure("เถียงนาโคกหนองนา", "พักผ่อน", bed.transform);
-
-        Sign(t, new Vector3(2f, 0f, 14f), "โคก หนอง นา\nทำนา · เลี้ยงปลาในกระชัง", 180f);
-        return farm;
+        return hut;
     }
 
     // ── Songthaew stop (ป้ายรถสองแถว): opens the travel map; arrival spawn in front ──

@@ -104,6 +104,21 @@ public class MatchSync : MonoBehaviour
         if (Instance == this) Instance = null;
     }
 
+    // matchName for หมู่ที่ 1 (and maps without lots), matchName_m{N} for the others. Waits a moment for
+    // HomeClient to learn where you live, so you join your own หมู่.
+    private async System.Threading.Tasks.Task<string> MooMatchName()
+    {
+        if (FindAnyObjectByType<HouseLots>() == null) return matchName;
+        for (int i = 0; i < 50 && (HomeClient.Instance == null || HomeClient.Instance.Current == null); i++)
+            await System.Threading.Tasks.Task.Delay(100);
+        // the village: also which หมู่ your farm lot is in (when you don't live here)
+        for (int i = 0; i < 30 && FindAnyObjectByType<FarmLots>() != null && !FarmLots.Loaded; i++)
+            await System.Threading.Tasks.Task.Delay(100);
+        var lots = HouseLots.Current != null ? HouseLots.Current : FindAnyObjectByType<HouseLots>();
+        int moo = lots != null ? lots.Moo : 1;
+        return moo > 1 ? $"{matchName}_m{moo}" : matchName;
+    }
+
     private async void OnConnected(NakamaConnection conn)
     {
         conn.Socket.ReceivedMatchState += OnMatchState;
@@ -111,9 +126,12 @@ public class MatchSync : MonoBehaviour
 
         try
         {
-            // A named match: everyone asking for the same name lands in the same match.
-            match = await conn.Socket.CreateMatchAsync(matchName);
-            Debug.Log($"[Match] Joined '{matchName}' ({match.Id}) — {CountOthers(match.Presences)} other player(s) here");
+            // A named match: everyone asking for the same name lands in the same match. A map with house
+            // lots (HouseLots) has one match per หมู่: you play with the people of the หมู่ on show.
+            string name = await MooMatchName();
+            if (this == null) return;
+            match = await conn.Socket.CreateMatchAsync(name);
+            Debug.Log($"[Match] Joined '{name}' ({match.Id}) — {CountOthers(match.Presences)} other player(s) here");
 
             foreach (var presence in match.Presences)
                 AddRemote(presence);

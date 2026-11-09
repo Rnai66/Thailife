@@ -117,8 +117,17 @@ public class AutoQuest : MonoBehaviour
     {
         if (kind == "feed" || kind == "sell_eggs")
         {
-            var gate = GameObject.Find("CoopGateZone");
-            if (gate != null && gate.GetComponent<Collider>() != null) return gate.GetComponent<Collider>();
+            // the nearest coop (by the stilt house, or the shared one at Kok Nong Na)
+            Collider near = null;
+            float nearD = float.MaxValue;
+            Vector3 from = player != null ? player.transform.position : Vector3.zero;
+            foreach (var spot in FindObjectsByType<WindowSpot>(FindObjectsSortMode.None))
+            {
+                if (spot.name != "CoopGateZone" || !spot.TryGetComponent<Collider>(out var c)) continue;
+                float dist = (c.bounds.center - from).sqrMagnitude;
+                if (dist < nearD) { nearD = dist; near = c; }
+            }
+            if (near != null) return near;
         }
         if (type == null) return null;
         Collider best = null;

@@ -359,6 +359,9 @@ public static class RoyalBarges
     // เรือพระที่นั่งสุพรรณหงส์: the golden swan, its neck rising high at the bow with a crimson tassel
     // from the beak and a garland round the neck, its tail curling up at the stern; the gold บุษบก
     // pavilion amidships, ฉัตร fore and aft
+    // which way the sculpted swan and Narai face as made (turned so they look ahead, +Z)
+    private const float SwanYaw = 0f, NaraiYaw = 0f;
+
     private static Transform Suphannahong(Transform p, Vector3 at)
     {
         const float L = 30f, B = 2.5f, D = 0.9f;
@@ -367,32 +370,37 @@ public static class RoyalBarges
         float bowTop = D + 1.2f, sternTop = D + 1.6f;
 
         int mark = body.childCount;
-        // the neck: up from the stem in an S, the head looking ahead
-        var neck = MeshKit.Curve(new Vector3(0f, bowTop - 0.3f, L * 0.5f - 0.6f), new Vector3(0f, bowTop + 3.2f, L * 0.5f + 1.8f), new Vector3(0f, bowTop + 4.6f, L * 0.5f + 0.3f), 14);
-        MeshKit.Place("SwanNeck", body, MeshKit.Sweep("Barges/SwanNeck", neck, MeshKit.Taper(14, 0.62f, 0.3f), 10), gold, Vector3.zero);
-        var head = neck[13] + new Vector3(0f, 0.25f, 0.15f);
-        Part("Head", body, Ball, gold, head, new Vector3(0.62f, 0.66f, 0.95f));
-        Part("Beak", body, Cone, gold, head + new Vector3(0f, -0.05f, 0.42f), new Vector3(0.3f, 0.8f, 0.3f), new Vector3(90f, 0f, 0f));
-        foreach (float s in new[] { -1f, 1f })
-            Part("Eye", body, Ball, black, head + new Vector3(s * 0.28f, 0.1f, 0.15f), Vector3.one * 0.1f);
-        Part("Crest", body, Cone, gold, head + new Vector3(0f, 0.35f, -0.15f), new Vector3(0.2f, 0.7f, 0.2f), new Vector3(-30f, 0f, 0f));
-        // crimson tassel (พู่) from the beak, gold ball on its cord
-        var tip = head + new Vector3(0f, -0.15f, 1.1f);
-        Stick("TasselCord", body, gold, tip, tip + Vector3.down * 0.9f, 0.02f);
-        Part("TasselBall", body, Ball, gold, tip + Vector3.down * 0.95f, Vector3.one * 0.16f);
-        Part("Tassel", body, Cone, red, tip + Vector3.down * 1.8f, new Vector3(0.28f, 0.85f, 0.28f));
-        // white flower garland round the neck
-        var g = neck[5];
-        for (int i = 0; i < 16; i++)
+        // the sculpted figure (AI-made) when present, else the built one
+        if (AiModels.Has("Swan")) AiModels.Place("Swan", body, new Vector3(0f, bowTop - 0.5f, L * 0.5f - 0.9f), 7.2f, SwanYaw);
+        else
         {
-            float a = i * Mathf.PI * 2f / 16f;
-            Part("Garland", body, Ball, white, g + new Vector3(Mathf.Cos(a) * 0.66f, Mathf.Sin(a) * 0.3f - 0.35f, Mathf.Sin(a) * 0.5f), Vector3.one * 0.17f);
-        }
-        // glass inlay along the neck
-        for (int i = 2; i < 12; i += 2)
+            // the neck: up from the stem in an S, the head looking ahead
+            var neck = MeshKit.Curve(new Vector3(0f, bowTop - 0.3f, L * 0.5f - 0.6f), new Vector3(0f, bowTop + 3.2f, L * 0.5f + 1.8f), new Vector3(0f, bowTop + 4.6f, L * 0.5f + 0.3f), 14);
+            MeshKit.Place("SwanNeck", body, MeshKit.Sweep("Barges/SwanNeck", neck, MeshKit.Taper(14, 0.62f, 0.3f), 10), gold, Vector3.zero);
+            var head = neck[13] + new Vector3(0f, 0.25f, 0.15f);
+            Part("Head", body, Ball, gold, head, new Vector3(0.62f, 0.66f, 0.95f));
+            Part("Beak", body, Cone, gold, head + new Vector3(0f, -0.05f, 0.42f), new Vector3(0.3f, 0.8f, 0.3f), new Vector3(90f, 0f, 0f));
             foreach (float s in new[] { -1f, 1f })
-                Part("Inlay", body, Ball, glassGreen, neck[i] + new Vector3(s * Mathf.Lerp(0.6f, 0.3f, i / 13f), 0f, 0f), Vector3.one * 0.12f);
-        Enlarge(body, mark, new Vector3(0f, bowTop - 0.3f, L * 0.5f - 0.6f), 1.75f);
+                Part("Eye", body, Ball, black, head + new Vector3(s * 0.28f, 0.1f, 0.15f), Vector3.one * 0.1f);
+            Part("Crest", body, Cone, gold, head + new Vector3(0f, 0.35f, -0.15f), new Vector3(0.2f, 0.7f, 0.2f), new Vector3(-30f, 0f, 0f));
+            // crimson tassel (พู่) from the beak, gold ball on its cord
+            var tip = head + new Vector3(0f, -0.15f, 1.1f);
+            Stick("TasselCord", body, gold, tip, tip + Vector3.down * 0.9f, 0.02f);
+            Part("TasselBall", body, Ball, gold, tip + Vector3.down * 0.95f, Vector3.one * 0.16f);
+            Part("Tassel", body, Cone, red, tip + Vector3.down * 1.8f, new Vector3(0.28f, 0.85f, 0.28f));
+            // white flower garland round the neck
+            var g = neck[5];
+            for (int i = 0; i < 16; i++)
+            {
+                float a = i * Mathf.PI * 2f / 16f;
+                Part("Garland", body, Ball, white, g + new Vector3(Mathf.Cos(a) * 0.66f, Mathf.Sin(a) * 0.3f - 0.35f, Mathf.Sin(a) * 0.5f), Vector3.one * 0.17f);
+            }
+            // glass inlay along the neck
+            for (int i = 2; i < 12; i += 2)
+                foreach (float s in new[] { -1f, 1f })
+                    Part("Inlay", body, Ball, glassGreen, neck[i] + new Vector3(s * Mathf.Lerp(0.6f, 0.3f, i / 13f), 0f, 0f), Vector3.one * 0.12f);
+            Enlarge(body, mark, new Vector3(0f, bowTop - 0.3f, L * 0.5f - 0.6f), 1.75f);
+        }
         mark = body.childCount;
         // the tail curling up at the stern
         var tail = MeshKit.Curve(new Vector3(0f, sternTop - 0.3f, -L * 0.5f + 0.5f), new Vector3(0f, sternTop + 2.6f, -L * 0.5f - 1.4f), new Vector3(0f, sternTop + 3.2f, -L * 0.5f + 0.4f), 12);
@@ -461,33 +469,38 @@ public static class RoyalBarges
         var g = new Vector3(0f, top, L * 0.5f - 0.6f);
         var garudaRed = PrimitiveKit.Mat("GarudaRed", new Color(0.72f, 0.12f, 0.1f), 0.6f, 0.2f);
         int mark = body.childCount;
-        // Garuda: crouching body, wings spread up and out, a fierce head with a gold crown
-        Part("GarudaBody", body, Cube, garudaRed, g + new Vector3(0f, 0.9f, 0.2f), new Vector3(1.1f, 1.5f, 0.9f), new Vector3(-10f, 0f, 0f));
-        Part("Breastplate", body, Cube, gold, g + new Vector3(0f, 1f, 0.67f), new Vector3(0.8f, 0.9f, 0.08f), new Vector3(-10f, 0f, 0f));
-        Part("GarudaHead", body, Ball, garudaRed, g + new Vector3(0f, 1.95f, 0.45f), new Vector3(0.75f, 0.7f, 0.75f));
-        Part("Beak", body, Cone, gold, g + new Vector3(0f, 1.85f, 0.9f), new Vector3(0.25f, 0.45f, 0.25f), new Vector3(110f, 0f, 0f));
-        Part("Crown", body, Cone, gold, g + new Vector3(0f, 2.2f, 0.4f), new Vector3(0.6f, 0.9f, 0.6f));
-        foreach (float s in new[] { -1f, 1f })
+        // the sculpted figure (AI-made) when present, else the built one
+        if (AiModels.Has("Narai")) AiModels.Place("Narai", body, g + new Vector3(0f, -0.3f, -0.2f), 6.4f, NaraiYaw);
+        else
         {
-            Part("Wing", body, Cube, gold, g + new Vector3(s * 1.05f, 1.6f, 0f), new Vector3(1.4f, 0.14f, 0.7f), new Vector3(0f, 0f, s * 38f));
-            Part("WingTip", body, Cube, gold, g + new Vector3(s * 1.7f, 2.35f, -0.05f), new Vector3(0.7f, 0.12f, 0.5f), new Vector3(0f, 0f, s * 65f));
-            Part("Arm", body, Cube, garudaRed, g + new Vector3(s * 0.7f, 1.3f, 0.55f), new Vector3(0.22f, 0.8f, 0.22f), new Vector3(-40f, 0f, s * 10f));
-            Part("Eye", body, Ball, black, g + new Vector3(s * 0.2f, 2.02f, 0.8f), Vector3.one * 0.1f);
-        }
-        // Vishnu standing on Garuda's shoulders: dark body, gold dress, tall crown, four arms with the conch, discus, mace
-        var n = g + new Vector3(0f, 2.55f, 0.1f);
-        Part("NaraiLegs", body, Cube, gold, n + new Vector3(0f, 0.35f, 0f), new Vector3(0.45f, 0.7f, 0.3f));
-        Part("NaraiBody", body, Cube, navy, n + new Vector3(0f, 1f, 0f), new Vector3(0.5f, 0.65f, 0.3f));
-        Part("NaraiHead", body, Ball, navy, n + new Vector3(0f, 1.52f, 0f), Vector3.one * 0.36f);
-        Part("NaraiCrown", body, Cone, gold, n + new Vector3(0f, 1.62f, 0f), new Vector3(0.32f, 1f, 0.32f));
-        foreach (float s in new[] { -1f, 1f })
-            foreach (float up in new[] { 0f, 1f })
+            // Garuda: crouching body, wings spread up and out, a fierce head with a gold crown
+            Part("GarudaBody", body, Cube, garudaRed, g + new Vector3(0f, 0.9f, 0.2f), new Vector3(1.1f, 1.5f, 0.9f), new Vector3(-10f, 0f, 0f));
+            Part("Breastplate", body, Cube, gold, g + new Vector3(0f, 1f, 0.67f), new Vector3(0.8f, 0.9f, 0.08f), new Vector3(-10f, 0f, 0f));
+            Part("GarudaHead", body, Ball, garudaRed, g + new Vector3(0f, 1.95f, 0.45f), new Vector3(0.75f, 0.7f, 0.75f));
+            Part("Beak", body, Cone, gold, g + new Vector3(0f, 1.85f, 0.9f), new Vector3(0.25f, 0.45f, 0.25f), new Vector3(110f, 0f, 0f));
+            Part("Crown", body, Cone, gold, g + new Vector3(0f, 2.2f, 0.4f), new Vector3(0.6f, 0.9f, 0.6f));
+            foreach (float s in new[] { -1f, 1f })
             {
-                var hand = n + new Vector3(s * (0.55f + up * 0.15f), 0.95f + up * 0.55f, 0.15f);
-                Stick("NaraiArm", body, navy, n + new Vector3(s * 0.25f, 1.15f, 0f), hand, 0.07f);
-                Part(up > 0f ? "Discus" : "Mace", body, up > 0f ? Rod : Cone, gold, hand, up > 0f ? new Vector3(0.3f, 0.04f, 0.3f) : new Vector3(0.12f, 0.45f, 0.12f), up > 0f ? new Vector3(90f, 0f, 0f) : Vector3.zero);
+                Part("Wing", body, Cube, gold, g + new Vector3(s * 1.05f, 1.6f, 0f), new Vector3(1.4f, 0.14f, 0.7f), new Vector3(0f, 0f, s * 38f));
+                Part("WingTip", body, Cube, gold, g + new Vector3(s * 1.7f, 2.35f, -0.05f), new Vector3(0.7f, 0.12f, 0.5f), new Vector3(0f, 0f, s * 65f));
+                Part("Arm", body, Cube, garudaRed, g + new Vector3(s * 0.7f, 1.3f, 0.55f), new Vector3(0.22f, 0.8f, 0.22f), new Vector3(-40f, 0f, s * 10f));
+                Part("Eye", body, Ball, black, g + new Vector3(s * 0.2f, 2.02f, 0.8f), Vector3.one * 0.1f);
             }
-        Enlarge(body, mark, g, 1.85f);
+            // Vishnu standing on Garuda's shoulders: dark body, gold dress, tall crown, four arms with the conch, discus, mace
+            var n = g + new Vector3(0f, 2.55f, 0.1f);
+            Part("NaraiLegs", body, Cube, gold, n + new Vector3(0f, 0.35f, 0f), new Vector3(0.45f, 0.7f, 0.3f));
+            Part("NaraiBody", body, Cube, navy, n + new Vector3(0f, 1f, 0f), new Vector3(0.5f, 0.65f, 0.3f));
+            Part("NaraiHead", body, Ball, navy, n + new Vector3(0f, 1.52f, 0f), Vector3.one * 0.36f);
+            Part("NaraiCrown", body, Cone, gold, n + new Vector3(0f, 1.62f, 0f), new Vector3(0.32f, 1f, 0.32f));
+            foreach (float s in new[] { -1f, 1f })
+                foreach (float up in new[] { 0f, 1f })
+                {
+                    var hand = n + new Vector3(s * (0.55f + up * 0.15f), 0.95f + up * 0.55f, 0.15f);
+                    Stick("NaraiArm", body, navy, n + new Vector3(s * 0.25f, 1.15f, 0f), hand, 0.07f);
+                    Part(up > 0f ? "Discus" : "Mace", body, up > 0f ? Rod : Cone, gold, hand, up > 0f ? new Vector3(0.3f, 0.04f, 0.3f) : new Vector3(0.12f, 0.45f, 0.12f), up > 0f ? new Vector3(90f, 0f, 0f) : Vector3.zero);
+                }
+            Enlarge(body, mark, g, 1.85f);
+        }
         mark = body.childCount;
         // gold flame tail at the stern
         var tail = MeshKit.Curve(new Vector3(0f, D + 1.5f, -L * 0.5f + 0.5f), new Vector3(0f, D + 3.6f, -L * 0.5f - 0.9f), new Vector3(0f, D + 4f, -L * 0.5f + 0.5f), 10);

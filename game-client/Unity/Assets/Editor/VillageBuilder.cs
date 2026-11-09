@@ -59,12 +59,14 @@ public static class VillageBuilder
         var root = new GameObject(RootName);
         Undo.RegisterCreatedObjectUndo(root, "Build Thai Village");
 
-        // 120 x 120 m of ground for the whole village
+        // 172 x 232 m of ground for the whole village (x -60..112, z -172..60): the east soi's house lots past
+        // x 60, the farm lots (FarmLotsBuilder) south of z -60
         var ground = GameObject.Find("Ground");
         if (ground != null)
         {
             Undo.RecordObject(ground.transform, "Resize Ground");
-            ground.transform.localScale = new Vector3(12f, 1f, 12f);
+            ground.transform.localScale = new Vector3(17.2f, 1f, 23.2f);
+            ground.transform.position = new Vector3(26f, ground.transform.position.y, -56f);
             var groundMat = ground.GetComponent<Renderer>().sharedMaterial;
             if (groundMat != null)
             {
@@ -77,7 +79,8 @@ public static class VillageBuilder
         var v = root.transform;
         BuildRoad(v);
         BuildStiltHouse(v, new Vector3(7f, 0f, 7f));
-        Homes.Village(v); // the other houses to choose from, on a lane east of the village hall
+        Homes.Village(v); // the house lots (HouseLots), on a lane east of the village hall and along the east soi
+        FarmLotsBuilder.Build(v); // everyone's own โคกหนองนา (rice, fish, cows, chickens) south of the village
         BuildSpiritHouse(v, new Vector3(2.8f, 0f, 3.2f));
         BuildShop(v, new Vector3(-7f, 0f, -12f), yaw: 180f);
 
@@ -99,8 +102,6 @@ public static class VillageBuilder
         Lane(v, -32f, -6f, 7f);
         Places2.VillageHall(v, new Vector3(28f, 0f, 16f), "ศาลากลางบ้าน");
         Lane(v, 28f, -6f, 11.5f);
-        Places.KokNongNa(v, new Vector3(-12f, 0f, -36f));
-        Lane(v, -12f, -21f, -10f);
 
         // Songthaew stop on the south side of the road, facing it
         Places.BusStop(v, new Vector3(14f, 0f, -11.5f), 180f);
@@ -111,7 +112,7 @@ public static class VillageBuilder
             Places.ShadeTree(v, pos);
 
         DressNature(v);
-        Seaside.CowFarm(v, new Vector3(21f, 0f, -31f), 180f); // ฟาร์มวัว east of Kok Nong Na, gate toward the road
+        Seaside.CowSeller(v, new Vector3(21f, 0f, -26.5f), 180f); // พ่อค้าวัว at the end of the old cow-farm lane (the pens are in the farm lots)
         Lane(v, 21f, -10.6f, -23f);
         LandParcels.BuildVillage(v); // land you buy at the bank: rice land by the canal, a 1-rai plot
         TempleLife.BuildVillage(v);  // monks, the abbot, meditation, amulets; the cemetery and community forest; the home shrine
@@ -180,7 +181,7 @@ public static class VillageBuilder
         };
         for (int i = 0; i < bushes.Length; i++) Nature.Bush(v, bushes[i], 0.9f + (i % 3) * 0.25f, i, flowers: i % 3 == 0);
 
-        var rocks = new[] { new Vector3(-6f, 0f, -20f), new Vector3(-17f, 0f, -22f), new Vector3(40f, 0f, 20f), new Vector3(-40f, 0f, 10f), new Vector3(15f, 0f, 30f) };
+        var rocks = new[] { new Vector3(-6f, 0f, -20f), new Vector3(-17f, 0f, -22f), new Vector3(42f, 0f, 0f), new Vector3(-40f, 0f, 10f), new Vector3(15f, 0f, 30f) };
         for (int i = 0; i < rocks.Length; i++) Nature.Rock(v, rocks[i], 0.8f + i % 2 * 0.5f, i);
 
         Nature.GrassField(v, Vector3.zero, new Vector2(116f, 116f), 2600, 7,
@@ -198,7 +199,12 @@ public static class VillageBuilder
             new Vector4(-11f, -16.5f, -3f, -7f),       // shop
             new Vector4(-58.5f, -50.5f, -34.5f, -11.5f), // fair ground across from the temple
             new Vector4(6f, -6f, 8f, 3f),              // lane to the house
-            new Vector4(-33.3f, -6f, -30.7f, 8f), new Vector4(26.7f, -6f, 29.3f, 12f), new Vector4(-13.3f, -21f, -10.7f, -10f));
+            new Vector4(-33.3f, -6f, -30.7f, 8f), new Vector4(26.7f, -6f, 29.3f, 12f), new Vector4(-13.3f, -21f, -10.7f, -10f),
+            new Vector4(36.7f, -6f, 39.3f, 57f));       // lane to house lots 1–6
+        // the east part (house lots 7–22 along the east soi)
+        Nature.GrassField(v, new Vector3(80f, 0f, 0f), new Vector2(38f, 116f), 900, 8,
+            new Vector4(60f, -10.6f, 100f, -5.4f),     // road
+            new Vector4(77.5f, -58.5f, 82.5f, 45.5f)); // soi
     }
 
     // Career needs CareerClient on the Network object and a TrainingTarget on the punching bag
@@ -230,17 +236,21 @@ public static class VillageBuilder
         var paint = PrimitiveKit.Mat("RoadPaint", new Color(0.95f, 0.9f, 0.6f));
         var dirt = PrimitiveKit.Mat("Dirt", new Color(0.55f, 0.42f, 0.28f));
 
-        PrimitiveKit.Box("Asphalt", road.transform, new Vector3(0f, 0.02f, 0f), new Vector3(120f, 0.04f, 4f), asphalt);
-        for (float x = -58f; x <= 58f; x += 4f)
+        PrimitiveKit.Box("Asphalt", road.transform, new Vector3(26f, 0.02f, 0f), new Vector3(172f, 0.04f, 4f), asphalt);
+        for (float x = -58f; x <= 110f; x += 4f)
             PrimitiveKit.Box("Dash", road.transform, new Vector3(x, 0.045f, 0f), new Vector3(1.6f, 0.01f, 0.15f), paint, collider: false);
 
         // Dirt lane from the road up to the stilt house
         PrimitiveKit.Box("DirtLane", parent, new Vector3(7f, 0.012f, -1.2f), new Vector3(1.8f, 0.02f, 9.6f), dirt, collider: false);
     }
 
-    private static void BuildStiltHouse(Transform parent, Vector3 position)
+    // A copy for the house lots (Homes, HouseLots): its own name and an empty carport (the car and the
+    // shrine come over from the village's stilt house when it is yours)
+    internal static void StiltTemplate(Transform parent, Vector3 position) => BuildStiltHouse(parent, position, template: true);
+
+    private static void BuildStiltHouse(Transform parent, Vector3 position, bool template = false)
     {
-        var house = PrimitiveKit.Group("StiltHouse_บ้านไม้ใต้ถุนสูง", parent, position);
+        var house = PrimitiveKit.Group(template ? "Home_stilt" : "StiltHouse_บ้านไม้ใต้ถุนสูง", parent, position);
         var t = house.transform;
         var darkWood = PrimitiveKit.Mat("DarkWood", DarkWood);
         var wood = PrimitiveKit.Mat("WoodPlank", Wood);
@@ -286,7 +296,7 @@ public static class VillageBuilder
         // Sleeping mat (เสื่อ) on the porch: lie down to restore energy
         PrimitiveKit.Box("SleepingMat", t, new Vector3(-1.6f, 2.62f, -3.4f), new Vector3(1.4f, 0.03f, 2f),
             PrimitiveKit.Mat("Mat", new Color(0.85f, 0.7f, 0.4f)), collider: false);
-        var bed = new GameObject("SleepZone");
+        var bed = new GameObject(template ? "SleepZone_stilt" : "SleepZone");
         bed.transform.SetParent(t, false);
         bed.transform.localPosition = new Vector3(-1.6f, 3.6f, -3.4f);
         var bedZone = bed.AddComponent<BoxCollider>();
@@ -299,7 +309,8 @@ public static class VillageBuilder
         bed.AddComponent<SleepSpot>().Configure("เสื่อบนชานบ้าน", "นอนพัก", matPoint.transform);
         // One of the houses a player can choose (Homes, HomePlot): you arrive on the porch by the stairs
         var porchPoint = PrimitiveKit.Group("HomePorch", t, new Vector3(1.4f, 2.6f, -3.4f), 180f).transform;
-        house.AddComponent<HomePlot>().Configure("stilt", 2.6f, porchPoint, bed);
+        var plot = house.AddComponent<HomePlot>();
+        plot.Configure("stilt", 2.6f, porchPoint, bed);
 
         // Porch railing (gap left for the stairs)
         PrimitiveKit.Box("Rail", t, new Vector3(-0.7f, 3.35f, -4.15f), new Vector3(4.6f, 0.08f, 0.08f), darkWood);
@@ -323,11 +334,12 @@ public static class VillageBuilder
         }
 
         // Carport under the house: the vehicle you bought at the bank parks here (between the stilt columns)
-        var carport = new GameObject("Carport_ที่จอดรถใต้ถุน");
+        var carport = new GameObject(template ? "HomeCarport" : "Carport_ที่จอดรถใต้ถุน");
         carport.transform.SetParent(t, false);
         carport.transform.localPosition = new Vector3(1.4f, 0f, 0f);
         carport.transform.localRotation = Quaternion.Euler(0f, 180f, 0f); // nose toward the lane
-        carport.AddComponent<HomeCar>();
+        if (template) plot.SetCarport(carport.transform);
+        else carport.AddComponent<HomeCar>();
 
         // Gable ends and ridge cap (names start with "Roof" so HomeInterior hides them when you're inside)
         var gableEnd = MeshKit.Gable("StiltGable", 4.6f, 2.3f, 0.1f);

@@ -90,8 +90,8 @@ public class LandUI : MonoBehaviour
     private void Render()
     {
         titleText.text = ParcelName(parcel);
-        subtitleText.text = parcel == "rice" ? "นาข้างโคกหนองนา · แปลงนา 7-12"
-            : parcel == "city" ? "ข้างธนาคาร ริมถนนใหญ่" : "ข้างฟาร์มวัว ใกล้โคกหนองนา";
+        subtitleText.text = parcel == "rice" ? "นา 7-12 แถวหลังในแปลงเกษตรของคุณ"
+            : parcel == "city" ? "ข้างธนาคาร ริมถนนใหญ่" : "ริมถนนใหญ่ ใกล้ร้านค้าในหมู่บ้าน";
         UiKit.Clear(buttons);
         slot = 0;
 
@@ -114,7 +114,7 @@ public class LandUI : MonoBehaviour
         if (parcel == "rice")
         {
             statusText.text = "ที่นาของคุณ · แปลงนา 7-12";
-            infoText.text = "เดินเข้าไปในแปลงนาเพื่อไถ ดำนา รดน้ำ และเกี่ยวข้าว เหมือนนาที่โคกหนองนา · ข้าวที่เกี่ยวเก็บเข้ายุ้งข้าว";
+            infoText.text = "เดินเข้าไปในแปลงนาเพื่อไถ ดำนา รดน้ำ และเกี่ยวข้าว อยู่แถวหลังของแปลงนาในแปลงเกษตรของคุณ · ข้าวที่เกี่ยวเก็บเข้ายุ้งข้าว";
             return;
         }
 

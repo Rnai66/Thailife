@@ -118,9 +118,30 @@ local function view(user_id, inv, extra)
   return nk.json_encode(result)
 end
 
+-- เงินขวัญถุง: every player who joins from WELCOME_SINCE on is given WELCOME_BAHT once, the first time
+-- the game loads their wallet. A flag in storage makes sure it is only ever given once.
+local WELCOME_BAHT = 20000
+local WELCOME_SINCE = 1794210000 -- 2026-11-09: accounts made before this already had their start
+local WELCOME = { collection = "economy", key = "welcome" }
+
+local function welcome_gift(user_id)
+  local objects = nk.storage_read({ { collection = WELCOME.collection, key = WELCOME.key, user_id = user_id } })
+  if #objects > 0 then return 0 end
+  local account = nk.account_get_id(user_id)
+  local created = tonumber((account.user or {}).create_time) or 0
+  local give = created >= WELCOME_SINCE
+  -- "*": only if not written yet, so two loads at once can't both give it
+  local ok = pcall(nk.storage_write, { { collection = WELCOME.collection, key = WELCOME.key, user_id = user_id,
+    value = { given = give, at = nk.time() }, version = "*", permission_read = 1, permission_write = 0 } })
+  if not ok or not give then return 0 end
+  nk.wallet_update(user_id, { [CURRENCY] = WELCOME_BAHT }, { reason = "welcome_gift" }, true)
+  return WELCOME_BAHT
+end
+
 local function rpc_get(context, payload)
   current_env = context.env
-  return view(context.user_id, read_inventory(context.user_id))
+  local gift = welcome_gift(context.user_id)
+  return view(context.user_id, read_inventory(context.user_id), gift > 0 and { welcome_gift = gift } or nil)
 end
 
 local function rpc_sell_fish(context, payload)

@@ -45,6 +45,7 @@ public class FarmClient : MonoBehaviour
         public string action;
         public int harvested_kg;
         public string harvested_name;
+        public int harvested_value;
     }
 
     [Serializable]

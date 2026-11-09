@@ -2741,3 +2741,50 @@ TICKETS	TICKETS
 นับจังหวะ	Count the beats
 รวมกันกี่จังหวะ?	How many beats altogether?
 บวกค่าจังหวะของทุกตัว (ตัวหยุดก็นับ)	Add up every value (rests count too)
+แปลงนา {} (1 งาน) · พลังงาน {}	Paddy {} (1 ngan) · Energy {}
+ได้{} {} กก. (ราว {} บาท) เข้ายุ้งแล้ว!\nนำไปขายที่ร้านค้าชุมชน	Got {} {} kg (about {} baht) into the barn!\nSell it at the community shop
+ปลูกได้ 1 แปลง (1 งาน · 4 แปลง = 1 ไร่ ได้ราว 10,000 บาท) · โต 120 วันในเกม · ขาย {} บาท/กก.	Plants 1 paddy (1 ngan · 4 paddies = 1 rai, about 10,000 baht) · grows 120 game days · sells {} baht/kg
+เงินขวัญถุงผู้เล่นใหม่ +{} บาท	New player welcome gift +{} baht
+บ้านเลขที่ {}	House No. {}
+บ้านเลขที่ {}\n{}	House No. {}\n{}
+ว่าง\nแปลง {}	Vacant\nLot {}
+ซอยตะวันออก\nแปลงบ้าน 7–22	East Soi\nHouse lots 7–22
+ซอยบ้านใหม่ →\nแปลงบ้าน 1–6	New homes soi →\nHouse lots 1–6
+แปลงนี้มีคนจองไปแล้ว เลือกแปลงอื่น	Someone has taken this lot, choose another
+ย่านนี้เต็มทุกหมู่แล้ว	Every moo in this area is full
+บ้านเลขที่ {} {} ถูกประกาศขายเพราะไม่ได้เข้าเกมนาน · ได้บ้านหลังใหม่แทน	House No. {} {} was put up for sale after a long absence · you have a new house instead
+โคก หนอง นา\nทำนา · เลี้ยงปลาในกระชัง · เล้าไก่	Khok Nong Na\nRice farming · cage fish farming · chicken coop
+รับวัวฟรีคนละ 1 ตัว ไปเลี้ยงที่คอกวัวในแปลงเกษตรของคุณ	One free cow per person, raised in the cow pen on your farm lot
+คุณรับวัวจาก อบต. ไปแล้ว — ซื้อเพิ่มได้จากพ่อค้าวัวริมถนนใหญ่ในหมู่บ้าน	You already got your TAO cow — buy more from the cattle dealer by the village main road
+นา 7-12 แถวหลังในแปลงเกษตรของคุณ	Paddies 7-12, the back rows of your farm lot
+ริมถนนใหญ่ ใกล้ร้านค้าในหมู่บ้าน	By the main road, near the village shop
+เดินเข้าไปในแปลงนาเพื่อไถ ดำนา รดน้ำ และเกี่ยวข้าว อยู่แถวหลังของแปลงนาในแปลงเกษตรของคุณ · ข้าวที่เกี่ยวเก็บเข้ายุ้งข้าว	Walk into a plot to plow, plant, water and harvest — the back rows of the paddies on your farm lot · harvested rice goes to the barn
+แปลงเกษตร {}	Farm lot {}
+แปลงเกษตร {}\n{}	Farm lot {}\n{}
+ว่าง\nแปลงเกษตร {}	Vacant\nFarm lot {}
+แปลงเกษตรของฉัน · โคกหนองนา	My farm lot · Khok Nong Na
+จัดโซน · แตะโซนหนึ่ง แล้วแตะอีกโซนเพื่อสลับกัน	Zones · tap one zone, then another to swap them
+ถนน (หน้าแปลง)	Road (front of the lot)
+บันทึกการจัดโซน · {} บาท	Save the zones · {} baht
+ยังไม่ได้สลับโซน	No zones swapped yet
+สร้างรั้ว · จ่ายครั้งเดียวต่อด้าน	Build fences · paid once per side
+ด้านหน้า	Front
+ด้านหลัง	Back
+ด้านซ้าย	Left
+ด้านขวา	Right
+แปลงนา	Paddies
+บ่อเลี้ยงปลา	Fish pond
+คอกวัว	Cow pen
+เล้าไก่ · เถียงนา	Chicken coop · field hut
+ไม่มีรั้ว	No fence
+รั้วลวดหนาม	Barbed wire
+จัดโซนแปลงเกษตรใหม่แล้ว	Farm zones rearranged
+รื้อรั้วแล้ว	Fence taken down
+จัดโซนแบบนี้อยู่แล้ว	The zones are already like this
+ด้านนี้เป็นรั้วแบบนี้อยู่แล้ว	This side already has that fence
+จัดแปลงเกษตร	Arrange farm lot
+สลับโซน นา · บ่อปลา · คอกวัว · เล้าไก่ · สร้างรั้ว	Swap zones: paddies · pond · cows · coop · build fences
+แปลงเกษตร โคกหนองนา ↓\nนา · บ่อปลา · คอกวัว · เล้าไก่	Farm lots · Khok Nong Na ↓\nPaddies · pond · cows · coop
+นา 7-12\nซื้อที่นาติดคลองที่ธนาคาร	Paddies 7-12\nBuy the canal-side land at the bank
+พ่อค้าวัว\nซื้อวัวเข้าคอกในแปลงเกษตร	Cattle dealer\nBuy cows for your farm lot pen
+แปลงเกษตรเลขที่ {} {}	Farm lot No. {} {}

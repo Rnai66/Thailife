@@ -844,6 +844,25 @@ public static class Seaside
         Places.Sign(f, new Vector3(6.6f, 0f, -hz - 2.4f), "พ่อค้าวัว\nซื้อวัวเข้าคอก", 0f);
     }
 
+    // The cow seller (พ่อค้าวัว) on his own, by the farm lots (the cows go to your pen in your farm lot)
+    public static void CowSeller(Transform parent, Vector3 position, float yaw)
+    {
+        var f = PrimitiveKit.Group("CowSellerStand_พ่อค้าวัว", parent, position, yaw).transform;
+        var seller = PrimitiveKit.Group("CowSeller_พ่อค้าวัว", f, Vector3.zero, 180f);
+        seller.AddComponent<MarketVendor>().Configure(3);
+        var zone = new GameObject("CowSellerZone");
+        zone.transform.SetParent(f, false);
+        zone.transform.localPosition = new Vector3(0f, 1f, -1f);
+        var box = zone.AddComponent<BoxCollider>();
+        box.isTrigger = true;
+        box.size = new Vector3(2.6f, 2f, 2f);
+        zone.AddComponent<RanchCounter>().Configure("seller");
+        var hay = PrimitiveKit.Mat("Hay", new Color(0.9f, 0.78f, 0.38f));
+        PrimitiveKit.Box("HayBale", f, new Vector3(-1.6f, 0.3f, 0.6f), new Vector3(1f, 0.6f, 0.7f), hay);
+        PrimitiveKit.Box("HayBale", f, new Vector3(-1.6f, 0.9f, 0.6f), new Vector3(1f, 0.6f, 0.7f), hay);
+        Places.Sign(f, new Vector3(2.1f, 0f, -0.2f), "พ่อค้าวัว\nซื้อวัวเข้าคอกในแปลงเกษตร", 0f);
+    }
+
     // A cute, rounded dairy cow: capsule body, round head with big eyes, pink muzzle, floppy ears
     internal static void Cow(Transform parent, Vector3 pos, int index, Vector2 room)
     {

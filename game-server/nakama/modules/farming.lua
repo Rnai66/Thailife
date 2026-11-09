@@ -139,6 +139,7 @@ local function rpc_act(context, payload)
     data.write_barn(user_id, crops)
     extra.harvested_kg = kg
     extra.harvested_name = rice.name
+    extra.harvested_value = kg * rice.price_per_kg -- what it fetches when sold (ร้านค้าชุมชน)
     quest.progress(user_id, "harvest", 1)
     p = { state = "empty" }
 
