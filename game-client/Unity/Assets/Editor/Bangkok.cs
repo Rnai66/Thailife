@@ -27,6 +27,8 @@ public static class Bangkok
         WatPhraKaew(root, Wat);
         BrahmaShrine(root, Shrine);
         Airport(root, Terminal);
+        // the runway out beyond the ring road: planes landing and taking off all day
+        Aviation.Field(root, new Vector3(0f, 0f, -172f), 90f, 420f, "สุวรรณภูมิ");
         River(root);
         WatArun(root, Arun);
     }
@@ -97,8 +99,8 @@ public static class Bangkok
         PrimitiveKit.Box("GateBoard", t, new Vector3(GateX, 6.6f, -hd - 0.95f), new Vector3(7f, 0.9f, 0.08f), lacquer, collider: false);
         PrimitiveKit.Label("วัดพระศรีรัตนศาสดาราม · วัดพระแก้ว", t, new Vector3(GateX, 6.6f, -hd - 1f), 0.05f, new Color(1f, 0.85f, 0.4f));
         // the two guardian giants out in front, either side of the entrance, facing the visitors
-        Yaksha(t, new Vector3(GateX - 6.4f, 0f, -hd - 3.4f), new Color(0.15f, 0.5f, 0.35f));
-        Yaksha(t, new Vector3(GateX + 6.4f, 0f, -hd - 3.4f), new Color(0.7f, 0.15f, 0.12f));
+        Yaksha(t, new Vector3(GateX - 6.4f, 0f, -hd - 3.4f), new Color(0.15f, 0.5f, 0.35f), -GiantTurn);
+        Yaksha(t, new Vector3(GateX + 6.4f, 0f, -hd - 3.4f), new Color(0.7f, 0.15f, 0.12f), GiantTurn);
 
         Cloister(t, hw, hd, wallH, white, lacquer, orange, gold);
 
@@ -546,8 +548,8 @@ public static class Bangkok
         }
 
         // Guardian yaksha at the gate, the name on a board in front
-        Yaksha(t, new Vector3(-3.5f, 0f, -12f), new Color(0.92f, 0.92f, 0.88f));
-        Yaksha(t, new Vector3(3.5f, 0f, -12f), new Color(0.15f, 0.5f, 0.35f));
+        Yaksha(t, new Vector3(-3.5f, 0f, -12f), new Color(0.92f, 0.92f, 0.88f), -GiantTurn);
+        Yaksha(t, new Vector3(3.5f, 0f, -12f), new Color(0.15f, 0.5f, 0.35f), GiantTurn);
         PrimitiveKit.Box("NameBoard", t, new Vector3(0f, 1.2f, -15.8f), new Vector3(6f, 1f, 0.12f), PrimitiveKit.Mat("TempleLacquer", new Color(0.45f, 0.07f, 0.06f), 0.6f));
         PrimitiveKit.Label("วัดอรุณราชวราราม", t, new Vector3(0f, 1.2f, -15.88f), 0.05f, new Color(1f, 0.85f, 0.4f));
         foreach (float x in new[] { -7f, 7f })
@@ -830,12 +832,15 @@ public static class Bangkok
 
     // A temple guardian giant (ยักษ์) after the วัดพระแก้ว ones (GuardianGiant): glazed colour skin,
     // gold armour, both hands on the club, the tall tiered crown. Each one a different crown and flaps.
+    // Each pair turned a little in toward the path between them, so whoever walks up to the gate
+    // looks them in the face (straight out, you only saw them side-on from the path)
+    private const float GiantTurn = 22f;
     private static int giants;
-    private static void Yaksha(Transform t, Vector3 at, Color skin)
+    private static void Yaksha(Transform t, Vector3 at, Color skin, float yaw = 0f)
     {
         Color[] flaps = { new Color(0.75f, 0.12f, 0.12f), new Color(0.15f, 0.45f, 0.3f), new Color(0.2f, 0.3f, 0.7f) };
         int n = giants++;
-        GuardianGiant.Build(t, at, skin, flaps[(n + 1) % 3], n % 3, $"{t.name.Split('_')[0]}{n}");
+        GuardianGiant.Build(t, at, skin, flaps[(n + 1) % 3], n % 3, $"{t.name.Split('_')[0]}{n}", yaw);
     }
 
     // ── ศาลพระพรหม ─────────────────────────────────────────────────────────────
@@ -874,7 +879,7 @@ public static class Bangkok
     // ── ท่าอากาศยานสุวรรณภูมิ ──────────────────────────────────────────────────────
     private static void Airport(Transform root, Vector3 at)
     {
-        var t = PrimitiveKit.Group("Airport_สุวรรณภูมิ", root, at).transform;
+        var t = PrimitiveKit.Group("Airport_ท่าอากาศยานสุวรรณภูมิ", root, at).transform;
         const float w = 50f, d = 18f, h = 9f;
         float front = d / 2f; // the front faces north (+Z), toward the avenue
         var steel = PrimitiveKit.Mat("TrussWhite", new Color(0.92f, 0.93f, 0.95f), 0.5f, 0.4f);
@@ -948,47 +953,16 @@ public static class Bangkok
         PrimitiveKit.Box("Fence", t, new Vector3(2.5f, 1.2f, -front - 1.2f), new Vector3(89f, 2.4f, 0.05f), chain);
         foreach (float x in new[] { -42f, 47f }) // round the ends of the apron
             PrimitiveKit.Box("Fence", t, new Vector3(x, 1.2f, -front - 18.6f), new Vector3(0.05f, 2.4f, 34.8f), chain);
-        Jet(t, new Vector3(5f, 0f, -front - 17f));
-        PrimitiveKit.Box("AirBridge", t, new Vector3(-4f, 4.4f, -front - 7.4f), new Vector3(3f, 2.8f, 12.8f), steel, collider: false);
+        // two airliners at the gates, nose to the east, the air bridge to the first one's front door
+        Aviation.Jet(t, new Vector3(-12f, 0f, -front - 17f), 90f, Aviation.Airlines[0], "BkkGate0");
+        Aviation.Jet(t, new Vector3(26f, 0f, -front - 17f), 90f, Aviation.Airlines[3], "BkkGate1");
+        Aviation.GroundCrew(t, new Vector3(8f, 0f, -front - 6f), 0f);
+        PrimitiveKit.Box("AirBridge", t, new Vector3(-0.1f, 4.6f, -front - 7.5f), new Vector3(3f, 2.8f, 14.6f), steel, collider: false);
         PrimitiveKit.Cylinder("AirBridgeLeg", t, new Vector3(-4f, 1.5f, -front - 12f), new Vector3(0.5f, 1.5f, 0.5f), steel, collider: false);
         var tower = PrimitiveKit.Group("ControlTower", t, new Vector3(32f, 0f, -front - 26f)).transform;
         PrimitiveKit.Cylinder("Shaft", tower, new Vector3(0f, 15f, 0f), new Vector3(3.2f, 15f, 3.2f), steel);
         PrimitiveKit.Cylinder("Cab", tower, new Vector3(0f, 31.5f, 0f), new Vector3(8f, 1.5f, 8f), glass, collider: false);
         PrimitiveKit.Cylinder("CabRoof", tower, new Vector3(0f, 33.2f, 0f), new Vector3(9f, 0.25f, 9f), steel, collider: false);
         PrimitiveKit.Sphere("Beacon", tower, new Vector3(0f, 34f, 0f), Vector3.one * 0.6f, PrimitiveKit.Glow("BeaconRed", new Color(1f, 0.15f, 0.1f), 2f));
-    }
-
-    // A twin-engine airliner in a Thai livery (white, royal purple and gold), nose to the east
-    private static void Jet(Transform t, Vector3 at)
-    {
-        var j = PrimitiveKit.Group("Jet_เครื่องบิน", t, at).transform;
-        var white = PrimitiveKit.Mat("JetWhite", new Color(0.95f, 0.95f, 0.96f), 0.7f, 0.2f);
-        var purple = PrimitiveKit.Mat("JetPurple", new Color(0.38f, 0.14f, 0.5f), 0.6f, 0.2f);
-        var gold = Gold;
-        var grey = PrimitiveKit.Mat("JetGrey", new Color(0.6f, 0.62f, 0.66f), 0.6f, 0.5f);
-        const float len = 34f, r = 2.2f, y = 3.6f;
-        PrimitiveKit.Cylinder("Fuselage", j, new Vector3(0f, y, 0f), new Vector3(r * 2f, len / 2f, r * 2f), white, new Vector3(0f, 0f, 90f));
-        PrimitiveKit.Sphere("Nose", j, new Vector3(len / 2f, y, 0f), new Vector3(5f, r * 2f, r * 2f), white);
-        PrimitiveKit.Cylinder("TailCone", j, new Vector3(-len / 2f - 2.4f, y + 0.6f, 0f), new Vector3(r * 1.3f, 2.6f, r * 1.3f), white, new Vector3(0f, 0f, 75f), collider: false);
-        PrimitiveKit.Box("Cheatline", j, new Vector3(0f, y - 0.6f, 0f), new Vector3(len, 0.35f, r * 2f + 0.06f), purple, collider: false);
-        PrimitiveKit.Box("GoldLine", j, new Vector3(0f, y - 0.25f, 0f), new Vector3(len, 0.12f, r * 2f + 0.07f), gold, collider: false);
-        PrimitiveKit.Box("Windows", j, new Vector3(1f, y + 0.55f, 0f), new Vector3(len - 6f, 0.25f, r * 2f + 0.05f), PrimitiveKit.Mat("JetWindow", new Color(0.1f, 0.12f, 0.16f), 0.9f), collider: false);
-        PrimitiveKit.Box("Cockpit", j, new Vector3(len / 2f + 1.2f, y + 0.8f, 0f), new Vector3(1.2f, 0.4f, 2.2f), PrimitiveKit.Mat("JetWindow", new Color(0.1f, 0.12f, 0.16f), 0.9f), collider: false);
-        // Wings swept back, engines underneath; tailplane and a purple fin with a gold flourish
-        foreach (float s in new[] { -1f, 1f })
-        {
-            PrimitiveKit.Box("Wing", j, new Vector3(-1.5f, y - 1f, s * 8.5f), new Vector3(5f, 0.45f, 15f), white, new Vector3(0f, s * 25f, 0f), collider: false);
-            PrimitiveKit.Cylinder("Engine", j, new Vector3(0.8f, y - 2.1f, s * 6f), new Vector3(2f, 1.8f, 2f), grey, new Vector3(0f, 0f, 90f), collider: false);
-            PrimitiveKit.Box("Tailplane", j, new Vector3(-len / 2f - 1.5f, y + 1f, s * 3.6f), new Vector3(2.8f, 0.3f, 6f), white, new Vector3(0f, s * 25f, 0f), collider: false);
-            PrimitiveKit.Cylinder("MainGear", j, new Vector3(-2f, 0.6f, s * 2.5f), new Vector3(1.2f, 0.3f, 1.2f), grey, new Vector3(90f, 0f, 0f), collider: false);
-        }
-        PrimitiveKit.Box("Fin", j, new Vector3(-len / 2f - 1.2f, y + 4.6f, 0f), new Vector3(5f, 7f, 0.35f), purple, new Vector3(0f, 0f, -20f), collider: false);
-        PrimitiveKit.Box("FinGold", j, new Vector3(-len / 2f - 1.6f, y + 5.4f, 0f), new Vector3(1.4f, 3f, 0.4f), gold, new Vector3(0f, 0f, -35f), collider: false);
-        PrimitiveKit.Cylinder("NoseGear", j, new Vector3(len / 2f - 2f, 0.5f, 0f), new Vector3(0.9f, 0.25f, 0.9f), grey, new Vector3(90f, 0f, 0f), collider: false);
-        PrimitiveKit.Cylinder("GearLeg", j, new Vector3(len / 2f - 2f, 1.6f, 0f), new Vector3(0.25f, 1.2f, 0.25f), grey, collider: false);
-        PrimitiveKit.Label("ไทยไลฟ์แอร์", j, new Vector3(2f, y + 1.2f, r + 0.05f), 0.08f, new Color(0.38f, 0.14f, 0.5f), 180f);
-        var col = j.gameObject.AddComponent<BoxCollider>();
-        col.center = new Vector3(0f, y, 0f);
-        col.size = new Vector3(len + 6f, 5f, 4.6f);
     }
 }

@@ -85,6 +85,9 @@ public class HomeChoiceUI : MonoBehaviour
             UiKit.RoundButton(list, "กลับบ้าน", new Vector2(portrait ? 0f : -bodyW * 0.5f + 180f, -bodyH * 0.5f + (portrait ? 110f : 50f)),
                 new Vector2(300f, 64f), UiKit.Gold, UiKit.GoldInk, () => { Close(); HomeClient.Instance?.GoHome(); }, 24);
         if (!first && State.chosen && State.area == "village" && State.moo > 0) OfferFarmMove(version);
+        if (!first && State.chosen && State.area != "village") // living in town: pick the หมู่ your farm is in
+            UiKit.RoundButton(list, "แปลงเกษตร · เลือกหมู่", new Vector2(portrait ? 0f : bodyW * 0.5f - 250f, -bodyH * 0.5f + (portrait ? 190f : 50f)),
+                new Vector2(460f, 64f), UiKit.PayGreen, Color.white, () => { Close(); FarmLotUI.Show(); }, 22);
     }
 
     // Your farm lot is in another หมู่ than your house: bring it over (free, everything on it comes along)

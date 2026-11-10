@@ -41,6 +41,18 @@ public class PlayerController : MonoBehaviour
     // Extra speed while driving your own car around (DrivableCar)
     public float DriveBoost { get; set; } = 1f;
 
+    // Driving (DrivableCar): the stick only steers; the speed comes from the throttle (held: speeds up
+    // to the vehicle's top speed, let go: rolls to a stop) and the brake. YawRate is how fast it's
+    // turning (degrees a second, + = right), for leaning into the turn.
+    public bool VehicleMode { get; set; }
+    public bool Throttle { get; set; }
+    public bool Brake { get; set; }
+    public float VehicleSpeed { get; private set; }
+    public float YawRate { get; private set; }
+    private const float Accel = 0.55f, Coast = 0.3f, Braking = 1.4f; // fractions of top speed a second
+    private const float StickCruise = 0.6f; // the stick alone drives along at this much of top speed
+    public const float KmhPerMetre = 5.76f; // the speedometer's km/h for 1 m/s (the world is built small)
+
     public bool IsGrounded => controller != null && controller.isGrounded;
 
     // False while knocked out
@@ -93,6 +105,13 @@ public class PlayerController : MonoBehaviour
         right.Normalize();
 
         Vector3 move = forward * input.y + right * input.x;
+        if (VehicleMode)
+        {
+            Drive(Vector3.ClampMagnitude(move, 1f));
+            return;
+        }
+        VehicleSpeed = 0f;
+        YawRate = 0f;
         if (!ManualInput && InputEnabled && AutoMove.sqrMagnitude > 0.0001f) move = new Vector3(AutoMove.x, 0f, AutoMove.z);
         move = Vector3.ClampMagnitude(move, 1f);
 
@@ -115,6 +134,42 @@ public class PlayerController : MonoBehaviour
         impulseVelocity = Vector3.Lerp(impulseVelocity, Vector3.zero, 1f - Mathf.Exp(-8f * Time.deltaTime));
 
         controller.Move(velocity * Time.deltaTime);
+    }
+
+    // The vehicle: steer towards the stick, speed from the throttle and brake
+    private void Drive(Vector3 steer)
+    {
+        float dt = Time.deltaTime;
+        float top = moveSpeed * DriveBoost;
+        bool throttle = Throttle, brake = Brake;
+#if ENABLE_INPUT_SYSTEM
+        var kb = Keyboard.current;
+        if (kb != null) { throttle |= kb.leftShiftKey.isPressed; brake |= kb.spaceKey.isPressed; }
+#endif
+        if (!InputEnabled) { throttle = false; brake = true; }
+        // คันเร่ง: full speed; just the stick: along at a steady pace (one thumb is enough); เบรก: stop
+        float target = brake ? 0f : throttle ? top : top * StickCruise * Mathf.Clamp01((steer.magnitude - 0.2f) / 0.6f);
+        float change = brake ? Braking : target > VehicleSpeed ? Accel : Coast;
+        VehicleSpeed = Mathf.MoveTowards(VehicleSpeed, target, top * change * dt);
+
+        float yaw = transform.eulerAngles.y, before = yaw;
+        if (steer.sqrMagnitude > 0.04f)
+        {
+            float want = Quaternion.LookRotation(steer).eulerAngles.y;
+            float k = Mathf.Clamp01(VehicleSpeed / Mathf.Max(top, 0.01f));
+            float rate = Mathf.Lerp(70f, 110f, Mathf.Clamp01(VehicleSpeed / 2f)) * Mathf.Lerp(1f, 0.6f, k); // tighter turns slowly
+            yaw = Mathf.MoveTowardsAngle(yaw, want, rate * dt);
+        }
+        YawRate = dt > 0f ? Mathf.DeltaAngle(before, yaw) / dt : 0f;
+        transform.rotation = Quaternion.Euler(0f, yaw, 0f);
+
+        if (controller.isGrounded && verticalVelocity < 0f) verticalVelocity = -2f;
+        verticalVelocity += gravity * dt;
+        Vector3 velocity = transform.forward * VehicleSpeed + impulseVelocity;
+        velocity.y = verticalVelocity;
+        impulseVelocity = Vector3.Lerp(impulseVelocity, Vector3.zero, 1f - Mathf.Exp(-8f * dt));
+        CollisionFlags hit = controller.Move(velocity * dt);
+        if ((hit & CollisionFlags.Sides) != 0) VehicleSpeed *= 0.5f; // ran into something
     }
 
     private Vector2 ReadMoveInput()

@@ -65,8 +65,9 @@ public class FarmLots : MonoBehaviour
     private void Update()
     {
         if (Time.time < nextRefresh || busy) return;
-        nextRefresh = Time.time + 60f;
-        _ = Refresh();
+        // not connected yet (just arrived in the map): try again in a moment, not in a minute
+        nextRefresh = Time.time + (Connection() == null ? 1f : 60f);
+        if (Connection() != null) _ = Refresh();
     }
 
     public GameObject Template(string name)
@@ -124,15 +125,29 @@ public class FarmLots : MonoBehaviour
         Changed?.Invoke(view);
     }
 
+    private Coroutine applying;
+
+    // Your own lot at once, then the neighbours' a few a frame (each is a lot of pieces to copy)
     private void Apply(View view)
     {
         if (view?.lots == null || view.moo != ShownMoo()) return;
-        foreach (var l in view.lots)
+        if (applying != null) StopCoroutine(applying);
+        applying = StartCoroutine(ApplyRoutine(view));
+    }
+
+    private System.Collections.IEnumerator ApplyRoutine(View view)
+    {
+        var order = new List<LotEntry>(view.lots);
+        order.Sort((a, b) => b.mine.CompareTo(a.mine));
+        int done = 0;
+        foreach (var l in order)
         {
             if (!lots.TryGetValue(l.no, out var lot)) continue;
             if (l.vacant) lot.Clear(true);
-            else lot.Show(this, l.layout, l.fences, l.owner, l.mine, l.mine ? null : l.pieces); // your own pieces: BuiltPieces
+            else if (lot.Show(this, l.layout, l.fences, l.owner, l.mine, l.mine ? null : l.pieces) && ++done % 2 == 0) // your own pieces: BuiltPieces
+                yield return null;
         }
+        applying = null;
     }
 
     // Your own lot in the หมู่ on show (null when your farm is in another หมู่)

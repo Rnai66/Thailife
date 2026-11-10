@@ -9,7 +9,7 @@ public static class CarModels
 
     // Drive speed multiplier on top of walking
     public static float DriveSpeed(string id) =>
-        id == "car_bicycle" ? 1.6f : id == "car_motorbike" ? 2.4f : id == "car_pickup" ? 2.8f : id == "car_sedan" ? 3.0f : 3.4f;
+        id == "car_bicycle" ? 1.9f : id == "car_motorbike" ? 2.6f : id == "car_pickup" ? 3.4f : id == "car_sedan" ? 3.7f : 4.1f;
 
     public static void Build(string id, Transform root, Material template)
     {

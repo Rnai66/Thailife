@@ -65,6 +65,20 @@ public static class BangkokStreets
             body.useGravity = false;
             v.localPosition = path[0];
         }
+        // slip roads between ถนนพระราม 4 and the ring road (CityTraffic.SlipRoads), a car on each
+        int k = 0;
+        foreach (var slip in CityTraffic.SlipRoads(ring, Rama4Z + Lane, Rama4Z - Lane, inner - 7f))
+        {
+            string kind = k % 2 == 0 ? "tuktuk" : "taxi";
+            var v = CityTraffic.Vehicle(t, kind, k, out float halfLen, out float speed);
+            v.gameObject.AddComponent<TrafficCar>().Configure(slip, false, Mathf.Min(speed, 9f), halfLen, 0f, null, null, null);
+            CityTraffic.Hailable(v, kind);
+            var body = v.GetComponent<Rigidbody>();
+            body.isKinematic = true;
+            body.useGravity = false;
+            v.localPosition = slip[0];
+            k++;
+        }
         Car("taxi", 0, rama4, 10f);
         Car("tuktuk", 1, rama4, 95f);
         Car("sedan", 1, rama4, 180f);

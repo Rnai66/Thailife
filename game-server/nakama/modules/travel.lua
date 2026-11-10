@@ -55,6 +55,7 @@ end
 local FERRY_FARE = 10
 local TUKTUK_FARE = 40
 local TAXI_FARE = 60
+local SONGTHAEW_FARE = 20 -- รถสองแถวรอบเมือง
 
 local function charge(user_id, fare, meta)
   local account = nk.account_get_id(user_id)
@@ -100,8 +101,10 @@ end, "ferry_ride")
 
 nk.register_rpc(function(context, payload)
   local ok, args = pcall(nk.json_decode, payload ~= "" and payload or "{}")
-  local taxi = ok and type(args) == "table" and args.kind == "taxi"
-  local fare = taxi and TAXI_FARE or TUKTUK_FARE
-  charge(context.user_id, fare, { reason = taxi and "taxi" or "tuktuk" })
+  local kind = ok and type(args) == "table" and args.kind or "tuktuk"
+  local fares = { taxi = TAXI_FARE, songthaew = SONGTHAEW_FARE, tuktuk = TUKTUK_FARE }
+  if not fares[kind] then kind = "tuktuk" end
+  local fare = fares[kind]
+  charge(context.user_id, fare, { reason = kind })
   return nk.json_encode({ fare = fare })
 end, "tuktuk_ride")

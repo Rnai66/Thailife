@@ -122,6 +122,12 @@ public class CharacterModel : MonoBehaviour
     // Sitting (on a boat that moves under us): stay in the idle pose instead of walking
     public bool Seated { get; set; }
 
+    // Leaning over with a bike in a turn (DrivableCar): the body tips round the feet, degrees, + = left
+    public void SetLean(float degrees)
+    {
+        if (model != null) model.transform.localRotation = Quaternion.Euler(0f, 0f, degrees);
+    }
+
     private void Update()
     {
         if (animator == null) return;

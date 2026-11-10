@@ -2818,7 +2818,8 @@ TICKETS	TICKETS
 สร้างแล้ว {}/{} ชิ้น · วางได้ในแปลงบ้านของคุณ	Built {}/{} pieces · place them on your own house lot
 ของที่สร้างไว้ {} ชิ้นอยู่นอกแปลงบ้าน · เพื่อนบ้านจะไม่เห็น ย้ายเข้ามาในแปลงได้ที่เมนูก่อสร้าง	{} built pieces are outside your house lot · neighbours can't see them; move them in from the Build menu
 บ้านเลขที่ {} {} · {}	House No. {} {} · {}
-คุณรับวัวจาก อบต. ไปแล้ว — ซื้อเพิ่มได้จากพ่อค้าวัวริมซอยข้างแปลงเกษตร	You already got your TAO cow — buy more from the cattle dealer on the soi by the farm lots
+คุณรับวัวจาก อบต. ไปแล้ว — ซื้อเพิ่มได้ที่ฟาร์มพ่อค้าวัว ท้ายซอยกลางหมู่บ้าน	You already got your TAO cow — buy more at the cattle dealer's farm at the end of the village lane
+ฟาร์มพ่อค้าวัว\nซื้อ · ขายวัว	Cattle dealer's farm\nBuy · sell cows
 ก่อสร้างในแปลงเกษตร	Build on your farm lot
 ก่อสร้างในที่ดินของคุณ	Build on your land
 สร้างแล้ว {}/{} ชิ้น · วางได้ในแปลงเกษตรของคุณ	Built {}/{} · place them on your farm lot

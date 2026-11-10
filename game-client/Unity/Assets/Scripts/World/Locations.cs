@@ -45,13 +45,13 @@ public static class Locations
         new Location { Id = "island", NameTh = "เกาะ · อ่าวมาหยา ชิงช้า หาสมบัติ เรือใบ", Level = LocationLevel.Beach, Scene = "Island", SpawnId = "ferry", Icon = "island", BoatOnly = true },
         // Other provinces: reached by bus, train or plane; spawn by how you came (bus / train / air)
         new Location { Id = "bangkok", NameTh = "กรุงเทพฯ · วัดพระแก้ว วัดอรุณ สุวรรณภูมิ", Level = LocationLevel.Province, Scene = "Bangkok", Intercity = true, Airport = true },
-        new Location { Id = "chiangmai", NameTh = "เชียงใหม่ · ดอยสุเทพ ถนนคนเดิน", Level = LocationLevel.Province, Intercity = true, Airport = true },
-        new Location { Id = "pattaya", NameTh = "พัทยา · ชายหาด วอล์กกิ้งสตรีท", Level = LocationLevel.Province, Intercity = true, Airport = true },
-        new Location { Id = "khonkaen", NameTh = "ขอนแก่น · บึงแก่นนคร พระมหาธาตุ", Level = LocationLevel.Province, Intercity = true, Airport = true },
-        new Location { Id = "ubon", NameTh = "อุบลราชธานี · แห่เทียนพรรษา แม่น้ำมูล", Level = LocationLevel.Province, Intercity = true, Airport = true },
-        new Location { Id = "buriram", NameTh = "บุรีรัมย์ · สนามช้าง ปราสาทพนมรุ้ง", Level = LocationLevel.Province, Intercity = true, Airport = true },
-        new Location { Id = "songkhla", NameTh = "สงขลา · หาดใหญ่ แหลมสมิหลา", Level = LocationLevel.Province, Intercity = true, Airport = true },
-        new Location { Id = "nakhonsi", NameTh = "นครศรีธรรมราช · วัดพระมหาธาตุ", Level = LocationLevel.Province, Intercity = true, Airport = true },
+        new Location { Id = "chiangmai", NameTh = "เชียงใหม่ · ดอยสุเทพ ถนนคนเดิน", Level = LocationLevel.Province, Scene = "ChiangMai", Intercity = true, Airport = true },
+        new Location { Id = "pattaya", NameTh = "พัทยา · ชายหาด วอล์กกิ้งสตรีท", Level = LocationLevel.Province, Scene = "Pattaya", Intercity = true, Airport = true },
+        new Location { Id = "khonkaen", NameTh = "ขอนแก่น · บึงแก่นนคร พระมหาธาตุ", Level = LocationLevel.Province, Scene = "KhonKaen", Intercity = true, Airport = true },
+        new Location { Id = "ubon", NameTh = "อุบลราชธานี · แห่เทียนพรรษา แม่น้ำมูล", Level = LocationLevel.Province, Scene = "Ubon", Intercity = true, Airport = true },
+        new Location { Id = "buriram", NameTh = "บุรีรัมย์ · สนามช้าง ปราสาทพนมรุ้ง", Level = LocationLevel.Province, Scene = "Buriram", Intercity = true, Airport = true },
+        new Location { Id = "songkhla", NameTh = "สงขลา · หาดใหญ่ แหลมสมิหลา", Level = LocationLevel.Province, Scene = "Songkhla", Intercity = true, Airport = true },
+        new Location { Id = "nakhonsi", NameTh = "นครศรีธรรมราช · วัดพระมหาธาตุ", Level = LocationLevel.Province, Scene = "NakhonSi", Intercity = true, Airport = true },
     };
 
     public static string LevelNameTh(LocationLevel level) => level switch

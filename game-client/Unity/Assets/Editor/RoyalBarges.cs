@@ -327,6 +327,10 @@ public static class RoyalBarges
 
     // Make the figure just built (body's children from `from` on) bigger, about `pivot` on the stem, so
     // the sacred beasts at bow and stern stand out over the crews as they do on the real barges
+    // ...but never taller than Clearance above the water: they pass under the river bridges (RiverBridges,
+    // deck underside 6.2 m)
+    private const float Clearance = 5.5f;
+
     private static void Enlarge(Transform body, int from, Vector3 pivot, float scale)
     {
         var group = new GameObject("Figure").transform;
@@ -345,7 +349,20 @@ public static class RoyalBarges
             k.localRotation = r;
             k.localScale = s;
         }
+        // shrink back down if the top of the figure would hit the bridges
+        float top = float.NegativeInfinity;
+        foreach (var rend in group.GetComponentsInChildren<Renderer>(true))
+        {
+            var b = rend.bounds;
+            top = Mathf.Max(top, body.InverseTransformPoint(new Vector3(b.center.x, b.max.y, b.center.z)).y);
+        }
+        if (top > Clearance && top - pivot.y > 0.01f)
+            group.localScale = Vector3.one * scale * Mathf.Max(0.2f, (Clearance - pivot.y) / (top - pivot.y));
     }
+
+    // A sculpted (AI-made) figure, as tall as asked but its top under Clearance
+    private static void Figure(string name, Transform body, Vector3 at, float height, float yaw = 0f) =>
+        AiModels.Place(name, body, at, Mathf.Min(height, Clearance - at.y), yaw);
 
     private static void Finish(Transform root, string name)
     {
@@ -371,7 +388,7 @@ public static class RoyalBarges
 
         int mark = body.childCount;
         // the sculpted figure (AI-made) when present, else the built one
-        if (AiModels.Has("Swan")) AiModels.Place("Swan", body, new Vector3(0f, bowTop - 0.5f, L * 0.5f - 0.9f), 7.2f, SwanYaw);
+        if (AiModels.Has("Swan")) Figure("Swan", body, new Vector3(0f, bowTop - 0.5f, L * 0.5f - 0.9f), 7.2f, SwanYaw);
         else
         {
             // the neck: up from the stem in an S, the head looking ahead
@@ -417,6 +434,7 @@ public static class RoyalBarges
     // บุษบก: the gold pavilion with a tiered spire, crimson curtains tied back, an officer at each corner
     private static void Busabok(Transform body, Vector3 at)
     {
+        int mark = body.childCount;
         Part("Platform", body, Cube, gold, at + new Vector3(0f, 0.35f, 0f), new Vector3(2.1f, 0.7f, 3.4f));
         Part("Cushion", body, Cube, red, at + new Vector3(0f, 0.78f, 0f), new Vector3(1.6f, 0.16f, 2.6f));
         foreach (float x in new[] { -0.9f, 0.9f })
@@ -435,6 +453,7 @@ public static class RoyalBarges
         }
         Part("Spire", body, Cone, gold, at + new Vector3(0f, y, 0f), new Vector3(0.8f, 2.4f, 0.8f));
         Part("SpireTip", body, Rod, gold, at + new Vector3(0f, y + 2.3f, 0f), new Vector3(0.05f, 0.6f, 0.05f));
+        Enlarge(body, mark, at, 1f); // (only shrinks it, if the spire would reach the bridges)
         foreach (float x in new[] { -1.4f, 1.4f })
             foreach (float z in new[] { -2.1f, 2.1f })
                 Standing(body, at + new Vector3(x, 0f, z), white, gold);
@@ -470,7 +489,7 @@ public static class RoyalBarges
         var garudaRed = PrimitiveKit.Mat("GarudaRed", new Color(0.72f, 0.12f, 0.1f), 0.6f, 0.2f);
         int mark = body.childCount;
         // the sculpted figure (AI-made) when present, else the built one
-        if (AiModels.Has("Narai")) AiModels.Place("Narai", body, g + new Vector3(0f, -0.3f, -0.2f), 6.4f, NaraiYaw);
+        if (AiModels.Has("Narai")) Figure("Narai", body, g + new Vector3(0f, -0.3f, -0.2f), 6.4f, NaraiYaw);
         else
         {
             // Garuda: crouching body, wings spread up and out, a fierce head with a gold crown
@@ -522,7 +541,7 @@ public static class RoyalBarges
         float top = D + 1.3f;
         int mark = body.childCount;
         // the sculpted seven-headed naga (AI-made from a photo) when present, else the swept necks
-        if (AiModels.Has("Naga")) AiModels.Place("Naga", body, new Vector3(0f, -0.3f, L * 0.5f - 0.6f), 5.2f);
+        if (AiModels.Has("Naga")) Figure("Naga", body, new Vector3(0f, -0.3f, L * 0.5f - 0.6f), 5.2f);
         else for (int k = -3; k <= 3; k++)
         {
             var neck = MeshKit.Curve(new Vector3(0f, top - 0.2f, L * 0.5f - 0.6f),
@@ -579,7 +598,7 @@ public static class RoyalBarges
         if (monkey && AiModels.Has("Hanuman"))
         {
             // the sculpted monkey warrior (AI-made from a photo): gilded, dark-skinned, banners in hand
-            AiModels.Place("Hanuman", body, new Vector3(0f, -0.15f, L * 0.5f - 1.5f), 4.2f);
+            Figure("Hanuman", body, new Vector3(0f, -0.15f, L * 0.5f - 1.5f), 4.2f);
             Finish(root, name);
             return root;
         }

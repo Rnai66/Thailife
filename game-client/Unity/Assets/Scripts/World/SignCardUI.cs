@@ -14,7 +14,7 @@ public class SignCardUI : MonoBehaviour
 
     private CanvasGroup group;
     private RectTransform card, header;
-    private Text title, body;
+    private Text title, body, body2; // body2: the second column of a long list
     private object owner;
     private Coroutine anim;
     private bool suppressed; // hidden because a window is open
@@ -84,6 +84,16 @@ public class SignCardUI : MonoBehaviour
         body.rectTransform.anchorMax = Vector2.one;
         body.rectTransform.offsetMin = new Vector2(40f, 22f);
         body.rectTransform.offsetMax = new Vector2(-40f, -110f);
+        body2 = UiKit.Label(card, 26, "", Vector2.zero, Vector2.zero, UiKit.Ink);
+        body2.font = ThaiFont.Display;
+        body2.lineSpacing = 1.1f;
+        body2.verticalOverflow = VerticalWrapMode.Overflow;
+        body2.alignment = TextAnchor.UpperLeft;
+        body2.rectTransform.anchorMin = new Vector2(0.5f, 0f);
+        body2.rectTransform.anchorMax = Vector2.one;
+        body2.rectTransform.offsetMin = new Vector2(10f, 22f);
+        body2.rectTransform.offsetMax = new Vector2(-30f, -110f);
+        body2.gameObject.SetActive(false);
         foreach (var g in canvasGo.GetComponentsInChildren<Graphic>()) g.raycastTarget = false;
         group.alpha = 0f;
         card.gameObject.SetActive(false);
@@ -127,12 +137,37 @@ public class SignCardUI : MonoBehaviour
         owner = who;
         suppressed = UiKit.AnyWindowOpen;
         title.text = heading;
-        body.text = text;
         bool hasBody = !string.IsNullOrEmpty(text);
         body.gameObject.SetActive(hasBody);
-        int lines = hasBody ? text.Split('\n').Length : 0;
-        float width = Mathf.Clamp(Mathf.Max(heading.Length * 34f, LongestLine(text) * 22f) + 220f, 640f, 1100f);
-        card.sizeDelta = new Vector2(width, 116f + (hasBody ? lines * 48f + 36f : 0f));
+        string[] all = hasBody ? text.Split('\n') : new string[0];
+        if (all.Length > 5)
+        {
+            // a long list (the tourist map's ten sights): two columns in smaller type, so the card
+            // stays low on the screen
+            int half = (all.Length + 1) / 2;
+            body.text = string.Join("\n", all, 0, half);
+            body2.text = string.Join("\n", all, half, all.Length - half);
+            body.fontSize = 26;
+            body.alignment = TextAnchor.UpperLeft;
+            body.rectTransform.anchorMax = new Vector2(0.5f, 1f);
+            body.rectTransform.offsetMin = new Vector2(30f, 22f);
+            body.rectTransform.offsetMax = new Vector2(-10f, -110f);
+            body2.gameObject.SetActive(true);
+            card.sizeDelta = new Vector2(1200f, 116f + half * 36f + 36f);
+        }
+        else
+        {
+            body.text = text;
+            body.fontSize = 34;
+            body.alignment = TextAnchor.MiddleCenter;
+            body.rectTransform.anchorMax = Vector2.one;
+            body.rectTransform.offsetMin = new Vector2(40f, 22f);
+            body.rectTransform.offsetMax = new Vector2(-40f, -110f);
+            body2.gameObject.SetActive(false);
+            int lines = all.Length;
+            float width = Mathf.Clamp(Mathf.Max(heading.Length * 34f, LongestLine(text) * 22f) + 220f, 640f, 1100f);
+            card.sizeDelta = new Vector2(width, 116f + (hasBody ? lines * 48f + 36f : 0f));
+        }
         if (suppressed) return;
         card.gameObject.SetActive(true);
         if (anim != null) StopCoroutine(anim);

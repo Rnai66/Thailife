@@ -23,4 +23,25 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Bangkok.unity
     guid: a6988c15e275d459d9abd5ae1a81c8a7
+  - enabled: 1
+    path: Assets/Scenes/NakhonSi.unity
+    guid: 3f675f99a2b074399a03aae084c4f197
+  - enabled: 1
+    path: Assets/Scenes/Buriram.unity
+    guid: c6cdc553dea374dc9862d3b65bb4ff4b
+  - enabled: 1
+    path: Assets/Scenes/Songkhla.unity
+    guid: 885ff687f6e194cadac4ef661312a20a
+  - enabled: 1
+    path: Assets/Scenes/ChiangMai.unity
+    guid: b2f6da82bc3a4428a9dc7de5bdb6afe1
+  - enabled: 1
+    path: Assets/Scenes/Pattaya.unity
+    guid: 60c3b6744dea542f5a5cc0cda7c7437d
+  - enabled: 1
+    path: Assets/Scenes/KhonKaen.unity
+    guid: be193bac0481148f7b0aaca0963898a8
+  - enabled: 1
+    path: Assets/Scenes/Ubon.unity
+    guid: e06b8a45236774acdac838b08d918b73
   m_configObjects: {}

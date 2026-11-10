@@ -113,6 +113,7 @@ public static class VillageBuilder
 
         DressNature(v);
         Lane(v, 21f, -10.6f, -23f);
+        Seaside.CowSeller(v, new Vector3(21f, 0f, -26.5f), 180f); // ฟาร์มพ่อค้าวัว at the end of this lane: his stand, his cows behind it
         LandParcels.BuildVillage(v); // land you buy at the bank: rice land by the canal, a 1-rai plot
         TempleLife.BuildVillage(v);  // monks, the abbot, meditation, amulets; the cemetery and community forest; the home shrine
         Lane(v, 46.5f, -10.6f, -23f);

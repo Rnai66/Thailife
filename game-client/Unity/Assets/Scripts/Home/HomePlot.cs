@@ -153,6 +153,9 @@ public class HomePlot : MonoBehaviour
         waking = player;
         Vector3 stand = porch != null ? porch.position : transform.position;
         Vector3 hipsOffset = SeatedPose.HipsOffset(player.transform); // measured standing, before lying down
+        // the player's origin is the middle of its capsule, above the feet: standing on a floor at y puts it at y + feetUp
+        var cc = player.GetComponent<CharacterController>();
+        float feetUp = cc != null ? -(cc.center.y - cc.height * 0.5f) : 1f;
         Vector3 lieAt = Vector3.zero;
         bool inRoom = false;
         float yaw = 0f, roll = 90f;
@@ -204,7 +207,7 @@ public class HomePlot : MonoBehaviour
                 yield return null;
             }
             player.enabled = true;
-            player.Teleport(stand + Vector3.up * 0.1f, Facing(stand, door));
+            player.Teleport(stand + Vector3.up * (feetUp + 0.05f), Facing(stand, door));
             player.InputEnabled = true;
             waking = null;
             yield break;
@@ -233,7 +236,7 @@ public class HomePlot : MonoBehaviour
         // 2. stand up: lean forward, rise onto the feet just in front of the bed
         Destroy(pose);
         yield return null;
-        Vector3 standRoot = stand + Vector3.up * 0.02f;
+        Vector3 standRoot = stand + Vector3.up * (feetUp + 0.02f); // feet on the floor, not half through it
         const float rise = 0.6f;
         for (float t = 0f; t < rise; t += Time.deltaTime)
         {
@@ -252,7 +255,7 @@ public class HomePlot : MonoBehaviour
             yield return null;
         }
         player.enabled = true;
-        player.Teleport(standRoot + Vector3.up * 0.08f, doorRot);
+        player.Teleport(standRoot + Vector3.up * 0.03f, doorRot);
         player.InputEnabled = true;
         waking = null;
         ScreenToast.Show("ทางออกอยู่ตามลูกศรสีเขียวที่ประตู", new Color(0.3f, 0.85f, 0.45f));

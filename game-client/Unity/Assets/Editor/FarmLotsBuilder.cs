@@ -25,8 +25,6 @@ public static class FarmLotsBuilder
         foreach (float road in new[] { RoadA, RoadB })
             foreach (float x in new[] { -31.5f, -4.5f, 22.5f, 49.5f })
                 StreetFurniture.SolarLamp(v, new Vector3(x, 0f, road + RoadHalf + 0.5f), 0f);
-        // the cow seller (พ่อค้าวัว) on the strip beside the east soi, just past farm road A, facing the soi
-        Seaside.CowSeller(v, new Vector3(83f, 0f, RoadA - 8f), 90f);
 
         var root = PrimitiveKit.Group("FarmLots_village", v, Vector3.zero).transform;
         var tpl = PrimitiveKit.Group("FarmTemplates", root, new Vector3(0f, -60f, 0f)).transform;

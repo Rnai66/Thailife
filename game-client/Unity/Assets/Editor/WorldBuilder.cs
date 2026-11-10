@@ -24,6 +24,13 @@ public static class WorldBuilder
         TambonBuilder.BuildBeach(ask: false);
         TambonBuilder.BuildIsland(ask: false);
         TambonBuilder.BuildBangkok(ask: false);
+        ProvinceNakhonSi.Build(ask: false);
+        ProvinceBuriram.Build(ask: false);
+        ProvinceSongkhla.Build(ask: false);
+        ProvinceChiangMai.Build(ask: false);
+        ProvincePattaya.Build(ask: false);
+        ProvinceKhonKaen.Build(ask: false);
+        ProvinceUbon.Build(ask: false);
 
         var village = EditorSceneManager.OpenScene(VillageScene, OpenSceneMode.Single);
         VillageBuilder.Build(ask: false);

@@ -5,6 +5,8 @@ using UnityEngine.UI;
 // Arrange your own farm lot (แปลงเกษตร, farmlot.lua) from the sign at its front: the four corners as a
 // little plan (the road at the bottom) — tap one zone, then another to swap them, and save (layout_fee)
 // — and the fence on each side: tap a fence to build it (paid once; "ไม่มีรั้ว" takes it down).
+// Someone living in town (เมือง / กรุงเทพฯ) also picks which หมู่ their farm is in (free move, everything
+// comes along); a village resident's farm always goes with their house.
 public class FarmLotUI : MonoBehaviour
 {
     private static FarmLotUI instance;
@@ -18,7 +20,13 @@ public class FarmLotUI : MonoBehaviour
     private readonly Button[] cells = new Button[4];
     private readonly Text[] cellText = new Text[4];
     private readonly Button[,] fenceButtons = new Button[4, 5];
-    private Button save;
+    private Button save, moveButton;
+    private GameObject mooRow;
+    private Text mooText;
+    private int mooPick;
+    // the 12 หมู่ (farmlot.lua VILLAGE_MOO_NAMES)
+    private static readonly string[] MooNames = { "บ้านโคกสะอาด", "บ้านหนองแวง", "บ้านโนนสูง", "บ้านดอนแดง", "บ้านนาดี", "บ้านหนองไผ่",
+        "บ้านโพนทอง", "บ้านสร้างแก้ว", "บ้านท่าลาด", "บ้านหัวช้าง", "บ้านนาคำ", "บ้านดงเย็น" };
     private Coroutine toast;
     private string[] pending;
     private int picked = -1;
@@ -30,8 +38,16 @@ public class FarmLotUI : MonoBehaviour
         instance.backdrop.SetActive(true);
         instance.pending = null;
         instance.picked = -1;
+        instance.mooPick = 0;
         instance.Render();
         if (FarmLots.Current != null) _ = FarmLots.Current.Refresh();
+        else instance.FetchMine(); // opened away from the village (the move-house window in town)
+    }
+
+    private async void FetchMine()
+    {
+        try { await FarmLots.FetchMineAsync(); }
+        catch (Exception e) { Notify(FarmLots.Explain(e), UiKit.Danger); }
     }
 
     public static void Hide()
@@ -73,6 +89,15 @@ public class FarmLotUI : MonoBehaviour
                 fenceButtons[s, k] = UiKit.RoundButton(rows, "", new Vector2(-160f + k * 118f, y), new Vector2(112f, 88f), Color.white, UiKit.Ink, () => Fence(side, kind), 19);
             }
         }
+        // which หมู่ (town residents only): ◀ หมู่ที่ n ▶  [ย้ายแปลงมาหมู่นี้]
+        var row = UiKit.Container(body, portrait ? new Vector2(0f, -510f) : new Vector2(-380f, -300f));
+        mooRow = row.gameObject;
+        UiKit.RoundButton(row, "◀", new Vector2(-290f, 0f), new Vector2(70f, 70f), UiKit.Pill, UiKit.Ink, () => StepMoo(-1), 28, circle: true);
+        mooText = UiKit.Label(row, 24, "", new Vector2(-110f, 0f), new Vector2(270f, 70f), UiKit.Ink);
+        mooText.fontStyle = FontStyle.Bold;
+        UiKit.RoundButton(row, "▶", new Vector2(70f, 0f), new Vector2(70f, 70f), UiKit.Pill, UiKit.Ink, () => StepMoo(1), 28, circle: true);
+        moveButton = UiKit.RoundButton(row, "ย้ายแปลงมาหมู่นี้", new Vector2(245f, 0f), new Vector2(230f, 70f), UiKit.PayGreen, Color.white, MoveHere, 22);
+
         toastText = UiKit.ToastBar(body, new Vector2(0f, portrait ? -560f : -320f), 1000f);
         backdrop.SetActive(false);
         FarmLots.Changed += OnChanged;
@@ -114,6 +139,18 @@ public class FarmLotUI : MonoBehaviour
         bool changed = pending != null;
         save.interactable = changed && !busy;
         saveText.text = changed ? $"บันทึกการจัดโซน · {(v != null ? v.layout_fee : 500):N0} บาท" : "ยังไม่ได้สลับโซน";
+
+        // the หมู่ picker: only for those whose house isn't in the village
+        bool town = !HomeClient.LivesIn("village");
+        mooRow.SetActive(town);
+        if (town)
+        {
+            int current = v?.mine != null ? v.mine.moo : 0;
+            if (mooPick < 1) mooPick = current > 0 ? current : 1;
+            bool here = mooPick == current;
+            mooText.text = $"หมู่ที่ {mooPick} {MooNames[mooPick - 1]}" + (here ? "\n(แปลงอยู่หมู่นี้)" : "");
+            moveButton.interactable = !busy && !here && v != null;
+        }
 
         var fences = v?.mine?.fences ?? new FarmLots.Fences();
         string[] now = { fences.front, fences.back, fences.left, fences.right };
@@ -172,6 +209,28 @@ public class FarmLotUI : MonoBehaviour
         {
             var v = await FarmLots.SetFenceAsync(FarmLot.Sides[side], opt.id);
             Notify(v.done ?? "เรียบร้อย", UiKit.PayGreen);
+        }
+        catch (Exception e) { Notify(FarmLots.Explain(e), UiKit.Danger); }
+        finally { busy = false; if (this != null) Render(); }
+    }
+
+    private void StepMoo(int by)
+    {
+        if (busy) return;
+        mooPick = (mooPick - 1 + by + MooNames.Length) % MooNames.Length + 1;
+        Render();
+    }
+
+    // Move the farm to the หมู่ picked (free; rice, fish and animals come along)
+    private async void MoveHere()
+    {
+        if (busy || mooPick < 1) return;
+        busy = true;
+        Render();
+        try
+        {
+            var v = await FarmLots.MoveAsync(mooPick);
+            Notify(v.done ?? "ย้ายแปลงเกษตรแล้ว", UiKit.PayGreen);
         }
         catch (Exception e) { Notify(FarmLots.Explain(e), UiKit.Danger); }
         finally { busy = false; if (this != null) Render(); }

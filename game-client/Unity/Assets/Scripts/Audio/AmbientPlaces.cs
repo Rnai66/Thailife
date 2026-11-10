@@ -28,6 +28,11 @@ public static class AmbientPlaces
         new Rule { Prefix = "BoxingCamp_", Range = 6f, MinGap = 25f, MaxGap = 50f, Volume = 0.45f, Sounds = new[] { "punch", "punch_heavy" } },
         new Rule { Prefix = "FreshMarket_", Range = 4f, MinGap = 40f, MaxGap = 80f, Volume = 0.6f, Sounds = new[] { "coins" } },
         new Rule { Prefix = "FleaMarket_", Range = 4f, MinGap = 40f, MaxGap = 80f, Volume = 0.6f, Sounds = new[] { "coins" } },
+        // the provinces' landmarks (ProvinceKit)
+        new Rule { Prefix = "AttrTemple_", Range = 16f, MinGap = 35f, MaxGap = 70f, Volume = 0.55f, Sounds = new[] { "wind_bells", "temple_bell", "wind_bells", "temple_gong" } },
+        new Rule { Prefix = "AttrShrine_", Range = 10f, MinGap = 40f, MaxGap = 80f, Volume = 0.5f, Sounds = new[] { "wind_bells", "temple_gong" } },
+        new Rule { Prefix = "AttrBeach_", Range = 24f, MinGap = 25f, MaxGap = 55f, Volume = 0.6f, Sounds = new[] { "seagull" } },
+        new Rule { Prefix = "BusTerminal_", Range = 14f, MinGap = 45f, MaxGap = 90f, Volume = 0.5f, Sounds = new[] { "pa_chime" } },
         new Rule { Prefix = "BankZone", Range = 3f, MinGap = 60f, MaxGap = 120f, Volume = 0.5f, Sounds = new[] { "coins" } },
     };
 

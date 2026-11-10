@@ -58,6 +58,9 @@ public static class Homes
         var asphalt = PrimitiveKit.Mat("Asphalt", new Color(0.22f, 0.22f, 0.24f));
         PrimitiveKit.Box("Soi", root, new Vector3(56f, 0.02f, -66f), new Vector3(76f, 0.04f, 6f), asphalt);
         PrimitiveKit.Box("Soi", root, new Vector3(-84f, 0.02f, 25f), new Vector3(5f, 0.04f, 52f), asphalt);
+        // traffic down both sois too (in from the ring road / the station road and back out)
+        CityStreets.BackAndForth(root, "ซอยหมู่บ้านใต้", new Vector3(21f, 0f, -66f), new Vector3(88f, 0f, -66f), 1.4f, ("sedan", 1, 10f), ("songthaew", 0, 90f));
+        CityStreets.BackAndForth(root, "ซอยหมู่บ้านตะวันตก", new Vector3(-84f, 0f, 0f), new Vector3(-84f, 0f, 44.5f), 1.2f, ("tuktuk", 2, 30f));
         var lots = new System.Collections.Generic.List<HouseLotsBuilder.Lot>();
         int no = 1;
         for (int i = 0; i < 6; i++) lots.Add(L(no++, 23f + 12f * i, -77f, 180f, 12f, 16f));

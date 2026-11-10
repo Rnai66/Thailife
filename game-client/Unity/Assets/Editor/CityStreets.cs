@@ -20,7 +20,8 @@ public static class CityStreets
 
     private static Material asphalt, white, yellow;
 
-    public static void Build(Transform root)
+    // mainStreet: the name on the plates of the street across the roundabout (the pub street in เมือง)
+    public static void Build(Transform root, string mainStreet = "ถนนย่านผับ")
     {
         asphalt = PrimitiveKit.Mat("Asphalt", new Color(0.22f, 0.22f, 0.24f));
         white = PrimitiveKit.Mat("RoadWhite", new Color(0.95f, 0.95f, 0.93f));
@@ -57,7 +58,7 @@ public static class CityStreets
         Zebra(t, new Vector3(0f, 0f, 26f), 6f, 0f);
 
         // street name plates on the corners (blue, white letters, Thai style)
-        StreetSign(t, new Vector3(-12f, 0f, PubZ + 3.6f), 0f, "ถนนย่านผับ");
+        StreetSign(t, new Vector3(-12f, 0f, PubZ + 3.6f), 0f, mainStreet);
         StreetSign(t, new Vector3(-3.6f, 0f, 28.5f), 90f, "ถนนสถานี");
         StreetSign(t, new Vector3(8f, 0f, StationZ - 3.1f), 0f, "ถนนหน้าสถานีรถไฟ");
         StreetSign(t, new Vector3(WestSoiX + 3f, 0f, PubZ - 3.6f), -90f, "ซอย 1");
@@ -188,5 +189,43 @@ public static class CityStreets
         Car("taxi", 2, b, 130f);
         Car("tuktuk", 1, m, 5f);
         Car("sedan", 0, m, 40f);
+        // the whole of the station road, ring road to ring road (both ends join it, and soi 1 and the
+        // station street): with it every street in town is joined up for the traffic to wander
+        BackAndForth(t, "ถนนหน้าสถานี", new Vector3(-87f, 0f, StationZ), new Vector3(87f, 0f, StationZ), 1.2f,
+            ("taxi", 3, 20f), ("songthaew", 2, 120f), ("tuktuk", 0, 260f));
+    }
+
+    // A two-way street with no loop of its own (a soi, the station road): out along one side, round at
+    // the end, back along the other — keeping left. Its ends meet other roads, so TrafficNet joins it
+    // to them and the town's traffic wanders in and out of it.
+    public static void BackAndForth(Transform parent, string name, Vector3 a, Vector3 b, float halfGap, params (string kind, int variant, float start)[] cars)
+    {
+        var t = PrimitiveKit.Group("Traffic_" + name, parent, Vector3.zero).transform;
+        var dir = (b - a).normalized;
+        var left = new Vector3(-dir.z, 0f, dir.x);
+        var p = new List<Vector3> { a + left * halfGap, b + left * halfGap };
+        for (int i = 1; i < 8; i++)
+        {
+            float th = i * Mathf.PI / 8f;
+            p.Add(b + (left * Mathf.Cos(th) + dir * Mathf.Sin(th)) * halfGap);
+        }
+        p.Add(b - left * halfGap);
+        p.Add(a - left * halfGap);
+        for (int i = 1; i < 8; i++)
+        {
+            float th = i * Mathf.PI / 8f;
+            p.Add(a + (-left * Mathf.Cos(th) - dir * Mathf.Sin(th)) * halfGap);
+        }
+        var pts = p.ToArray();
+        foreach (var (kind, variant, start) in cars)
+        {
+            var v = CityTraffic.Vehicle(t, kind, variant, out float halfLen, out _);
+            v.gameObject.AddComponent<TrafficCar>().Configure(pts, true, kind == "tuktuk" ? 6f : 7f, halfLen, start, null, null, null);
+            CityTraffic.Hailable(v, kind);
+            var body = v.GetComponent<Rigidbody>();
+            body.isKinematic = true;
+            body.useGravity = false;
+            v.localPosition = pts[0];
+        }
     }
 }

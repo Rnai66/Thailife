@@ -29,7 +29,7 @@ public static class CityTraffic
     // also the stop for long-distance coaches, บขส.)
     public static void Build(Transform root, string gantryWest = "↑ ตลาดสด · ชายหาด\n← หอนาฬิกา · ย่านผับ",
         string gantryEast = "↑ วัด · ค่ายมวย · ลานวัด\nสถานีรถไฟ ↑", string shelter = "ป้ายรถเมล์ · รถทัวร์ บขส.",
-        bool roundabout = false, RingSpec ringRoad = null)
+        bool roundabout = false, RingSpec ringRoad = null, bool coachStop = true, string terminalWay = "สุดถนนนี้ทางตะวันออก ข้ามวงแหวน")
     {
         var avenue = PrimitiveKit.Group("Avenue_ถนนสี่เลน", root, Vector3.zero).transform;
         ring = ringRoad;
@@ -37,7 +37,7 @@ public static class CityTraffic
         var lights = Junction(avenue);
         Traffic(avenue, lights, roundabout);
         Gantries(avenue, gantryWest, gantryEast);
-        BusShelter(avenue, new Vector3(40f, 0f, SouthEdge - 1.5f), 180f, shelter);
+        BusShelter(avenue, new Vector3(40f, 0f, SouthEdge - 1.5f), 180f, shelter, coachStop, terminalWay);
         BusPole(avenue, new Vector3(-40f, 0f, NorthEdge + 0.5f));
     }
 
@@ -249,6 +249,7 @@ public static class CityTraffic
             Add("limo", 0, kerb, 150f, ks, both, closed: true);
             Add("bus", 1, kerb, 215f, ks, both, busStops, closed: true);
             Add("tuktuk", 0, kerb, 275f, ks, both, closed: true);
+            Add("songthaew", 0, kerb, 185f, ks, both, closed: true); // no bus stops: it roams the town like the taxis
             Add("taxi", 3, kerb, 320f, ks, both, closed: true);
             float[] ss = { StopE(side, EastKerb), TrafficCar.DistanceTo(side, new Vector3(1.5f, 0f, SideStopZ)), StopW(side, WestKerb) };
             int[] sf = { 0, 1, 0 };
@@ -277,6 +278,25 @@ public static class CityTraffic
             Ring("tuktuk", 1, ringB, 60f);
             Ring("sedan", 0, ringB, 300f);
             Ring("tuktuk", 0, ringB, 520f);
+            Ring("songthaew", 1, ringA, 290f);
+            Ring("songthaew", 2, ringA, 470f);
+            Ring("songthaew", 3, ringB, 410f);
+
+            // Slip roads between the avenue and the ring road (left turns only, onto and off its inner
+            // lane): with them the traffic changes over from one to the other (TrafficNet) and gets
+            // all round town. One car starts on each.
+            int k = 0;
+            foreach (var slip in SlipRoads(ring, EastKerb, WestKerb, UTurnX))
+            {
+                var v = Vehicle(traffic, k % 2 == 0 ? "taxi" : "sedan", k % 4, out float halfLen, out float speed);
+                v.gameObject.AddComponent<TrafficCar>().Configure(slip, false, Mathf.Min(speed, 9f), halfLen, 0f, null, null, null);
+                Hailable(v, k % 2 == 0 ? "taxi" : "sedan");
+                var body = v.GetComponent<Rigidbody>();
+                body.isKinematic = true;
+                body.useGravity = false;
+                v.position = traffic.TransformPoint(slip[0]);
+                k++;
+            }
             return;
         }
 
@@ -304,6 +324,47 @@ public static class CityTraffic
         Add("tuktuk", 2, side, 62f, sideStops, sideFor);
         Add("taxi", 0, side, 190f, sideStops, sideFor);
 
+    }
+
+    // The four slip roads, each starting along an avenue lane and finishing along the ring road's inner
+    // lane (or the other way round), so TrafficNet joins them up
+    // eastLane / westLane: the street's kerb lanes (z) where its traffic runs east and west; u: where its
+    // traffic turns round short of the ring (the slip roads leave and join it 14 m before that)
+    public static List<Vector3[]> SlipRoads(RingSpec ring, float EastKerb, float WestKerb, float u)
+    {
+        const float r = 6f;
+        float e = ring.Edge - CityRingRoad.LaneOffset; // the inner lane: north up the east side, south down the west
+        var list = new List<Vector3[]>();
+        List<Vector3> Arc(List<Vector3> p, Vector3 c, float from, float to)
+        {
+            for (int i = 1; i <= 10; i++)
+            {
+                float a = Mathf.Lerp(from, to, i / 10f) * Mathf.Deg2Rad;
+                p.Add(c + new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a)) * r);
+            }
+            return p;
+        }
+        // east on the avenue → left, north up the ring's east side
+        var a1 = new List<Vector3> { new Vector3(u - 14f, 0f, EastKerb), new Vector3(e - r, 0f, EastKerb) };
+        Arc(a1, new Vector3(e - r, 0f, EastKerb + r), -90f, 0f);
+        a1.Add(new Vector3(e, 0f, EastKerb + r + 6f));
+        list.Add(a1.ToArray());
+        // south down the ring's west side → left, east along the avenue
+        var a2 = new List<Vector3> { new Vector3(-e, 0f, EastKerb + r + 6f), new Vector3(-e, 0f, EastKerb + r) };
+        Arc(a2, new Vector3(-e + r, 0f, EastKerb + r), 180f, 270f);
+        a2.Add(new Vector3(-u + 14f, 0f, EastKerb));
+        list.Add(a2.ToArray());
+        // west on the avenue → left, south down the ring's west side
+        var a3 = new List<Vector3> { new Vector3(-u + 14f, 0f, WestKerb), new Vector3(-e + r, 0f, WestKerb) };
+        Arc(a3, new Vector3(-e + r, 0f, WestKerb - r), 90f, 180f);
+        a3.Add(new Vector3(-e, 0f, WestKerb - r - 6f));
+        list.Add(a3.ToArray());
+        // north up the ring's east side → left, west along the avenue
+        var a4 = new List<Vector3> { new Vector3(e, 0f, WestKerb - r - 6f), new Vector3(e, 0f, WestKerb - r) };
+        Arc(a4, new Vector3(e - r, 0f, WestKerb - r), 0f, 90f);
+        a4.Add(new Vector3(u - 14f, 0f, WestKerb));
+        list.Add(a4.ToArray());
+        return list;
     }
 
     // roundabout: the street ends at the clock-tower roundabout (CityStreets) — go once round it
@@ -382,7 +443,11 @@ public static class CityTraffic
     {
         if (kind == "tuktuk") v.gameObject.AddComponent<TukTukHail>();
         else if (kind == "taxi") v.gameObject.AddComponent<TukTukHail>().Configure(isTaxi: true);
+        else if (kind == "songthaew") v.gameObject.AddComponent<TukTukHail>().Configure(isTaxi: false, isSongthaew: true);
     }
+
+    // what the songthaews driving round town show on their roof signs
+    private static readonly string[] SongthaewRoutes = { "รอบเมือง", "สถานีรถไฟ - บขส.", "ตลาด - โรงพยาบาล", "รอบเมือง · 20 บาท" };
 
     internal static Transform Vehicle(Transform parent, string kind, int variant, out float halfLength, out float speed)
     {
@@ -399,6 +464,7 @@ public static class CityTraffic
                 tukTuks++;
                 break;
             case "super": size = Supercar(v, variant); speed = 12f; break;
+            case "songthaew": size = BusTerminal.Songthaew(v, variant, SongthaewRoutes[variant % SongthaewRoutes.Length]); speed = 8.5f; break;
             case "limo": size = Sedan(v, new Color(0.05f, 0.05f, 0.07f), 5.2f, 1.9f, chrome: true); speed = 10.5f; break;
             default: size = Sedan(v, variant == 0 ? new Color(0.95f, 0.95f, 0.96f) : new Color(0.7f, 0.72f, 0.75f), 4.4f, 1.78f, chrome: false); speed = 10f; break;
         }
@@ -591,7 +657,8 @@ public static class CityTraffic
         Gantry(30f, SouthEdge - 0.4f, RoadZ - 0.3f, -90f, east);
     }
 
-    private static void BusShelter(Transform parent, Vector3 at, float yaw, string name)
+    // coaches: also the coach stop (บขส.) — not where the town has its own bus terminal (BusTerminal)
+    private static void BusShelter(Transform parent, Vector3 at, float yaw, string name, bool coaches, string terminalWay)
     {
         var t = PrimitiveKit.Group("BusShelter_ป้ายรถเมล์", parent, at, yaw).transform;
         var steel = PrimitiveKit.Mat("SignalPole", new Color(0.82f, 0.83f, 0.85f), 0.6f, 0.5f);
@@ -605,6 +672,12 @@ public static class CityTraffic
         PrimitiveKit.Box("NameBoard", t, new Vector3(0f, 2.85f, -0.4f), new Vector3(2.6f, 0.45f, 0.06f), PrimitiveKit.Mat("SignYellow", new Color(1f, 0.85f, 0.15f)), collider: false);
         PrimitiveKit.Label(name, t, new Vector3(0f, 2.85f, -0.44f), 0.045f, new Color(0.2f, 0.1f, 0.05f));
 
+        if (!coaches)
+        {
+            // the coaches go from the town's bus terminal now: point the way there
+            Places.Sign(t, new Vector3(-3.4f, 0f, 0.3f), "สถานีขนส่ง บขส.\nรถทัวร์ · คิวสองแถว · " + terminalWay, 180f);
+            return;
+        }
         // Coaches to other provinces (บขส.) stop here too: stand under the roof for tickets
         var zone = new GameObject("CoachZone_รถทัวร์");
         zone.transform.SetParent(t, false);

@@ -35,18 +35,22 @@ public class FarmLot : MonoBehaviour
         sides = sidePoints;
     }
 
-    public void Show(FarmLots owner, string[] layout, FarmLots.Fences fences, string ownerName, bool mine, BuildClient.Piece[] pieces = null)
+    // Returns whether anything had to be built (the caller spreads that over frames)
+    public bool Show(FarmLots owner, string[] layout, FarmLots.Fences fences, string ownerName, bool mine, BuildClient.Piece[] pieces = null)
     {
+        bool rebuilt = false;
         ShowBuilt(pieces);
         fences ??= new FarmLots.Fences();
         string[] f = { fences.front, fences.back, fences.left, fences.right };
         string key = (layout != null ? string.Join(",", layout) : "") + "|" + string.Join(",", f) + "|" + mine;
         if (key != shown)
         {
+            rebuilt = true;
             Remove();
             shown = key;
             for (int i = 0; i < slots.Length && layout != null && i < layout.Length; i++)
                 Place(owner.Template("Tpl_" + layout[i]), slots[i], mine);
+            Sounds(layout);
             for (int i = 0; i < sides.Length; i++)
             {
                 if (string.IsNullOrEmpty(f[i]) || f[i] == "none") continue;
@@ -57,6 +61,7 @@ public class FarmLot : MonoBehaviour
         if (plate != null) plate.text = string.IsNullOrEmpty(ownerName) ? $"แปลงเกษตร {number}" : $"แปลงเกษตร {number}\n{ownerName}";
         if (vacant != null) vacant.SetActive(false);
         if (manage != null) manage.SetActive(mine);
+        return rebuilt;
     }
 
     public void Clear(bool known)
@@ -67,6 +72,32 @@ public class FarmLot : MonoBehaviour
         if (plate != null) plate.text = $"แปลงเกษตร {number}";
         if (vacant != null) vacant.SetActive(known);
         if (manage != null) manage.SetActive(false);
+        Sounds(null);
+    }
+
+    // เสียงบรรยากาศ: walking onto the lot you hear what's on it — frogs and crickets in the paddies,
+    // frogs by the pond, the cows lowing, the hens and the rooster — now and then while you stay
+    private void Sounds(string[] layout)
+    {
+        var zone = GetComponent<AmbientZone>();
+        var list = new List<string>();
+        if (layout != null)
+            foreach (var m in layout)
+                switch (m)
+                {
+                    case "rice": list.Add("frog"); list.Add("crickets"); break;
+                    case "pond": list.Add("frog"); break;
+                    case "cows": list.Add("cow"); break;
+                    case "coop": list.Add("hen"); list.Add("rooster"); list.Add("hen"); break;
+                }
+        if (list.Count == 0) { if (zone != null) zone.enabled = false; return; }
+        var area = new Bounds(transform.position, Vector3.one);
+        foreach (var s in slots)
+            if (s != null) { area.Encapsulate(s.position + new Vector3(6f, 0f, 6f)); area.Encapsulate(s.position - new Vector3(6f, 0f, 6f)); }
+        if (zone == null) zone = gameObject.AddComponent<AmbientZone>();
+        zone.enabled = true;
+        zone.Configure(area, 2f, 25f, 50f, 0.7f, list.ToArray());
+        foreach (var s in list) SynthSounds.Prepare(s);
     }
 
     [System.Serializable] private class PieceList { public BuildClient.Piece[] items; }

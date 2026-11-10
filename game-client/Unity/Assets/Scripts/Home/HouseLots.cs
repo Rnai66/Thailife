@@ -60,8 +60,10 @@ public class HouseLots : MonoBehaviour
     private void Update()
     {
         if (Time.time < nextRefresh || busy) return;
-        nextRefresh = Time.time + 60f;
-        Refresh();
+        // not connected yet (just arrived in the map): try again in a moment, not in a minute
+        bool online = HomeClient.Instance != null && HomeClient.Instance.IsOnline;
+        nextRefresh = Time.time + (online ? 60f : 1f);
+        if (online) Refresh();
     }
 
     public GameObject Template(string style)

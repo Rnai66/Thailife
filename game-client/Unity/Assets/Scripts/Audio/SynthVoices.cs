@@ -21,6 +21,9 @@ public static class SynthVoices
             case "cow": return Moo(125f, 1.4f, 0.75f);
             case "seagull": return Seagull();
             case "frog": return Frog();
+            case "hen": return Hen();
+            case "rooster": return Rooster();
+            case "jet": return Jet();
             case "school_bell": return Notes(new[] { 659f, 523f, 587f, 392f, 392f, 587f, 659f, 523f }, 0.6f, 0.55f);
             case "pa_chime": return Notes(new[] { 523f, 659f, 784f }, 0.32f, 0.4f);
             default: return null;
@@ -279,6 +282,72 @@ public static class SynthVoices
             }
         }
         Normalize(d, 0.4f);
+        return d;
+    }
+
+    // One sung syllable: harmonics of a gliding pitch through a vowel, added into d
+    private static void Syllable(float[] d, float at, float seconds, float f0From, float f0To, Vector2 vowel, float rasp, int seed)
+    {
+        var rng = new System.Random(seed);
+        int start = (int)(at * Rate), n = (int)(seconds * Rate);
+        float phase = 0f;
+        for (int i = 0; i < n && start + i < d.Length; i++)
+        {
+            float u = (float)i / n;
+            float f0 = Mathf.Lerp(f0From, f0To, u);
+            phase += 2f * Mathf.PI * f0 / Rate;
+            float v = 0f;
+            int harmonics = Mathf.Min(14, (int)(4200f / f0));
+            for (int k = 1; k <= harmonics; k++)
+                v += Mathf.Sin(phase * k) * FormantGain(f0 * k, vowel) / k;
+            float noise = ((float)rng.NextDouble() * 2f - 1f) * rasp;
+            float env = Mathf.Clamp01(u / 0.08f) * Mathf.Clamp01((1f - u) / 0.25f);
+            d[start + i] += (v * (1f - rasp) + noise) * env;
+        }
+    }
+
+    // A hen pottering about: a few quick "ก๊อก ก๊อก" clucks and a drawn-out "ก๊าก"
+    private static float[] Hen()
+    {
+        var d = SynthSounds.Buffer(1.7f);
+        float[] at = { 0f, 0.17f, 0.31f, 0.5f, 0.64f };
+        for (int c = 0; c < at.Length; c++)
+            Syllable(d, at[c], 0.07f, 520f, 430f, new Vector2(600f, 1500f), 0.25f, 30 + c);
+        Syllable(d, 0.9f, 0.42f, 620f, 760f, new Vector2(800f, 1700f), 0.3f, 40);
+        Normalize(d, 0.45f);
+        return d;
+    }
+
+    // A rooster's "เอ้ก อี เอ้ก เอ้ก": four calls, the last one long and wavering
+    private static float[] Rooster()
+    {
+        var d = SynthSounds.Buffer(2.4f);
+        Syllable(d, 0f, 0.22f, 560f, 700f, new Vector2(480f, 1800f), 0.2f, 50);
+        Syllable(d, 0.26f, 0.2f, 760f, 880f, new Vector2(300f, 2200f), 0.2f, 51);
+        Syllable(d, 0.5f, 0.24f, 820f, 860f, new Vector2(480f, 1800f), 0.2f, 52);
+        Syllable(d, 0.8f, 1.2f, 880f, 600f, new Vector2(730f, 1100f), 0.22f, 53);
+        Normalize(d, 0.5f);
+        return d;
+    }
+
+    // A jet going by: a deep roar with a whine on top, swelling up and dying away
+    private static float[] Jet()
+    {
+        var d = SynthSounds.Buffer(6f);
+        var rng = new System.Random(77);
+        float low = 0f, mid = 0f, phase = 0f;
+        for (int i = 0; i < d.Length; i++)
+        {
+            float u = (float)i / d.Length;
+            float white = (float)rng.NextDouble() * 2f - 1f;
+            low += (white - low) * 0.02f;   // rumble
+            mid += (white - mid) * 0.18f;   // roar
+            phase += 2f * Mathf.PI * Mathf.Lerp(2400f, 2900f, u) / Rate;
+            float env = Mathf.Sin(Mathf.PI * u);
+            env *= env;
+            d[i] = (low * 3.2f + mid * 0.6f + Mathf.Sin(phase) * 0.05f) * env;
+        }
+        Normalize(d, 0.8f);
         return d;
     }
 

@@ -149,7 +149,12 @@ public static class TambonBuilder
     internal static void BuildCity(bool ask) => BuildLocation("Assets/Scenes/City.unity", "City", 20f, ask, root =>
     {
         // Four-lane avenue with traffic lights and traffic (CityTraffic)
-        CityTraffic.Build(root, roundabout: true, ringRoad: CityRingRoad.Town);
+        CityTraffic.Build(root, shelter: "ป้ายรถเมล์", roundabout: true, ringRoad: CityRingRoad.Town, coachStop: false,
+            terminalWay: "เดินลงทางเท้าข้างธนาคาร ↓");
+        // สถานีขนส่ง (บขส.) in the middle of town, behind the bank, on the homes soi: coaches to other
+        // provinces, and the songthaew queue out to the villages, the sub-district and the beach
+        BusTerminal.Compact(root, BusTerminal.CitySite, 0f, "ประจำจังหวัด", new[] { "กรุงเทพฯ (หมอชิต 2)", "บุรีรัมย์", "นครศรีธรรมราช" },
+            new[] { "หมู่บ้าน", "ตำบล", "ชายหาด", "รอบเมือง" }, songthaewTravel: true);
         // ตัวเมือง (อำเภอ/จังหวัด): clock tower roundabout, shophouses, boxing camp (career tier 3)
         Places2.ClockTower(root, new Vector3(0f, 0f, 14f));
         Places2.Shophouses(root, new Vector3(-20f, 0f, 2f), 0f, 5, new[] { "ร้านทอง", "ร้านขายยา", "ออฟฟิศไอที", "ร้านข้าวมันไก่", "ร้านเสื้อผ้า" });
@@ -252,6 +257,11 @@ public static class TambonBuilder
         }
         foreach (var pos in new[] { new Vector3(-10f, 0f, 30f), new Vector3(10f, 0f, 30f), new Vector3(-30f, 0f, 9.3f), new Vector3(-44f, 0f, 4f) })
             Nature.Bush(root, pos, 1.2f, (int)(pos.x + pos.z), flowers: true);
+
+        // ป้ายแผนที่ท่องเที่ยว: on the civic pavement by the songthaew stop, and in the bus terminal
+        var sights = TouristMap.Collect(root);
+        TouristMap.Build(root, "(ตัวเมือง)", sights, new Vector3(13f, 0f, -20.6f), 0f, half: 100f);
+        TouristMap.Build(root, "(ตัวเมือง)", sights, new Vector3(17.5f, 0f, -46f), 90f, half: 100f);
     }, road: false);
 
     // กรุงเทพฯ: another province, reached by coach, train or plane (TravelMenu). The same avenue and
@@ -297,12 +307,16 @@ public static class TambonBuilder
         Homes.Bangkok(root); // หมู่บ้านจัดสรร: the modern townhome and the detached house players can live in
         RoyalBarges.Plaza(root); // ลานชมขบวนเรือ: live screen, seats, riverside market, food carts, tuk-tuks
 
+        // ป้ายแผนที่ท่องเที่ยว on the avenue's south pavement
+        TouristMap.Build(root, "กรุงเทพมหานคร", TouristMap.Collect(root), new Vector3(-30f, 0f, -20.4f), 0f,
+            half: 125f, ring: CityRingRoad.Capital.Edge, railZ: 0f);
+
         // Start on the lawn rather than in the side street (arrivals use the SpawnPoints)
         var player = UnityEngine.Object.FindAnyObjectByType<PlayerController>();
         if (player != null) player.transform.position = new Vector3(-34f, 1f, 2f);
     }, road: false);
 
-    private static void BuildLocation(string scenePath, string rootName, float groundScale, bool ask, Action<Transform> content, bool road = true)
+    internal static void BuildLocation(string scenePath, string rootName, float groundScale, bool ask, Action<Transform> content, bool road = true)
     {
         if (ask && File.Exists(scenePath) &&
             !EditorUtility.DisplayDialog("สร้างฉาก", $"{Path.GetFileName(scenePath)} มีอยู่แล้ว ต้องการสร้างใหม่ทับหรือไม่?\n(ไม่กระทบฉากอื่น)", "สร้างใหม่", "ยกเลิก"))
@@ -383,7 +397,7 @@ public static class TambonBuilder
 
     private static void FoodCounter(Transform parent, Vector3 position) => ShopZone(parent, position, "city_food");
 
-    private static void ShopZone(Transform parent, Vector3 position, string shopId)
+    internal static void ShopZone(Transform parent, Vector3 position, string shopId)
     {
         var zone = new GameObject("ShopZone_" + shopId);
         zone.transform.SetParent(parent, false);

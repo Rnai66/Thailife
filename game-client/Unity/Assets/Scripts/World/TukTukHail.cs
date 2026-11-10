@@ -10,14 +10,26 @@ using UnityEngine;
 public class TukTukHail : MonoBehaviour
 {
     private const float HailRange = 9f, BoardRange = 12f, GiveUpRange = 28f;
-    private const string Pitch = "เที่ยวรอบเมือง · ค่ารถ 40 บาท\nกด \"ลงรถ\" ได้ทุกเมื่อ";
-    private const string TaxiPitch = "แท็กซี่เที่ยวรอบเมือง · ค่าโดยสาร 60 บาท\nกด \"ลงรถ\" ได้ทุกเมื่อ";
+    private const string Pitch = "ค่ารถ 40 บาท · แตะแผนที่เลือกที่หมายได้\nกด \"ลงรถ\" ได้ทุกเมื่อ";
+    private const string TaxiPitch = "แท็กซี่ · ค่าโดยสาร 60 บาท · แตะแผนที่เลือกที่หมายได้\nกด \"ลงรถ\" ได้ทุกเมื่อ";
     // the taxi's back seat, kerb side (CityTraffic.Taxi; the tuk-tuk's is TukTukRider.BenchSeat)
     private static readonly Vector3 TaxiSeat = new Vector3(-0.38f, 0.62f, -0.6f);
+    // on the left bench in the back of the songthaew (BusTerminal.Songthaew)
+    private static readonly Vector3 SongthaewSeat = new Vector3(-0.5f, 0.92f, -1.3f);
 
     [SerializeField] private bool taxi;
+    [SerializeField] private bool songthaew; // รถสองแถว: 20 baht, sit on the bench in the back
 
-    public void Configure(bool isTaxi) => taxi = isTaxi;
+    public void Configure(bool isTaxi, bool isSongthaew = false)
+    {
+        taxi = isTaxi;
+        songthaew = isSongthaew;
+    }
+
+    private const string SongthaewPitch = "รถสองแถว · ค่ารถ 20 บาท · แตะแผนที่เลือกที่หมายได้\nกด \"ลงรถ\" ได้ทุกเมื่อ";
+    private string Ride => songthaew ? "สองแถว" : taxi ? "แท็กซี่" : "ตุ๊กตุ๊ก";
+    private string Kind => songthaew ? "songthaew" : taxi ? "taxi" : "tuktuk";
+    private int Fare => songthaew ? 20 : taxi ? 60 : 40;
 
     private enum State { Free, Coming, Paying, Riding, Leaving }
 
@@ -49,7 +61,16 @@ public class TukTukHail : MonoBehaviour
 
     private void Update()
     {
-        if (state == State.Riding) return;
+        if (state == State.Riding)
+        {
+            if (!car.Navigating || Time.unscaledTime < nextCheck) return;
+            nextCheck = Time.unscaledTime + 0.4f;
+            if (car.Arrived) { Arrive(); return; }
+            float left = car.LeftToGo();
+            string far = left >= 1000f ? $"{left / 1000f:0.0} กม." : $"{Mathf.Max(10, Mathf.RoundToInt(left / 10f) * 10)} ม.";
+            ContextButton.Show(this, "ลงรถ", $"กำลังไป {destination} · อีกราว {far}", AskToStop, highlight: true);
+            return;
+        }
         if (state == State.Leaving)
         {
             if (car.IsStopped) GetOff();
@@ -77,7 +98,7 @@ public class TukTukHail : MonoBehaviour
         {
             if (offered != null && offered != this) ContextButton.Hide(offered);
             offered = this;
-            ContextButton.Show(this, taxi ? "เรียกแท็กซี่" : "โบกตุ๊กตุ๊ก", taxi ? TaxiPitch : Pitch, Hail);
+            ContextButton.Show(this, taxi ? "เรียกแท็กซี่" : "โบก" + Ride, songthaew ? SongthaewPitch : taxi ? TaxiPitch : Pitch, Hail);
         }
         else if (offered == this && dist > HailRange + 2f)
         {
@@ -94,7 +115,7 @@ public class TukTukHail : MonoBehaviour
         state = State.Coming;
         waitSince = Time.time;
         car.StopNear(player.transform.position);
-        ContextButton.Show(this, taxi ? "รอแท็กซี่..." : "รอตุ๊กตุ๊ก...", taxi ? "แท็กซี่กำลังจอดรับ" : "ตุ๊กตุ๊กกำลังจอดรับ", null, enabled: false);
+        ContextButton.Show(this, $"รอ{Ride}...", $"{Ride}กำลังจอดรับ", null, enabled: false);
     }
 
     private void Cancel()
@@ -112,16 +133,16 @@ public class TukTukHail : MonoBehaviour
         ContextButton.Show(this, "จ่ายค่ารถ...", null, null, enabled: false);
         try
         {
-            int fare = await TravelClient.TukTukAsync(taxi);
+            int fare = await TravelClient.TukTukAsync(Kind);
             if (this == null || player == null) return;
             SitDown();
-            UiKit.FloatAbovePlayer(taxi ? $"ขึ้นแท็กซี่ · ค่าโดยสาร {fare} บาท" : $"ขึ้นตุ๊กตุ๊ก · ค่ารถ {fare} บาท", UiKit.GoldText);
+            UiKit.FloatAbovePlayer(taxi ? $"ขึ้นแท็กซี่ · ค่าโดยสาร {fare} บาท" : $"ขึ้น{Ride} · ค่ารถ {fare} บาท", UiKit.GoldText);
             GameAudio.Play("coins");
         }
         catch (Exception e)
         {
             if (this == null) return;
-            string why = e.Message.Contains("not enough baht") ? (taxi ? "เงินไม่พอค่าแท็กซี่ 60 บาท" : "เงินไม่พอค่าตุ๊กตุ๊ก 40 บาท")
+            string why = e.Message.Contains("not enough baht") ? $"เงินไม่พอค่า{Ride} {Fare} บาท"
                 : e.Message.Contains("offline") ? "ต้องออนไลน์ก่อนเรียกรถ" : "เรียกรถไม่สำเร็จ ลองใหม่";
             UiKit.FloatAbovePlayer(why, new Color(1f, 0.5f, 0.4f));
             Cancel();
@@ -140,7 +161,46 @@ public class TukTukHail : MonoBehaviour
         state = State.Riding;
         Seat();
         car.Release();
-        ContextButton.Show(this, "ลงรถ", taxi ? "นั่งแท็กซี่เที่ยวรอบเมือง · กดเพื่อลงรถ" : "นั่งตุ๊กตุ๊กเที่ยวรอบเมือง · กดเพื่อลงรถ", AskToStop, highlight: true);
+        ContextButton.Show(this, "ลงรถ", $"นั่ง{Ride}เที่ยวรอบเมือง · กดเพื่อลงรถ", AskToStop, highlight: true);
+        RideMapUI.MapButton(OpenMap);
+        OpenMap();
+    }
+
+    private string destination;
+
+    // Where to? The passenger taps the map; the driver goes there along the roads
+    private void OpenMap()
+    {
+        if (state != State.Riding) return;
+        RideMapUI.Open(car, GoTo, Roam);
+    }
+
+    private void GoTo(Vector3 place, string name)
+    {
+        if (state != State.Riding) return;
+        if (car.GoTo(place))
+        {
+            destination = string.IsNullOrEmpty(name) ? "ที่หมาย" : name;
+            UiKit.FloatAbovePlayer($"{Ride}กำลังพาไป {destination}", UiKit.GoldText);
+            nextCheck = 0f;
+        }
+        else UiKit.FloatAbovePlayer("ถนนไปไม่ถึงตรงนั้น ลองเลือกจุดอื่น", new Color(1f, 0.5f, 0.4f));
+    }
+
+    private void Roam()
+    {
+        if (state != State.Riding) return;
+        car.StopGoing();
+        car.Release();
+        ContextButton.Show(this, "ลงรถ", "เที่ยวรอบเมือง · กดปุ่มแผนที่เพื่อเลือกที่หมาย", AskToStop, highlight: true);
+    }
+
+    // Pulled up at the destination: step down
+    private void Arrive()
+    {
+        state = State.Leaving;
+        GetOff();
+        UiKit.FloatAbovePlayer("ถึงที่หมายแล้ว · ขอบคุณที่ใช้บริการ", UiKit.GoldText);
     }
 
     // Keep the player on the back bench as the tuk-tuk moves
@@ -154,13 +214,15 @@ public class TukTukHail : MonoBehaviour
         if (player == null) return;
         var rot = transform.rotation;
         player.transform.SetPositionAndRotation(
-            SeatedPose.RootFor(transform.TransformPoint((taxi ? TaxiSeat : TukTukRider.BenchSeat) + Vector3.up * 0.05f), rot, hips), rot);
+            SeatedPose.RootFor(transform.TransformPoint((songthaew ? SongthaewSeat : taxi ? TaxiSeat : TukTukRider.BenchSeat) + Vector3.up * 0.05f), rot, hips), rot);
     }
 
     private void AskToStop()
     {
         if (state != State.Riding) return;
         state = State.Leaving;
+        car.StopGoing();
+        RideMapUI.HideAll();
         car.StopSoon();
         ContextButton.Show(this, "กำลังจอด...", null, null, enabled: false);
     }
@@ -182,6 +244,8 @@ public class TukTukHail : MonoBehaviour
     {
         if (pose != null) Destroy(pose);
         pose = null;
+        car.StopGoing();
+        RideMapUI.HideAll();
         if (crew != null) crew.ShowPassengers(true);
         if (player != null)
         {

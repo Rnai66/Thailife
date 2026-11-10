@@ -39,9 +39,10 @@ public static class TravelClient
     [Serializable] private class FerryFare { public int fare; }
 
     // A hailed ตุ๊กตุ๊ก round the town: a flat fare when you get in (TukTukHail)
-    public static async Task<int> TukTukAsync(bool taxi = false)
+    // kind: "tuktuk", "taxi" or "songthaew" (travel.lua prices each)
+    public static async Task<int> TukTukAsync(string kind = "tuktuk")
     {
-        var r = JsonUtility.FromJson<FerryFare>(await Call("tuktuk_ride", taxi ? "{\"kind\":\"taxi\"}" : "{}"));
+        var r = JsonUtility.FromJson<FerryFare>(await Call("tuktuk_ride", "{\"kind\":\"" + kind + "\"}"));
         if (WalletClient.Instance != null) _ = WalletClient.Instance.RefreshAsync();
         return r.fare;
     }
