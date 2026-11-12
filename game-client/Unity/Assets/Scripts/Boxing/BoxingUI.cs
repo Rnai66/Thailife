@@ -38,7 +38,7 @@ public class BoxingUI : MonoBehaviour
         string head = pads ? $"ซ้อมเป้าล่อ: เป๊ะ {r.good} ครั้ง" : r.win ? (r.ko ? "ชนะน็อค!" : "ชนะคะแนน!") : "แพ้";
         string body = $"{head}\nค่าตัว/รางวัล {r.purse:N0} บาท · XP +{r.xp}";
         if (!string.IsNullOrEmpty(r.title)) body += $"\nได้ตำแหน่ง \"{r.title}\"!";
-        if (r.leveled_up) body += $"\nเลเวลอัป! นักมวย Lv {r.new_level}";
+        if (r.leveled_up) { body += $"\nเลเวลอัป! นักมวย Lv {r.new_level}"; LevelUpFX.Show(r.new_level, "นักมวย"); }
         if (r.injured) body += "\nบาดเจ็บ! ไปรักษาที่ รพ.สต. (ตำบล) หรือโรงพยาบาล (เมือง)";
         instance.resultBody.text = body;
         instance.resultBody.color = r.win ? UiKit.OkGreen : UiKit.Danger;

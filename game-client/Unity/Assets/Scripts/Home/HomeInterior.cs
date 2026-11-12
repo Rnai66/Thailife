@@ -165,7 +165,7 @@ public class HomeInterior : MonoBehaviour
             exitMaterial.SetColor("_EmissionColor", new Color(0.25f, 0.9f, 0.4f) * (1.2f + Mathf.Sin(Time.time * 4f) * 0.8f));
         if (ceilingLight == null || Time.time < nextLightCheck) return;
         nextLightCheck = Time.time + 0.5f;
-        bool on = PlayerInside || RenderSettings.ambientIntensity < 0.8f;
+        bool on = PlayerInside || DayNightCycle.Dark;
         ceilingLight.enabled = on;
         bulbMaterial.SetColor("_EmissionColor", on ? new Color(1f, 0.85f, 0.55f) * 3f : Color.black);
     }

@@ -50,6 +50,10 @@ public class TrafficCar : MonoBehaviour
     private float squeezeUntil;
     private static int made;
     private readonly int order = ++made;
+    // Every car on the roads: before changing over onto another road it looks there for a car at
+    // (or coming up to) the place it would come out, and waits short of the turn rather than drive into it
+    private static readonly System.Collections.Generic.List<TrafficCar> active = new System.Collections.Generic.List<TrafficCar>();
+    private float mergeSince = -1f;
 
     private float[] dist;
     private float length, s, speed, dwell, lastDwell = -1f;
@@ -297,6 +301,7 @@ public class TrafficCar : MonoBehaviour
                 else offPlan = true;
             }
             else if (!(t.end || Random.value < TrafficNet.Chance(t.kind))) continue;
+            else if (!t.end && LandingBusy(t.to, t.at) != null) continue; // a car there: stay on this road
             var to = TrafficNet.Get(t.to);
             if (to == null) continue;
             float over = Mathf.Repeat(after - t.from, length);
@@ -414,6 +419,61 @@ public class TrafficCar : MonoBehaviour
         return best;
     }
 
+    private void OnEnable() => active.Add(this);
+    private void OnDisable() => active.Remove(this);
+
+    // A car where we would come out on route `to`, `at` metres along it: standing (or about to be)
+    // on that spot, coming up to it, or turning in there already
+    private TrafficCar LandingBusy(int to, float at)
+    {
+        var r = TrafficNet.Get(to);
+        if (r == null) return null;
+        foreach (var c in active)
+        {
+            if (c == this || c.dist == null) continue;
+            if (c == ghost && Time.time < ghostUntil) continue;
+            float gap = halfLength + c.halfLength + 2f;
+            if (c.netRoute == to)
+            {
+                float d = c.s - at; // + : ahead of the spot, - : behind it
+                if (r.closed && r.length > 0f) d = Mathf.Repeat(d + r.length * 0.5f, r.length) - r.length * 0.5f;
+                if (d >= 0f ? d < gap : -d < gap + c.speed * 1.2f) return c;
+            }
+            else if (c.curveTo == to && Mathf.Abs(c.curveAt - at) < gap) return c;
+        }
+        return null;
+    }
+
+    // The change-over we are about to make (next on the plan, or the end of a slip road) comes out
+    // where another car is: how far we may go — short of the turn. Not for ever: when it has been
+    // standing still 8 s as well, it may be waiting on us, so go.
+    private float MergeRoom()
+    {
+        if (netRoute < 0 || curveTo >= 0 || dwellAt != null || holdAt >= 0f) { mergeSince = -1f; return float.MaxValue; }
+        var r = TrafficNet.Get(netRoute);
+        if (r == null) { mergeSince = -1f; return float.MaxValue; }
+        float look = 9f + speed * speed / (2f * Brake);
+        foreach (var t in r.transfers)
+        {
+            float ahead = loop ? Mathf.Repeat(t.from - s, length) : t.from - s;
+            if (ahead < 0f || ahead > look) continue;
+            bool next = (navigating || wandering) && plan.Count > 0 && plan[0].to == t.to && Mathf.Abs(plan[0].from - t.from) <= 0.01f;
+            if (!next && !t.end) continue;
+            var who = LandingBusy(t.to, t.at);
+            if (who == null) break;
+            if (mergeSince < 0f) mergeSince = Time.time;
+            if (Time.time - mergeSince > 8f && who.speed < 0.5f)
+            {
+                ghost = who;
+                ghostUntil = Time.time + 4f;
+                break;
+            }
+            return Mathf.Max(0f, ahead - 0.3f);
+        }
+        mergeSince = -1f;
+        return float.MaxValue;
+    }
+
     // Waited long enough on the car in front? Not if it is a queue held up at the front by something
     // that isn't a car (a red light, a stop, a fare, the player, a level-crossing gate): yes after 2 s
     // when it's across our way (at a junction, round a roundabout) rather than going our way, and
@@ -477,7 +537,8 @@ public class TrafficCar : MonoBehaviour
             b.y = 0f;
             bend = Mathf.Max(bend, Vector3.Angle(a, b));
         }
-        return Mathf.Lerp(topSpeed, Mathf.Min(topSpeed, 4f), Mathf.InverseLerp(12f, 85f, bend));
+        float cruise = Mathf.Lerp(topSpeed, Mathf.Min(topSpeed, 4f), Mathf.InverseLerp(12f, 85f, bend));
+        return Mathf.Min(cruise, PoliceCheckpoint.SpeedCap(transform.position)); // ด่านตรวจ: slow right down
     }
 
     private void Update()
@@ -494,6 +555,9 @@ public class TrafficCar : MonoBehaviour
             }
 
         float room = Mathf.Min(Clearance() - 1.5f, ToStopLine() - 0.3f);
+        room = Mathf.Min(room, MergeRoom());
+        // a traffic officer holding this way at the junction
+        room = Mathf.Min(room, TrafficPolice.StopRoom(transform.position, transform.forward, halfLength, speed * speed / (2f * Brake)));
         if (dwellAt != null)
             foreach (float d in dwellAt)
             {

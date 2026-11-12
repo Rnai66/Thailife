@@ -29,6 +29,7 @@ public class MusicClient : MonoBehaviour
         public bool open;
         public bool played_today;   // pubs: once per game day each
         public string when;
+        public int cap;        // the hardest lesson taught here (as a level)
     }
 
     [Serializable]
@@ -46,6 +47,7 @@ public class MusicClient : MonoBehaviour
         public int tips;
         public int accuracy;
         public int gained_xp;
+        public bool practice;   // played below their level: half XP
         public bool leveled_up;
         public int perfect;
         public int good;

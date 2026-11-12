@@ -61,7 +61,7 @@ public class Fireworks : MonoBehaviour
 
     private void Update()
     {
-        if (Time.time < next || RenderSettings.ambientIntensity >= 0.8f) return; // after dark only
+        if (Time.time < next || !DayNightCycle.Dark) return; // after dark only
         bool finale = Random.value < 0.15f;
         next = Time.time + (finale ? 6f : Random.Range(1.6f, 3.6f));
         int count = finale ? Pool : 1;

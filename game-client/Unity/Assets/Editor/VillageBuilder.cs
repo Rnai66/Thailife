@@ -117,6 +117,8 @@ public static class VillageBuilder
         LandParcels.BuildVillage(v); // land you buy at the bank: rice land by the canal, a 1-rai plot
         TempleLife.BuildVillage(v);  // monks, the abbot, meditation, amulets; the cemetery and community forest; the home shrine
         Lane(v, 46.5f, -10.6f, -23f);
+        // ปั๊มน้ำมันหมู่บ้าน at the east end of the road, by the edge of the map: fill up, or drive off to another place
+        PetrolStation.Build(v, new Vector3(104.5f, 0f, -0.5f), 0f, 13f, 9f, "");
 
         // Villagers out and about in the daytime, monks' alms round at dawn (from the temple along the road)
         Npcs.Crowd(v, new Vector3(2f, 0f, -3f), new Vector2(22f, 4f), 3, "", 7, 19, Npcs.VillageTalk);
@@ -198,7 +200,8 @@ public static class VillageBuilder
         // the east part (house lots 7–22 along the east soi)
         Nature.GrassField(v, new Vector3(80f, 0f, 0f), new Vector2(38f, 116f), 900, 8,
             new Vector4(60f, -10.6f, 100f, -5.4f),     // road
-            new Vector4(77.5f, -58.5f, 82.5f, 45.5f)); // soi
+            new Vector4(77.5f, -58.5f, 82.5f, 45.5f),  // soi
+            new Vector4(98f, -5f, 111f, 4f));          // petrol pump
     }
 
     // Career needs CareerClient on the Network object and a TrainingTarget on the punching bag

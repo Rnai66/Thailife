@@ -143,7 +143,13 @@ public static class TambonBuilder
             new Vector4(12.5f, -23.5f, 19.5f, -10f), // ร้านค้าชุมชน
             new Vector4(34.5f, 13f, 41.5f, 21.5f),   // boxing ring
             new Vector4(-49.5f, -43.5f, -22.5f, -10f), // fairground and its lane
-            new Vector4(-11.3f, -15f, -8.7f, -10f), new Vector4(0.7f, -6f, 3.3f, 4f));
+            new Vector4(-11.3f, -15f, -8.7f, -10f), new Vector4(0.7f, -6f, 3.3f, 4f),
+            new Vector4(45f, -5f, 59f, 11f));        // petrol station
+
+        // ปั๊มน้ำมัน at the east end of the road; ตำรวจ: a speed trap by the road and a checkpoint (ด่านตรวจ)
+        PetrolStation.Build(root, new Vector3(52f, 0f, 3f), 0f, 14f, 16f, "");
+        Police.SpeedTrap(root, new Vector3(-30f, 0f, -11.5f), 0f, 60);
+        Police.Checkpoint(root, new Vector3(40f, 0f, -8f), 90f, 4f, 1f);
     });
 
     internal static void BuildCity(bool ask) => BuildLocation("Assets/Scenes/City.unity", "City", 20f, ask, root =>
@@ -157,6 +163,12 @@ public static class TambonBuilder
             new[] { "หมู่บ้าน", "ตำบล", "ชายหาด", "รอบเมือง" }, songthaewTravel: true);
         // ตัวเมือง (อำเภอ/จังหวัด): clock tower roundabout, shophouses, boxing camp (career tier 3)
         Places2.ClockTower(root, new Vector3(0f, 0f, 14f));
+        // ตำรวจจราจร at the clock tower roundabout, a speed trap on the avenue, a checkpoint on the ring road;
+        // ปั๊มน้ำมัน inside the ring road on the south side
+        Police.TrafficPoint(root, new Vector3(0f, 0f, 14f), 8.6f, new Vector3(-4.2f, 0f, 2.6f));
+        Police.SpeedTrap(root, new Vector3(60f, 0f, -21f), 0f, 60);
+        Police.Checkpoint(root, new Vector3(22f, 0f, -94f), 90f, CityRingRoad.HalfWidth * 2f, -1f);
+        PetrolStation.Build(root, new Vector3(-3f, 0f, -76.5f), 0f, 30f, 23f, " ประจำจังหวัด");
         Places2.Shophouses(root, new Vector3(-20f, 0f, 2f), 0f, 5, new[] { "ร้านทอง", "ร้านขายยา", "ออฟฟิศไอที", "ร้านข้าวมันไก่", "ร้านเสื้อผ้า" });
         Places2.Shophouses(root, new Vector3(22f, 0f, 2f), 0f, 4, new[] { "ร้านกาแฟ", "บริษัทซอฟต์แวร์", "ร้านตัดผม", "ร้านเครื่องดนตรี" });
         // Every shop's counter is inside its walk-in room (Interiors): the menu opens once you're in the
@@ -275,6 +287,11 @@ public static class TambonBuilder
         Bangkok.Build(root);
         CityRingRoad.Build(root, CityRingRoad.Capital); // round the city, over the river on two bridges
         BangkokStreets.Build(root, CityRingRoad.Capital);
+        // ตำรวจจราจร at the Witthayu / Rama 4 crossroads; ปั๊มน้ำมัน inside the ring road on the west side
+        Police.TrafficPoint(root, new Vector3(55.5f, 0f, -90f), 4f, new Vector3(62.5f, 0f, -85.5f));
+        PetrolStation.Build(root, new Vector3(-100.5f, 0f, -50f), 90f, 28f, 25f, " กรุงเทพฯ");
+        // เวทีดนตรีระดับประเทศ on สนามหลวง (musician Lv 18, every lesson up to บทที่ 7)
+        Places2.MusicStage(root, new Vector3(-38f, 0f, 4.5f), 0f, "national_stage", "เวทีดนตรีระดับประเทศ · สนามหลวง", new Color(0.55f, 0.1f, 0.12f));
 
         var pave = PrimitiveKit.Mat("Pavement", new Color(0.72f, 0.7f, 0.66f));
         PrimitiveKit.Box("Pavement", root, new Vector3(0f, 0.008f, 19f), new Vector3(96f, 0.012f, 49f), pave, collider: false);

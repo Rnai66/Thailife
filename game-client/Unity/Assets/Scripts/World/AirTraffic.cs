@@ -82,8 +82,10 @@ public class AirTraffic : MonoBehaviour
             z += speed * Time.deltaTime;
             yield return null;
         }
-        Smoke(plane);
-        GameAudio.Play("jet", plane.position, 1f, 260f);
+        // touchdown smoke and roar are trimmings: whatever goes wrong with them, the plane carries on
+        // (an iPhone build without the particle shader used to stop the landing dead here)
+        try { Smoke(plane); } catch (System.Exception e) { Debug.LogWarning("[AirTraffic] smoke: " + e.Message); }
+        try { GameAudio.Play("jet", plane.position, 1f, 260f); } catch (System.Exception e) { Debug.LogWarning("[AirTraffic] jet: " + e.Message); }
         // roll out, braking, then off to the side and along the taxiway to the hangar
         float v = Touchdown, zz = touch, pitch = 6f;
         float exit = runwayLength * 0.5f - 40f;
@@ -119,7 +121,7 @@ public class AirTraffic : MonoBehaviour
         yield return Roll(plane, new Vector3(taxiX - 14f, 0f, start), new Vector3(14f, 0f, start), -90f);
         yield return Turn(plane, new Vector3(14f, 0f, start), -90f, 0f, 14f);
         yield return new WaitForSeconds(2f);
-        GameAudio.Play("jet", plane.position, 1f, 260f);
+        try { GameAudio.Play("jet", plane.position, 1f, 260f); } catch (System.Exception e) { Debug.LogWarning("[AirTraffic] jet: " + e.Message); }
         // the roll: faster and faster, nose up, off
         float v = 3f, z = start + 14f, y = 0f, pitch = 0f;
         bool airborne = false;
@@ -183,6 +185,8 @@ public class AirTraffic : MonoBehaviour
     // Tyre smoke where the main wheels touch
     private static void Smoke(Transform plane)
     {
+        var mat = SmokeMaterial;
+        if (mat == null) return; // no particle shader in this build: no smoke
         var go = new GameObject("TouchdownSmoke");
         go.transform.position = plane.position;
         var ps = go.AddComponent<ParticleSystem>();
@@ -201,7 +205,7 @@ public class AirTraffic : MonoBehaviour
         shape.shapeType = ParticleSystemShapeType.Sphere;
         shape.radius = 1.5f;
         var renderer = go.GetComponent<ParticleSystemRenderer>();
-        renderer.sharedMaterial = SmokeMaterial;
+        renderer.sharedMaterial = mat;
         ps.Play();
         Destroy(go, 3f);
     }
@@ -212,7 +216,11 @@ public class AirTraffic : MonoBehaviour
         get
         {
             if (smoke != null) return smoke;
-            var shader = Shader.Find("Universal Render Pipeline/Particles/Unlit") ?? Shader.Find("Particles/Standard Unlit");
+            // Shader.Find gives null for a shader the build left out (?? doesn't see Unity's fake null)
+            Shader shader = null;
+            foreach (var n in new[] { "Universal Render Pipeline/Particles/Unlit", "Particles/Standard Unlit", "Sprites/Default" })
+                if ((shader = Shader.Find(n)) != null) break;
+            if (shader == null) return null;
             smoke = new Material(shader) { color = new Color(0.9f, 0.9f, 0.9f, 0.5f) };
             return smoke;
         }

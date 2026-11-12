@@ -81,7 +81,7 @@ public class ConcertLights : MonoBehaviour
         int bar = Mathf.FloorToInt(beats / 4f);
         int mode = (bar / 2) % 3;                             // a new look every two bars
         bool drop = (bar % 8) == 7;                           // every eighth bar: strobe and full lasers
-        float night = RenderSettings.ambientIntensity < 0.8f ? 1f : 0.55f;
+        float night = DayNightCycle.Dark ? 1f : 0.55f;
 
         for (int i = 0; i < heads.Count; i++)
         {

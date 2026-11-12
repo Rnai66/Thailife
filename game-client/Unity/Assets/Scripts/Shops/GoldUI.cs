@@ -141,7 +141,7 @@ public class GoldUI : MonoBehaviour
         if (p == null)
         {
             boardSell.text = boardBuy.text = "—";
-            holdUnits.text = "กำลังโหลด...";
+            LoadingFlower.Show(holdUnits);
             return;
         }
         boardSell.text = $"{p.sell_baht:N0}";

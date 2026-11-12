@@ -77,7 +77,7 @@ public static class UiKit
 
     private static Sprite MakeFlower()
     {
-        const int n = 64;
+        const int n = 192; // sharp enough for the big loading flower
         var tex = new Texture2D(n, n, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp };
         var px = new Color32[n * n];
         for (int y = 0; y < n; y++)

@@ -198,3 +198,37 @@ nk.register_rpc(function(context, payload)
                        permission_read = 1, permission_write = 0 } })
   return nk.json_encode({ code = code, created = true, paid = cost, outfits = owned_list(record) })
 end, "profile_set_look")
+
+-- ── Address (ที่อยู่) ──────────────────────────────────────────────────────────
+-- Where the player lives: house number, หมู่, village, ตำบล, อำเภอ and one of the 77 provinces. The
+-- province is their home province: the "บ้านเกิด" town's place on the map, so trips to other
+-- provinces (travel.lua) and drives (fuel.lua) are measured from there.
+--   profile_get_address {}  -> { house, moo, village, tambon, amphoe, province, set }
+--   profile_set_address { house, moo, village, tambon, amphoe, province } -> the same
+local provinces = require("provinces")
+local ADDRESS_FIELDS = { house = 12, moo = 4, village = 30, tambon = 30, amphoe = 30 }
+
+local function address_reply(a)
+  return nk.json_encode({ house = a.house or "", moo = a.moo or "", village = a.village or "", tambon = a.tambon or "",
+    amphoe = a.amphoe or "", province = a.province or provinces.DEFAULT, set = a.province ~= nil })
+end
+
+nk.register_rpc(function(context, payload)
+  return address_reply(provinces.address(nk, context.user_id) or {})
+end, "profile_get_address")
+
+nk.register_rpc(function(context, payload)
+  local ok, req = pcall(nk.json_decode, payload or "")
+  if not ok or type(req) ~= "table" then error({ "invalid payload", GRPC_INVALID_ARGUMENT }) end
+  local a = {}
+  for field, max in pairs(ADDRESS_FIELDS) do
+    local v = clean(req[field])
+    if char_count(v) > max then error({ field .. " too long", GRPC_INVALID_ARGUMENT }) end
+    a[field] = v
+  end
+  if not provinces.BY_NAME[req.province or ""] then error({ "unknown province", GRPC_INVALID_ARGUMENT }) end
+  a.province = req.province
+  nk.storage_write({ { collection = "profile", key = "address", user_id = context.user_id, value = a,
+                       permission_read = 1, permission_write = 0 } })
+  return address_reply(a)
+end, "profile_set_address")

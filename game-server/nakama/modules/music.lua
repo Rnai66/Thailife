@@ -23,19 +23,24 @@ local LEAD_IN_MS = 2000
 local GRPC_INVALID_ARGUMENT = 3
 local GRPC_FAILED_PRECONDITION = 9
 
--- Venues: base tips, required level, which instruments get +20%, when it's open
+-- Venues: base tips, required level, which instruments get +20%, when it's open.
+-- cap: the hardest lesson taught there, as the musician level it opens at (MusicTheory.LessonStarts):
+-- the village sala is the practice room (บทที่ 1-2 only); the hard lessons are on the town,
+-- province and national stages. The client deals the cards at min(level, cap) (MusicTheory.VenueCap).
 local VENUES = {
-  village_hall = { name = "ศาลากลางหมู่บ้าน", level = 1,  base = 40,  bonus = "folk" },
-  temple_fair  = { name = "ดนตรีพื้นบ้าน", level = 1,  base = 120, bonus = "folk", fair = true },
-  tambon_event = { name = "เวทีอีเวนต์ตำบล",   level = 5,  base = 150, bonus = "any" },
-  city_event   = { name = "เวทีอีเวนต์เมือง",   level = 8,  base = 220, bonus = "modern" },
-  beach_concert = { name = "เวทีคอนเสิร์ตริมหาด", level = 12, base = 500, bonus = "modern", concert = true },
+  village_hall = { name = "ศาลากลางหมู่บ้าน (ลานฝึกพื้นฐาน)", level = 1,  base = 40,  bonus = "folk", cap = 4 },
+  temple_fair  = { name = "ดนตรีพื้นบ้าน", level = 1,  base = 120, bonus = "folk", fair = true, cap = 7 },
+  tambon_event = { name = "เวทีอีเวนต์ตำบล",   level = 5,  base = 150, bonus = "any", cap = 11 },
+  city_event   = { name = "เวทีอีเวนต์เมือง",   level = 8,  base = 220, bonus = "modern", cap = 17 },
+  province_stage = { name = "เวทีดนตรีประจำจังหวัด", level = 12, base = 420, bonus = "any", cap = 24 },
+  beach_concert = { name = "เวทีคอนเสิร์ตริมหาด", level = 12, base = 500, bonus = "modern", concert = true, cap = 100 },
+  national_stage = { name = "เวทีดนตรีระดับประเทศ สนามหลวง", level = 18, base = 650, bonus = "any", cap = 100 },
   -- Pubs (ผับ) in the city, named by style: open 19:00-03:00, each one once per game day
-  pub_puea_chiwit = { name = "ผับเพื่อชีวิต", level = 10, base = 350, bonus = "any",    night = true, pub = true },
-  pub_blues       = { name = "ผับบลูส์",     level = 10, base = 350, bonus = "modern", night = true, pub = true },
-  pub_indie       = { name = "ผับอินดี้",     level = 10, base = 350, bonus = "modern", night = true, pub = true },
+  pub_puea_chiwit = { name = "ผับเพื่อชีวิต", level = 10, base = 350, bonus = "any",    night = true, pub = true, cap = 17 },
+  pub_blues       = { name = "ผับบลูส์",     level = 10, base = 350, bonus = "modern", night = true, pub = true, cap = 17 },
+  pub_indie       = { name = "ผับอินดี้",     level = 10, base = 350, bonus = "modern", night = true, pub = true, cap = 17 },
 }
-local VENUE_ORDER = { "village_hall", "temple_fair", "tambon_event", "city_event", "beach_concert", "pub_puea_chiwit", "pub_blues", "pub_indie" }
+local VENUE_ORDER = { "village_hall", "temple_fair", "tambon_event", "city_event", "province_stage", "beach_concert", "national_stage", "pub_puea_chiwit", "pub_blues", "pub_indie" }
 
 local SONGS = { "ลำเพลิน", "เต้ยโขง", "ลาวแพน", "มนต์รักลูกทุ่ง", "สาวบ้านแต้", "ลำเต้ย", "รำวงชาวบ้าน", "เพลงงานวัด" }
 
@@ -95,7 +100,7 @@ local function view(user_id, s, env, extra)
   local venues = {}
   for _, id in ipairs(VENUE_ORDER) do
     local v = VENUES[id]
-    table.insert(venues, { id = id, name = v.name, level = v.level, base = v.base, bonus = v.bonus,
+    table.insert(venues, { id = id, name = v.name, level = v.level, base = v.base, bonus = v.bonus, cap = v.cap,
                            unlocked = s.level >= v.level, open = venue_open(v, now, env),
                            played_today = v.pub == true and (s.pub_days or {})[id] == life.game_day(now),
                            when = v.fair and "งานวัดตามประเพณี" or v.concert and "ช่วงคอนเสิร์ตริมหาด (ดูปฏิทินงาน)" or v.night and "กลางคืน 19:00-03:00 (ร้านละครั้งต่อวัน)" or "ทุกเวลา" })
@@ -208,7 +213,10 @@ local function rpc_finish(context, payload)
   tips, charm = amulet.boost(user_id, "sanae", tips) -- เสน่ห์: the crowd tips more
   if tips > 0 then nk.wallet_update(user_id, { [CURRENCY] = tips }, { reason = "music_tips", venue = session.venue }, true) end
 
+  -- Practising what you already know is worth half: past a venue's last lesson, go to a bigger stage
   local gained = perfect + good
+  local below = s.level > (v.cap or MAX_LEVEL)
+  if below then gained = math.floor(gained / 2) end
   s.xp = s.xp + gained
   s.performances = s.performances + 1
   local leveled = false
@@ -223,6 +231,7 @@ local function rpc_finish(context, payload)
 
   return view(user_id, s, context.env, {
     tips = tips, charm_bonus = charm, accuracy = math.floor(accuracy * 100 + 0.5), gained_xp = gained, leveled_up = leveled,
+    practice = below,
     perfect = perfect, good = good, total_notes = session.notes, venue_name = v.name,
   })
 end

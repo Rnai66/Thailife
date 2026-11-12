@@ -15,6 +15,8 @@ public class SceneLoader : MonoBehaviour
     private CanvasGroup group;
     private Text heading, tip, percent;
     private RectTransform fill, spinner;
+    private CanvasScaler scaler;
+    private int shape = -1; // 0 landscape, 1 portrait: the layout it was last fitted to
     private bool loading;
 
     private const float BarWidth = 900f;
@@ -118,8 +120,9 @@ public class SceneLoader : MonoBehaviour
         canvas.sortingOrder = 32000; // over everything, the title screen too
         var scaler = canvasGo.GetComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920f, 1080f);
         scaler.matchWidthOrHeight = 0.5f;
+        this.scaler = scaler;
+        scaler.referenceResolution = Screen.height > Screen.width ? new Vector2(1080f, 1920f) : new Vector2(1920f, 1080f);
         group = canvasGo.GetComponent<CanvasGroup>();
 
         var back = UiKit.Rect("Back", canvasGo.transform, new Color(0.06f, 0.05f, 0.09f, 1f));
@@ -148,20 +151,25 @@ public class SceneLoader : MonoBehaviour
         percent = UiKit.Label(back, 26, "", new Vector2(0f, -180f), new Vector2(400f, 40f), new Color(0.85f, 0.8f, 0.7f));
         tip = UiKit.Label(back, 28, "", new Vector2(0f, -250f), new Vector2(1400f, 50f), new Color(0.75f, 0.75f, 0.8f));
 
-        spinner = UiKit.Rect("Spinner", back, UiKit.Gold);
-        spinner.sizeDelta = new Vector2(46f, 46f);
-        spinner.anchorMin = spinner.anchorMax = new Vector2(1f, 0f);
-        spinner.anchoredPosition = new Vector2(-70f, 70f);
-        spinner.GetComponent<Image>().sprite = UiKit.FlowerSprite;
-        spinner.GetComponent<Image>().raycastTarget = false;
+        // the loading mark: the turning flower, big, in the middle just above the logo
+        spinner = PikulSpinner.Make(back, new Vector2(0f, 420f), 140f);
 
         group.alpha = 0f;
         canvasGo.SetActive(false);
     }
 
+    // Phone held upright or on its side: fit the screen to it (the title screen may be the other way)
     private void Update()
     {
-        if (loading && spinner != null) spinner.Rotate(0f, 0f, -200f * Time.unscaledDeltaTime);
+        if (scaler == null || !group.gameObject.activeSelf) return;
+        int now = Screen.height > Screen.width ? 1 : 0;
+        if (now == shape) return;
+        shape = now;
+        scaler.referenceResolution = now == 1 ? new Vector2(1080f, 1920f) : new Vector2(1920f, 1080f);
+        float w = now == 1 ? 1000f : 1400f;
+        heading.rectTransform.sizeDelta = new Vector2(w, 60f);
+        tip.rectTransform.sizeDelta = new Vector2(w, 90f);
+        tip.horizontalOverflow = HorizontalWrapMode.Wrap;
     }
 
     private void Show(float progress, string label)

@@ -157,7 +157,7 @@ public class SocialUI : MonoBehaviour
     private void Note(string text, Color color, int size = 21)
     {
         y -= 24f;
-        Top(UiKit.Label(content, size, text, new Vector2(0f, y), new Vector2(Width - 60f, 44f), color));
+        Top(LoadingFlower.Show(UiKit.Label(content, size, "", new Vector2(0f, y), new Vector2(Width - 60f, 44f), color), text));
         y -= 28f;
     }
 

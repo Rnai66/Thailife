@@ -40,7 +40,7 @@ public class NightCruise : MonoBehaviour
         if (!preview && Time.time >= nextCheck)
         {
             nextCheck = Time.time + 1f + Random.value;
-            Show(RenderSettings.ambientIntensity < 0.8f);
+            Show(DayNightCycle.Dark);
         }
         if (!night || boat == null) return;
         Sail(Time.time);

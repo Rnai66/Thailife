@@ -198,6 +198,7 @@ public class HealthHud : MonoBehaviour
             Round(menuColumn, r % perColumn, icon, caption, () => { open(); ToggleMenu(); }, out disc, out _, out label, (r / perColumn) * (Disc + 56f));
         }
         Entry("person", "ตั้งชื่อ", () => NameUI.Show(firstTime: false), out _, out nameCaption);
+        Entry("home", "ที่อยู่", AddressUI.Toggle, out _, out _);
         Entry("star", "อาชีพ", ProfessionUI.Toggle, out _, out careerCaption);
         Entry("quest", "ภารกิจ", QuestUI.Toggle, out questDisc, out questCaption);
         Entry("food", "กิน", FoodUI.Toggle, out _, out _);

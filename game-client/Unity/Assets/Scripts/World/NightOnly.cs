@@ -13,7 +13,7 @@ public class NightOnly : MonoBehaviour
     {
         if (Time.time < nextCheck) return;
         nextCheck = Time.time + 1f + Random.value;
-        Show(RenderSettings.ambientIntensity < 0.8f);
+        Show(DayNightCycle.Dark);
     }
 
     private void Show(bool on)

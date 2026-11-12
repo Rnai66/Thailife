@@ -98,7 +98,7 @@ public class LandUI : MonoBehaviour
         var s = LandClient.Instance?.Current;
         if (s == null)
         {
-            statusText.text = "กำลังโหลด…";
+            LoadingFlower.Show(statusText);
             infoText.text = "ต้องออนไลน์ก่อน";
             return;
         }

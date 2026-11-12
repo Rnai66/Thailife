@@ -140,7 +140,7 @@ public class FishPondUI : MonoBehaviour
         UiKit.Clear(speciesRow);
         if (s?.cages == null)
         {
-            pickText.text = "กำลังโหลด…";
+            LoadingFlower.Show(pickText);
             foreach (var c in cages)
             {
                 c.status.text = "-";

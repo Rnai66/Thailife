@@ -24,8 +24,11 @@ public static class SynthVoices
             case "hen": return Hen();
             case "rooster": return Rooster();
             case "jet": return Jet();
+            case "whistle": return Whistle(new[] { 0f }, 0.55f);               // ปรี๊ด: a traffic police whistle
+            case "whistle_long": return Whistle(new[] { 0f, 0.7f }, 0.5f);    // ปรี๊ด ปรี๊ด: stop!
             case "school_bell": return Notes(new[] { 659f, 523f, 587f, 392f, 392f, 587f, 659f, 523f }, 0.6f, 0.55f);
             case "pa_chime": return Notes(new[] { 523f, 659f, 784f }, 0.32f, 0.4f);
+            case "level_up": return Notes(new[] { 523f, 659f, 784f, 1047f, 784f, 1047f, 1319f, 1568f }, 0.085f, 0.6f); // เลเวลอัป: a bright run up
             default: return null;
         }
     }
@@ -348,6 +351,30 @@ public static class SynthVoices
             d[i] = (low * 3.2f + mid * 0.6f + Mathf.Sin(phase) * 0.05f) * env;
         }
         Normalize(d, 0.8f);
+        return d;
+    }
+
+    // A pea whistle: a shrill tone warbling as the pea rattles round, a breathy edge, each blast
+    // swelling in and cut off short
+    private static float[] Whistle(float[] starts, float blast)
+    {
+        var d = SynthSounds.Buffer(starts[starts.Length - 1] + blast + 0.15f);
+        var rng = new System.Random(5);
+        float phase = 0f, air = 0f;
+        foreach (float start in starts)
+        {
+            int from = (int)(start * Rate), n = (int)(blast * Rate);
+            for (int i = 0; i < n && from + i < d.Length; i++)
+            {
+                float t = (float)i / Rate, u = (float)i / n;
+                float trill = Mathf.Sin(2f * Mathf.PI * 34f * t);                    // the pea
+                phase += 2f * Mathf.PI * (2950f + 160f * trill) / Rate;
+                air += (((float)rng.NextDouble() * 2f - 1f) - air) * 0.5f;
+                float env = Mathf.Clamp01(u * 25f) * Mathf.Clamp01((1f - u) * 12f) * (0.75f + 0.25f * trill);
+                d[from + i] += (Mathf.Sin(phase) + 0.25f * Mathf.Sin(phase * 2f) + 0.12f * air) * env;
+            }
+        }
+        Normalize(d, 0.55f);
         return d;
     }
 

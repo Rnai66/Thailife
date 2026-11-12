@@ -130,7 +130,7 @@ public class TowerLights : MonoBehaviour
         if (Time.time >= nextCheck)
         {
             nextCheck = Time.time + 1.5f + (seed % 7) * 0.1f;
-            bool dark = RenderSettings.ambientIntensity < 0.8f;
+            bool dark = DayNightCycle.Dark;
             if (dark != night)
             {
                 night = dark;

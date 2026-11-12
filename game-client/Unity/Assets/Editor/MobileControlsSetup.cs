@@ -68,11 +68,11 @@ public static class MobileControlsSetup
 
         Sprite knob = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
 
-        var background = CreateImage("JoystickBackground", moveZone, knob, new Color(1f, 1f, 1f, 0.25f), 260f);
+        var background = CreateImage("JoystickBackground", moveZone, knob, new Color(1f, 1f, 1f, 0.25f), 340f);
         background.anchorMin = background.anchorMax = Vector2.zero;
-        background.anchoredPosition = new Vector2(280f, 260f);
+        background.anchoredPosition = new Vector2(300f, 400f);
 
-        var handle = CreateImage("JoystickHandle", background, knob, new Color(1f, 1f, 1f, 0.8f), 120f);
+        var handle = CreateImage("JoystickHandle", background, knob, new Color(1f, 1f, 1f, 0.8f), 150f);
         handle.anchorMin = handle.anchorMax = new Vector2(0.5f, 0.5f);
         handle.anchoredPosition = Vector2.zero;
 

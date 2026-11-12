@@ -10,6 +10,7 @@ using UnityEngine.SceneManagement;
 public class ScenePolish : MonoBehaviour
 {
     private static readonly Color DayFog = new Color(0.7f, 0.84f, 0.97f);
+    private static Material ownSky;
     private static readonly Color NightFog = new Color(0.08f, 0.1f, 0.17f);
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -67,6 +68,7 @@ public class ScenePolish : MonoBehaviour
             if (sky.HasProperty("_Exposure")) sky.SetFloat("_Exposure", 1.35f);
             if (sky.HasProperty("_GroundColor")) sky.SetColor("_GroundColor", new Color(0.55f, 0.65f, 0.45f));
             RenderSettings.skybox = sky;
+            ownSky = sky.HasProperty("_Exposure") ? sky : null;
         }
 
         RenderSettings.fog = true;
@@ -84,8 +86,16 @@ public class ScenePolish : MonoBehaviour
 
     private void Update()
     {
-        // Haze follows the day/night ambient (DayNightCycle sets ambientIntensity 0.5 at night .. 1 by day)
-        float day = Mathf.InverseLerp(0.5f, 1f, RenderSettings.ambientIntensity);
+        // Haze and sky follow the clock: a dark night sky (the procedural sky would glow blue under
+        // the moonlight coming from high above), the blue day sky as the sun comes up
+        float day = DayNightCycle.Daylight;
         RenderSettings.fogColor = Color.Lerp(NightFog, DayFog, day);
+        var sky = RenderSettings.skybox;
+        if (sky != null && sky == ownSky)
+        {
+            sky.SetFloat("_Exposure", Mathf.Lerp(0.07f, 1.35f, day));
+            sky.SetColor("_SkyTint", Color.Lerp(new Color(0.12f, 0.16f, 0.35f), new Color(0.35f, 0.6f, 1f), day));
+            if (sky.HasProperty("_SunSize")) sky.SetFloat("_SunSize", Mathf.Lerp(0.025f, 0.04f, day)); // a small pale moon at night
+        }
     }
 }

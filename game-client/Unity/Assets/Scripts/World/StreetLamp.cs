@@ -30,10 +30,10 @@ public class StreetLamp : MonoBehaviour
         lamp.shadows = LightShadows.None;
         switch (kind)
         {
-            case Kind.PoleStreet: Set(135f, 18f, 22f, new Color(1f, 0.8f, 0.55f)); break;
-            case Kind.Post:       Set(130f, 12f, 9f, new Color(1f, 0.85f, 0.6f)); break;
-            case Kind.Solar:      Set(125f, 11f, 7f, new Color(0.85f, 0.92f, 1f)); break; // cool white LED
-            case Kind.Hanging:    Set(140f, 9f, 5f, new Color(1f, 0.82f, 0.55f)); break;
+            case Kind.PoleStreet: Set(140f, 24f, 40f, new Color(1f, 0.82f, 0.58f)); break;
+            case Kind.Post:       Set(140f, 16f, 18f, new Color(1f, 0.86f, 0.62f)); break;
+            case Kind.Solar:      Set(135f, 15f, 14f, new Color(0.88f, 0.94f, 1f)); break; // cool white LED
+            case Kind.Hanging:    Set(145f, 12f, 10f, new Color(1f, 0.84f, 0.58f)); break;
             case Kind.Ring:       Set(110f, 9f, 16f, new Color(1f, 0.96f, 0.88f)); break; // bright stage light
             case Kind.Orange:     Set(140f, 11f, 7f, new Color(1f, 0.55f, 0.15f)); break; // sodium-orange (cow pen)
         }
@@ -53,6 +53,6 @@ public class StreetLamp : MonoBehaviour
         if (lamp == null || Time.time < nextCheck) return;
         if (kind == Kind.Ring) { lamp.enabled = true; nextCheck = float.MaxValue; return; } // rings are lit day and night
         nextCheck = Time.time + 1f + Random.value; // spread the checks out
-        lamp.enabled = RenderSettings.ambientIntensity < 0.8f;
+        lamp.enabled = DayNightCycle.Dark;
     }
 }

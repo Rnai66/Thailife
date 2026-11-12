@@ -131,7 +131,7 @@ public class ElectionUI : MonoBehaviour
 
         if (s?.positions == null)
         {
-            subtitleText.text = "กำลังโหลด…";
+            LoadingFlower.Show(subtitleText);
             phaseText.text = meText.text = hintText.text = "";
             foreach (var c in cards) { c.header.text = c.info.text = ""; UiKit.Clear(c.rows); }
             registerMember.interactable = registerMayor.interactable = salaryButton.interactable = campaignButton.interactable = false;

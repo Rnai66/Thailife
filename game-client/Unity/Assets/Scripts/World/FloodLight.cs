@@ -18,7 +18,7 @@ public class FloodLight : MonoBehaviour
     {
         if (Time.time < nextCheck) return;
         nextCheck = Time.time + 1f + Random.value; // spread the checks out
-        lamp.enabled = RenderSettings.ambientIntensity < 0.8f;
+        lamp.enabled = DayNightCycle.Dark;
     }
 
     // Editor previews: show it as by night or by day

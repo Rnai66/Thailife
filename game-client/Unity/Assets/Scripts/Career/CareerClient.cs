@@ -172,7 +172,7 @@ public class CareerClient : MonoBehaviour
 
             if (previous != null && combat != null)
             {
-                FloatingText.Spawn(combat.transform.position + Vector3.up * 2f, $"LEVEL UP! Lv {stats.level}", new Color(1f, 0.85f, 0.2f));
+                LevelUpFX.Show(stats.level, TitleOf(stats));
                 Debug.Log($"[Career] Level up → {stats.level} ({TitleOf(stats)})");
             }
         }

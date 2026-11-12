@@ -182,7 +182,7 @@ public class HomeChoiceUI : MonoBehaviour
         pickedLot = 0;
         shownMoo = moo;
         Heading($"{s.name} · เลือกบ้านเลขที่");
-        UiKit.Label(list, 28, "กำลังโหลดแปลง…", Vector2.zero, new Vector2(600f, 50f), UiKit.Muted);
+        LoadingFlower.Show(UiKit.Label(list, 28, "", Vector2.zero, new Vector2(600f, 50f), UiKit.Muted), "กำลังโหลดแปลง…");
         HomeClient.LotsView v;
         try { v = await HomeClient.Instance.LotsAsync(a.id, moo); }
         catch (Exception e) { if (this != null && page == version) Say(HomeClient.Explain(e), UiKit.Danger); return; }

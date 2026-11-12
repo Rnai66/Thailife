@@ -179,8 +179,7 @@ public class MusicUI : MonoBehaviour
         infoText.text = $"<b>นักดนตรี Lv {s.level}</b> · XP {s.xp}/{s.xp_to_next} · เล่นมาแล้ว {s.performances} ครั้ง\n"
                         + (v == null ? "" : $"ทิปพื้นฐาน {v.@base} บาท · {bonus} · {v.when}\n")
                         + $"{s.instrument_name}: {DeckFor(s.instrument)}\n"
-                        + $"<b>{MusicTheory.Lesson(s.instrument, s.level)}</b>"
-                        + (MusicTheory.NextLesson(s.level) > 0 ? $" · บทต่อไปที่ Lv {MusicTheory.NextLesson(s.level)}" : "");
+                        + LessonLine(s.instrument, s.level);
 
         int i = 0;
         if (s.instruments != null)
@@ -250,10 +249,23 @@ public class MusicUI : MonoBehaviour
         if (!playing) RenderMenu();
     }
 
+    // The lesson dealt on this stage, and where the next one is taught
+    private string LessonLine(string inst, int lv)
+    {
+        int at = MusicTheory.LessonLevel(venueId, lv);
+        string line = $"<b>ที่นี่: {MusicTheory.Lesson(inst, at)}</b>";
+        int next = MusicTheory.NextLesson(at);
+        if (next == 0) return line;
+        if (next > MusicTheory.VenueCap(venueId))
+            return line + (lv >= next ? $"\nบทต่อไปสอนที่{MusicTheory.NextStage(venueId)} (เล่นที่นี่ได้ XP ครึ่งเดียว)"
+                                      : $" · บทต่อไปที่ Lv {next} ที่{MusicTheory.NextStage(venueId)}");
+        return line + $" · บทต่อไปที่ Lv {next}";
+    }
+
     private void BeginGame(MusicClient.State state)
     {
         instrument = state?.instrument ?? "pin";
-        level = state?.level ?? 1;
+        level = MusicTheory.LessonLevel(venueId, state?.level ?? 1); // the lessons this stage teaches
         int count = chart.cards > 0 ? chart.cards : 10;
         cards = MusicTheory.Deal(instrument, level, count, chart.session * 7919 + (venueId ?? "").Length);
 
@@ -582,7 +594,9 @@ public class MusicUI : MonoBehaviour
         {
             var r = await music.FinishAsync(chart.session, perfect, good);
             result = $"จบเพลง! ความแม่น {r.accuracy}% · ได้ทิป {r.tips} บาท · XP +{r.gained_xp}"
+                     + (r.practice ? $" (ซ้อมบทพื้นฐาน XP ครึ่งเดียว — ไปเล่นที่{MusicTheory.NextStage(venueId)})" : "")
                      + (r.leveled_up ? $"\nเลเวลอัป! นักดนตรี Lv {r.level}" : "");
+            if (r.leveled_up) LevelUpFX.Show(r.level, "นักดนตรี");
             if (r.tips > 0) UiKit.FloatAbovePlayer($"ทิป +{r.tips} ฿", new Color(1f, 0.85f, 0.2f));
             if (WalletClient.Instance != null) _ = WalletClient.Instance.RefreshAsync();
         }

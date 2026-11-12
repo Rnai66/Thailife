@@ -12,13 +12,26 @@ public class DayNightCycle : MonoBehaviour
 
     // Night has to stay playable on a phone: a bright moon and a soft blue ambient (never below these)
     private const float MinNightIntensity = 0.6f;
-    private static readonly Color NightAmbient = new Color(0.38f, 0.42f, 0.58f);
+    private static readonly Color NightAmbient = new Color(0.32f, 0.36f, 0.52f);
 
     // Lamps and car headlights switch on between dusk and dawn
     public static bool IsNight
     {
         get { float m = GameClock.MinuteOfDay; return m >= 18.5f * 60f || m < 5.75f * 60f; }
     }
+
+    // How light it is outside: 0 at night .. 1 by day (from the clock, so anything can ask)
+    public static float Daylight
+    {
+        get
+        {
+            float sunAngle = (GameClock.MinuteOfDay / GameClock.MinutesPerDay) * 360f - 90f;
+            return Mathf.Clamp01(Mathf.Sin(sunAngle * Mathf.Deg2Rad) * 2f + 0.3f);
+        }
+    }
+
+    // Dark enough for the lamps, lit signs, fireworks and the like (dusk till dawn)
+    public static bool Dark => Daylight < 0.6f;
 
     private Light sun;
     private Color dayAmbient;

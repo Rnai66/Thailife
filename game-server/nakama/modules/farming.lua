@@ -15,8 +15,16 @@ local land = require("land_core")
 local FARM = { collection = "farm", key = "plots" }
 local PLOTS = 6
 local LAND_PLOTS = 6 -- on the canal-side paddies (land_rice)
+-- ที่นาติดคลอง is 5 ไร่ = 20 งาน, laid out as 6 big paddies: each one is 20/6 งาน, so it yields 20/6
+-- times a home plot (1 งาน) from one seed bag, and the land comes with its own barn space.
+local LAND_AREA = 20 / LAND_PLOTS
+local LAND_BARN = 3000 -- kg of extra barn space with the canal-side land
 
 local function plot_count(user_id) return PLOTS + (land.owned(user_id).rice and LAND_PLOTS or 0) end
+local function plot_area(id) return (id > PLOTS) and LAND_AREA or 1 end
+local function barn_capacity(user_id, items)
+  return items.barn_capacity + (land.owned(user_id).rice and LAND_BARN or 0)
+end
 
 local GRPC_INVALID_ARGUMENT = 3
 local GRPC_FAILED_PRECONDITION = 9
@@ -56,7 +64,7 @@ local function view(user_id, farm, extra)
       id = i, stage = stage, progress = progress, watered = p.watered == true, ripe_in_s = ripe_in,
       variety = (stage ~= "empty" and stage ~= "plowed") and (p.variety or "khao_niao") or "",
       variety_name = (stage ~= "empty" and stage ~= "plowed") and variety_of(p).name or "",
-      grow_s = grow_ms / 1000,
+      grow_s = grow_ms / 1000, area = plot_area(i),
     })
   end
 
@@ -72,7 +80,7 @@ local function view(user_id, farm, extra)
   local result = life.view(life.state(user_id))
   result.plots = plots
   result.varieties = varieties
-  result.barn_capacity = items.barn_capacity
+  result.barn_capacity = barn_capacity(user_id, items)
   result.barn_total = stored
   for k, v in pairs(extra or {}) do result[k] = v end
   return nk.json_encode(result)
@@ -124,12 +132,12 @@ local function rpc_act(context, payload)
     if stage ~= "ripe" then error({ "not ripe yet", GRPC_FAILED_PRECONDITION }) end
     local rice = variety_of(p)
     local range = p.watered and rice.yield_watered or rice.yield_dry
-    local kg = math.random(range[1], range[2])
+    local kg = math.floor(math.random(range[1], range[2]) * plot_area(id) + 0.5)
 
     -- The barn must have room for the whole harvest
     local items = data.read_items(user_id)
     local crops, stored = data.read_barn(user_id)
-    if stored + kg > items.barn_capacity then
+    if stored + kg > barn_capacity(user_id, items) then
       error({ "barn full", GRPC_FAILED_PRECONDITION })
     end
 

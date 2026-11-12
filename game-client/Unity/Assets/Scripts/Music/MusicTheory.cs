@@ -177,6 +177,38 @@ public static class MusicTheory
         return 0;
     }
 
+    // ── Where each lesson is taught (music.lua VENUES.cap) ──────────────────────────────────
+    // The village sala is the practice room: the basics only (บทที่ 1-2). The harder lessons are on
+    // the bigger stages: the temple fair บทที่ 3, the tambon stage 4, the town's stage and pubs 5, the
+    // province's stage 6, and the national stages (สนามหลวง, the beach concerts) everything.
+    // The cap is the highest level whose lesson is dealt there.
+    public static int VenueCap(string venue)
+    {
+        switch (venue)
+        {
+            case "village_hall": return 4;
+            case "temple_fair": return 7;
+            case "tambon_event": return 11;
+            case "city_event":
+            case "pub_puea_chiwit":
+            case "pub_blues":
+            case "pub_indie": return 17;
+            case "province_stage": return 24;
+            default: return 100; // beach_concert, national_stage
+        }
+    }
+
+    // The level the cards are dealt at on this stage
+    public static int LessonLevel(string venue, int level) => System.Math.Min(level, VenueCap(venue));
+
+    // Where to go for the lesson after this stage's last one
+    public static string NextStage(string venue)
+    {
+        int cap = VenueCap(venue);
+        return cap <= 4 ? "งานวัด / เวทีตำบล" : cap <= 7 ? "เวทีอีเวนต์ตำบล" : cap <= 11 ? "เวทีอีเวนต์เมือง หรือผับ"
+            : cap <= 17 ? "เวทีดนตรีประจำจังหวัด" : cap <= 24 ? "เวทีระดับประเทศ (สนามหลวง กรุงเทพฯ / คอนเสิร์ตริมหาด)" : "";
+    }
+
     public class Card
     {
         public Kind Kind;

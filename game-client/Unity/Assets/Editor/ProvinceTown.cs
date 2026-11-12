@@ -72,6 +72,14 @@ public static class ProvinceTown
         CityRingRoad.Build(root, CityRingRoad.Town, railway);
 
         Monument(root, CityStreets.Roundabout, spec);
+        // ตำรวจจราจร at the roundabout, a speed trap on the avenue, a checkpoint on the west ring road,
+        // and the ปั๊มน้ำมัน just outside it (where you drive in from other towns)
+        Police.TrafficPoint(root, CityStreets.Roundabout, 8.6f, new Vector3(-6.5f, 0f, 4.5f));
+        Police.SpeedTrap(root, new Vector3(60f, 0f, -21f), 0f, 60);
+        Police.Checkpoint(root, new Vector3(-CityRingRoad.Town.Edge, 0f, 7f), 0f, CityRingRoad.HalfWidth * 2f, -1f);
+        PetrolStation.Build(root, new Vector3(-109f, 0f, -20f), 270f, 32f, 20f, " " + spec.Name);
+        // เวทีดนตรีประจำจังหวัด (musician Lv 12, บทที่ 6): just outside the west ring road, facing town
+        Places2.MusicStage(root, new Vector3(-108f, 0f, 36f), -90f, "province_stage", "เวทีดนตรีประจำจังหวัด\n" + spec.Name, new Color(0.45f, 0.12f, 0.35f));
         Places2.Shophouses(root, new Vector3(-28f, 0f, 2f), 0f, 4, spec.ShopsWest ?? new[] { "ร้านข้าวแกง", "ร้านของฝาก", "ร้านขายยา", "ร้านกาแฟ" });
         Places2.Shophouses(root, new Vector3(22f, 0f, 2f), 0f, 4, spec.ShopsEast ?? new[] { "ร้านทอง", "ร้านโจ๊ก", "มินิมาร์ท", "ร้านตัดผม" });
         WelcomeArch(root, new Vector3(-66f, 0f, -11.5f), spec);

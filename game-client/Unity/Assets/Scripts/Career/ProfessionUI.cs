@@ -83,7 +83,7 @@ public class ProfessionUI : MonoBehaviour
         UiKit.Clear(list);
         if (state?.trades == null)
         {
-            shownText.text = "กำลังโหลด…";
+            LoadingFlower.Show(shownText);
             autoButton.interactable = false;
             return;
         }

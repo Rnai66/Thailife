@@ -6,12 +6,15 @@ using UnityEngine.UI;
 // In a car the player is hidden inside; on a bicycle or motorbike they stay visible in the saddle.
 // The stick steers; the คันเร่ง (throttle) and เบรก (brake) buttons set the speed (PlayerController's
 // VehicleMode). On two wheels the bike and its rider lean into the turns together.
+// A motorbike or car burns fuel as it goes (FuelClient): the gauge under the speedometer runs down,
+// and with an empty tank you can only push it along to a petrol station. Getting out leaves it where
+// it is, even on another map (ParkedCar).
 [RequireComponent(typeof(BoxCollider))]
 public class DrivableCar : MonoBehaviour
 {
     private static GameObject exitCanvas;
     private static HoldButton throttleButton, brakeButton;
-    private static Text speedText, limitText;
+    private static Text speedText, limitText, fuelText;
     private static GameObject limitBadge;
     private static Image speedPlate;
     private float lean;
@@ -24,6 +27,13 @@ public class DrivableCar : MonoBehaviour
     private BoxCollider zone;
 
     public bool Driving => driving == this;
+    public static DrivableCar Current => driving;
+    public string CarId => id;
+    public string CarName => carName;
+    public float Kmh => Driving && player != null ? player.VehicleSpeed * PlayerController.KmhPerMetre : 0f;
+
+    private float unreported; // metres driven not yet told to the server
+    private bool empty;
 
     public void Configure(string assetId, string displayName)
     {
@@ -47,7 +57,7 @@ public class DrivableCar : MonoBehaviour
         if (other.GetComponent<PlayerController>() != null) ContextButton.Hide(this);
     }
 
-    private void GetIn()
+    public void GetIn()
     {
         player = FindAnyObjectByType<PlayerController>();
         if (player == null || driving != null) return;
@@ -71,12 +81,41 @@ public class DrivableCar : MonoBehaviour
         }
         ShowExitButton(true);
         GameAudio.Play("whoosh", null, 0.5f);
+        empty = false;
+        if (FuelClient.Info(id) == null) Refresh();
     }
 
-    public void GetOut()
+    private static async void Refresh()
+    {
+        try { await FuelClient.GetAsync(); }
+        catch (System.Exception e) { Debug.Log("[Fuel] " + e.Message); }
+    }
+
+    // Tell the server what's been driven (now and then, and on getting out)
+    private void Report()
+    {
+        if (unreported < 1f) return;
+        _ = FuelClient.UseAsync(id, unreported);
+        unreported = 0f;
+    }
+
+    // Driving off to another map (DriveJourney): out of the seat, the car goes with you
+    public void LeaveWithPlayer()
+    {
+        if (!Driving) return;
+        Report();
+        ParkedCar.Home(); // DriveJourney says where it ends up
+        GetOut(save: false);
+        Destroy(gameObject);
+    }
+
+    public void GetOut() => GetOut(save: true);
+
+    private void GetOut(bool save)
     {
         if (!Driving) return;
         driving = null;
+        Report();
         if (player != null)
         {
             player.DriveBoost = 1f;
@@ -93,6 +132,10 @@ public class DrivableCar : MonoBehaviour
         riding = null;
         zone.enabled = true;
         ShowExitButton(false);
+        if (!save) return;
+        // parked here: under the house it's home again, anywhere else it stays where it is
+        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "ThaiVillage" && HomeCar.AtHome(transform.position)) ParkedCar.Home();
+        else ParkedCar.Save(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name, id, carName, transform.position, transform.eulerAngles.y);
     }
 
     private void LateUpdate()
@@ -103,6 +146,31 @@ public class DrivableCar : MonoBehaviour
         bool two = CarModels.TwoWheels(id);
         player.Throttle = throttleButton != null && throttleButton.Held;
         player.Brake = brakeButton != null && brakeButton.Held;
+        // fuel: burn it as it goes; an empty tank only lets you push it along
+        var tank = FuelClient.Info(id);
+        if (tank != null && tank.kmpl > 0f)
+        {
+            float metres = player.VehicleSpeed * Time.deltaTime;
+            FuelClient.Burn(id, metres);
+            unreported += metres;
+            if (unreported > 400f) Report();
+            bool now = tank.litres <= 0.001f;
+            if (now != empty)
+            {
+                empty = now;
+                player.DriveBoost = empty ? Mathf.Min(0.35f, CarModels.DriveSpeed(id)) : CarModels.DriveSpeed(id);
+                if (empty) UiKit.FloatAbovePlayer("น้ำมันหมด! เข็นไปเติมที่ปั๊ม", UiKit.Danger);
+            }
+        }
+        if (fuelText != null)
+        {
+            fuelText.transform.parent.gameObject.SetActive(tank != null && tank.kmpl > 0f);
+            if (tank != null && tank.kmpl > 0f)
+            {
+                fuelText.text = empty ? "น้ำมันหมด · เข็นไปปั๊ม" : $"น้ำมัน {tank.litres:0.0}/{tank.tank:0} ลิตร";
+                fuelText.color = empty || tank.litres < tank.tank * 0.15f ? new Color(1f, 0.55f, 0.45f) : Color.white;
+            }
+        }
         if (speedText != null)
         {
             int kmh = Mathf.RoundToInt(player.VehicleSpeed * PlayerController.KmhPerMetre);
@@ -148,12 +216,12 @@ public class DrivableCar : MonoBehaviour
             rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0f);
             rt.anchoredPosition = new Vector2(0f, 230f);
             // the pedals, right side above the action buttons: hold คันเร่ง to go, เบรก to stop
-            throttleButton = Pedal("คันเร่ง", new Vector2(-190f, 640f), 200f, UiKit.PayGreen);
-            brakeButton = Pedal("เบรก", new Vector2(-420f, 610f), 150f, UiKit.Danger);
+            throttleButton = Pedal("คันเร่ง", new Vector2(-220f, 650f), 210f, UiKit.PayGreen);
+            brakeButton = Pedal("เบรก", new Vector2(-460f, 615f), 160f, UiKit.Danger);
             // the speedometer above the pedals, with the limit of the road you're on beside it
             var plate = UiKit.Panel("Speedometer", exitCanvas.transform, new Color(0.08f, 0.09f, 0.12f, 0.82f), Vector2.zero, new Vector2(250f, 110f));
             plate.anchorMin = plate.anchorMax = new Vector2(1f, 0f);
-            plate.anchoredPosition = new Vector2(-250f, 820f);
+            plate.anchoredPosition = new Vector2(-260f, 900f); // clear above the pedals
             speedPlate = plate.GetComponent<Image>();
             speedText = UiKit.Label(plate, 54, "0", new Vector2(36f, 12f), new Vector2(150f, 64f), Color.white);
             speedText.fontStyle = FontStyle.Bold;
@@ -168,6 +236,11 @@ public class DrivableCar : MonoBehaviour
             limitText = UiKit.Label(inner, 30, "", Vector2.zero, new Vector2(60f, 50f), new Color(0.08f, 0.08f, 0.08f));
             limitText.fontStyle = FontStyle.Bold;
             limitBadge = badge.gameObject;
+            // the fuel gauge under it
+            var gauge = UiKit.Panel("FuelGauge", exitCanvas.transform, new Color(0.08f, 0.09f, 0.12f, 0.82f), Vector2.zero, new Vector2(250f, 46f));
+            gauge.anchorMin = gauge.anchorMax = new Vector2(1f, 0f);
+            gauge.anchoredPosition = new Vector2(-260f, 815f);
+            fuelText = UiKit.Label(gauge, 22, "", Vector2.zero, new Vector2(240f, 40f), Color.white);
         }
         exitCanvas.SetActive(show);
     }

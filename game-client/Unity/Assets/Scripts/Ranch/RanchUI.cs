@@ -133,7 +133,7 @@ public class RanchUI : MonoBehaviour
         var s = RanchClient.Instance?.Current;
         if (s == null)
         {
-            herdText.text = "กำลังโหลด…";
+            LoadingFlower.Show(herdText);
             infoText.text = "ต้องออนไลน์ก่อน";
             for (int i = 0; i < Buttons; i++) SetButton(i, i == 0 ? "-" : null, false, null);
             Arrange();

@@ -20,9 +20,18 @@ public class VirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler,
 
     public Vector2 Value { get; private set; }
 
+    // Bigger and higher than the scenes were built with: easier to steer with a thumb, away from the
+    // bottom edge of the phone
+    private const float Size = 340f, Knob = 150f;
+    private static readonly Vector2 Rest = new Vector2(300f, 400f);
+
     private void Awake()
     {
         zone = (RectTransform)transform;
+        background.sizeDelta = new Vector2(Size, Size);
+        if (handle != null) handle.sizeDelta = new Vector2(Knob, Knob);
+        radius = Mathf.Max(radius, Size * 0.43f);
+        background.anchoredPosition = Rest;
         restPosition = background.anchoredPosition;
 
         backgroundGroup = background.GetComponent<CanvasGroup>();

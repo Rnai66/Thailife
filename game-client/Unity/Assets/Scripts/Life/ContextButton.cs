@@ -18,6 +18,7 @@ public class ContextButton : MonoBehaviour
     private Image buttonImage;
     private Text buttonLabel;
     private Text status;
+    private RectTransform buttonRect, statusRect;
 
     public static void Show(object who, string label, string message, Action action, bool enabled = true, bool highlight = false)
     {
@@ -55,6 +56,7 @@ public class ContextButton : MonoBehaviour
 
     private void Update()
     {
+        Layout();
         if (owner == null || !button.interactable) return;
 #if ENABLE_INPUT_SYSTEM
         bool pressed = Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame;
@@ -81,13 +83,19 @@ public class ContextButton : MonoBehaviour
 
         var font = ThaiFont.Font;
 
-        // Same spot as the fishing button: above the action cluster
+        // Same spot as the fishing button: above the action cluster. The slot is what ScreenFit pins to
+        // the corner; the button moves inside it (out of the pedals' way while driving, Layout)
+        var slot = new GameObject("ActionSlot", typeof(RectTransform));
+        var slotRt = (RectTransform)slot.transform;
+        slotRt.SetParent(canvasGo.transform, false);
+        slotRt.anchorMin = slotRt.anchorMax = new Vector2(1f, 0f);
+        slotRt.anchoredPosition = new Vector2(-300f, 650f); // above the action cluster
+        slotRt.sizeDelta = new Vector2(300f, 160f);
         var buttonGo = new GameObject("ActionButton", typeof(RectTransform), typeof(Image), typeof(Button));
         var rt = (RectTransform)buttonGo.transform;
-        rt.SetParent(canvasGo.transform, false);
-        rt.anchorMin = rt.anchorMax = new Vector2(1f, 0f);
-        rt.anchoredPosition = new Vector2(-300f, 650f); // above the action cluster
+        rt.SetParent(slotRt, false);
         rt.sizeDelta = new Vector2(300f, 160f);
+        buttonRect = rt;
         buttonImage = buttonGo.GetComponent<Image>();
         buttonImage.sprite = UiKit.WoodSprite;
         buttonImage.type = Image.Type.Sliced;
@@ -98,12 +106,17 @@ public class ContextButton : MonoBehaviour
         buttonLabel = UiKit.Cartoon(MakeText(rt, font, 40, new Vector2(270f, 140f)), 3f);
         buttonLabel.color = UiKit.WoodInk;
 
+        var statusSlot = new GameObject("StatusSlot", typeof(RectTransform));
+        var ssRt = (RectTransform)statusSlot.transform;
+        ssRt.SetParent(canvasGo.transform, false);
+        ssRt.anchorMin = ssRt.anchorMax = new Vector2(0.5f, 1f);
+        ssRt.anchoredPosition = new Vector2(0f, -170f);
+        ssRt.sizeDelta = new Vector2(1000f, 76f);
         var statusBg = new GameObject("Status", typeof(RectTransform), typeof(Image));
         var srt = (RectTransform)statusBg.transform;
-        srt.SetParent(canvasGo.transform, false);
-        srt.anchorMin = srt.anchorMax = new Vector2(0.5f, 1f);
-        srt.anchoredPosition = new Vector2(0f, -170f);
+        srt.SetParent(ssRt, false);
         srt.sizeDelta = new Vector2(1000f, 76f);
+        statusRect = srt;
         var bg = statusBg.GetComponent<Image>();
         bg.sprite = UiKit.WoodSprite;
         bg.type = Image.Type.Sliced;
@@ -113,6 +126,20 @@ public class ContextButton : MonoBehaviour
         status.color = UiKit.WoodInk;
 
         root.SetActive(false);
+    }
+
+    // Driving: the button steps left of the pedals (DrivableCar's คันเร่ง/เบรก are where it usually is).
+    // Upright phone: the message line is narrower and lower, clear of the menu column on the left and
+    // the map and clock on the right.
+    private void Layout()
+    {
+        if (buttonRect == null) return;
+        bool driving = DrivableCar.Current != null;
+        buttonRect.anchoredPosition = driving ? new Vector2(-400f, -10f) : Vector2.zero;
+        bool portrait = ScreenFit.Portrait;
+        statusRect.anchoredPosition = portrait ? new Vector2(0f, -150f) : Vector2.zero;
+        statusRect.sizeDelta = new Vector2(portrait ? 820f : 1000f, 76f);
+        status.rectTransform.sizeDelta = new Vector2(portrait ? 790f : 960f, 70f);
     }
 
     private static Text MakeText(Transform parent, Font font, int size, Vector2 box)

@@ -11,12 +11,13 @@
 
 local nk = require("nakama")
 local data = require("shop_data")
+local provinces = require("provinces")
 
 local GRPC_INVALID_ARGUMENT = 3
 local GRPC_FAILED_PRECONDITION = 9
 
 -- Where each place is (lat, lon) and how you can get there. "city" is the player's home province
--- town (a central-plains province, no airport).
+-- town: wherever their address says (profile_set_address), สุพรรณบุรี until they set one.
 local PLACES = {
   city      = { lat = 14.47, lon = 100.12, bus = true, train = true },
   bangkok   = { lat = 13.75, lon = 100.50, bus = true, train = true, air = true },
@@ -43,10 +44,19 @@ local function km(a, b)
   return 111.2 * math.sqrt(dlat * dlat + dlon * dlon)
 end
 
-local function trip(from, to, mode)
-  local a, b, m = PLACES[from], PLACES[to], MODES[mode]
+-- PLACES with "city" moved to the player's home province
+local function places_for(user_id)
+  local home = provinces.home(nk, user_id)
+  local p = {}
+  for id, v in pairs(PLACES) do p[id] = v end
+  p.city = { lat = home.lat, lon = home.lon, bus = true, train = true, name = home.name }
+  return p
+end
+
+local function trip(from, to, mode, places)
+  local a, b, m = places[from], places[to], MODES[mode]
   if not a or not b or not m or from == to or not a[mode] or not b[mode] then return nil end
-  local d = km(a, b) * m.road
+  local d = math.max(30, km(a, b)) * m.road -- a home province that has its own scene still is a trip away
   local fare = math.floor((m.base + d * m.per_km) / 10 + 0.5) * 10 -- whole tens of baht
   local hours = math.floor((m.wait + d / m.speed) * 2 + 0.5) / 2    -- to the half hour
   return { to = to, fare = fare, hours = hours }
@@ -76,8 +86,9 @@ end
 nk.register_rpc(function(context, payload)
   local req = decode(payload)
   local trips = {}
+  local places = places_for(context.user_id)
   for _, to in ipairs(ORDER) do
-    local t = trip(req.from, to, req.mode)
+    local t = trip(req.from, to, req.mode, places)
     if t then table.insert(trips, t) end
   end
   if #trips == 0 then trips = nil end -- an empty table would encode as {} (not a list)
@@ -87,7 +98,7 @@ end, "travel_quote")
 nk.register_rpc(function(context, payload)
   local user_id = context.user_id
   local req = decode(payload)
-  local t = trip(req.from, req.to or "", req.mode)
+  local t = trip(req.from, req.to or "", req.mode, places_for(user_id))
   if not t then error({ "no such trip", GRPC_FAILED_PRECONDITION }) end
 
   charge(user_id, t.fare, { reason = "travel", mode = req.mode, from = req.from, to = req.to })

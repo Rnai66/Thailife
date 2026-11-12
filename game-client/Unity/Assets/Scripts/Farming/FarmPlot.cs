@@ -210,7 +210,7 @@ public class FarmPlot : MonoBehaviour
         }
 
         int energy = Mathf.FloorToInt(LifeClient.Instance != null ? LifeClient.Instance.Energy : 0f);
-        string header = $"แปลงนา {plotId} (1 งาน) · พลังงาน {energy}";
+        string header = $"แปลงนา {plotId} ({(plotId > 6 ? "ราว 3.3 งาน · ที่นาติดคลอง" : "1 งาน")}) · พลังงาน {energy}";
         switch (plot.stage)
         {
             case "empty":

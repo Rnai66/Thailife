@@ -20,7 +20,7 @@ public class SkyBeams : MonoBehaviour
         if (Time.time >= nextCheck)
         {
             nextCheck = Time.time + 1.5f;
-            bool night = RenderSettings.ambientIntensity < 0.8f;
+            bool night = DayNightCycle.Dark;
             if (night != shown)
             {
                 shown = night;

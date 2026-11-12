@@ -149,7 +149,7 @@ public class TempleUI : MonoBehaviour
         var s = TempleClient.Instance?.Current;
         if (s == null)
         {
-            statusText.text = "กำลังโหลด…";
+            LoadingFlower.Show(statusText);
             infoText.text = "ต้องออนไลน์ก่อน";
             return;
         }
