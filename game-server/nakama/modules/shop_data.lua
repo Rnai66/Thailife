@@ -103,9 +103,12 @@ M.GOODS = {
   bamboo_shoot = { name = "หน่อไม้",            price = 25 },
   ant_eggs     = { name = "ไข่มดแดง (ห่อ)",     price = 60 },
   pak_wan      = { name = "ผักหวานป่า (กำ)",    price = 30 },
+  -- from felling trees with the axe (woodcut.lua): logs, and the firewood you split from them
+  log          = { name = "ท่อนไม้",             price = 12 },
+  firewood     = { name = "ฟืน (มัด)",           price = 9 },
 }
 M.GOODS_ORDER = { "soap", "fish_sauce", "toothpaste", "detergent", "spoons", "basin", "teddy", "flask",
-                  "backpack", "futon", "rice_cooker", "mushroom", "bamboo_shoot", "ant_eggs", "pak_wan" }
+                  "backpack", "futon", "rice_cooker", "mushroom", "bamboo_shoot", "ant_eggs", "pak_wan", "log", "firewood" }
 
 -- Markets keep game-clock hours: the fresh market in the morning, the ตลาดนัด in the evening
 M.MARKETS = {
@@ -181,6 +184,7 @@ M.CATALOG = {
   { id = "barn_upgrade",    shop = "community", price = 600, name = "ขยายยุ้งข้าว +400 กก.", desc = "เก็บข้าวได้มากขึ้น (สูงสุด 2,800 กก.)", barn = true, consumable = true },
   { id = "rod_fiber",       shop = "community", price = 150, name = "เบ็ดไฟเบอร์", desc = "ปลากินเร็วขึ้น ปลาหายากบ่อยขึ้น ตัวใหญ่ขึ้น 15%", rod = "fiber" },
   { id = "rod_carbon",      shop = "community", price = 400, name = "เบ็ดคาร์บอน", desc = "ปลากินเร็วสุด ปลาช่อน/ปลาดุกบ่อย ตัวใหญ่ขึ้น 30%", rod = "carbon" },
+  { id = "tool_axe",        shop = "community", price = 350, name = "ขวานผ่าฟืน", desc = "โค่นต้นไม้ ถางไม้รกในป่าหลังคลอง ได้ท่อนไม้ · ผ่าเป็นฟืนที่ตอผ่าฟืนข้างสะพาน", tool = "axe" },
   { id = "camp_membership", shop = "camp",      price = 300, name = "สมาชิกค่ายมวย", desc = "ปลดล็อกการซ้อมกระสอบหนักในค่าย (ต้อง Lv 6 ด้วย)" },
 }
 
@@ -243,6 +247,7 @@ function M.read_items(user_id)
   items.instrument = items.instrument or "pin"
   items.furniture = items.furniture or {}   -- id -> how many owned (placed or stored)
   items.goods = items.goods or {}           -- id -> count (temple-fair prizes)
+  items.tools = items.tools or {}           -- id -> true (the axe)
   items.food = items.food or {}
   for _, f in ipairs(M.FOOD_ORDER) do items.food[f] = items.food[f] or 0 end
   return items
@@ -286,6 +291,7 @@ function M.owns(items, entry)
   if entry.barn then return items.barn_capacity >= M.BARN_MAX end -- "owned" = maxed out
   if entry.consumable then return false end
   if entry.rod then return items.rods[entry.rod] == true end
+  if entry.tool then return (items.tools or {})[entry.tool] == true end
   if entry.instrument then return items.instruments[entry.instrument] == true end
   if entry.id == "camp_membership" then return items.camp_member == true end
   return false

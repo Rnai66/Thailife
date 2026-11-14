@@ -98,6 +98,7 @@ public class ActivityPose : MonoBehaviour
         "gather" or "pluck" => "basket", // หาของป่า: stoop and pick into a basket on the other arm
         "dig" => "spade",                // ขุดหน่อไม้ with a เสียม
         "poke" => "pole",                // แหย่รังมดแดง with a long pole and a net bag
+        "fell" or "split" => "axe",      // ขวาน: felling a tree, splitting firewood on the block
         // jobs (WorkScene)
         "type" => "hands",               // typing at the keyboard
         "repairpc" => "screwdriver",     // working inside an open computer
@@ -158,6 +159,7 @@ public class ActivityPose : MonoBehaviour
         float wave = Mathf.Sin(k * Mathf.PI * 2f * Cycles(motion));
         if (WorkPose(root)) return;
         if (Forage(root, k, wave)) return;
+        if (Axe(root)) return;
 
         // Arm: forward and a little bent; actions swing it
         float lift = held switch { "rod" => -55f, "instrument" => -35f, "bucket" => -10f, "seedlings" => -25f, _ => -40f };
@@ -365,6 +367,58 @@ public class ActivityPose : MonoBehaviour
         return true;
     }
 
+    // ขวาน: wind up slowly, bring it down fast, a moment to pull it free. "split" goes up over the head
+    // and straight down onto the block; "fell" winds round to the right shoulder and swings into the trunk.
+    private bool Axe(Transform root)
+    {
+        if (held != "axe") return false;
+        float r = 0.15f;
+        bool split = motion == "split";
+        if (motion != null)
+        {
+            float period = split ? 1.3f : 1.2f;
+            float p = ((Time.time - motionStart) / period) % 1f;
+            r = p < 0.6f ? Mathf.SmoothStep(0.15f, 1f, p / 0.6f)
+              : p < 0.7f ? Mathf.Lerp(1f, 0f, (p - 0.6f) / 0.1f)
+              : Mathf.Lerp(0f, 0.15f, (p - 0.7f) / 0.3f);
+            float env = Mathf.Clamp01(Mathf.Min(Time.time - motionStart, motionStart + motionLength - Time.time) * 4f);
+            r = Mathf.Lerp(0.15f, r, env);
+        }
+        if (split)
+        {
+            Bend(HumanBodyBones.Spine, Mathf.Lerp(28f, -8f, r), root.right);
+            foreach (var (upper, lower) in new[] { (HumanBodyBones.LeftUpperLeg, HumanBodyBones.LeftLowerLeg), (HumanBodyBones.RightUpperLeg, HumanBodyBones.RightLowerLeg) })
+            {
+                Bend(upper, -12f * (1f - r), root.right);
+                Bend(lower, 18f * (1f - r), root.right);
+            }
+            foreach (var b in new[] { HumanBodyBones.RightUpperArm, HumanBodyBones.LeftUpperArm })
+                Bend(b, Mathf.Lerp(-45f, -165f, r), root.right);
+            Bend(HumanBodyBones.RightLowerArm, -15f, root.right);
+            Bend(HumanBodyBones.LeftLowerArm, -25f, root.right);
+        }
+        else
+        {
+            float twist = Mathf.Lerp(-15f, 50f, r); // wound round to the right, then through
+            Bend(HumanBodyBones.Spine, twist * 0.5f, root.up);
+            Bend(HumanBodyBones.Chest, twist * 0.4f, root.up);
+            Bend(HumanBodyBones.Spine, 10f, root.right);
+            foreach (var b in new[] { HumanBodyBones.RightUpperArm, HumanBodyBones.LeftUpperArm })
+                Bend(b, Mathf.Lerp(-70f, -125f, r), root.right);
+            Bend(HumanBodyBones.RightLowerArm, -20f, root.right);
+            Bend(HumanBodyBones.LeftLowerArm, -35f, root.right);
+        }
+        var hand = animator.GetBoneTransform(HumanBodyBones.RightHand);
+        if (hand != null)
+        {
+            Quaternion rot = split
+                ? root.rotation * Quaternion.Euler(Mathf.Lerp(70f, -115f, r), 0f, 0f)
+                : root.rotation * Quaternion.Euler(Mathf.Lerp(20f, -60f, r), Mathf.Lerp(-35f, 70f, r), 0f);
+            prop.SetPositionAndRotation(hand.position, rot);
+        }
+        return true;
+    }
+
     private static float Cycles(string m) => m switch { "gather" => 3f, "pluck" => 3f, "dig" => 4f, "poke" => 4f, "chop" => 3f, "plant" => 3f, "sweep" => 3f, "scatter" => 3f, "milk" => 5f, "reel" => 4f, "strum" => 6f, _ => 1f };
 
     private void Bend(HumanBodyBones bone, float angle, Vector3 axis)
@@ -481,6 +535,12 @@ public class ActivityPose : MonoBehaviour
             case "spade": // เสียม: a long wooden handle with a narrow iron blade
                 Part(p, PrimitiveType.Cylinder, wood, new Vector3(0f, 0f, 0.45f), new Vector3(0.04f, 0.65f, 0.04f), new Vector3(90f, 0f, 0f));
                 Part(p, PrimitiveType.Cube, steel, new Vector3(0f, 0f, 1.18f), new Vector3(0.14f, 0.02f, 0.24f), Vector3.zero);
+                break;
+            case "axe": // ขวานผ่าฟืน: a long wooden handle, the iron head with its edge leading the swing
+                Part(p, PrimitiveType.Cylinder, wood, new Vector3(0f, 0f, 0.32f), new Vector3(0.04f, 0.42f, 0.04f), new Vector3(90f, 0f, 0f));
+                Part(p, PrimitiveType.Cube, Mat("PropIron", new Color(0.3f, 0.3f, 0.32f)), new Vector3(0f, -0.04f, 0.7f), new Vector3(0.045f, 0.16f, 0.09f), Vector3.zero);
+                Part(p, PrimitiveType.Cube, steel, new Vector3(0f, -0.13f, 0.7f), new Vector3(0.02f, 0.03f, 0.16f), Vector3.zero);
+                Part(p, PrimitiveType.Cube, Mat("PropIron", new Color(0.3f, 0.3f, 0.32f)), new Vector3(0f, 0.05f, 0.7f), new Vector3(0.05f, 0.05f, 0.07f), Vector3.zero);
                 break;
             case "pole": // a long bamboo pole with a cloth net bag (สวิง) at the top for the ant eggs
                 Part(p, PrimitiveType.Cylinder, bamboo, new Vector3(0f, 0f, 1.2f), new Vector3(0.035f, 1.5f, 0.035f), new Vector3(90f, 0f, 0f));

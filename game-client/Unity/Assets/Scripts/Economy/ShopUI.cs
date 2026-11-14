@@ -54,6 +54,10 @@ public class ShopUI : MonoBehaviour
     private readonly Dictionary<string, int> cart = new Dictionary<string, int>();
     private bool portrait;
     private int itemCount;
+    private RectTransform scrollContent;
+    private ScrollRect scroll;
+    private float viewHeight, gridBottom;
+    private string shownTab, shownShop;
     private WalletClient.Snapshot last;
 
     // ── Opening / closing ───────────────────────────────────────────────────────
@@ -93,7 +97,7 @@ public class ShopUI : MonoBehaviour
                 list.Add(new Category { Name = "ทำนา", Tile = new Color32(0xEA, 0xF3, 0xDE, 0xFF), TileInk = new Color32(0x3B, 0x6D, 0x11, 0xFF), Has = id => id.StartsWith("seed_") || id == "barn_upgrade" });
                 list.Add(new Category { Name = "เลี้ยงไก่", Tile = new Color32(0xFA, 0xEC, 0xE7, 0xFF), TileInk = new Color32(0x99, 0x3C, 0x1D, 0xFF), Has = id => id.StartsWith("chicken_") });
                 list.Add(new Category { Name = "แต่งบ้าน", Tile = new Color32(0xF1, 0xEF, 0xE8, 0xFF), TileInk = new Color32(0x5F, 0x5E, 0x5A, 0xFF), Has = id => id.StartsWith("furn_") });
-                list.Add(new Category { Name = "ตกปลา", Tile = new Color32(0xE6, 0xF1, 0xFB, 0xFF), TileInk = new Color32(0x18, 0x5F, 0xA5, 0xFF), Has = id => id.StartsWith("rod_") });
+                list.Add(new Category { Name = "เครื่องมือ", Tile = new Color32(0xE6, 0xF1, 0xFB, 0xFF), TileInk = new Color32(0x18, 0x5F, 0xA5, 0xFF), Has = id => id.StartsWith("rod_") || id.StartsWith("tool_") });
                 break;
             case "music":
                 list.Add(new Category { Name = "พื้นบ้าน", Tile = new Color32(0xFB, 0xEA, 0xF0, 0xFF), TileInk = new Color32(0x99, 0x35, 0x56, 0xFF), Has = id => id == "inst_khaen" || id == "inst_so" || id == "inst_ranat" });
@@ -160,7 +164,7 @@ public class ShopUI : MonoBehaviour
                 Toast($"ขายได้ {result.earned:N0} บาท", SellGreen);
                 UiKit.FloatAbovePlayer($"+{result.earned} ฿", new Color(1f, 0.85f, 0.2f));
             }
-            else Toast("ยังไม่มีของให้ขาย — ตกปลาที่คลอง หรือทำนาที่โคก หนอง นา", Muted);
+            else Toast("ยังไม่มีของให้ขาย — ตกปลา ทำนา หาของป่า หรือตัดไม้ผ่าฟืน", Muted);
             FarmClient.Instance?.Refresh(); // the barn is empty now
         }
         catch (Exception e)
@@ -189,6 +193,7 @@ public class ShopUI : MonoBehaviour
             FarmClient.Instance?.Refresh();  // seeds / barn size
             CoopClient.Instance?.Refresh();  // chickens / feed
             LifeClient.Instance?.Refresh();  // food in the bag
+            if (WoodClient.Instance != null) _ = WoodClient.Instance.RefreshAsync(); // the axe
             HouseClient.Instance?.Refresh(); // furniture in storage
             if (MusicClient.Instance != null) _ = MusicClient.Instance.RefreshAsync(); // instruments
             UiKit.FloatAbovePlayer($"-{result.spent} ฿", new Color(1f, 0.6f, 0.3f));
@@ -197,7 +202,7 @@ public class ShopUI : MonoBehaviour
         {
             Toast(e.Message.Contains("not enough") ? "เงินไม่พอจ่ายทั้งตะกร้า — ลดจำนวนลงก่อน"
                 : e.Message.Contains("coop full") ? "ไก่เกินเล้า (เล้าจุ 8 ตัว)"
-                : e.Message.Contains("barn max") ? "ขยายยุ้งได้สูงสุด 500 กก."
+                : e.Message.Contains("barn max") ? "ยุ้งข้าวขยายเต็มที่แล้ว (2,800 กก.)"
                 : e.Message.Contains("already") ? "มีของบางชิ้นอยู่แล้ว — เอาออกจากตะกร้า"
                 : e.Message.Contains("market closed") ? $"ตลาดปิดแล้ว — เปิด {MarketOf(last)?.hours} น."
                 : "จ่ายเงินไม่สำเร็จ", Danger);
@@ -263,8 +268,17 @@ public class ShopUI : MonoBehaviour
 
         RenderTabs(categories);
         UiKit.Clear(grid);
+        gridBottom = 0f;
         if (tab == SellTab) RenderSell(snapshot);
         else RenderItems(snapshot, categories.Find(c => c.Name == tab));
+        scrollContent.sizeDelta = new Vector2(0f, Mathf.Max(viewHeight, -gridBottom + 30f));
+        if (shownTab != tab || shownShop != shopId)
+        {
+            shownTab = tab;
+            shownShop = shopId;
+            scrollContent.anchoredPosition = Vector2.zero; // a new tab starts at the top
+            scroll.velocity = Vector2.zero;
+        }
         RenderCart(snapshot);
     }
 
@@ -306,72 +320,89 @@ public class ShopUI : MonoBehaviour
             if (item.shop != shopId || category == null || !category.Has(item.id)) continue;
             AddCard(item, index++, snapshot.baht, category);
         }
+        if (itemCount == 0)
+        {
+            UiKit.Label(grid, 28, "ยังไม่มีสินค้าในหมวดนี้", new Vector2(0f, -120f), new Vector2(600f, 60f), Muted);
+            gridBottom = -200f;
+        }
     }
 
+    // A product card: picture on the left; name and price on top; what it does under it (two lines);
+    // what you have and the quantity stepper (or ใส่ตะกร้า / มีแล้ว) along the bottom.
     private void AddCard(WalletClient.CatalogItem item, int index, int baht, Category category)
     {
-        // Landscape: two columns. Upright: one column of wider cards (k stretches the card's insides).
-        float x = portrait ? 0f : index % 2 == 0 ? -260f : 260f;
-        float step = Mathf.Min(162f, 960f / Mathf.Max(1, itemCount)); // upright: more than six items squeeze together
-        float y = portrait ? 476f - step * 0.5f - index * step : 255f - (index / 2) * 170f;
-        float k = portrait ? 1.36f : 1f;
+        const float H = 168f, Gap = 14f;
+        float W = portrait ? 680f : 500f;
+        float x = portrait ? 0f : index % 2 == 0 ? -(W + Gap) * 0.5f : (W + Gap) * 0.5f;
+        int row = portrait ? index : index / 2;
+        float y = -H * 0.5f - row * (H + Gap);
+        gridBottom = Mathf.Min(gridBottom, y - H * 0.5f);
         int qty = InCart(item.id);
 
-        var card = UiKit.Panel("Card", grid, qty > 0 ? (Color)new Color32(0xFF, 0xF6, 0xDF, 0xFF) : Color.white, new Vector2(x, y), new Vector2(500f * k, 152f), shadow: true);
-        if (portrait && step < 162f) card.localScale = Vector3.one * (step / 162f);
+        var card = UiKit.Panel("Card", grid, qty > 0 ? (Color)new Color32(0xFF, 0xF6, 0xDF, 0xFF) : Color.white, new Vector2(x, y), new Vector2(W, H), shadow: true);
         card.gameObject.AddComponent<Outline>().effectColor = qty > 0 ? Gold : CardBorder;
 
-        // Item picture (Resources/Branding/Icons/<item id>, e.g. the instruments), or its initial letter in the category colour
+        float left = -W * 0.5f, right = W * 0.5f;
+        var iconAt = new Vector2(left + 66f, 0f);
         if (UiKit.Art("Icons/" + item.id) != null)
-            UiKit.IconTile(card, item.id, new Vector2(-185f * k - 20f * (k - 1f), 0f), new Vector2(104f, 104f));
+            UiKit.IconTile(card, item.id, iconAt, new Vector2(104f, 104f));
         else
         {
-            var tile = UiKit.Panel("Icon", card, category.Tile, new Vector2(-185f * k - 20f * (k - 1f), 0f), new Vector2(104f, 104f));
+            var tile = UiKit.Panel("Icon", card, category.Tile, iconAt, new Vector2(104f, 104f));
             var initial = UiKit.Label(tile, 56, Initial(item.name), Vector2.zero, new Vector2(100f, 100f), category.TileInk);
             initial.fontStyle = FontStyle.Bold;
         }
 
-        var name = UiKit.Label(card, 30, item.name, new Vector2(-10f * k - 40f * (k - 1f), 46f), new Vector2(250f * k, 44f), Ink, TextAnchor.MiddleLeft);
-        name.fontStyle = FontStyle.Bold;
-        var price = UiKit.Label(card, 32, $"{item.price:N0} ฿", new Vector2(185f * k, 46f), new Vector2(120f, 44f), Price, TextAnchor.MiddleRight);
+        // the text column, right of the picture
+        float x0 = left + 134f, colW = right - 16f - x0;
+        Vector2 Col(float w, float yy) => new Vector2(x0 + w * 0.5f, yy);
+        var price = UiKit.Label(card, 30, $"{item.price:N0} ฿", new Vector2(right - 16f - 70f, 54f), new Vector2(140f, 42f), Price, TextAnchor.MiddleRight);
         price.fontStyle = FontStyle.Bold;
+        var name = UiKit.Label(card, 28, item.name, Col(colW - 150f, 54f), new Vector2(colW - 150f, 42f), Ink, TextAnchor.MiddleLeft);
+        name.fontStyle = FontStyle.Bold;
+        name.resizeTextForBestFit = true;
+        name.resizeTextMinSize = 20;
+        name.resizeTextMaxSize = 28;
+        var desc = UiKit.Label(card, 20, item.desc ?? "", Col(colW, 8f), new Vector2(colW, 50f), SellGreen, TextAnchor.MiddleLeft);
+        desc.resizeTextForBestFit = true;
+        desc.resizeTextMinSize = 15;
+        desc.resizeTextMaxSize = 20;
+        UiKit.Label(card, 20, item.have ?? "", Col(colW - 190f, -50f), new Vector2(colW - 190f, 34f), Muted, TextAnchor.MiddleLeft);
 
-        // Benefit badge (green pill) and what you already have
-        var badge = UiKit.Panel("Badge", card, SellTint, new Vector2(30f * k, 4f), new Vector2(330f * k, 40f));
-        UiKit.Label(badge, 22, item.desc, Vector2.zero, new Vector2(330f * k - 14f, 38f), SellGreen);
-        UiKit.Label(card, 22, item.have ?? "", new Vector2(-30f * k, -46f), new Vector2(250f * k, 36f), Muted, TextAnchor.MiddleLeft);
-
+        float bx = right - 16f; // bottom-right controls end here
         if (item.owned)
         {
-            UiKit.RoundButton(card, "มีแล้ว", new Vector2(170f * k + 20f * (k - 1f), -44f), new Vector2(140f, 56f), new Color32(0xC0, 0xDD, 0x97, 0xFF), SellGreen, () => { }, 26)
+            UiKit.RoundButton(card, "มีแล้ว", new Vector2(bx - 75f, -50f), new Vector2(150f, 52f), new Color32(0xC0, 0xDD, 0x97, 0xFF), SellGreen, () => { }, 24)
                 .interactable = false;
         }
         else if (!item.consumable)
         {
-            UiKit.RoundButton(card, qty > 0 ? "ในตะกร้า" : "ใส่ตะกร้า", new Vector2(170f * k + 20f * (k - 1f), -44f), new Vector2(140f, 56f),
-                qty > 0 ? Gold : (Color)new Color32(0xFA, 0xEE, 0xDA, 0xFF), Ink, () => ChangeQty(item, qty > 0 ? -1 : 1), 26);
+            UiKit.RoundButton(card, qty > 0 ? "ในตะกร้า ✓" : "ใส่ตะกร้า", new Vector2(bx - 75f, -50f), new Vector2(150f, 52f),
+                qty > 0 ? Gold : (Color)new Color32(0xFA, 0xEE, 0xDA, 0xFF), Ink, () => ChangeQty(item, qty > 0 ? -1 : 1), 24);
         }
         else
         {
-            var minus = UiKit.RoundButton(card, "-", new Vector2(120f * k - 5f * (k - 1f), -44f), new Vector2(54f, 54f), Color.white, Danger, () => ChangeQty(item, -1), 34, circle: true);
+            var minus = UiKit.RoundButton(card, "-", new Vector2(bx - 150f, -50f), new Vector2(52f, 52f), Color.white, Danger, () => ChangeQty(item, -1), 34, circle: true);
             minus.gameObject.AddComponent<Outline>().effectColor = CardBorder;
             minus.interactable = qty > 0;
-            var count = UiKit.Label(card, 32, qty.ToString(), new Vector2(172f * k - 5f * (k - 1f), -44f), new Vector2(50f, 54f), Ink);
+            var count = UiKit.Label(card, 30, qty.ToString(), new Vector2(bx - 92f, -50f), new Vector2(56f, 52f), Ink);
             count.fontStyle = FontStyle.Bold;
-            UiKit.RoundButton(card, "+", new Vector2(224f * k - 5f * (k - 1f), -44f), new Vector2(54f, 54f), Gold, new Color32(0x41, 0x24, 0x02, 0xFF), () => ChangeQty(item, 1), 34, circle: true);
+            UiKit.RoundButton(card, "+", new Vector2(bx - 34f, -50f), new Vector2(52f, 52f), Gold, new Color32(0x41, 0x24, 0x02, 0xFF), () => ChangeQty(item, 1), 34, circle: true);
         }
     }
 
     private void RenderSell(WalletClient.Snapshot snapshot)
     {
         float k = portrait ? 0.68f : 1f; // upright the produce lines are narrower
-        UiKit.Label(grid, 30, "ร้านรับซื้อผลผลิตของคุณ", new Vector2(0f, portrait ? 440f : 320f), new Vector2(1000f * k, 50f), Ink).fontStyle = FontStyle.Bold;
+        UiKit.Label(grid, 30, "ร้านรับซื้อผลผลิตของคุณ", new Vector2(0f, -36f), new Vector2(1000f * k, 50f), Ink).fontStyle = FontStyle.Bold;
+        gridBottom = -70f;
         if (snapshot?.fish == null) return;
 
         int row = 0;
         foreach (var f in snapshot.fish)
         {
-            float y = (portrait ? 365f : 245f) - row * 92f;
+            float y = -112f - row * 92f;
+            gridBottom = Mathf.Min(gridBottom, y - 40f);
             var line = UiKit.Panel("Produce", grid, f.count > 0 ? Color.white : new Color(1f, 1f, 1f, 0.55f), new Vector2(0f, y), new Vector2(1000f * k, 80f), shadow: f.count > 0);
             line.gameObject.AddComponent<Outline>().effectColor = CardBorder;
             if (UiKit.Art("Icons/sell_" + f.id) != null)
@@ -407,7 +438,7 @@ public class ShopUI : MonoBehaviour
             payButton.onClick.AddListener(SellAll);
             payButton.interactable = !busy && value > 0;
             clearButton.gameObject.SetActive(false);
-            UiKit.Label(cartList, 24, "ขายปลาในข้องและข้าวในยุ้ง\nทั้งหมดในครั้งเดียว", new Vector2(0f, -40f), new Vector2(340f, 90f), Muted);
+            UiKit.Label(cartList, 24, "ขายปลา ข้าว ของป่า ฟืน\nและของรางวัล ทั้งหมดในครั้งเดียว", new Vector2(0f, -40f), new Vector2(340f, 90f), Muted);
             return;
         }
 
@@ -518,7 +549,30 @@ public class ShopUI : MonoBehaviour
         tabs = UiKit.Container(card, portrait ? new Vector2(0f, top - 172f) : new Vector2(-720f, -40f));
 
         var center = UiKit.Panel("Items", card, Cream, portrait ? new Vector2(0f, 70f) : new Vector2(-100f, -60f), portrait ? new Vector2(720f, 980f) : new Vector2(1040f, 800f));
-        grid = UiKit.Container(center, Vector2.zero);
+        // The items scroll up and down inside the cream panel (a long list never runs off the bottom)
+        var centerSize = portrait ? new Vector2(720f, 980f) : new Vector2(1040f, 800f);
+        viewHeight = centerSize.y - 16f;
+        var viewport = UiKit.Rect("Viewport", center, new Color(1f, 1f, 1f, 0f));
+        viewport.anchoredPosition = Vector2.zero;
+        viewport.sizeDelta = new Vector2(centerSize.x - 8f, viewHeight);
+        viewport.gameObject.AddComponent<RectMask2D>();
+        scrollContent = new GameObject("Content", typeof(RectTransform)).GetComponent<RectTransform>();
+        scrollContent.SetParent(viewport, false);
+        scrollContent.anchorMin = new Vector2(0f, 1f);
+        scrollContent.anchorMax = new Vector2(1f, 1f);
+        scrollContent.pivot = new Vector2(0.5f, 1f);
+        scrollContent.anchoredPosition = Vector2.zero;
+        scrollContent.sizeDelta = new Vector2(0f, viewHeight);
+        scroll = viewport.gameObject.AddComponent<ScrollRect>();
+        scroll.viewport = viewport;
+        scroll.content = scrollContent;
+        scroll.horizontal = false;
+        scroll.movementType = ScrollRect.MovementType.Clamped;
+        scroll.scrollSensitivity = 40f;
+        // items are placed from this point (top middle) downwards
+        grid = UiKit.Container(scrollContent, Vector2.zero);
+        grid.anchorMin = grid.anchorMax = new Vector2(0.5f, 1f);
+        grid.anchoredPosition = new Vector2(0f, -8f);
 
         var cartPanel = UiKit.Panel("Cart", card, new Color32(0xFF, 0xFD, 0xF8, 0xFF), portrait ? new Vector2(0f, -605f) : new Vector2(630f, -60f), portrait ? new Vector2(720f, 330f) : new Vector2(360f, 800f));
         cartTitle = UiKit.Label(cartPanel, 32, "ตะกร้า", portrait ? new Vector2(-185f, 130f) : new Vector2(0f, 360f), new Vector2(320f, 50f), Ink, TextAnchor.MiddleLeft);

@@ -3751,3 +3751,21 @@ ThaiVillage (หมู่บ้าน), Tambon (ตำบล), City (เมื�
 ถ่ายรูปไม่ได้ ลองใหม่	Couldn't take the photo, try again
 บันทึกรูปร้านลงคลังภาพแล้ว	Shop photo saved to Photos
 แชร์รูปร้านแล้ว	Shop photo shared
+
+โค่นต้นไม้	Fell the tree
+ถางไม้รก	Clear the scrub
+ผ่าฟืน	Split firewood
+ต้องมีขวาน — ซื้อขวานผ่าฟืนที่ร้านค้าชุมชน	You need an axe — buy one at the community shop
+ต้องมีขวานก่อน — ซื้อขวานผ่าฟืนที่ร้านค้าชุมชน	You need an axe first — buy one at the community shop
+โค่นไปแล้ว · {}ขึ้นใหม่อีกราว {} นาที	Already cut · {} grows back in about {} min
+{} · ได้ท่อนไม้ {}-{} ท่อน · ใช้พลังงาน {}	{} · gives {}-{} logs · energy {}
+ไม่มีท่อนไม้ — โค่นต้นไม้ในป่าก่อน · ฟืนในกระเป๋า {} มัด	No logs — fell a tree in the forest first · firewood in bag: {}
+ท่อนไม้ {} ท่อน · ผ่า {} ท่อน ได้ฟืน {} มัด (มัดละ {} บาท) · พลังงาน {}	{} logs · split {} for {} bundles of firewood ({} baht each) · energy {}
+ท่อนไม้ไม่พอ — ไปโค่นต้นไม้ก่อน	Not enough logs — fell a tree first
+ตอผ่าฟืน\nโค่นต้นไม้ในป่าได้ท่อนไม้\nมาผ่าเป็นฟืนที่นี่ · ต้องมีขวาน	Chopping block\nFell trees in the forest for logs\nsplit them into firewood here · axe needed
+เครื่องมือ	Tools
+ยังไม่มีสินค้าในหมวดนี้	Nothing in this section yet
+ในตะกร้า ✓	In cart ✓
+ยังไม่มีของให้ขาย — ตกปลา ทำนา หาของป่า หรือตัดไม้ผ่าฟืน	Nothing to sell yet — fish, farm rice, forage or chop firewood
+ขายปลา ข้าว ของป่า ฟืน\nและของรางวัล ทั้งหมดในครั้งเดียว	Sells your fish, rice, forest finds, firewood\nand prizes all at once
+ยุ้งข้าวขยายเต็มที่แล้ว (2,800 กก.)	The barn is already at its biggest (2,800 kg)

@@ -54,6 +54,11 @@ public static partial class TempleLife
         Forage("fg11", "mushroom", new Vector3(-33f, 0f, 55.2f));
         Forage("fg12", "pak_wan", new Vector3(21.5f, 0f, 56f));
 
+        // ขวาน: trees to fell, scrub to clear and the chopping block (WoodLots)
+        WoodLots(f);
+        foreach (var (_, _, at) in WoodTrees) keep.Add(at);
+        keep.Add(ChoppingBlock);
+
         // Five more ghosts, out at night
         BananaClump(f, new Vector3(-18.5f, 0f, 50.5f));
         Takhian(f, new Vector3(-5f, 0f, 56.5f));

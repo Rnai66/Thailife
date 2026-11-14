@@ -227,6 +227,8 @@ local function checkout(user_id, lines, env)
     if entry.rod then
       items.rods[entry.rod] = true
       items.rod = entry.rod -- equip the new rod
+    elseif entry.tool then
+      items.tools[entry.tool] = true
     elseif entry.instrument then
       items.instruments[entry.instrument] = true
       items.instrument = entry.instrument -- play the new instrument

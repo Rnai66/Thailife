@@ -114,6 +114,9 @@ local function build(user_id)
       item(gear, "inst_" .. id, data.INSTRUMENTS[id].name, 1, "ชิ้น", using and "ใช้อยู่" or "เครื่องดนตรี · กดใช้เล่นแทน", using and "" or "equip")
     end
   end
+  if items.tools and items.tools.axe then
+    item(gear, "tool_axe", "ขวานผ่าฟืน", 1, "เล่ม", "โค่นต้นไม้ ถางไม้รก ผ่าฟืน (ป่าหลังคลอง)")
+  end
   for _, id in ipairs(data.FURNITURE_ORDER) do
     item(gear, "furn_" .. id, data.FURNITURE[id].name, items.furniture[id], "ชิ้น", "แต่งบ้าน")
   end
