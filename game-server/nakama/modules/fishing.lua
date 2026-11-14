@@ -1,6 +1,7 @@
 -- Fishing (ตกปลา) at the tambon canal. The server owns the timing and the catch:
 --   fishing_cast  {"water": "fresh"|"sea"} -> {"bite_in_ms": N}  server picks when the fish bites;
---                 "sea" = the fishing pier at the beach (ปลาทะเล), anything else = canal / pond fish
+--                 "sea" = the fishing pier at the beach (ปลาทะเล), "river" = the tambon river
+--                 (ปลาแม่น้ำ), anything else = canal / pond fish
 --   fishing_reel  {}  -> {"caught": bool, ...}       server checks the timing and rolls the fish
 --   fishing_get   {}  -> inventory summary
 -- The client only shows the bobber and asks; it can't choose the fish or skip the wait.
@@ -42,6 +43,21 @@ local function roll_sea_fish()
     if r <= 0 then return f end
   end
   return SEA_FISH[#SEA_FISH]
+end
+
+-- River fish: a better rod (it lands rarer fish at the canal too) makes the rare ones come more often
+local RARE_BOOST = { bamboo = 1, fiber = 1.4, carbon = 1.9 }
+local function roll_river_fish(rod_id)
+  local boost = RARE_BOOST[rod_id] or 1
+  local total = 0
+  local function w(f) return f.weight <= 6 and f.weight * boost or f.weight end
+  for _, f in ipairs(data.RIVER_FISH) do total = total + w(f) end
+  local r = math.random() * total
+  for _, f in ipairs(data.RIVER_FISH) do
+    r = r - w(f)
+    if r <= 0 then return f end
+  end
+  return data.RIVER_FISH[1]
 end
 
 local function read(user_id, spec)
@@ -88,8 +104,9 @@ local function rpc_cast(context, payload)
   local rod = equipped_rod(context.user_id)
   local bite_in = math.random(rod.bite_min or MIN_BITE_MS, rod.bite_max or MAX_BITE_MS)
   local ok, req = pcall(nk.json_decode, payload or "")
-  local sea = ok and type(req) == "table" and req.water == "sea"
-  write(context.user_id, STATE, { cast_ms = now, bite_ms = now + bite_in, sea = sea or nil })
+  local water = ok and type(req) == "table" and req.water or "fresh"
+  if water == "river" then bite_in = bite_in + math.random(500, 2500) end -- the big river: a little longer to bite
+  write(context.user_id, STATE, { cast_ms = now, bite_ms = now + bite_in, sea = (water == "sea") or nil, river = (water == "river") or nil })
   return nk.json_encode({ bite_in_ms = bite_in })
 end
 
@@ -110,7 +127,10 @@ local function rpc_reel(context, payload)
   end
 
   local rod = equipped_rod(context.user_id)
-  local fish = state.sea and roll_sea_fish() or roll_fish(rod)
+  local fish
+  if state.sea then fish = roll_sea_fish()
+  elseif state.river then fish = roll_river_fish(data.read_items(context.user_id).rod)
+  else fish = roll_fish(rod) end
   local kg = (fish.min_kg + math.random() * (fish.max_kg - fish.min_kg)) * (rod.size or 1)
   kg = math.floor(kg * 100 + 0.5) / 100
 

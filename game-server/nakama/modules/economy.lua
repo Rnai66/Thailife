@@ -28,6 +28,11 @@ local FISH_PRICES = {
   { id = "grouper",   name = "ปลาเก๋า",      price = 120 },
   { id = "kingfish",  name = "ปลาอินทรี",    price = 165 },
 }
+-- river fish from the tambon river (shop_data.RIVER_FISH)
+for _, f in ipairs(data.RIVER_FISH) do
+  table.insert(FISH_PRICES, { id = f.id, name = f.name, price = f.price, river = true })
+end
+local CANAL = { barb = true, tilapia = true, catfish = true, snakehead = true }
 
 local function read_inventory(user_id)
   local objects = nk.storage_read({ { collection = INVENTORY.collection, key = INVENTORY.key, user_id = user_id } })
@@ -45,8 +50,10 @@ local function basket(inv, crops, items)
   local list, value = {}, 0
   for _, f in ipairs(FISH_PRICES) do
     local n = counts[f.id] or 0
-    table.insert(list, { id = f.id, name = f.name, count = n, price = f.price })
-    value = value + n * f.price
+    if n > 0 or CANAL[f.id] then -- sea and river fish only once you have some (a short list)
+      table.insert(list, { id = f.id, name = f.name, count = n, price = f.price })
+      value = value + n * f.price
+    end
   end
   for _, v in ipairs(data.RICE_ORDER) do
     local r = data.RICE[v]

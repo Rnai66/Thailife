@@ -104,6 +104,107 @@ public static class FishArt
             analFrom = 0.6f, analTo = 0.72f, analH = 0.04f, eye = 0.016f, eyeAt = 0.07f, scaleShow = 0f,
             back = C(0.2f, 0.32f, 0.48f), side = C(0.72f, 0.76f, 0.82f), belly = C(0.95f, 0.96f, 0.97f),
             fin = C(0.4f, 0.45f, 0.52f), mark = C(0.25f, 0.35f, 0.5f), bars = 14, barsFrom = 0.2f, barsTo = 0.8f, wavy = true,
+        });        River();
+    }
+
+    // ── ปลาแม่น้ำ (the tambon river) ──────────────────────────────────────────────────────────
+    private static void River()
+    {
+        Add(new Spec // ปลาสร้อยขาว: small, slim, bright silver, a dark spot behind the gill, forked tail
+        {
+            id = "soi", name = "ปลาสร้อยขาว", minKg = 0.05f, maxKg = 0.25f, depth = 0.15f, peak = 0.4f, blunt = 0.95f, stalk = 0.04f,
+            tailSpread = 0.17f, fork = 0.8f, dorsalFrom = 0.38f, dorsalTo = 0.52f, dorsalH = 0.1f,
+            analFrom = 0.64f, analTo = 0.72f, analH = 0.05f, eye = 0.026f, scale = 0.04f, scaleShow = 0.5f,
+            back = C(0.4f, 0.45f, 0.42f), side = C(0.84f, 0.86f, 0.86f), belly = C(0.97f, 0.97f, 0.96f),
+            fin = C(0.82f, 0.8f, 0.72f), mark = C(0.2f, 0.22f, 0.22f), spots = 0.15f, spotSize = 0.01f,
+        });
+        Add(new Spec // ปลากด: smooth blue-grey catfish, long whiskers, tall dorsal, deeply forked tail
+        {
+            id = "kot", name = "ปลากด", minKg = 0.5f, maxKg = 3f, depth = 0.12f, peak = 0.3f, blunt = 0.55f, stalk = 0.04f,
+            bodyEnd = 0.8f, tailSpread = 0.17f, fork = 0.85f, dorsalFrom = 0.28f, dorsalTo = 0.38f, dorsalH = 0.11f, spiny = true,
+            analFrom = 0.6f, analTo = 0.74f, analH = 0.05f, eye = 0.015f, eyeAt = 0.065f, scaleShow = 0f,
+            back = C(0.28f, 0.32f, 0.38f), side = C(0.55f, 0.6f, 0.66f), belly = C(0.9f, 0.9f, 0.88f),
+            fin = C(0.45f, 0.42f, 0.4f), finEdge = C(0.7f, 0.35f, 0.25f), barbels = true,
+        });
+        Add(new Spec // ปลาตะโกก: a big silver carp, olive back, large scales, forked tail with grey-red lobes
+        {
+            id = "takok", name = "ปลาตะโกก", minKg = 0.5f, maxKg = 3f, depth = 0.17f, peak = 0.4f, blunt = 0.85f, stalk = 0.045f,
+            tailSpread = 0.17f, fork = 0.75f, dorsalFrom = 0.35f, dorsalTo = 0.5f, dorsalH = 0.12f,
+            analFrom = 0.62f, analTo = 0.72f, analH = 0.06f, scale = 0.05f, scaleShow = 0.55f,
+            back = C(0.36f, 0.4f, 0.3f), side = C(0.78f, 0.78f, 0.7f), belly = C(0.95f, 0.94f, 0.9f),
+            fin = C(0.6f, 0.5f, 0.45f), finEdge = C(0.6f, 0.25f, 0.2f),
+        });
+        Add(new Spec // ปลาสวาย: big shiny grey shark-catfish, short whiskers, deep fork, dark fins
+        {
+            id = "swai", name = "ปลาสวาย", minKg = 1f, maxKg = 6f, depth = 0.14f, peak = 0.33f, blunt = 0.7f, stalk = 0.035f,
+            bodyEnd = 0.8f, tailSpread = 0.18f, fork = 0.9f, dorsalFrom = 0.3f, dorsalTo = 0.38f, dorsalH = 0.12f,
+            analFrom = 0.55f, analTo = 0.74f, analH = 0.06f, eye = 0.02f, eyeAt = 0.07f, scaleShow = 0f,
+            back = C(0.25f, 0.3f, 0.34f), side = C(0.6f, 0.65f, 0.7f), belly = C(0.93f, 0.93f, 0.92f),
+            fin = C(0.22f, 0.24f, 0.26f), mark = C(0.3f, 0.36f, 0.4f), barbels = true,
+        });
+        Add(new Spec // ปลากราย: knife-shaped, humped back, silver, a row of black eye-spots ringed white along the belly fin
+        {
+            id = "krai", name = "ปลากราย", minKg = 0.8f, maxKg = 4f, rare = true, depth = 0.2f, peak = 0.22f, blunt = 0.6f, stalk = 0.02f,
+            bodyEnd = 0.92f, tailSpread = 0.06f, fork = 0f, round = 1f, dorsalFrom = 0.24f, dorsalTo = 0.3f, dorsalH = 0.06f,
+            analFrom = 0.3f, analTo = 0.92f, analH = 0.07f, eye = 0.016f, eyeAt = 0.06f, scale = 0.02f, scaleShow = 0.2f,
+            back = C(0.4f, 0.42f, 0.44f), side = C(0.78f, 0.8f, 0.8f), belly = C(0.92f, 0.92f, 0.9f),
+            fin = C(0.7f, 0.72f, 0.72f), mark = C(0.06f, 0.06f, 0.06f), spots = 0.6f, spotSize = 0.02f,
+        });
+        Add(new Spec // ปลาแรด: a deep, heavy gourami, small head, long rays, rounded tail, brownish with faint bars
+        {
+            id = "raet", name = "ปลาแรด", minKg = 1f, maxKg = 5f, rare = true, depth = 0.24f, peak = 0.42f, blunt = 0.75f, stalk = 0.07f,
+            tailSpread = 0.15f, fork = 0f, round = 1f, dorsalFrom = 0.38f, dorsalTo = 0.78f, dorsalH = 0.06f, spiny = true,
+            analFrom = 0.42f, analTo = 0.8f, analH = 0.07f, eye = 0.02f, eyeAt = 0.07f, scale = 0.045f, scaleShow = 0.4f,
+            back = C(0.36f, 0.3f, 0.22f), side = C(0.6f, 0.55f, 0.45f), belly = C(0.86f, 0.82f, 0.72f),
+            fin = C(0.45f, 0.38f, 0.28f), mark = C(0.3f, 0.25f, 0.18f), bars = 6,
+        });
+        Add(new Spec // ปลาบู่: a goby — big head, marbled brown, two dorsals, rounded tail
+        {
+            id = "bu", name = "ปลาบู่", minKg = 0.3f, maxKg = 1.5f, rare = true, depth = 0.11f, peak = 0.25f, blunt = 0.5f, stalk = 0.06f,
+            tailSpread = 0.11f, fork = 0f, round = 1f, dorsalFrom = 0.4f, dorsalTo = 0.75f, dorsalH = 0.06f,
+            analFrom = 0.58f, analTo = 0.76f, analH = 0.05f, eye = 0.02f, eyeAt = 0.07f, scale = 0.025f, scaleShow = 0.2f,
+            back = C(0.32f, 0.26f, 0.18f), side = C(0.55f, 0.46f, 0.32f), belly = C(0.85f, 0.78f, 0.62f),
+            fin = C(0.42f, 0.35f, 0.25f), mark = C(0.18f, 0.14f, 0.1f), blotches = 1.2f,
+        });
+        Add(new Spec // ปลาชะโด: the giant snakehead — long, dark, with a black band and orange glints
+        {
+            id = "chado", name = "ปลาชะโด", minKg = 2f, maxKg = 8f, rare = true, depth = 0.1f, peak = 0.3f, blunt = 0.45f, stalk = 0.065f,
+            bodyEnd = 0.85f, tailSpread = 0.1f, fork = 0f, round = 1f, dorsalFrom = 0.3f, dorsalTo = 0.84f, dorsalH = 0.05f,
+            analFrom = 0.5f, analTo = 0.84f, analH = 0.045f, eye = 0.016f, eyeAt = 0.06f, scale = 0.028f, scaleShow = 0.3f,
+            back = C(0.14f, 0.16f, 0.14f), side = C(0.34f, 0.36f, 0.3f), belly = C(0.8f, 0.76f, 0.66f),
+            fin = C(0.25f, 0.24f, 0.2f), finEdge = C(0.85f, 0.45f, 0.15f), mark = C(0.75f, 0.4f, 0.12f), spots = 0.35f, spotSize = 0.01f,
+        });
+        Add(new Spec // ปลาเทโพ: a huge pangasius, dark back, a black spot over the pectoral, forked tail
+        {
+            id = "thepho", name = "ปลาเทโพ", minKg = 2f, maxKg = 8f, rare = true, depth = 0.15f, peak = 0.33f, blunt = 0.7f, stalk = 0.04f,
+            bodyEnd = 0.8f, tailSpread = 0.18f, fork = 0.88f, dorsalFrom = 0.3f, dorsalTo = 0.38f, dorsalH = 0.11f,
+            analFrom = 0.55f, analTo = 0.74f, analH = 0.06f, eye = 0.02f, eyeAt = 0.07f, scaleShow = 0f,
+            back = C(0.18f, 0.22f, 0.26f), side = C(0.5f, 0.56f, 0.6f), belly = C(0.92f, 0.92f, 0.9f),
+            fin = C(0.3f, 0.32f, 0.34f), mark = C(0.05f, 0.05f, 0.06f), blotches = 0.35f, barbels = true,
+        });
+        Add(new Spec // ปลาเค้าดำ: a long wolf catfish, wide mouth, tiny dorsal, long anal fin, forked tail
+        {
+            id = "khao", name = "ปลาเค้าดำ", minKg = 2f, maxKg = 10f, rare = true, depth = 0.1f, peak = 0.22f, blunt = 0.5f, stalk = 0.03f,
+            bodyEnd = 0.85f, tailSpread = 0.13f, fork = 0.7f, dorsalFrom = 0.24f, dorsalTo = 0.29f, dorsalH = 0.05f,
+            analFrom = 0.42f, analTo = 0.85f, analH = 0.045f, eye = 0.013f, eyeAt = 0.06f, scaleShow = 0f,
+            back = C(0.22f, 0.22f, 0.24f), side = C(0.48f, 0.48f, 0.5f), belly = C(0.86f, 0.84f, 0.8f),
+            fin = C(0.3f, 0.3f, 0.32f), barbels = true,
+        });
+        Add(new Spec // ปลายี่สก: a golden carp with seven dark stripes along it — rare and prized
+        {
+            id = "yisok", name = "ปลายี่สก", minKg = 2f, maxKg = 10f, rare = true, depth = 0.15f, peak = 0.4f, blunt = 0.85f, stalk = 0.045f,
+            tailSpread = 0.17f, fork = 0.75f, dorsalFrom = 0.35f, dorsalTo = 0.5f, dorsalH = 0.11f,
+            analFrom = 0.62f, analTo = 0.72f, analH = 0.06f, scale = 0.05f, scaleShow = 0.5f,
+            back = C(0.42f, 0.36f, 0.16f), side = C(0.86f, 0.72f, 0.32f), belly = C(0.96f, 0.9f, 0.7f),
+            fin = C(0.82f, 0.5f, 0.25f), mark = C(0.25f, 0.2f, 0.1f), wavy = true,
+        });
+        Add(new Spec // ปลาบึก: the Mekong giant catfish — huge, grey, no whiskers to speak of, small eye low on the head
+        {
+            id = "buek", name = "ปลาบึก", minKg = 30f, maxKg = 150f, rare = true, depth = 0.15f, peak = 0.32f, blunt = 0.65f, stalk = 0.04f,
+            bodyEnd = 0.8f, tailSpread = 0.17f, fork = 0.85f, dorsalFrom = 0.3f, dorsalTo = 0.38f, dorsalH = 0.1f,
+            analFrom = 0.56f, analTo = 0.72f, analH = 0.05f, eye = 0.011f, eyeAt = 0.06f, scaleShow = 0f,
+            back = C(0.3f, 0.32f, 0.34f), side = C(0.58f, 0.6f, 0.62f), belly = C(0.9f, 0.9f, 0.88f),
+            fin = C(0.4f, 0.42f, 0.44f),
         });
     }
 

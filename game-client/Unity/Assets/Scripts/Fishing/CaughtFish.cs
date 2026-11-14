@@ -68,6 +68,18 @@ public class CaughtFish : MonoBehaviour
             case "seabass":   body = new Color(0.66f, 0.72f, 0.76f); belly = new Color(0.94f, 0.96f, 0.97f); fin = new Color(0.5f, 0.57f, 0.63f); break;
             case "grouper":   body = new Color(0.58f, 0.38f, 0.27f); belly = new Color(0.84f, 0.7f, 0.58f); fin = body; slim = 1.2f; break;
             case "kingfish":  body = new Color(0.31f, 0.47f, 0.66f); belly = new Color(0.9f, 0.92f, 0.95f); fin = new Color(0.27f, 0.39f, 0.58f); slim = 0.7f; break;
+            case "soi":       body = new Color(0.78f, 0.8f, 0.8f);   belly = new Color(0.96f, 0.96f, 0.95f); fin = new Color(0.8f, 0.78f, 0.7f); slim = 0.85f; break;
+            case "kot":       body = new Color(0.45f, 0.5f, 0.56f);  belly = new Color(0.88f, 0.88f, 0.86f); fin = body; slim = 0.8f; break;
+            case "takok":     body = new Color(0.7f, 0.7f, 0.62f);   belly = new Color(0.94f, 0.93f, 0.9f);  fin = new Color(0.6f, 0.45f, 0.4f); break;
+            case "swai":      body = new Color(0.5f, 0.55f, 0.6f);   belly = new Color(0.92f, 0.92f, 0.9f);  fin = new Color(0.22f, 0.24f, 0.26f); slim = 0.85f; break;
+            case "krai":      body = new Color(0.7f, 0.72f, 0.72f);  belly = new Color(0.9f, 0.9f, 0.88f);   fin = body; slim = 1.3f; break;
+            case "raet":      body = new Color(0.55f, 0.5f, 0.4f);   belly = new Color(0.85f, 0.8f, 0.7f);   fin = body; slim = 1.4f; break;
+            case "bu":        body = new Color(0.5f, 0.42f, 0.3f);   belly = new Color(0.84f, 0.76f, 0.6f);  fin = body; slim = 0.8f; break;
+            case "chado":     body = new Color(0.25f, 0.27f, 0.23f); belly = new Color(0.78f, 0.74f, 0.64f); fin = new Color(0.75f, 0.4f, 0.12f); slim = 0.7f; break;
+            case "thepho":    body = new Color(0.36f, 0.42f, 0.46f); belly = new Color(0.92f, 0.92f, 0.9f);  fin = new Color(0.3f, 0.32f, 0.34f); slim = 0.9f; break;
+            case "khao":      body = new Color(0.4f, 0.4f, 0.42f);   belly = new Color(0.86f, 0.84f, 0.8f);  fin = body; slim = 0.7f; break;
+            case "yisok":     body = new Color(0.82f, 0.66f, 0.28f); belly = new Color(0.96f, 0.9f, 0.7f);   fin = new Color(0.82f, 0.5f, 0.25f); break;
+            case "buek":      body = new Color(0.5f, 0.52f, 0.54f);  belly = new Color(0.9f, 0.9f, 0.88f);   fin = new Color(0.4f, 0.42f, 0.44f); break;
             default:          body = new Color(0.6f, 0.62f, 0.66f);  belly = new Color(0.92f, 0.92f, 0.9f); fin = body; break;
         }
         Part(root, PrimitiveType.Sphere, Vector3.zero, new Vector3(len * 0.28f, len * 0.36f * slim, len), body);
@@ -78,7 +90,7 @@ public class CaughtFish : MonoBehaviour
         {
             Part(root, PrimitiveType.Sphere, new Vector3(x * len * 0.12f, len * 0.05f, len * 0.36f), Vector3.one * len * 0.07f, Color.white);
             Part(root, PrimitiveType.Sphere, new Vector3(x * len * 0.145f, len * 0.05f, len * 0.375f), Vector3.one * len * 0.035f, Color.black);
-            if (id == "catfish") Part(root, PrimitiveType.Cube, new Vector3(x * len * 0.12f, -len * 0.04f, len * 0.55f), new Vector3(0.008f, 0.008f, len * 0.3f), Color.black, new Vector3(0f, x * 25f, 0f));
+            if (id == "catfish" || id == "kot" || id == "swai" || id == "thepho" || id == "khao") Part(root, PrimitiveType.Cube, new Vector3(x * len * 0.12f, -len * 0.04f, len * 0.55f), new Vector3(0.008f, 0.008f, len * 0.3f), Color.black, new Vector3(0f, x * 25f, 0f));
         }
     }
 

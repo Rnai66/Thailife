@@ -17,6 +17,10 @@ local FISH_NAMES = {
   mackerel = "ปลาทู", squid = "ปลาหมึก", seabass = "ปลากะพงขาว", grouper = "ปลาเก๋า", kingfish = "ปลาอินทรี",
 }
 local FISH_ORDER = { "barb", "tilapia", "catfish", "snakehead", "mackerel", "squid", "seabass", "grouper", "kingfish" }
+for _, f in ipairs(data.RIVER_FISH) do -- ปลาแม่น้ำ
+  FISH_NAMES[f.id] = f.name
+  table.insert(FISH_ORDER, f.id)
+end
 -- profile.lua OUTFITS, by index (0 = your own clothes)
 local OUTFIT_NAMES = { [0] = "เสื้อผ้าลำลอง", "ชุดปกติขาว ข้าราชการ", "ชุดสูทสากล", "ชุดนักมวยไทย", "ชุดกากี อบต.",
   "ชุดม่อฮ่อม ชาวนา", "เสื้อกาวน์หมอ", "ชุดไทยราชปะแตน", "ชุดกีฬา", "ชุดตำรวจ", "จีวรพระ" }

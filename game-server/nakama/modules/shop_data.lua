@@ -15,6 +15,23 @@ M.FISH = {
   { id = "catfish",   name = "ปลาดุก",     weight = 10, min_kg = 0.4, max_kg = 1.8 },
 }
 
+-- River fish (แม่น้ำ, the tambon river): rarer and bigger than the canal's. price = what the
+-- community shop pays per fish. A better rod makes the rare ones (weight <= 6) come more often.
+M.RIVER_FISH = {
+  { id = "soi",    name = "ปลาสร้อยขาว", weight = 26,  min_kg = 0.05, max_kg = 0.25, price = 15 },
+  { id = "kot",    name = "ปลากด",       weight = 20,  min_kg = 0.5,  max_kg = 3.0,  price = 70 },
+  { id = "takok",  name = "ปลาตะโกก",    weight = 14,  min_kg = 0.5,  max_kg = 3.0,  price = 60 },
+  { id = "swai",   name = "ปลาสวาย",     weight = 13,  min_kg = 1.0,  max_kg = 6.0,  price = 90 },
+  { id = "krai",   name = "ปลากราย",     weight = 8,   min_kg = 0.8,  max_kg = 4.0,  price = 110 },
+  { id = "raet",   name = "ปลาแรด",      weight = 7,   min_kg = 1.0,  max_kg = 5.0,  price = 120 },
+  { id = "bu",     name = "ปลาบู่",       weight = 6,   min_kg = 0.3,  max_kg = 1.5,  price = 150 },
+  { id = "chado",  name = "ปลาชะโด",     weight = 5,   min_kg = 2.0,  max_kg = 8.0,  price = 130 },
+  { id = "thepho", name = "ปลาเทโพ",     weight = 4,   min_kg = 2.0,  max_kg = 8.0,  price = 140 },
+  { id = "khao",   name = "ปลาเค้าดำ",    weight = 3,   min_kg = 2.0,  max_kg = 10.0, price = 160 },
+  { id = "yisok",  name = "ปลายี่สก",     weight = 1.5, min_kg = 2.0,  max_kg = 10.0, price = 300 },
+  { id = "buek",   name = "ปลาบึก",       weight = 0.4, min_kg = 30.0, max_kg = 150.0, price = 2000 },
+}
+
 -- Fishing rods: better rods bite sooner, favour rarer fish and land bigger ones.
 -- weights are per fish id (see M.FISH)
 M.RODS = {

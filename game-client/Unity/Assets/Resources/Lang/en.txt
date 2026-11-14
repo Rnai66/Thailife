@@ -3769,3 +3769,27 @@ ThaiVillage (หมู่บ้าน), Tambon (ตำบล), City (เมื�
 ยังไม่มีของให้ขาย — ตกปลา ทำนา หาของป่า หรือตัดไม้ผ่าฟืน	Nothing to sell yet — fish, farm rice, forage or chop firewood
 ขายปลา ข้าว ของป่า ฟืน\nและของรางวัล ทั้งหมดในครั้งเดียว	Sells your fish, rice, forest finds, firewood\nand prizes all at once
 ยุ้งข้าวขยายเต็มที่แล้ว (2,800 กก.)	The barn is already at its biggest (2,800 kg)
+ปลาสร้อยขาว	Siamese mud carp
+ปลากด	Long-whiskered catfish
+ปลาตะโกก	Soldier river barb
+ปลาสวาย	Striped catfish
+ปลากราย	Clown featherback
+ปลาแรด	Giant gourami
+ปลาบู่	Marble goby
+ปลาชะโด	Giant snakehead
+ปลาเทโพ	Black-ear catfish
+ปลาเค้าดำ	Wallago catfish
+ปลายี่สก	Seven-striped barb
+ปลาบึก	Mekong giant catfish
+หยุด\nทางแยกข้างหน้า	STOP\nCrossroads ahead
+ระวัง ทางแยก\nขับช้าลง	Caution: crossroads\nSlow down
+↑ แม่น้ำ · ท่าน้ำตกปลา · ป่าริมน้ำ\n← ตำบล · อบต. · โรงเรียน\n↓ ทุ่งนา	↑ River · fishing landings · riverside forest\n← Sub-district · SAO · school\n↓ Rice fields
+แม่น้ำ · ตกปลาแม่น้ำ\nปลาสร้อย ปลากด ปลาตะโกก ปลาสวาย ปลากราย ปลาแรด\nปลาบู่ ปลาชะโด ปลาเทโพ ปลาเค้า ปลายี่สก\nปลาบึก หายากมาก!	River · river fishing\nMud carp, catfish, river barb, striped catfish, featherback, gourami\nGoby, giant snakehead, black-ear catfish, wallago, seven-striped barb\nMekong giant catfish: very rare!
+สะพานข้ามแม่น้ำ	River bridge
+ป่าชุมชน\nช่วยกันรักษาป่า ห้ามเผา	Community forest\nHelp protect it: no burning
+ทุ่งนา	Rice fields
+โรงเก็บรถไถ · รถเกี่ยวข้าว	Tractor & harvester shed
+เกี่ยวข้าวเสร็จแล้ว	Harvest's done
+ปีนี้ข้าวงามนะ	Good rice this year
+นวดข้าวกันเถอะ	Let's thresh the rice
+ขายได้กี่บาทเกวียนนี้?	How much a ton this time?

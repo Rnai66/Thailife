@@ -46,7 +46,7 @@ public static class TambonBuilder
         StreetFurniture.PoleLine(root, new[] { new Vector3(-40f, 0f, -10.6f), new Vector3(-12f, 0f, -10.6f), new Vector3(24f, 0f, -10.6f), new Vector3(46f, 0f, -10.6f) }, 180f, lamps: true);
     });
 
-    internal static void BuildTambon(bool ask) => BuildLocation("Assets/Scenes/Tambon.unity", "Tambon", 12f, ask, root => // 120 m: room for the forest behind the canal
+    internal static void BuildTambon(bool ask) => BuildLocation("Assets/Scenes/Tambon.unity", "Tambon", 20f, ask, root => // 200 m: the core, the forest behind the canal, and the countryside round it (TambonCountry)
     {
         // ตำบล: SAO office, health station, school, public park, canal with fishing
         Places2.SaoOffice(root, new Vector3(-24f, 0f, 10f), "อบต.");
@@ -100,7 +100,9 @@ public static class TambonBuilder
         // Power line with street lamps along the north side of the road
         StreetFurniture.PoleLine(root, new[]
         {
+            new Vector3(-92f, 0f, -5.5f), new Vector3(-66f, 0f, -5.5f),
             new Vector3(-40f, 0f, -5.5f), new Vector3(-12f, 0f, -5.5f), new Vector3(16f, 0f, -5.5f), new Vector3(44f, 0f, -5.5f),
+            new Vector3(64f, 0f, -5.5f), new Vector3(92f, 0f, -5.5f),
         }, 0f, lamps: true);
         // One lamp at the ตลาดนัด entrance, bulbs along its aisle
         StreetFurniture.PoleLine(root, new[] { new Vector3(30.2f, 0f, -20.5f) }, 90f, lamps: true);
@@ -150,6 +152,9 @@ public static class TambonBuilder
         PetrolStation.Build(root, new Vector3(52f, 0f, 3f), 0f, 14f, 16f, "");
         Police.SpeedTrap(root, new Vector3(-30f, 0f, -11.5f), 0f, 60);
         Police.Checkpoint(root, new Vector3(40f, 0f, -8f), 90f, 4f, 1f);
+
+        // The countryside: side road and crossroads, the river with its landings and bridge, forests, paddies
+        TambonCountry.Build(root);
     });
 
     internal static void BuildCity(bool ask) => BuildLocation("Assets/Scenes/City.unity", "City", 20f, ask, root =>

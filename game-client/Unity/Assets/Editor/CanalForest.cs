@@ -158,7 +158,7 @@ public static partial class TempleLife
     }
 
     // A tall, dark forest tree: straight trunk, a few lumpy crowns, a creeper hanging down
-    private static void ForestTree(Transform parent, Vector3 at, float size, int seed)
+    internal static void ForestTree(Transform parent, Vector3 at, float size, int seed)
     {
         var t = PrimitiveKit.Group("ForestTree_ต้นไม้ป่า", parent, at, seed * 47f).transform;
         t.localScale = Vector3.one * size;

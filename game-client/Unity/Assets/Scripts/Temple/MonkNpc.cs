@@ -31,6 +31,12 @@ public class MonkNpc : MonoBehaviour
     public void Init(int index, int seed)
     {
         Index = index;
+        // The monk's transform is on the ground (MonkProcession walks it along the road), not at the middle of
+        // a capsule: a disabled capsule tells CharacterModel to stand the feet at 0 instead of 1 m down
+        var feet = gameObject.AddComponent<CapsuleCollider>();
+        feet.center = Vector3.up;
+        feet.height = 2f;
+        feet.enabled = false;
         var model = gameObject.AddComponent<CharacterModel>();
         model.SetLook(new Look { Gender = 0, Face = seed % 2, Hair = 10, Outfit = Look.Robe });
         transform.localScale = Vector3.one * (0.95f + (seed * 37 % 10) * 0.01f);
