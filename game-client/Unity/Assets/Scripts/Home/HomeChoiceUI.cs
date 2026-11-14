@@ -8,6 +8,8 @@ using UnityEngine.UI;
 // friends live — or let the game pick. Asked once when you start (free); later "ย้ายบ้าน" in the
 // settings moves you for a fee. Choosing takes you straight to your new porch (HomeClient.GoHome).
 // A village resident whose farm lot (FarmLots) ended up in another หมู่ can bring it over here, free.
+// ประกาศขายบ้าน: put your house up for sale (ShowSell); houses for sale show orange in the lot grid
+// with their price, and buying one moves you in (HomeClient.BuyAsync) — the money goes to the seller's bank.
 public class HomeChoiceUI : MonoBehaviour
 {
     private static HomeChoiceUI instance;
@@ -18,7 +20,7 @@ public class HomeChoiceUI : MonoBehaviour
     private Coroutine toastRun;
     private bool busy, first, portrait;
     private float bodyW, bodyH;
-    private int pickedLot, shownMoo;
+    private int pickedLot, shownMoo, pickedSale, askPrice;
     private int version; // drops answers for a page that has since been left
 
     private static readonly (string area, string icon)[] Icons = { ("village", "farm"), ("city", "city"), ("bangkok", "temple") };
@@ -84,6 +86,10 @@ public class HomeChoiceUI : MonoBehaviour
         if (!first && State.chosen) // opened from the HUD: the quick way back to your porch
             UiKit.RoundButton(list, "กลับบ้าน", new Vector2(portrait ? 0f : -bodyW * 0.5f + 180f, -bodyH * 0.5f + (portrait ? 110f : 50f)),
                 new Vector2(300f, 64f), UiKit.Gold, UiKit.GoldInk, () => { Close(); HomeClient.Instance?.GoHome(); }, 24);
+        if (!first && State.chosen && State.lot > 0) // your house for sale
+            UiKit.RoundButton(list, State.sale > 0 ? $"ประกาศขายอยู่ {State.sale:N0} ฿" : "ประกาศขายบ้าน",
+                new Vector2(portrait ? 0f : 0f, -bodyH * 0.5f + (portrait ? 270f : 50f)), new Vector2(portrait ? 460f : 330f, 64f),
+                new Color(0.93f, 0.55f, 0.2f), Color.white, ShowSell, 22);
         if (!first && State.chosen && State.area == "village" && State.moo > 0) OfferFarmMove(version);
         if (!first && State.chosen && State.area != "village") // living in town: pick the หมู่ your farm is in
             UiKit.RoundButton(list, "แปลงเกษตร · เลือกหมู่", new Vector2(portrait ? 0f : bodyW * 0.5f - 250f, -bodyH * 0.5f + (portrait ? 190f : 50f)),
@@ -180,6 +186,7 @@ public class HomeChoiceUI : MonoBehaviour
         int page = ++version;
         UiKit.Clear(list);
         pickedLot = 0;
+        pickedSale = 0;
         shownMoo = moo;
         Heading($"{s.name} · เลือกบ้านเลขที่");
         LoadingFlower.Show(UiKit.Label(list, 28, "", Vector2.zero, new Vector2(600f, 50f), UiKit.Muted), "กำลังโหลดแปลง…");
@@ -215,7 +222,7 @@ public class HomeChoiceUI : MonoBehaviour
                 foreach (var e in v.moos) if (e.no == m && e.friends > 0 && m != v.moo) friendsMoo = m;
             }
         float legendY = top - 120f;
-        UiKit.Label(list, 21, "เขียว = ว่าง · ฟ้า = เพื่อน · ทอง = บ้านคุณ · เทา = มีคนอยู่", new Vector2(portrait ? 0f : -150f, legendY),
+        UiKit.Label(list, 21, "เขียว = ว่าง · ฟ้า = เพื่อน · ทอง = บ้านคุณ · ส้ม = ประกาศขาย · เทา = มีคนอยู่", new Vector2(portrait ? 0f : -150f, legendY),
             new Vector2(portrait ? bodyW - 40f : 820f, 32f), UiKit.Muted, portrait ? TextAnchor.MiddleCenter : TextAnchor.MiddleLeft);
         if (friendsMoo > 0)
             UiKit.RoundButton(list, $"ไปหมู่ที่มีเพื่อน (หมู่ {friendsMoo})", new Vector2(portrait ? 0f : bodyW * 0.5f - 200f, portrait ? legendY - 48f : legendY),
@@ -235,22 +242,32 @@ public class HomeChoiceUI : MonoBehaviour
             var l = v.lots[i];
             int col = i % cols, row = i / cols;
             var at = new Vector2((col - (cols - 1) * 0.5f) * (cw + gap), gridTop - ch * 0.5f - row * (ch + gap));
-            Color fill = l.mine ? UiKit.Gold : l.vacant ? new Color(0.84f, 0.94f, 0.8f) : l.friend ? new Color(0.72f, 0.85f, 0.98f) : new Color(0.86f, 0.86f, 0.84f);
-            string who = l.mine ? "บ้านคุณ" : l.vacant ? "ว่าง" : Short(l.owner);
+            bool forSale = !l.mine && !l.vacant && l.sale > 0;
+            Color fill = l.mine ? UiKit.Gold : l.vacant ? new Color(0.84f, 0.94f, 0.8f) : forSale ? SaleTint
+                : l.friend ? new Color(0.72f, 0.85f, 0.98f) : new Color(0.86f, 0.86f, 0.84f);
+            string who = l.mine ? "บ้านคุณ" : l.vacant ? "ว่าง" : forSale ? $"ขาย {Money(l.sale)}" : Short(l.owner);
+            int sale = forSale ? l.sale : 0;
             int no = l.no;
             var b = UiKit.RoundButton(list, $"{l.no}\n{who}", at, new Vector2(cw, ch), fill, UiKit.Ink, () =>
             {
                 pickedLot = no;
+                pickedSale = sale;
                 for (int k = 0; k < buttons.Length; k++)
-                    if (buttons[k] != null && v.lots[k].vacant)
-                        buttons[k].GetComponent<Image>().color = v.lots[k].no == no ? UiKit.PayGreen : new Color(0.84f, 0.94f, 0.8f);
+                {
+                    if (buttons[k] == null) continue;
+                    var e = v.lots[k];
+                    bool sells = !e.mine && !e.vacant && e.sale > 0;
+                    if (e.vacant || sells)
+                        buttons[k].GetComponent<Image>().color = e.no == no ? UiKit.PayGreen : sells ? SaleTint : new Color(0.84f, 0.94f, 0.8f);
+                }
                 if (confirm != null)
                 {
                     confirm.interactable = true;
-                    confirmText.text = l.mine ? $"เปลี่ยนเป็น{s.name}ที่บ้านเลขที่ {no}" : $"อยู่บ้านเลขที่ {no} หมู่ที่ {v.moo}";
+                    confirmText.text = sale > 0 ? $"ซื้อบ้านเลขที่ {no} · {sale:N0} บาท"
+                        : l.mine ? $"เปลี่ยนเป็น{s.name}ที่บ้านเลขที่ {no}" : $"อยู่บ้านเลขที่ {no} หมู่ที่ {v.moo}";
                 }
             }, 20);
-            b.interactable = l.vacant || (l.mine && State.style != s.id); // your own lot: change the house on it
+            b.interactable = l.vacant || forSale || (l.mine && State.style != s.id); // your own lot: change the house on it
             buttons[i] = b;
         }
 
@@ -284,6 +301,7 @@ public class HomeChoiceUI : MonoBehaviour
         var home = HomeClient.Instance;
         if (busy || home == null) return;
         if (moo > 0 && lot <= 0) return;
+        if (moo > 0 && pickedSale > 0 && lot == pickedLot) { Buy(a, moo, lot, pickedSale); return; }
         busy = true;
         try
         {
@@ -301,6 +319,83 @@ public class HomeChoiceUI : MonoBehaviour
         {
             Say(HomeClient.Explain(e), UiKit.Danger);
         }
+        busy = false;
+    }
+
+    private static readonly Color SaleTint = new Color(1f, 0.78f, 0.5f);
+
+    private static string Money(int baht) => baht >= 1000000 ? $"{baht / 1000000f:0.#} ล้าน" : baht >= 1000 ? $"{baht / 1000}k" : baht.ToString();
+
+    // Buy a house for sale: the price from your wallet, and you move in (the seller's builds come with it)
+    private async void Buy(HomeClient.Area a, int moo, int lot, int price)
+    {
+        var home = HomeClient.Instance;
+        if (busy || home == null) return;
+        busy = true;
+        try
+        {
+            var r = await home.BuyAsync(a.id, moo, lot);
+            if (a.id == "village" && (FarmLots.Last?.mine == null || FarmLots.Last.mine.moo != r.moo))
+            {
+                try { await FarmLots.MoveAsync(); } catch (Exception) { }
+            }
+            UiKit.FloatAbovePlayer($"-{price:N0} ฿", new Color(1f, 0.6f, 0.3f));
+            UiKit.FloatAbovePlayer(r.done ?? "ซื้อบ้านแล้ว!", new Color(1f, 0.85f, 0.3f));
+            if (WalletClient.Instance != null) _ = WalletClient.Instance.RefreshAsync();
+            Close();
+        }
+        catch (Exception e) { Say(HomeClient.Explain(e), UiKit.Danger); }
+        busy = false;
+    }
+
+    // ประกาศขายบ้าน: set the price with the steps, put it up (or take it down)
+    private void ShowSell()
+    {
+        version++;
+        UiKit.Clear(list);
+        var st = State;
+        title.text = "ประกาศขายบ้าน";
+        subtitle.text = $"{st.address} · {st.style_name}";
+        if (askPrice <= 0) askPrice = st.sale > 0 ? st.sale : 300000;
+        int min = st.sale_min > 0 ? st.sale_min : 5000, max = st.sale_max > 0 ? st.sale_max : 50000000;
+        askPrice = Mathf.Clamp(askPrice, min, max);
+        float top = bodyH * 0.5f;
+        UiKit.Label(list, 24, "ผู้เล่นคนอื่นซื้อได้จากหน้าเลือกบ้าน (แปลงสีส้ม) · เงินค่าบ้านเข้าบัญชีธนาคารของคุณ\nรั้วและสิ่งที่สร้างรอบบ้านไปกับบ้าน · ขายแล้วเลือกบ้านใหม่ได้ฟรี · ของในบ้านยังเป็นของคุณ",
+            new Vector2(0f, top - 80f), new Vector2(bodyW - 60f, 90f), UiKit.Muted);
+        var price = UiKit.Cartoon(UiKit.Label(list, 64, $"{askPrice:N0} บาท", new Vector2(0f, 60f), new Vector2(bodyW - 60f, 90f), UiKit.Price), 2f);
+        void Step(string label, int delta, float x, float y) =>
+            UiKit.RoundButton(list, label, new Vector2(x, y), new Vector2(portrait ? 150f : 170f, 64f), UiKit.Pill, UiKit.Ink, () =>
+            {
+                askPrice = Mathf.Clamp(askPrice + delta, min, max);
+                price.text = $"{askPrice:N0} บาท";
+            }, 24);
+        float w = portrait ? 160f : 185f;
+        Step("-100k", -100000, -w * 1.5f, -40f);
+        Step("-10k", -10000, -w * 0.5f, -40f);
+        Step("+10k", 10000, w * 0.5f, -40f);
+        Step("+100k", 100000, w * 1.5f, -40f);
+        Step("-1 ล้าน", -1000000, -w, -115f);
+        Step("+1 ล้าน", 1000000, w, -115f);
+        float by = -bodyH * 0.5f + (portrait ? 110f : 50f);
+        UiKit.RoundButton(list, "← กลับ", new Vector2(-bodyW * 0.5f + (portrait ? 130f : 170f), by), new Vector2(portrait ? 220f : 260f, 64f), UiKit.Pill, UiKit.Ink, ShowAreas, 24);
+        if (st.sale > 0)
+            UiKit.RoundButton(list, "ยกเลิกประกาศ", new Vector2(0f, by), new Vector2(portrait ? 230f : 280f, 64f), UiKit.DangerTint, UiKit.Danger, () => Sell(0), 24);
+        UiKit.RoundButton(list, st.sale > 0 ? "เปลี่ยนราคา" : "ประกาศขาย", new Vector2(bodyW * 0.5f - (portrait ? 130f : 190f), by),
+            new Vector2(portrait ? 220f : 320f, 64f), new Color(0.93f, 0.55f, 0.2f), Color.white, () => Sell(askPrice), 24);
+    }
+
+    private async void Sell(int price)
+    {
+        var home = HomeClient.Instance;
+        if (busy || home == null) return;
+        busy = true;
+        try
+        {
+            var r = await home.SellAsync(price);
+            Say(r.done ?? "บันทึกแล้ว", UiKit.PayGreen);
+            ShowAreas();
+        }
+        catch (Exception e) { Say(HomeClient.Explain(e), UiKit.Danger); }
         busy = false;
     }
 }

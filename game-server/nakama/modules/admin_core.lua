@@ -9,4 +9,11 @@ local ADMINS = {
 
 function M.is(user_id) return ADMINS[user_id or ""] ~= nil end
 
+-- Their user ids
+function M.ids()
+  local r = {}
+  for id in pairs(ADMINS) do table.insert(r, id) end
+  return r
+end
+
 return M

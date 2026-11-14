@@ -92,6 +92,7 @@ public class LifeClient : MonoBehaviour
         if (GetComponent<ActivityAlerts>() == null) gameObject.AddComponent<ActivityAlerts>();
         if (GetComponent<FairClient>() == null) gameObject.AddComponent<FairClient>();
         if (GetComponent<BankClient>() == null) gameObject.AddComponent<BankClient>();
+        if (GetComponent<CafeClient>() == null) gameObject.AddComponent<CafeClient>();
         if (GetComponent<RanchClient>() == null) gameObject.AddComponent<RanchClient>();
         if (GetComponent<BuildClient>() == null) gameObject.AddComponent<BuildClient>();
         if (GetComponent<LandClient>() == null) gameObject.AddComponent<LandClient>();

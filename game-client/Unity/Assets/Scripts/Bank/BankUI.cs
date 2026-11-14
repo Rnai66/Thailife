@@ -168,7 +168,7 @@ public class BankUI : MonoBehaviour
             var c = Card(P ? new Vector2(0f, 345f - i * 222f) : new Vector2(-470f + i * 470f, 120f), new Vector2(P ? 600f : 450f, 210f));
             UiKit.Label(c, 28, b.name, new Vector2(0f, 75f), new Vector2(420f, 40f), UiKit.Ink).fontStyle = FontStyle.Bold;
             UiKit.Label(c, 20, b.building, new Vector2(0f, 42f), new Vector2(420f, 30f), UiKit.Muted);
-            UiKit.Label(c, 22, $"กำไร/วัน ~{b.per_day:N0} ฿ · รอรับ {b.till:N0} ฿", new Vector2(0f, 8f), new Vector2(420f, 32f), b.per_day >= 0 ? UiKit.OkGreen : UiKit.Danger);
+            UiKit.Label(c, 22, $"กำไร/วัน ~{b.per_day:N0} ฿ · เข้าบัญชีแล้ว {b.earned:N0} ฿", new Vector2(0f, 8f), new Vector2(420f, 32f), b.per_day >= 0 ? UiKit.OkGreen : UiKit.Danger);
             int slot = b.slot;
             UiKit.RoundButton(c, "-", new Vector2(-150f, -50f), new Vector2(70f, 56f), UiKit.Pill, UiKit.Danger, () => Do(x => x.StaffAsync(slot, -1)), 32).interactable = !busy && b.staff > 0;
             UiKit.Label(c, 22, $"พนักงาน {b.staff} คน", new Vector2(0f, -50f), new Vector2(220f, 40f), UiKit.Ink);
@@ -178,8 +178,8 @@ public class BankUI : MonoBehaviour
         if (count == 0)
             UiKit.Label(content, 26, "ยังไม่มีธุรกิจ — เลือกประเภทและอาคารด้านล่าง แล้วกดเปิดกิจการ", P ? new Vector2(0f, 300f) : new Vector2(0f, 120f), new Vector2(P ? 640f : 1200f, P ? 100f : 60f), UiKit.Muted);
         else
-            UiKit.RoundButton(content, s.till >= 0 ? $"รับกำไรทั้งหมด {s.till:N0} ฿" : $"จ่ายขาดทุน {-s.till:N0} ฿", P ? new Vector2(0f, 500f) : new Vector2(560f, 255f), new Vector2(P ? 400f : 300f, 50f),
-                UiKit.PayGreen, Color.white, () => Do(x => x.CollectAsync()), 22).interactable = !busy && s.till != 0;
+            UiKit.PillLabel(content, $"กำไรเข้าบัญชีอัตโนมัติ · รวม {s.income:N0} ฿", P ? new Vector2(0f, 500f) : new Vector2(545f, 255f), new Vector2(P ? 560f : 330f, 50f),
+                UiKit.OkTint, UiKit.OkGreen, P ? 20 : 17);
 
         // Open a new one
         // Upright: the types and the buildings each in a 2x2 grid

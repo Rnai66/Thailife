@@ -8,7 +8,7 @@
 --   bank_buy       {"asset": "car_pickup" | "land_rice" ...}
 --   bank_open      {"business": "coffee", "building": "shop_left_3"}
 --   bank_staff     {"slot": 1, "delta": 1 | -1}
---   bank_collect   {}                    -> takes every business's profit (or pays its loss)
+--   bank_collect   {}                    -> (old) profits now go into savings by themselves
 --   bank_close     {"slot": 1}
 
 local nk = require("nakama")
@@ -118,15 +118,29 @@ local function settle(user_id, a)
     a.savings = a.savings + math.floor(rent) -- land rent is paid into savings
     a.settled = now
   end
+  -- Business takings go straight into savings (a loss comes out of savings, then onto the loan)
+  local income = 0
   for _, b in ipairs(a.businesses) do
     local t = BUSINESSES[b.type]
     local d = math.min(MAX_SETTLE_DAYS, math.max(0, now - (b.settled or now)))
     if t and d > 0 then
       local mood = 0.85 + math.random() * 0.3
       local revenue = t.revenue * (0.4 + 0.12 * b.staff) * mood
-      b.till = math.floor((b.till or 0) + (revenue - t.rent - t.wage * b.staff) * d)
+      local profit = math.floor((revenue - t.rent - t.wage * b.staff) * d)
+      income = income + profit
+      b.earned = (b.earned or 0) + profit
     end
+    income = income + (b.till or 0) -- anything left from before the takings went to the bank
+    b.till = 0
     b.settled = now
+  end
+  if income ~= 0 then
+    a.savings = a.savings + income
+    if a.savings < 0 then
+      a.loan = a.loan - a.savings
+      a.savings = 0
+    end
+    a.income = (a.income or 0) + income
   end
   return a
 end
@@ -165,7 +179,7 @@ local function view(user_id, a, extra)
     local t = BUSINESSES[b.type]
     till = till + (b.till or 0)
     table.insert(mine, { slot = i, type = b.type, name = t.name, building = BUILDINGS[b.building] or b.building,
-                         staff = b.staff, till = b.till or 0,
+                         staff = b.staff, till = b.till or 0, earned = b.earned or 0,
                          per_day = math.floor(t.revenue * (0.4 + 0.12 * b.staff) - t.rent - t.wage * b.staff) })
   end
   local buildings = {}
@@ -179,6 +193,7 @@ local function view(user_id, a, extra)
     savings_rate = SAVINGS_RATE, loan_rate = LOAN_RATE, loan_level = LOAN_LEVEL,
     business_level = BUSINESS_LEVEL, business_cash = BUSINESS_CASH, max_staff = MAX_STAFF,
     assets = assets, business_types = types, buildings = buildings, till = till, speed = speed,
+    income = a.income or 0, inbox = a.inbox,
   }
   if #mine > 0 then result.businesses = mine end
   for k, v in pairs(extra or {}) do result[k] = v end
@@ -282,7 +297,6 @@ rpc("bank_close", function(user_id, a, req)
   local slot = math.floor(tonumber(req.slot) or 0)
   local b = a.businesses[slot]
   if not b then err("unknown business", GRPC_INVALID_ARGUMENT) end
-  if (b.till or 0) ~= 0 then err("collect first") end
   table.remove(a.businesses, slot)
   return { done = "ปิดกิจการแล้ว" }
 end)

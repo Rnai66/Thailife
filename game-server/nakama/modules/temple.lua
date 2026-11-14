@@ -11,6 +11,9 @@
 --                                                           shrine, adopt a temple dog, raise a กุมารทอง
 --   temple_wear      {"item": id, "wear": bool}          -> ห้อยคอ / ถอด an amulet (at most 3 worn); worn
 --                                                           amulets give their พุทธคุณ (amulet_core.lua)
+--   temple_alms      {"monk": n, "food": id}             -> ตักบาตร: give one food from the bag to monk n of
+--                                                           the morning alms round; บารมี as much as one
+--                                                           meditation, once per monk per game day
 --   ghost_start      {"spot": "...", "ghost": id}        -> {token, ghost, sigils, seconds, need}
 --   ghost_finish     {"token": "...", "hits": n}         -> view + result (exorcists only, at night)
 --
@@ -32,6 +35,12 @@ local ORDAIN = { level = 5, cost = 2000 }
 local EXORCIST_MONK_LEVEL = 30
 local MEDITATE = { seconds = 25, incense = 20, barami = 8, barami_incense = 8, monk = 40, monk_incense = 20, energy = 4 }
 local LOG_SIZE = 6
+
+-- พระบิณฑบาต: every morning (05:30-09:00 game time) the monks walk their round from the temple; 5 on an
+-- ordinary day, 10 on วันพระ, 20 on the Buddhist holy days and merit-making festivals (life_core FESTIVALS)
+local ALMS = { barami = MEDITATE.barami, from = 330, to = 540, slack = 20, normal = 5, wan_phra = 10, special = 20 }
+local ALMS_DAYS = { makha = true, phapa_1 = true, visakha = true, asalha = true, khao_phansa = true, ok_phansa = true,
+                    tak_bat_thewo = true, kathin = true, phapa_2 = true, temple_annual = true, songkran = true }
 
 -- บูชา at the temple. guard = keeps ghosts away, luck = keeps thieves away (percent points),
 -- barami = the บารมี level needed to keep it
@@ -237,6 +246,26 @@ end
 
 local function powers_or_nil(list) return (#list > 0) and list or nil end
 
+-- How many monks walk this morning, and why
+local function alms_today(now)
+  local open, _, _, _, ev = life.fair(now)
+  if open and ev and ALMS_DAYS[ev.id] then return ALMS.special, ev.name end
+  if life.wan_phra(now) then return ALMS.wan_phra, "วันพระ" end
+  return ALMS.normal, ""
+end
+
+local function alms_view(s, now)
+  local monks, why = alms_today(now)
+  local minute = life.minute_of_day(now)
+  local given = {}
+  if s.alms and s.alms.day == life.game_day(now) then
+    for k in pairs(s.alms.given or {}) do table.insert(given, tonumber(k)) end
+    table.sort(given)
+  end
+  return { monks = monks, day_name = why, open = minute >= ALMS.from and minute < ALMS.to,
+           from = ALMS.from, to = ALMS.to, barami = ALMS.barami, given = (#given > 0) and given or nil }
+end
+
 -- ── View ──────────────────────────────────────────────────────────────────────────────────────
 local function view(user_id, s, extra)
   local trades = trade.read(user_id)
@@ -267,6 +296,7 @@ local function view(user_id, s, extra)
     incense_cost = MEDITATE.incense, meditate_seconds = MEDITATE.seconds,
     worn_max = amulet.WORN_MAX, my_powers = powers_or_nil(amulet.totals_list(amulet.totals(s.worn))),
     night = is_night(nk.time()), wan_phra = life.wan_phra(nk.time()), items = catalog, ghosts = ghosts,
+    alms = alms_view(s, nk.time()),
     log = (#s.log > 0) and s.log or nil, banished = (#banished > 0) and banished or nil,
   }
   for k, v in pairs(extra or {}) do result[k] = v end
@@ -340,6 +370,28 @@ nk.register_rpc(rpc(function(context, user_id, s, req)
   life.add_energy(user_id, MEDITATE.energy)
   return { gained_barami = barami, gained_monk = monk, gained_energy = MEDITATE.energy }
 end), "temple_meditate")
+
+nk.register_rpc(rpc(function(context, user_id, s, req)
+  local now = nk.time()
+  local monks = alms_today(now)
+  local monk = math.floor(tonumber(req.monk) or 0)
+  if monk < 1 or monk > monks then err("no such monk", GRPC_INVALID_ARGUMENT) end
+  local food = data.FOODS[tostring(req.food or "")]
+  if not food then err("unknown food", GRPC_INVALID_ARGUMENT) end
+  if s.ordained then err("monks don't give alms") end
+  local minute = life.minute_of_day(now)
+  if minute < ALMS.from - ALMS.slack or minute >= ALMS.to + ALMS.slack then err("not alms time") end
+  local day = life.game_day(now)
+  if not s.alms or s.alms.day ~= day then s.alms = { day = day, given = {} } end
+  if s.alms.given[tostring(monk)] then err("already given") end
+  local items = data.read_items(user_id)
+  if (items.food[req.food] or 0) < 1 then err("no such food in bag") end
+  items.food[req.food] = items.food[req.food] - 1
+  data.write_items(user_id, items)
+  s.alms.given[tostring(monk)] = true
+  add_barami(s, ALMS.barami)
+  return { gained_barami = ALMS.barami, done = "ใส่บาตร" .. food.name .. "แล้ว สาธุ · บารมี +" .. ALMS.barami }
+end), "temple_alms")
 
 nk.register_rpc(rpc(function(context, user_id, s, req)
   local it = ITEMS[req.item or ""]

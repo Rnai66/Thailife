@@ -3672,3 +3672,82 @@ ThaiVillage (หมู่บ้าน), Tambon (ตำบล), City (เมื�
 นครราชสีมา · ย่าโม ปราสาทหินพิมาย	Nakhon Ratchasima · Ya Mo, Phimai
 ย่าโม ปราสาทหินพิมาย	Ya Mo, Phimai
 โคราช	Korat
+ตั้งชื่อตัวละครก่อน แล้วจะได้แปลงเกษตรของตัวเอง	Set your name first to get your own farm lot
+ใส่บาตร	Give alms
+พระออกบิณฑบาต {} รูป	{} monks on the alms round
+ใส่บาตรด้วยอาหารในกระเป๋า	Give food from your bag
+บารมี +{} ต่อพระ 1 รูป	Merit +{} per monk
+เลือกอาหารจากกระเป๋าใส่บาตรพระรูปที่ {}	Choose food from your bag for monk {}
+บารมี +{}	Merit +{}
+ไม่ใช่ตอนนี้	Not now
+ไม่มีอาหารในกระเป๋า\nซื้อข้าวเหนียวหมูปิ้ง กาแฟ ฯลฯ ได้ที่ร้านค้าชุมชนและตลาด	No food in your bag\nBuy sticky rice with grilled pork, coffee and more at the community shop and the market
+ใส่บาตร{} สาธุ	Gave {} as alms. Sathu
+ใส่บาตรพระรูปนี้แล้ววันนี้	You already gave to this monk today
+ใส่รูปถัดไปได้	You can give to the next one
+อาหารนี้หมดแล้ว	You're out of this food
+พระกลับวัดแล้ว	The monks have gone back to the temple
+พรุ่งนี้เช้ามาใหม่	Come again tomorrow morning
+ขณะบวชอยู่ใส่บาตรไม่ได้	You can't give alms while ordained
+วันพระ	Buddhist holy day
+วันอาสาฬหบูชา	Asalha Bucha Day
+ตักบาตรเทโว	Tak Bat Devo
+อายุ วัณโณ สุขัง พะลัง	Ayu, vanno, sukham, balam
+ยะถา วาริวะหา ปูรา...	Yatha varivaha pura...
+สัพพีติโย วิวัชชันตุ	Sabbitiyo vivajjantu
+เจริญพร ขอให้เจริญสุข	Blessings, may you be happy
+ประกาศขายบ้าน	Sell your house
+ประกาศขายอยู่ {} ฿	For sale at {} ฿
+ประกาศขาย {} บาท	For sale: {} baht
+ส้ม = ประกาศขาย	orange = for sale
+ขาย {}	Sale {}
+ซื้อบ้านเลขที่ {}	Buy house no. {}
+ซื้อบ้านแล้ว!	House bought!
+ผู้เล่นคนอื่นซื้อได้จากหน้าเลือกบ้าน (แปลงสีส้ม)	Other players can buy it from the home picker (orange lots)
+เงินค่าบ้านเข้าบัญชีธนาคารของคุณ\nรั้วและสิ่งที่สร้างรอบบ้านไปกับบ้าน	The money goes into your bank account\nFences and builds around the house go with it
+ขายแล้วเลือกบ้านใหม่ได้ฟรี	After selling, choose a new home for free
+ของในบ้านยังเป็นของคุณ	Your furniture stays yours
+ยกเลิกประกาศ	Take off market
+เปลี่ยนราคา	Change price
+ประกาศขาย	List for sale
+← กลับ	← Back
+บันทึกแล้ว	Saved
+บ้านหลังนี้ไม่ได้ประกาศขายแล้ว	This house is no longer for sale
+บ้านของคุณเอง	That's your own house
+ยังไม่มีบ้านเลขที่ของตัวเองให้ขาย	You don't have a numbered house to sell
+ราคาไม่ถูกต้อง	Invalid price
+เงินไม่พอ	Not enough money
+ประกาศขายบ้านแล้ว	House listed for sale
+ราคา {} บาท	Price {} baht
+ยกเลิกประกาศขายบ้านแล้ว	Listing removed
+{} ขายได้ {} บาท	{} sold for {} baht
+เงินเข้าบัญชีธนาคารแล้ว	The money is in your bank account
+เลือกบ้านใหม่ได้ฟรี	Choose a new home for free
+กำไร/วัน ~{} ฿ · เข้าบัญชีแล้ว {} ฿	Profit/day ~{} ฿ · banked {} ฿
+กำไรเข้าบัญชีอัตโนมัติ · รวม {} ฿	Profit goes to the bank by itself · total {} ฿
+ร้านว่าง ให้เช่า\nเปิดร้านกาแฟ\nที่ธนาคาร	Shop for lease\nOpen a coffee shop\nat the bank
+ร้านกาแฟของคุณ	Your coffee shop
+ร้านกาแฟของฉัน	My coffee shop
+สไตล์	Style 
+พนักงาน	Staff
+จัดร้าน	Arrange shop
+สไตล์ร้าน	Shop style
+ถ่ายรูป	Photo
+กำลังวาง	Placing
+เดินไปตรงที่ต้องการแล้วกด วางตรงนี้	walk to the spot and tap Place here
+เลือกอยู่	Selected
+ของในร้าน	Items
+ร้านยังว่าง — กด ซื้อของ แล้วเริ่มจากเคาน์เตอร์บาร์กับเครื่องชงกาแฟ	The shop is empty — tap Buy items and start with the bar counter and espresso machine
+ของแต่งร้านกาแฟ	Café furniture
+เลือกแล้วเดินไปวาง · จ่ายเงินตอนวาง · เก็บคืนได้ครึ่งราคา	Pick one and walk to place it · pay when placed · half back when stored
+สไตล์และชื่อร้าน	Style and shop name
+ผนัง พื้น และเฟอร์นิเจอร์ทั้งร้านเปลี่ยนตามสไตล์	Walls, floor and all the furniture follow the style
+ชื่อร้าน (ขึ้นป้ายหน้าร้าน)	Shop name (on the sign over the door)
+เช่น บ้านไร่คาเฟ่	e.g. Farmhouse Café
+สไตล์ร้าน · เปลี่ยนสไตล์ {} ฿	Shop style · change for {} ฿
+บันทึกชื่อร้าน	Save name
+ร้านเต็มแล้ว (40 ชิ้น) เก็บบางอย่างก่อน	The shop is full (40 items) — store something first
+ต้องเปิดธุรกิจร้านกาแฟที่ธนาคารก่อน	Open a coffee business at the bank first
+ชื่อร้านยาวเกินไป	Shop name is too long
+ถ่ายรูปไม่ได้ ลองใหม่	Couldn't take the photo, try again
+บันทึกรูปร้านลงคลังภาพแล้ว	Shop photo saved to Photos
+แชร์รูปร้านแล้ว	Shop photo shared

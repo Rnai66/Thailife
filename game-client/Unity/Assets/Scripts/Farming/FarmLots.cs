@@ -205,6 +205,7 @@ public class FarmLots : MonoBehaviour
         if (m.Contains("offline")) return "ต้องออนไลน์ก่อน";
         if (m.Contains("farms full")) return "หมู่นี้แปลงเกษตรเต็มแล้ว";
         if (m.Contains("same farm")) return "แปลงเกษตรอยู่หมู่นี้อยู่แล้ว";
+        if (m.Contains("set your name")) return "ตั้งชื่อตัวละครก่อน แล้วจะได้แปลงเกษตรของตัวเอง";
         return "เชื่อมต่อไม่ได้ ลองใหม่";
     }
 }

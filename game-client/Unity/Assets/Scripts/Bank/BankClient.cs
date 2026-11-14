@@ -9,13 +9,13 @@ public class BankClient : MonoBehaviour
 {
     [Serializable] public class Asset { public string id, kind, name, perk; public int price, level; public bool owned; }
     [Serializable] public class BusinessType { public string id, name; public int setup, rent, wage, revenue; }
-    [Serializable] public class Business { public int slot, staff, till, per_day; public string type, name, building; }
+    [Serializable] public class Business { public int slot, staff, till, per_day, earned; public string type, name, building; }
     [Serializable] public class Building { public string id, name; public bool taken; }
 
     [Serializable]
     public class State
     {
-        public int level, cash, savings, loan, loan_limit, loan_level, business_level, business_cash, max_staff, till;
+        public int level, cash, savings, loan, loan_limit, loan_level, business_level, business_cash, max_staff, till, income;
         public float savings_rate, loan_rate, speed = 1f;
         public Asset[] assets;
         public BusinessType[] business_types;

@@ -119,8 +119,16 @@ local function home_moo(user_id)
   return nil
 end
 
--- Make sure the player has a farm lot (your own หมู่ first, else the fullest หมู่ with room)
-local function ensure(user_id, s)
+-- Has the player given themselves a name yet (profile_set_name)? A farm lot is only given then, so a
+-- fresh install that is opened and closed again doesn't take one under a made-up username
+local function named(user_id)
+  local u = nk.account_get_id(user_id).user or {}
+  return u.display_name ~= nil and u.display_name ~= ""
+end
+
+-- Make sure the player has a farm lot (your own หมู่ first, else the fullest หมู่ with room); `need`:
+-- an action that can't do without one (without a name yet: an error, else nothing given)
+local function ensure(user_id, s, need)
   if s.moo and s.lot then
     local doc = read_lots(s.moo)
     local cur = doc.lots[tostring(s.lot)]
@@ -128,6 +136,11 @@ local function ensure(user_id, s)
       if nk.time() - (cur.seen or 0) > SEEN_EVERY_MS then put(s.moo, s.lot, user_id, s) end
       return
     end
+    s.moo, s.lot = nil, nil -- let go meanwhile (idle)
+  end
+  if not named(user_id) then
+    if need then err("set your name first") end
+    return
   end
   local want = home_moo(user_id)
   local order = {}
@@ -204,7 +217,7 @@ nk.register_rpc(function(context, payload)
   local user_id = context.user_id
   local req = decode(payload)
   local s = read(user_id)
-  ensure(user_id, s)
+  ensure(user_id, s, true)
   local home = home_moo(user_id)
   local moo = home or math.floor(tonumber(req.moo) or 0)
   if moo < 1 or moo > MOOS then err("bad moo", GRPC_INVALID_ARGUMENT) end
@@ -251,7 +264,7 @@ nk.register_rpc(function(context, payload)
   local user_id = context.user_id
   local req = decode(payload)
   local s = read(user_id)
-  ensure(user_id, s)
+  ensure(user_id, s, true)
   local done
   if req.layout ~= nil then
     if type(req.layout) ~= "table" or #req.layout ~= 4 then err("bad layout", GRPC_INVALID_ARGUMENT) end

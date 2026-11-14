@@ -29,6 +29,7 @@ public class HomeClient : MonoBehaviour
         public bool chosen;
         public string area, area_name, scene, style, style_name, done, moo_name, address, notice;
         public int move_fee, paid, moo, lot;
+        public int sale, sale_min, sale_max; // ประกาศขายบ้าน: your asking price (0 = not for sale)
         public bool admin; // the game's own account: keeps the village stilt house too (HomePlot.IsSecondHome)
         public Area[] areas;
     }
@@ -37,11 +38,13 @@ public class HomeClient : MonoBehaviour
     [Serializable] private class ChooseLotRequest { public string area, style; public int moo, lot; }
     [Serializable] private class LotsRequest { public string area; public int moo; }
     [Serializable] private class VisitRequest { public string user_id; }
+    [Serializable] private class SellRequest { public int price; }
+    [Serializable] private class BuyRequest { public string area; public int moo, lot; }
     // A friend's home you're visiting (home_visit): you see and play in their หมู่ until you go home
     [Serializable] public class VisitInfo { public string user_id, name, area, area_name, scene, address; public int moo, lot; }
 
     // lots_get: one หมู่'s lots and how full each หมู่ is
-    [Serializable] public class LotEntry { public int no; public bool vacant, mine, friend; public string owner, owner_id, style; }
+    [Serializable] public class LotEntry { public int no, sale; public bool vacant, mine, friend; public string owner, owner_id, style; }
     [Serializable] public class MooEntry { public int no, used, total, friends; public string name; }
     [Serializable] public class LotsView
     {
@@ -154,6 +157,17 @@ public class HomeClient : MonoBehaviour
         return s;
     }
 
+    // ประกาศขายบ้าน at a price (0: take it off the market)
+    public Task<State> SellAsync(int price) => Call("home_sell", JsonUtility.ToJson(new SellRequest { price = price }));
+
+    // Buy a house that's for sale and move in
+    public async Task<State> BuyAsync(string area, int moo, int lot)
+    {
+        var s = await Call("home_buy", JsonUtility.ToJson(new BuyRequest { area = area, moo = moo, lot = lot }));
+        GoHome();
+        return s;
+    }
+
     public async Task<LotsView> LotsAsync(string area, int moo)
     {
         var result = await connection.Client.RpcAsync(connection.Session, "lots_get", JsonUtility.ToJson(new LotsRequest { area = area, moo = moo }));
@@ -209,7 +223,11 @@ public class HomeClient : MonoBehaviour
     public static string Explain(Exception e)
     {
         string m = e.Message ?? "";
-        if (m.Contains("not enough baht")) return "เงินไม่พอค่าย้ายบ้าน";
+        if (m.Contains("not enough baht")) return "เงินไม่พอ";
+        if (m.Contains("not for sale")) return "บ้านหลังนี้ไม่ได้ประกาศขายแล้ว";
+        if (m.Contains("your own house")) return "บ้านของคุณเอง";
+        if (m.Contains("no house to sell")) return "ยังไม่มีบ้านเลขที่ของตัวเองให้ขาย";
+        if (m.Contains("bad price")) return "ราคาไม่ถูกต้อง";
         if (m.Contains("same home")) return "อยู่บ้านนี้อยู่แล้ว";
         if (m.Contains("lot taken")) return "แปลงนี้มีคนจองไปแล้ว เลือกแปลงอื่น";
         if (m.Contains("area full")) return "ย่านนี้เต็มทุกหมู่แล้ว";

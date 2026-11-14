@@ -54,12 +54,25 @@ public class TempleClient : MonoBehaviour
         public Ghost[] ghosts;
         public Night[] log;
         public string[] banished;
+        public Alms alms;
         // results
         public string done, token, ghost, ghost_name;
         public int seconds, sigils, need, gained_barami, gained_monk, gained_energy, reward, xp;
         public bool won;
     }
 
+    // พระบิณฑบาต this morning (temple.lua alms_view): how many monks walk, why (วันพระ / the holy day's
+    // name), whether it's the time for it (game minutes from..to) and which monks you've given to today
+    [Serializable]
+    public class Alms
+    {
+        public int monks, from, to, barami;
+        public string day_name;
+        public bool open;
+        public int[] given;
+    }
+
+    [Serializable] private class AlmsRequest { public int monk; public string food; }
     [Serializable] private class MeditateRequest { public string action, token; public bool incense; }
     [Serializable] private class GhostRequest { public string spot, ghost, token; public int hits; }
     [Serializable] private class ItemRequest { public string item; }
@@ -107,6 +120,12 @@ public class TempleClient : MonoBehaviour
         if (Current == null || !connection.IsConnected || Time.time < nextPoll) return;
         nextPoll = Time.time + PollInterval;
         _ = Quietly();
+    }
+
+    // Look again now (e.g. a new morning's alms round), quietly
+    public void Poke()
+    {
+        if (connection != null && connection.IsConnected) _ = Quietly();
     }
 
     private async Task Quietly()
@@ -162,6 +181,13 @@ public class TempleClient : MonoBehaviour
     public Task<State> WearAsync(string item, bool wear) => Call("temple_wear", JsonUtility.ToJson(new WearRequest { item = item, wear = wear }));
     public Task<State> MeditateStartAsync(bool incense) => Call("temple_meditate", JsonUtility.ToJson(new MeditateRequest { action = "start", incense = incense }));
     public Task<State> MeditateFinishAsync(string token) => Call("temple_meditate", JsonUtility.ToJson(new MeditateRequest { action = "finish", token = token }));
+    public Task<State> AlmsAsync(int monk, string food) => Call("temple_alms", JsonUtility.ToJson(new AlmsRequest { monk = monk, food = food }));
+    public bool GaveAlms(int monk)
+    {
+        if (Current?.alms?.given == null) return false;
+        foreach (int g in Current.alms.given) if (g == monk) return true;
+        return false;
+    }
     public Task<State> GhostStartAsync(string spot, string ghost) => Call("ghost_start", JsonUtility.ToJson(new GhostRequest { spot = spot, ghost = ghost }));
     public Task<State> GhostFinishAsync(string token, int hits) => Call("ghost_finish", JsonUtility.ToJson(new GhostRequest { token = token, hits = hits }));
 

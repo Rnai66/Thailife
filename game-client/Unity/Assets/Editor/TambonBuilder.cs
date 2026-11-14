@@ -193,6 +193,7 @@ public static class TambonBuilder
 
         TempleGround(root);
         LandParcels.BuildCity(root); // ที่ดินติดถนน next to the bank (a shophouse to let once it's yours)
+        CafeShop.Build(root); // ร้านกาแฟของผู้เล่น: east of the land lot, decorated by whoever runs a coffee business
         Homes.City(root); // หมู่บ้านในเมือง: the townhouse and the detached house players can live in
 
         // ตลาดสดเทศบาล east of the clock tower (morning market, 05:00-13:00)

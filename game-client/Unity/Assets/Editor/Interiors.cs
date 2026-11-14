@@ -64,6 +64,7 @@ public static class Interiors
             case "store": Store(room, hw, hd, height, accent); break;
             case "spa": Spa(room, hw, hd, height); break;
             case "cafe": Cafe(room, hw, hd, height, accent); break;
+            case "empty": break; // furnished at runtime (CafeSite)
             case "food": Food(room, hw, hd, height, accent); break;
             case "barber": Barber(room, hw, hd, height); break;
             case "pharmacy": Pharmacy(room, hw, hd, height); break;

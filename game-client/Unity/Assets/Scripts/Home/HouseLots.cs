@@ -12,6 +12,7 @@ public class HouseLots : MonoBehaviour
     [SerializeField] private Transform templates;
 
     private readonly Dictionary<int, HouseLot> lots = new Dictionary<int, HouseLot>();
+    private HouseLot ownHouse; // the builds of the game's own account round the village's own stilt house (lot 0)
     private float nextRefresh;
     private bool busy;
 
@@ -41,6 +42,7 @@ public class HouseLots : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (ownHouse != null) Destroy(ownHouse.gameObject);
         if (Current == this) Current = null;
     }
 
@@ -81,7 +83,7 @@ public class HouseLots : MonoBehaviour
         // a lot you've left (moved within this map) goes back to waiting for the server
         foreach (var lot in lots.Values)
             if (lot.Number != s.lot && lot.Style != null && lot.GetComponentInChildren<HomePlot>() is HomePlot p && p.IsMine) lot.Clear(false);
-        if (lots.TryGetValue(s.lot, out var mine)) mine.Show(Template(s.style), s.style, MyName());
+        if (lots.TryGetValue(s.lot, out var mine)) mine.Show(Template(s.style), s.style, s.sale > 0 ? $"{MyName()}\nประกาศขาย {s.sale:N0} บาท" : MyName());
         HomePlot.ApplyAll();
     }
 
@@ -100,6 +102,11 @@ public class HouseLots : MonoBehaviour
             var got = !mine && byLot.TryGetValue(lot.Number, out var l2) ? l2 : null;
             lot.ShowBuilt(got?.pieces, got?.anchor);
         }
+        // lot 0: the game's own account lives in the map's own stilt house (home.lua) — shown to everyone
+        // else (its owner sees them as their own, BuiltPieces)
+        var own = !HomeClient.IsAdmin && byLot.TryGetValue(0, out var l0) ? l0 : null;
+        if (own != null && ownHouse == null) ownHouse = new GameObject("OwnHouseBuilds").AddComponent<HouseLot>();
+        if (ownHouse != null) ownHouse.ShowBuilt(own?.pieces, own?.anchor);
     }
 
     // Come to visit a friend (HomeClient.VisitAsync): stand in front of their lot once it's known
@@ -134,7 +141,7 @@ public class HouseLots : MonoBehaviour
             {
                 if (!lots.TryGetValue(l.no, out var lot)) continue;
                 if (l.vacant) lot.Clear(true);
-                else lot.Show(Template(l.style), l.style, l.owner);
+                else lot.Show(Template(l.style), l.style, l.sale > 0 ? $"{l.owner}\nประกาศขาย {l.sale:N0} บาท" : l.owner);
             }
             HomePlot.ApplyAll();
             ArriveForVisit();

@@ -222,6 +222,30 @@ nk.register_rpc(function(context, payload)
       if #pieces > 0 then table.insert(lots, { no = no, user_id = user, pieces = pieces, anchor = big and ANCHOR or nil }) end
     end
   end
+  -- the game's own account living in the village's own stilt house (home.lua s.own): that house stands in
+  -- every หมู่ of the village, and so do its builds (lot 0: drawn round the anchor)
+  if area == "village" then
+    local keys2 = {}
+    for _, id in ipairs(admin.ids()) do
+      if not owners[id] then
+        table.insert(keys2, { collection = STATE.collection, key = STATE.key, user_id = id })
+        table.insert(keys2, { collection = "home", key = "choice", user_id = id })
+      end
+    end
+    if #keys2 > 0 then
+      local b2, h2 = {}, {}
+      for _, o in ipairs(nk.storage_read(keys2)) do
+        if o.collection == STATE.collection then b2[o.user_id] = o.value else h2[o.user_id] = o.value end
+      end
+      for id, s in pairs(b2) do
+        if h2[id] and h2[id].own and s.pieces then
+          local pieces = {}
+          for _, p in ipairs(s.pieces) do if site_of(p) == "home" then table.insert(pieces, p) end end
+          if #pieces > 0 then table.insert(lots, { no = 0, user_id = id, pieces = pieces, anchor = ANCHOR }) end
+        end
+      end
+    end
+  end
   return nk.json_encode({ area = area, moo = moo, lots = (#lots > 0) and lots or nil })
 end, "build_lots")
 

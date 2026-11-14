@@ -1,16 +1,26 @@
 using UnityEngine;
 
-// พระบิณฑบาต: in the early morning (06:00-08:30 game time) a line of monks walks barefoot from
-// the temple along the road with their alms bowls, then back. Monks are built from simple
-// shapes: saffron robe, shaven head, black alms bowl.
+// พระบิณฑบาต: every morning (05:30-09:00 game time, temple.lua ALMS) a line of monks (MonkNpc) walks
+// barefoot from the temple along the road with their alms bowls, in single file, eyes down, and back.
+// 5 monks on an ordinary day, 10 on วันพระ, 20 on the holy days (เข้าพรรษา, ออกพรรษา, ตักบาตรเทโว,
+// กฐิน, ผ้าป่า, …) — the number comes from the server (TempleClient alms). Walk up to a monk to
+// ตักบาตร (AlmsUI): the whole line waits while he receives and blesses you.
 public class MonkProcession : MonoBehaviour
 {
     [SerializeField] private Vector3 from, to;   // world points along the road
-    [SerializeField] private int monks = 3;
+    [SerializeField] private int monks = 3;      // (before the server says)
 
-    private Transform[] line;
-    private float t;
+    private const float Gap = 1.7f, Reach = 2.4f;
+    private const int DefaultFrom = 330, DefaultTo = 540;
+
+    private MonkNpc[] line;
+    private float lead;   // how far the first monk has come along the out-and-back path (metres)
     private float nextCheck;
+    private int shownDay = -1;
+    private PlayerController player;
+    private MonkNpc offered;
+
+    public static MonkProcession Current { get; private set; }
 
     public void Configure(Vector3 start, Vector3 end, int count)
     {
@@ -19,65 +29,126 @@ public class MonkProcession : MonoBehaviour
         monks = count;
     }
 
-    private static bool Morning => GameClock.Hour == 6 || GameClock.Hour == 7 || (GameClock.Hour == 8 && GameClock.Minute < 30);
+    private void OnEnable() => Current = this;
+    private void OnDisable()
+    {
+        if (Current == this) Current = null;
+        if (offered != null) ContextButton.Hide(this);
+    }
+
+    private static TempleClient.Alms Alms => TempleClient.Instance?.Current?.alms;
+    private static int WindowFrom => Alms != null && Alms.to > 0 ? Alms.from : DefaultFrom;
+    private static int WindowTo => Alms != null && Alms.to > 0 ? Alms.to : DefaultTo;
+    private int Count => Alms != null && Alms.monks > 0 ? Alms.monks : Mathf.Max(monks, 5);
+    private static bool Morning => GameClock.MinuteOfDay >= WindowFrom && GameClock.MinuteOfDay < WindowTo;
+
+    // The line waits while someone is giving (the UI is open or a monk is receiving)
+    public bool Waiting { get; set; }
+
+    private float PathLength => Vector3.Distance(from, to) * 2f;
+
+    // Where the head of the line should be by the clock
+    private float LeadByClock(int count)
+    {
+        float u = Mathf.Clamp01((GameClock.MinuteOfDay - WindowFrom) / Mathf.Max(1f, WindowTo - WindowFrom));
+        return u * (PathLength + (count - 1) * Gap);
+    }
 
     private void Update()
     {
         if (Time.time >= nextCheck)
         {
             nextCheck = Time.time + 2f;
-            if (Morning && line == null) Spawn();
+            if (Morning && (line == null || line.Length != Count || shownDay != GameClock.Day)) Spawn();
             else if (!Morning && line != null) Clear();
         }
         if (line == null) return;
 
-        // Out and back across the morning (150 game minutes = 150 real seconds)
-        float minutes = (GameClock.Hour - 6) * 60f + GameClock.Minute + GameClock.MinuteOfDay % 1f;
-        float u = Mathf.Clamp01(minutes / 150f);
-        float along = u < 0.5f ? u * 2f : (1f - u) * 2f;
+        bool hold = Waiting;
+        foreach (var m in line) if (m != null && m.Receiving) hold = true;
+        // keep to the clock, catching up after waiting for someone
+        float target = LeadByClock(line.Length);
+        lead = Mathf.MoveTowards(lead, target, hold ? 0f : Time.deltaTime * 1.2f);
+
+        float half = PathLength * 0.5f;
         Vector3 dir = (to - from).normalized;
         for (int i = 0; i < line.Length; i++)
         {
-            Vector3 p = Vector3.Lerp(from, to, Mathf.Clamp01(along - i * 0.025f));
             var m = line[i];
-            m.position = p + Vector3.up * Mathf.Abs(Mathf.Sin(Time.time * 4f + i)) * 0.04f; // gentle walking bob
-            m.rotation = Quaternion.LookRotation(u < 0.5f ? dir : -dir);
+            if (m == null) continue;
+            float s = Mathf.Clamp(lead - i * Gap, 0f, PathLength);
+            bool back = s > half;
+            Vector3 p = back ? Vector3.Lerp(to, from, (s - half) / half) : Vector3.Lerp(from, to, s / half);
+            p += Vector3.Cross(Vector3.up, dir) * (back ? -0.9f : 0.9f); // keep to one side of the road
+            if (!m.Receiving)
+            {
+                m.transform.position = p;
+                m.transform.rotation = Quaternion.LookRotation(back ? -dir : dir);
+            }
         }
+        OfferNearest();
+    }
+
+    // The monk nearest the player that you haven't given to yet today: offer ใส่บาตร
+    private void OfferNearest()
+    {
+        if (player == null) player = FindAnyObjectByType<PlayerController>();
+        MonkNpc best = null;
+        var temple = TempleClient.Instance;
+        if (player != null && !Waiting && temple != null && temple.IsOnline)
+        {
+            float bestD = Reach * Reach;
+            foreach (var m in line)
+            {
+                if (m == null) continue;
+                float d = (m.transform.position - player.transform.position).sqrMagnitude;
+                if (d < bestD && !temple.GaveAlms(m.Index)) { bestD = d; best = m; }
+            }
+        }
+        if (best == offered) return;
+        offered = best;
+        if (best == null) { ContextButton.Hide(this); return; }
+        var a = Alms;
+        string why = a != null && !string.IsNullOrEmpty(a.day_name) ? $"{a.day_name} · พระออกบิณฑบาต {line.Length} รูป · " : "";
+        int barami = a != null && a.barami > 0 ? a.barami : 8;
+        var monk = best;
+        ContextButton.Show(this, "ใส่บาตร", $"{why}ใส่บาตรด้วยอาหารในกระเป๋า · บารมี +{barami} ต่อพระ 1 รูป", () => AlmsUI.Open(this, monk));
+    }
+
+    // After giving: that monk can't be offered again today
+    public void Given()
+    {
+        offered = null;
+        ContextButton.Hide(this);
     }
 
     private void Spawn()
     {
-        line = new Transform[monks];
-        var robe = Mat(new Color(0.95f, 0.5f, 0.1f));
-        var skin = Mat(new Color(0.8f, 0.6f, 0.45f));
-        var bowl = Mat(new Color(0.08f, 0.08f, 0.08f));
-        for (int i = 0; i < monks; i++)
+        Clear();
+        int count = Count;
+        line = new MonkNpc[count];
+        for (int i = 0; i < count; i++)
         {
-            var m = new GameObject("Monk_พระ").transform;
-            m.SetParent(transform, false);
-            Part(PrimitiveType.Cylinder, m, new Vector3(0f, 0.75f, 0f), new Vector3(0.55f, 0.75f, 0.45f), robe);   // robe
-            Part(PrimitiveType.Sphere, m, new Vector3(0f, 1.48f, 0f), new Vector3(0.52f, 0.5f, 0.45f), robe);      // shoulders
-            Part(PrimitiveType.Sphere, m, new Vector3(0f, 1.78f, 0f), new Vector3(0.26f, 0.3f, 0.26f), skin);      // shaven head
-            Part(PrimitiveType.Sphere, m, new Vector3(0f, 1.05f, 0.3f), new Vector3(0.3f, 0.22f, 0.3f), bowl);     // alms bowl
+            var go = new GameObject($"Monk_พระ_{i + 1}");
+            go.transform.SetParent(transform, false);
+            var m = go.AddComponent<MonkNpc>();
+            m.Init(i + 1, i * 7 + GameClock.Day);
             line[i] = m;
         }
+        shownDay = GameClock.Day;
+        if (TempleClient.Instance != null) TempleClient.Instance.Poke(); // how many walk today (and who you gave to)
+        lead = LeadByClock(count);
+        var a = Alms;
+        if (a != null && !string.IsNullOrEmpty(a.day_name) && count > 5 && player != null
+            && (player.transform.position - from).sqrMagnitude < 120f * 120f)
+            UiKit.FloatAbovePlayer($"{a.day_name} · พระออกบิณฑบาต {count} รูป", new Color(1f, 0.82f, 0.35f));
     }
 
     private void Clear()
     {
-        foreach (var m in line) if (m != null) Destroy(m.gameObject);
+        if (line != null) foreach (var m in line) if (m != null) Destroy(m.gameObject);
         line = null;
-    }
-
-    private static Material Mat(Color c) => new Material(Shader.Find("Universal Render Pipeline/Lit")) { color = c };
-
-    private static void Part(PrimitiveType type, Transform parent, Vector3 pos, Vector3 scale, Material mat)
-    {
-        var go = GameObject.CreatePrimitive(type);
-        Destroy(go.GetComponent<Collider>());
-        go.transform.SetParent(parent, false);
-        go.transform.localPosition = pos;
-        go.transform.localScale = scale;
-        go.GetComponent<Renderer>().sharedMaterial = mat;
+        offered = null;
+        ContextButton.Hide(this);
     }
 }
