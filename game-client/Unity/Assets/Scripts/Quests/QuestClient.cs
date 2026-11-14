@@ -22,6 +22,15 @@ public class QuestClient : MonoBehaviour
         public bool claimed;
         public bool auto;         // the character is doing it by itself (ออโต้)
         public int auto_left_s;   // seconds until the auto run finishes it
+        public FishCatch[] @catch; // the fish an auto fishing quest brought up (into the fish bag)
+    }
+
+    [Serializable]
+    public class FishCatch
+    {
+        public string id;
+        public string name;
+        public float kg;
     }
 
     [Serializable]

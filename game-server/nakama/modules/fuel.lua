@@ -46,10 +46,11 @@ local PROVINCE_AT = {
   khonkaen  = { lat = 16.43, lon = 102.83 },
   ubon      = { lat = 15.24, lon = 104.85 },
   buriram   = { lat = 14.99, lon = 103.10 },
+  korat     = { lat = 14.97, lon = 102.10 },
   songkhla  = { lat = 7.01,  lon = 100.47 },
   nakhonsi  = { lat = 8.43,  lon = 99.96 },
 }
-local ORDER = { "village_khoko", "tambon_khoko", "city", "beach", "bangkok", "chiangmai", "pattaya", "khonkaen", "ubon", "buriram", "songkhla", "nakhonsi" }
+local ORDER = { "village_khoko", "tambon_khoko", "city", "beach", "bangkok", "chiangmai", "pattaya", "khonkaen", "ubon", "buriram", "korat", "songkhla", "nakhonsi" }
 
 local function err(msg, code) error({ msg, code or GRPC_FAILED_PRECONDITION }) end
 

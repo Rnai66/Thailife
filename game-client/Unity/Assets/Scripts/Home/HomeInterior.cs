@@ -310,6 +310,25 @@ public class HomeInterior : MonoBehaviour
             added.Add(defaultMat);
         }
         if (defaultMat != null) defaultMat.SetActive(bed == null);
+        if (bed != null) Sleepable(bed, 0.62f, new Vector3(1.9f, 2f, 2.9f));
+        if (defaultMat != null) Sleepable(defaultMat.transform, 0.14f, new Vector3(1.8f, 2f, 2.6f));
+    }
+
+    // Stand by the bed (or the mat) and a นอน button comes up: lie down on it to get the energy back
+    private static void Sleepable(Transform piece, float height, Vector3 zone)
+    {
+        if (piece.GetComponentInChildren<SleepSpot>(true) != null) return;
+        var go = new GameObject("SleepZone");
+        go.transform.SetParent(piece, false);
+        var box = go.AddComponent<BoxCollider>();
+        box.isTrigger = true;
+        box.center = new Vector3(0f, 1f, 0f);
+        box.size = zone;
+        var lie = new GameObject("LiePoint").transform;
+        lie.SetParent(piece, false);
+        lie.localPosition = new Vector3(0f, height, 0.1f);
+        lie.localRotation = Quaternion.Euler(0f, 90f, 0f);
+        go.AddComponent<SleepSpot>().Configure(height > 0.3f ? "เตียงในบ้าน" : "ที่นอนในบ้าน", "นอน", lie);
     }
 
     private Transform bed;

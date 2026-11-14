@@ -15,6 +15,7 @@ public class SeatedPose : MonoBehaviour
     public bool Ride;
     public bool Kneel;
     public bool CrossLegged;
+    public bool Writing; // นั่งเรียน: forearms on the desk, the right hand writing, head dipping to the book now and then
 
     private Animator animator;
     private CharacterModel model;
@@ -71,6 +72,18 @@ public class SeatedPose : MonoBehaviour
         Bend(HumanBodyBones.RightUpperLeg, -85f);
         Bend(HumanBodyBones.LeftLowerLeg, 85f);
         Bend(HumanBodyBones.RightLowerLeg, 85f);
+        if (Writing)
+        {
+            float w = Time.time;
+            float scribble = Mathf.Sin(w * 9f) * 4f + Mathf.Sin(w * 2.3f) * 3f;
+            bool look = Mathf.Repeat(w, 7f) < 4.5f; // head down to the book, then up to the board
+            Bend(HumanBodyBones.LeftUpperArm, -40f, Vector3.forward, 18f);
+            Bend(HumanBodyBones.RightUpperArm, -42f + scribble * 0.4f, Vector3.forward, -16f);
+            Bend(HumanBodyBones.LeftLowerArm, -55f, Vector3.up, 35f);
+            Bend(HumanBodyBones.RightLowerArm, -50f + scribble, Vector3.up, -30f);
+            Bend(HumanBodyBones.Spine, 8f);
+            Bend(HumanBodyBones.Head, look ? 22f : 2f);
+        }
         if (HoldTiller)
         {
             Bend(HumanBodyBones.RightUpperArm, -55f, Vector3.forward, 20f);

@@ -160,6 +160,18 @@ public class CareerClient : MonoBehaviour
     private static void Tired() =>
         UiKit.FloatAbovePlayer("เหนื่อยแล้ว! กินอะไรหน่อยหรือนอนพัก", new Color(1f, 0.55f, 0.35f));
 
+    // XP from elsewhere (the level-up share reward): the same stats with the new level and XP
+    public void ApplyXp(int level, int xp, int xpToNext)
+    {
+        if (Current == null) return;
+        var next = JsonUtility.FromJson<Stats>(JsonUtility.ToJson(Current));
+        next.level = level;
+        next.xp = xp;
+        next.xp_to_next = xpToNext;
+        next.accepted = 0;
+        Apply(next);
+    }
+
     private void Apply(Stats stats)
     {
         var previous = Current;
@@ -173,6 +185,7 @@ public class CareerClient : MonoBehaviour
             if (previous != null && combat != null)
             {
                 LevelUpFX.Show(stats.level, TitleOf(stats));
+                if (stats.level > previous.level) LevelUpShare.Offer(stats.level, TitleOf(stats));
                 Debug.Log($"[Career] Level up → {stats.level} ({TitleOf(stats)})");
             }
         }

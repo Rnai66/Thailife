@@ -26,6 +26,7 @@ public static class WorldBuilder
         TambonBuilder.BuildBangkok(ask: false);
         ProvinceNakhonSi.Build(ask: false);
         ProvinceBuriram.Build(ask: false);
+        ProvinceKorat.Build(ask: false);
         ProvinceSongkhla.Build(ask: false);
         ProvinceChiangMai.Build(ask: false);
         ProvincePattaya.Build(ask: false);

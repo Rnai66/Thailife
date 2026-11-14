@@ -2830,3 +2830,845 @@ TICKETS	TICKETS
 ออกจากโหมดก่อสร้างแล้ว (ออกนอกพื้นที่)	Left build mode (out of the area)
 ก่อสร้างได้ที่บ้าน แปลงเกษตร หรือที่ดินของคุณ	You can build at your home, farm lot or land
 เดินไปที่บ้าน แปลงเกษตร หรือที่ดินของคุณก่อน แล้วค่อยเปิดโหมดก่อสร้าง	Walk to your home, farm lot or land first, then open build mode
+สยามสกาย	Siam Sky
+บางกอกเจ็ท	Bangkok Jet
+อันดามันแอร์	Andaman Air
+ล้านนาแอร์ไลน์	Lanna Airlines
+ศูนย์ซ่อมบำรุงอากาศยาน	Aircraft Maintenance Center
+อีสานบิน	Isan Air
+ร้านค้า	Shop
+น้ำดื่ม ขนม	Drinks & snacks
+ห้องน้ำ  ↗	Restrooms  ↗
+ชานชาลา {}	Platform {}
+ทางรถทัวร์เข้า-ออก →	Coach entrance / exit →
+คิวรถสองแถว	Songthaew stand
+รอบเมือง	Around town
+ไปหมู่บ้าน ตำบล ทะเล	To the village, tambon, beach
+วิ่งรอบเมือง	Runs around town
+โบกได้ริมถนน 20	Hail by the roadside 20
+บขส. สถานีขนส่ง ↓	Bus terminal ↓
+บขส.	Bus terminal
+สถานีขนส่งผู้โดยสาร	Passenger bus terminal
+บขส.  BUS TERMINAL	BUS TERMINAL
+บขส. (สายกลาง)	Bus terminal (central)
+ราชสีห์ทัวร์	Ratchasi Tour
+เพชรทัวร์	Phet Tour
+ทองคำทัวร์	Thongkham Tour
+สยามสายใต้	Siam Southern Line
+ขาออก	Departures
+· รถทัวร์ไปต่างจังหวัด	· coaches to other provinces
+ถนนหน้าสถานี	Station Road
+ซอย1	Soi 1
+↑ วัด	↑ Temple
+ลานวัด	Temple grounds
+สุดถนนนี้ทางตะวันออก ข้ามวงแหวน	East at the end of this road, across the ring road
+สถานีรถไฟ - บขส.	Railway station - bus terminal
+ตลาด - โรงพยาบาล	Market - hospital
+สถานีขนส่ง บขส.	Bus terminal
+คิวสองแถว ·	Songthaew stand ·
+แปลงเกษตร	Farm plots
+ซอยหมู่บ้านใต้	South village lane
+ซอยหมู่บ้านตะวันตก	West village lane
+น	N
+สถานีบริการน้ำมัน	Petrol station
+ดีเซล	Diesel
+ห้องน้ำ	Restrooms
+น้ำแข็ง	Ice
+จ่ายเงินที่นี่	Pay here
+น้ำมัน	Fuel
+ราคาวันนี้ (บาท/ลิตร)	Today's prices (baht/liter)
+แก๊สโซฮอล์ 95	Gasohol 95
+เติมลม	Air
+น้ำ	Water
+ตำรวจ  POLICE	POLICE
+ตรวจจับความเร็ว	Speed check
+จำกัด {} กม./ชม.	Limit {} km/h
+ชะลอความเร็ว 20	Slow down to 20
+ตำรวจ  ด่านตรวจ	POLICE  CHECKPOINT
+วนอุทยานเขากระโดง	Khao Kradong Forest Park
+ภูเขาไฟเก่า	Old volcano
+บันไดนาค 297 ขั้น	Naga stairway, 297 steps
+พระสุภัทรบพิตร	Phra Suphattharabophit
+ศาลหลักเมืองบุรีรัมย์	Buriram City Pillar Shrine
+ศาลหลักเมืองทรงปรางค์ขอม	City pillar shrine in a Khmer prang
+วัดเขาอังคาร	Wat Khao Angkhan
+อุโบสถศิลปะผสมไทย-ขอม บนยอดภูเขาไฟ	Thai-Khmer ordination hall on top of a volcano
+อุโบสถวัดเขาอังคาร	Wat Khao Angkhan ordination hall
+ท่าอากาศยานบุรีรัมย์	Buriram Airport
+สถานีรถไฟบุรีรัมย์	Buriram Railway Station
+ทุ่งนกกระเรียน ห้วยจระเข้มาก	Huai Chorakhe Mak crane wetland
+นกกระเรียนพันธุ์ไทย คืนถิ่นบุรีรัมย์	Sarus cranes back home in Buriram
+ถนนจิระ	Chira Road
+เมืองปราสาทหิน	City of stone castles
+↓ สนามช้าง เซอร์กิต	↓ Chang Circuit
+ช้าง อารีน่า	Chang Arena
+← วัดเขาอังคาร	← Wat Khao Angkhan
+ปราสาทเมืองต่ำ	Prasat Mueang Tam
+จุดชมนก	Birdwatching point
+ตลาดผ้าไหมนาโพธิ์	Na Pho silk market
+ผ้าไหมมัดหมี่ ผ้าไหมหางกระรอก	Mudmee silk, squirrel-tail silk
+↑ เขากระโดง	↑ Khao Kradong
+ตลาดผ้าไหม	Silk market
+ปราสาทหินพนมรุ้ง ↑	Phanom Rung ↑
+ร้านผ้าไหม	Silk shop
+ส้มตำไก่ย่าง	Som tam & grilled chicken
+ร้านเสื้อบอล	Football shirt shop
+ข้าวเปียก	Khao piak (noodle soup)
+ถนนคนเดินเซราะกราว	Soe Krao walking street
+ตลาดคนเดิน ของกิน ของฝาก ดนตรีเปิดหมวก	Walking street: food, souvenirs, buskers
+สนามช้าง อินเตอร์เนชั่นแนลเซอร์กิต	Chang International Circuit
+สนามแข่งรถมาตรฐานโลก FIA	World-class FIA race track
+สนามฟุตบอลบุรีรัมย์ ยูไนเต็ด	Buriram United stadium
+ปราสาทสายฟ้า	Thunder Castle
+ปราสาทหินพนมรุ้ง	Phanom Rung Historical Park
+ปราสาทหินบนภูเขาไฟ	Stone castle on a volcano
+สะพานนาคราช	Naga bridge
+ปราสาทอิฐห้าองค์	Five brick prangs
+สระน้ำรูปตัวแอล	L-shaped pond
+ถนนคนเดินวันอาทิตย์ ท่าแพ	Tha Phae Sunday walking street
+ของกินเหนือ งานฝีมือ ผ้าฝ้าย	Northern food, crafts, cotton
+ดนตรีพื้นเมือง	Folk music
+เชียงใหม่ไนท์บาซาร์	Chiang Mai Night Bazaar
+ตลาดกลางคืน ของที่ระลึก เครื่องเงิน งานไม้แกะสลัก	Night market: souvenirs, silverware, wood carvings
+ไนท์บาซาร์	Night Bazaar
+ท่าอากาศยานเชียงใหม่	Chiang Mai Airport
+สถานีรถไฟเชียงใหม่	Chiang Mai Railway Station
+ดอยอินทนนท์	Doi Inthanon
+หลังคาประเทศไทย 2,565 ม.	The roof of Thailand, 2,565 m
+พระมหาธาตุเจดีย์คู่	Twin royal chedis
+ถนนท่าแพ	Tha Phae Road
+นครพิงค์	Nakhon Ping
+จุดสูงสุดแดนสยาม	The highest point in Siam
+ดอยสุเทพ-ปุย	Doi Suthep-Pui
+↓ ดอยสุเทพ	↓ Doi Suthep
+วัดเจดีย์หลวง	Wat Chedi Luang
+วัดอุโมงค์	Wat Umong
+← ประตูท่าแพ	← Tha Phae Gate
+คูเมือง	Old city moat
+อุทยานแห่งชาติดอยอินทนนท์	Doi Inthanon National Park
+เล่นน้ำได้	Swimming allowed
+↑ ไนท์บาซาร์	↑ Night Bazaar
+น้ำตกแม่กลาง	Mae Klang Waterfall
+บ่อสร้าง	Bo Sang
+ดอยอินทนนท์ ↑	Doi Inthanon ↑
+หมู่บ้านทำร่มบ่อสร้าง	Bo Sang umbrella village
+ร่มกระดาษสาเขียนลาย	Hand-painted paper umbrellas
+ศูนย์หัตถกรรม	Handicraft center
+ร้านข้าวซอย	Khao soi shop
+ร้านไส้อั่ว แคบหมู	Sai ua & pork crackling shop
+ร้านผ้าฝ้าย	Cotton shop
+ร้านกาแฟดอย	Doi coffee shop
+ร้านเครื่องเงิน	Silverware shop
+อุโมงค์อิฐโบราณกลางป่า	Ancient brick tunnels in the forest
+วัดป่าในเมือง	A forest temple in the city
+รถแดง	Red truck (rot daeng)
+ดอยสุเทพ	Doi Suthep
+ตลาดวโรรส	Warorot Market
+วัดพระธาตุดอยสุเทพ	Wat Phra That Doi Suthep
+บันไดนาค 306 ขั้น	Naga stairway, 306 steps
+พระธาตุทองคำคู่เมืองเชียงใหม่	The golden chedi of Chiang Mai
+ประตูท่าแพ	Tha Phae Gate
+ประตูเมืองเก่า 700 ปี	700-year-old city gate
+ลานท่าแพ	Tha Phae square
+พระเจดีย์หลวงอิฐโบราณ	Ancient brick great chedi
+เคยประดิษฐานพระแก้วมรกต	Once home of the Emerald Buddha
+วัดพระสิงห์วรมหาวิหาร	Wat Phra Singh
+พระพุทธสิหิงค์	Phra Buddha Sihing
+วิหารลายคำ ศิลปะล้านนา	Viharn Lai Kham, Lanna style
+วิหารลายคำ	Viharn Lai Kham
+ตลาดนัดกลางคืน ของกินอีสาน	Night market, Isan food
+ดนตรีสด	Live music
+ท่าอากาศยานขอนแก่น	Khon Kaen Airport
+สถานีรถไฟขอนแก่น	Khon Kaen Railway Station
+ศาลหลักเมืองขอนแก่น	Khon Kaen City Pillar Shrine
+หลักเมืองคู่บ้านคู่เมือง	The city's guardian pillar
+ไหว้ขอพร	Make a wish
+ถนนมิตรภาพ	Mittraphap Road
+เมืองหมอแคน	City of the khaen players
+ศูนย์ผ้าไหมชนบท	Chonnabot Silk Center
+↓ บึงแก่นนคร	↓ Bueng Kaen Nakhon
+พระมหาธาตุแก่นนคร	Phra Mahathat Kaen Nakhon
+← พิพิธภัณฑ์	← Museum
+ตลาดโต้รุ่ง	Night market
+ผ้าไหมมัดหมี่ขอนแก่น	Khon Kaen mudmee silk
+ดูการทอผ้า	Watch the weaving
+↑ ไดโนเสาร์ภูเวียง	↑ Phu Wiang dinosaurs
+ตลาดต้นตาล	Ton Tan Market
+เขื่อนอุบลรัตน์	Ubol Ratana Dam
+ผ้าไหมชนบท ↑	Chonnabot silk ↑
+ร้านส้มตำ ไก่ย่าง	Som tam & grilled chicken shop
+ร้านหมอลำ แคน	Mor lam & khaen shop
+เขื่อนแห่งแรกของภาคอีสาน	The first dam in Isan
+ร้านไส้กรอกอีสาน	Isan sausage shop
+ภูพานคำ	Phu Phan Kham
+พิพิธภัณฑสถานแห่งชาติขอนแก่น	Khon Kaen National Museum
+ใบเสมาสมัยทวารวดี	Dvaravati boundary stones
+ประวัติศาสตร์อีสาน	History of Isan
+พิพิธภัณฑสถานแห่งชาติ	National Museum
+พระธาตุขามแก่น	Phra That Kham Kaen
+ปูชนียสถานคู่เมืองขอนแก่น	Khon Kaen's sacred landmark
+ที่มาของชื่อเมือง	Where the city got its name
+รถสองแถว สาย 8	Songthaew line 8
+บึงแก่นนคร	Bueng Kaen Nakhon
+ม.ขอนแก่น	Khon Kaen University
+ตลาดบางลำภู	Bang Lamphu Market
+ตลาดโต้รุ่งขอนแก่น	Khon Kaen night market
+อาหารอีสาน ไก่ย่าง ส้มตำ	Isan food, grilled chicken, som tam
+เปิดถึงดึก	Open till late
+บึงใหญ่กลางเมือง	A big lake in the middle of town
+ทางเดิน-ปั่นจักรยานรอบบึง	Walking and cycling path round the lake
+พระมหาธาตุแก่นนคร (วัดหนองแวง)	Phra Mahathat Kaen Nakhon (Wat Nong Waeng)
+พระธาตุ 9 ชั้น สูง 80 ม.	9-tier pagoda, 80 m tall
+ชมวิวเมืองจากชั้นบนสุด	City views from the top floor
+อุทยานไดโนเสาร์ภูเวียง	Phu Wiang Dinosaur Park
+ภูเวียงโกซอรัส สิรินธรเน	Phuwiangosaurus sirindhornae
+หลุมขุดค้นฟอสซิล	Fossil dig site
+กำแพงเมืองเก่า ประตูชัยเหนือ	Old city wall, north victory gate
+กำแพงอิฐโบราณ เมืองนครศรีธรรมราช	Ancient brick wall of Nakhon Si Thammarat
+ประตูชัยเหนือ	North victory gate
+หอพระอิศวร เสาชิงช้า	Ho Phra Isuan & Giant Swing
+เทวสถานพราหมณ์	Brahmin shrine
+พิธีโล้ชิงช้า	Giant swing ceremony
+หนังตะลุง	Nang talung shadow puppets
+ท่าอากาศยานนครศรีธรรมราช	Nakhon Si Thammarat Airport
+สถานีรถไฟนครศรีธรรมราช	Nakhon Si Thammarat Railway Station
+ศิลปะการแสดงพื้นบ้านปักษ์ใต้	Southern folk performing art
+ถนนราชดำเนิน	Ratchadamnoen Road
+เมืองพระ	City of monks
+↓ วัดพระมหาธาตุฯ	↓ Wat Phra Mahathat
+น้ำตกกรุงชิง	Krung Ching Waterfall
+← คีรีวง	← Khiri Wong
+กำแพงเมืองเก่า	Old city wall
+เครื่องถมนคร	Nakhon nielloware
+ของฝาก เครื่องถม ผ้ายก ขนมพื้นเมือง	Souvenirs: nielloware, yok brocade, local sweets
+↑ หอพระพุทธสิหิงค์	↑ Ho Phra Buddha Sihing
+หอพระอิศวร	Ho Phra Isuan
+ตลาดหัวอิฐ	Hua It Market
+อ่าวขนอม ↑	Khanom Bay ↑
+หมู่บ้านคีรีวง	Khiri Wong village
+หมู่บ้านอากาศดีที่สุดในประเทศไทย	The village with the cleanest air in Thailand
+ใต้เขาหลวง	Below Khao Luang
+ร้านเครื่องถม	Nielloware shop
+ขนมจีนเมืองคอน	Nakhon khanom chin
+ร้านกาแฟโบราณ	Old-style coffee shop
+เขาหลวง	Khao Luang
+เทือกเขานครศรีธรรมราช	Nakhon Si Thammarat range
+ร้านหนังตะลุง	Shadow puppet shop
+อุทยานแห่งชาติเขาหลวง	Khao Luang National Park
+น้ำตกหนานฝนแสนห่า	Nan Fon Saen Ha Waterfall
+อ่าวขนอม	Khanom Bay
+โลมาสีชมพู	Pink dolphins
+หาดทรายขาว ชมโลมาสีชมพูหายาก	White sand beach, see rare pink dolphins
+วัดพระมหาธาตุวรมหาวิหาร	Wat Phra Mahathat Woramahawihan
+พระบรมธาตุเจดีย์ ยอดทองคำ	The great chedi with a golden spire
+มรดกโลก	World Heritage
+วิหารหลวง	Grand viharn
+ศาลหลักเมืองนครศรีธรรมราช	Nakhon Si Thammarat City Pillar Shrine
+ศิลปะศรีวิชัย	Srivijaya art
+ขอพรให้แคล้วคลาด	Pray for safe travels
+หอพระพุทธสิหิงค์	Ho Phra Buddha Sihing
+พระพุทธสิหิงค์ องค์ศักดิ์สิทธิ์คู่เมือง	The city's sacred Phra Buddha Sihing
+วอล์กกิ้งสตรีท	Walking Street
+ถนนคนเดินยามค่ำคืน	Walking street by night
+ไฟนีออน ร้านอาหารทะเล	Neon lights, seafood restaurants
+ชลบุรี (พัทยา)	Chonburi (Pattaya)
+เกาะล้าน	Koh Larn
+หาดตาแหวน หาดเทียน	Ta Waen beach, Tien beach
+เรือเฟอร์รี่จากแหลมบาลีฮาย	Ferry from Bali Hai pier
+ท่าอากาศยานอู่ตะเภา	U-Tapao Airport
+สถานีรถไฟพัทยา	Pattaya Railway Station
+ตลาดน้ำ ของกิน ของฝาก 4 ภาค	Floating market: food & souvenirs from 4 regions
+เรือพายขายของ	Boats selling goods
+ถนนพัทยาสาย 2	Pattaya Second Road
+พัทยา	Pattaya
+เมืองพัทยา	Pattaya City
+↓ พระใหญ่เขาพระบาท	↓ Big Buddha, Khao Phra Bat
+สวนนงนุช	Nong Nooch Garden
+← เขาพระตำหนัก	← Khao Phra Tamnak
+ปราสาทสัจธรรม	Sanctuary of Truth
+สวนนงนุชพัทยา	Nong Nooch Tropical Garden
+สวนพฤกษศาสตร์ระดับโลก	World-class botanical garden
+สวนฝรั่งเศส สวนไดโนเสาร์	French garden, dinosaur garden
+↑ วอล์กกิ้งสตรีท	↑ Walking Street
+ตลาดน้ำ 4 ภาค	Four Regions Floating Market
+หาดพัทยา	Pattaya Beach
+ท่าเรือไปเกาะล้าน ↑	Pier to Koh Larn ↑
+ร้านเช่ามอเตอร์ไซค์	Motorbike rental
+วัดญาณสังวรารามวรมหาวิหาร	Wat Yansangwararam
+วัดในพระบรมราชานุเคราะห์	A temple under royal patronage
+มณฑปพระพุทธบาท	Buddha's Footprint pavilion
+พระอุโบสถ	Ordination hall
+พิพิธภัณฑ์ภาพสามมิติ	3D Art Museum
+ถ่ายรูปกับภาพวาดลวงตา 3 มิติ	Take photos with 3D illusion paintings
+ในร่มทั้งวัน	Indoors all day
+ภาพสามมิติ	3D art
+กรุงเทพฯ (เอกมัย)	Bangkok (Ekkamai)
+เลียบหาด	Along the beach
+พัทยาใต้	South Pattaya
+นาเกลือ	Naklua
+จอมเทียน	Jomtien
+ชายหาดยาว 3 กม.	3 km long beach
+ร่มชายหาด กีฬาทางน้ำ	Beach umbrellas, water sports
+จุดชมวิวเขาพระตำหนัก	Khao Phra Tamnak viewpoint
+ป้าย PATTAYA CITY	PATTAYA CITY sign
+มองเห็นอ่าวพัทยาทั้งอ่าว	See the whole of Pattaya Bay
+พระใหญ่ เขาพระบาท	Big Buddha, Khao Phra Bat
+พระพุทธรูปทองคำปางมารวิชัย สูง 18 ม.	18 m golden Buddha
+วัดพระใหญ่	Big Buddha temple
+ปราสาทไม้แกะสลักทั้งหลัง สูง 105 ม.	All-wood carved castle, 105 m tall
+พระพุทธมงคลมหาราช	Phra Buddha Mongkol Maharaj
+สวนสาธารณะหาดใหญ่	Hat Yai Municipal Park
+เขาคอหงส์	Khao Kho Hong
+พระพุทธรูปสูง 19.9 ม.	19.9 m Buddha statue
+ตลาดกิมหยง	Kim Yong Market
+ของฝากหาดใหญ่ ผลไม้แห้ง เม็ดมะม่วงหิมพานต์	Hat Yai souvenirs: dried fruit, cashew nuts
+ป้อมเมืองสงขลา	Songkhla Fort
+ป้อมปืนและกำแพงเมืองเก่า สมัยรัชกาลที่ 3	Old city wall and cannon fort from the reign of Rama III
+ท่าอากาศยานหาดใหญ่	Hat Yai Airport
+สถานีรถไฟหาดใหญ่	Hat Yai Railway Station
+น้ำตกโตนงาช้าง	Ton Nga Chang Waterfall
+น้ำตกเจ็ดชั้น	Seven-tier waterfall
+อุทยานแห่งชาติน้ำตกโตนงาช้าง	Ton Nga Chang Waterfall National Park
+เทือกเขาบรรทัด	Banthat Mountains
+ถนนนิพัทธ์อุทิศ	Niphat Uthit Road
+หาดใหญ่	Hat Yai
+ศาลหลักเมืองสงขลา	Songkhla City Pillar Shrine
+ศาลเจ้าพ่อหลักเมือง ศิลปะจีน	City pillar shrine, Chinese style
+ศาลหลักเมือง	City pillar shrine
+↓ สะพานติณสูลานนท์	↓ Tinsulanonda Bridge
+พระพุทธมงคลฯ	Phra Buddha Mongkol
+← น้ำตกโตนงาช้าง	← Ton Nga Chang Waterfall
+ย่านเมืองเก่า	Old town
+↑ ตลาดกิมหยง	↑ Kim Yong Market
+เขาตังกวน	Khao Tang Kuan
+แหลมสมิหลา ↑	Samila Beach ↑
+ไก่ทอดหาดใหญ่	Hat Yai fried chicken
+ร้านติ่มซำ	Dim sum shop
+ร้านโกปี๊	Kopi shop
+ร้านแลกเงิน	Money exchange
+แหลมสมิหลา	Laem Samila
+นางเงือกทอง	The Golden Mermaid
+สัญลักษณ์เมืองสงขลา	Symbol of Songkhla
+ชมพระอาทิตย์ตก	Watch the sunset
+เกาะหนู เกาะแมว	Rat and Cat Islands
+ตำนานเมืองสงขลา	A Songkhla legend
+มองเห็นจากหาดสมิหลา	Seen from Samila Beach
+ย่านเมืองเก่าสงขลา	Songkhla Old Town
+ถนนนครใน นครนอก	Nakhon Nai & Nakhon Nok roads
+ตึกชิโนโปรตุกีส	Sino-Portuguese shophouses
+สตรีทอาร์ต	Street art
+ขนมบ้าน	Local sweets
+หอศิลป์	Art gallery
+นครใน	Nakhon Nai
+ร้านเต้าส้อ	Tao-so pastry shop
+โรงแรมเก่า	Old hotel
+ร้านหนังสือ	Bookshop
+ร้านชา	Tea shop
+ขนมจีบ	Dumplings
+ร้านผ้า	Fabric shop
+สะพานติณสูลานนท์	Tinsulanonda Bridge
+สะพานคอนกรีตข้ามทะเลสาบสงขลา ยาวที่สุดในไทย	The longest concrete bridge in Thailand, over Songkhla Lake
+ทะเลสาบสงขลา	Songkhla Lake
+เจดีย์บนยอดเขา	Chedi on the hilltop
+ลิฟต์ขึ้นเขา	Hill lift
+ชมวิวเมืองสงขลา	Views over Songkhla
+ยินดีต้อนรับสู่ จังหวัด	Welcome to the province of
+เที่ยวบินในประเทศ	Domestic flights
+กรุงเทพฯ (สุวรรณภูมิ)  เชียงใหม่  อู่ตะเภา	Bangkok (Suvarnabhumi)  Chiang Mai  U-Tapao
+ขอนแก่น  อุบลฯ  หาดใหญ่  บุรีรัมย์  นครศรีฯ	Khon Kaen  Ubon  Hat Yai  Buriram  Nakhon Si
+· เที่ยวบินในประเทศ	· domestic flights
+ตลาด - บขส.	Market - bus terminal
+ป้ายรถเมล์ ·	Bus stop ·
+ร้านข้าวแกง	Curry & rice shop
+ร้านโจ๊ก	Rice porridge shop
+หาดวัดใต้	Wat Tai Beach
+แม่น้ำมูล	Mun River
+หาดทรายกลางแม่น้ำมูลช่วงหน้าแล้ง	A sand beach in the Mun River in the dry season
+แพริมน้ำ	Riverside rafts
+อุทยานแห่งชาติผาแต้ม	Pha Taem National Park
+ภาพเขียนสีก่อนประวัติศาสตร์ 3,000 ปี	3,000-year-old prehistoric paintings
+ชมพระอาทิตย์ขึ้นแรกสุดในไทย	See Thailand's first sunrise
+ท่าอากาศยานอุบลราชธานี	Ubon Ratchathani Airport
+สถานีรถไฟอุบลราชธานี	Ubon Ratchathani Railway Station
+ถนนชยางกูร	Chayangkun Road
+เมืองดอกบัว	City of lotuses
+↓ วัดหนองป่าพง	↓ Wat Nong Pa Phong
+พระธาตุหนองบัว	Phra That Nong Bua
+สามพันโบก	Sam Phan Bok
+← ผาแต้ม	← Pha Taem
+แกรนด์แคนยอนแม่น้ำโขง	The Grand Canyon of the Mekong
+แอ่งหินนับพัน	A thousand rock pools
+↑ ทุ่งศรีเมือง	↑ Thung Si Mueang
+ถนนคนเดิน	Walking street
+หาดวัดใต้ แม่น้ำมูล ↑	Wat Tai Beach, Mun River ↑
+ถนนคนเดินอุบลราชธานี	Ubon Ratchathani walking street
+ของกินอีสาน ผ้าพื้นเมือง	Isan food, local fabrics
+ดนตรีโปงลาง	Pong lang music
+ร้านหมูยอ กุนเชียง	Moo yor & kun chiang shop
+ร้านผ้ากาบบัว	Kab bua fabric shop
+ร้านข้าวเปียกเส้น	Khao piak sen shop
+ร้านเทียนพรรษา	Candle festival shop
+วัดศรีอุบลรัตนาราม	Wat Si Ubon Rattanaram
+พระแก้วบุษราคัม	Phra Kaew Butsarakham
+อุโบสถจำลองวัดเบญจมบพิตร	Replica of Wat Benchamabophit's hall
+น้ำตกแสงจันทร์	Saeng Chan Waterfall
+น้ำตกทะลุหลังคา	The waterfall through the roof
+รถสองแถว สาย 2	Songthaew line 2
+วารินชำราบ	Warin Chamrap
+ทุ่งศรีเมือง	Thung Si Mueang
+ตลาดใหญ่	Big market
+ศาลหลักเมืองอุบลราชธานี	Ubon Ratchathani City Pillar Shrine
+หลักเมืองไม้ชัยพฤกษ์	Golden shower tree city pillar
+ศาลาทรงจตุรมุข	Four-gabled pavilion
+วัดหนองป่าพง	Wat Nong Pa Phong
+วัดป่าสายหลวงพ่อชา	Ajahn Chah's forest temple
+สงบร่มรื่น	Calm and shady
+อุโบสถ	Ordination hall
+วัดพระธาตุหนองบัว	Wat Phra That Nong Bua
+เจดีย์ทรงพุทธคยาสี่เหลี่ยม	Square Bodh Gaya-style chedi
+2,500 ปีพุทธศาสนา	2,500 years of Buddhism
+ต้นเทียนพรรษา	Candle festival float
+ต้นเทียนแกะสลักยักษ์	Giant carved candle
+งานแห่เทียนเข้าพรรษา	Candle Festival parade
+ไม่พบ Player ในฉากนี้	No Player in this scene
+เปิดฉาก Assets/Scenes/ThaiVillage.unity ก่อน	Open the scene Assets/Scenes/ThaiVillage.unity first
+เริ่ม 60	Start 60
+ป้ายรถเมล์	Bus stop
+เดินลงทางเท้าข้างธนาคาร ↓	Walk down the path beside the bank ↓
+ประจำจังหวัด	provincial
+กรุงเทพฯ (หมอชิต 2)	Bangkok (Mo Chit 2)
+ชายหาด	Beach
+(ตัวเมือง)	(town)
+เวทีดนตรีระดับประเทศ	National music stage
+สร้างฉาก	Build scene
+{} มีอยู่แล้ว ต้องการสร้างใหม่ทับหรือไม่?	{} already exists. Build it again over it?
+(ไม่กระทบฉากอื่น)	(other scenes are not affected)
+ตั๋ว	Ticket
+รีเซ็ตฉาก	Reset scene
+จะลบทุกอย่างในฉาก ThaiVillage (หมู่บ้าน, Network, ปุ่มควบคุม ฯลฯ) แล้วสร้างฉากต้นแบบใหม่	This deletes everything in the ThaiVillage scene (village, Network, controls, etc.) and builds the starter scene again
+ถ้าแค่ต้องการเติมส่วนที่หาย ให้ใช้ Thai Life → Repair Scene แทน	If you only need to add missing parts, use Thai Life → Repair Scene instead
+ลบและรีเซ็ต	Delete and reset
+คุณอยู่ที่นี่	You are here
+แผนที่ท่องเที่ยว จังหวัด	Tourist map of
+แผนที่ท่องเที่ยว  จังหวัด	Tourist map of
+มีกระสอบทรายในฉากแล้ว	There's already a punching bag in the scene
+ตอนนี้เปิดฉาก "{}" อยู่	The scene "{}" is open now
+ผังหมู่บ้านต้องสร้างในฉาก ThaiVillage	The village layout has to be built in the ThaiVillage scene
+เปิด Assets/Scenes/ThaiVillage ก่อน แล้วค่อยกดเมนูนี้	Open Assets/Scenes/ThaiVillage first, then use this menu
+Village อยู่แล้ว ต้องการสร้างใหม่ทับหรือไม่?	Village already exists. Build it again over it?
+สร้างใหม่	Rebuild
+สร้างโลกทั้งหมด	Build the whole world
+จะสร้างฉาก ตำบล และ เมือง ใหม่ แล้วสร้างผังหมู่บ้านใหม่ในฉาก ThaiVillage	This rebuilds the Tambon and City scenes, then builds a new village layout in the ThaiVillage scene
+(Player/Network ในหมู่บ้านไม่ถูกลบ)	(Player/Network in the village are kept)
+สร้าง	Build
+ThaiVillage (หมู่บ้าน), Tambon (ตำบล), City (เมือง). Press Play in ThaiVillage.	ThaiVillage (village), Tambon (subdistrict), City (town). Press Play in ThaiVillage.
+ภาษา / Language	ภาษา / Language
+ไทย	ไทย
+ที่อยู่	Address
+เแโใไ	เแโใไ
+หมู่ที่ {} {}	Moo {} {}
+(แปลงอยู่หมู่นี้)	(your plot is in this moo)
+เรียบร้อย	Done
+โคกสะอาด	Khok Sa-at
+หนองแวง	Nong Waeng
+โนนสูง	Non Sung
+ดอนแดง	Don Daeng
+นาดี	Na Di
+หนองไผ่	Nong Phai
+โพนทอง	Phon Thong
+สร้างแก้ว	Sang Kaeo
+ท่าลาด	Tha Lat
+หัวช้าง	Hua Chang
+นาคำ	Na Kham
+ดงเย็น	Dong Yen
+ย้ายแปลงมาหมู่นี้	Move my plot to this moo
+วางได้ใน{}	Can be placed in {}
+ต้องวางใน{}	Must be placed in {}
+แปลงเกษตรของคุณ	Your farm plot
+แปลงบ้านของคุณ	Your house plot
+· เพื่อนอยู่ที่นี่ {} คน	· {} friends live here
+ว่าง	Free
+มีคนอยู่	Taken
+· เลือกหมู่	· choose a moo
+เตียงในบ้าน	Bed at home
+ที่นอนในบ้าน	Sleeping mat at home
+นอน	Sleep
+มี	Mi
+ลา	La
+งานวัด / เวทีตำบล	Temple fair / tambon stage
+เวทีอีเวนต์เมือง หรือผับ	Town event stage or a pub
+เวทีดนตรีประจำจังหวัด	Provincial music stage
+เวทีระดับประเทศ (สนามหลวง กรุงเทพฯ / คอนเสิร์ตริมหาด)	National stages (Sanam Luang, Bangkok / beach concerts)
+<b>ที่นี่	<b>Here
+บทต่อไปสอนที่{} (เล่นที่นี่ได้ XP ครึ่งเดียว)	The next lesson is taught at {} (half XP here)
+· บทต่อไปที่ Lv {} ที่{}	· next lesson at Lv {} at {}
+· บทต่อไปที่ Lv {}	· next lesson at Lv {}
+คอมโบ {}	Combo {}
+(ซ้อมบทพื้นฐาน XP ครึ่งเดียว	(practising the basics, half XP
+ไปเล่นที่{})	go play at {})
+นะโม	Namo
+พุทธายะ	Buddhaya
+นะมะพะทะ	Namaphatha
+จะภะกะสะ	Japhakasa
+มะอะอุ	Ma-a-u
+ตัสสะ	Tassa
+ภะคะวะโต	Bhagavato
+อะระหะโต	Arahato
+สัมมา	Samma
+สัมพุทธัสสะ	Sambuddhassa
+อิติปิโส	Itipiso
+ภะคะวา	Bhagava
+อะระหัง	Araham
+สัมมาสัมพุทโธ	Sammasambuddho
+วิชชาจะระณะ	Vijjacarana
+สัมปันโน	Sampanno
+สุคะโต	Sugato
+โลกะวิทู	Lokavidu
+อะนุตตะโร	Anuttaro
+ปุริสะทัมมะ	Purisadamma
+สาระถิ	Sarathi
+สัตถา	Sattha
+เทวะมะนุสสานัง	Devamanussanam
+พุทโธ	Buddho
+ภะคะวาติ	Bhagavati
+สวากขาโต	Svakkhato
+ภะคะวะตา	Bhagavata
+ธัมโม	Dhammo
+สันทิฏฐิโก	Sanditthiko
+อะกาลิโก	Akaliko
+เอหิปัสสิโก	Ehipassiko
+โอปะนะยิโก	Opanayiko
+ปัจจัตตัง	Paccattam
+เวทิตัพโพ	Veditabbo
+วิญญูหีติ	Vinnuhiti
+ปราบ{}	Banish {}
+เก่งขึ้นอีกขั้นแล้ว!	Even better now!
+กำลังโหลด	Loading
+แผนที่	Map
+จะไปไหนดี?	Where to?
+สถานที่	Places
+แตะเพื่อเลือก (ใกล้สุดก่อน)	Tap to choose (nearest first)
+กำลังไปที่หมายเดิม	Heading to the same place
+อีกราว {} ตามถนน	About {} by road
+แตะที่ใหม่เพื่อเปลี่ยน	Tap somewhere new to change
+ยังไม่ได้เลือกที่หมาย	No destination yet
+แตะสถานที่ในรายการ หรือแตะบนแผนที่ตรงไหนก็ได้	Tap a place in the list, or anywhere on the map
+รถพาไปตามถนน แล้วจอดส่งให้ถึงที่	The car follows the roads and drops you off there
+ห่างราว {} (เส้นตรง)	About {} away (straight line)
+แตะบนแผนที่ตรงที่อยากไปได้เลย	Tap the map where you want to go
+ริมถนน ใกล้{}	By the road, near {}
+จุดที่ปักหมุดไว้	Pinned spot
+ระยะทางตามถนน {} ·	Distance by road {} ·
+ไม่ถึง 1	Under 1
+ประมาณ {}	About {}
+ถนนไปไม่ถึงตรงนั้น ลองเลือกที่อื่น	The road doesn't reach there, try somewhere else
+{} กม.	{} km
+{} ม.	{} m
+เคล็ดลับ:	Tip:
+กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรฤลฦวศษสหฬอฮฯะัาำิีึืฺุู฿เแโใไๅๆ็่้๊๋์ํ๎๐๑๒๓๔๕๖๗๘๙	กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรฤลฦวศษสหฬอฮฯะัาำิีึืฺุู฿เแโใไๅๆ็่้๊๋์ํ๎๐๑๒๓๔๕๖๗๘๙
+เลขที่	No.
+หมู่	Moo
+ต.	Tambon
+อ.	Amphoe
+จ.	Province
+โหลดที่อยู่ไม่สำเร็จ	Couldn't load the address
+บันทึกแล้ว	Saved
+เกิด จ.{}	Born in {}
+ชื่อยาวเกินไป	Name too long
+บันทึกไม่สำเร็จ	Couldn't save
+ที่อยู่ของฉัน	My address
+จังหวัดบ้านเกิด ใช้คิดระยะทาง ค่าตั๋ว และค่าน้ำมัน	Home province: used for distances, ticket prices and fuel
+เช่น 99/1	e.g. 99/1
+หมู่ที่	Moo
+เช่น 3	e.g. 3
+ชื่อหมู่บ้าน	Village name
+ชื่อตำบล	Tambon name
+อำเภอ	District (amphoe)
+ชื่ออำเภอ	District name
+จังหวัด	Province
+บันทึกที่อยู่	Save address
+เลือกจังหวัด	Choose a province
+น้ำมันหมด! เข็นไปเติมที่ปั๊ม	Out of fuel! Push it to a petrol station
+น้ำมันหมด	Out of fuel
+เข็นไปปั๊ม	Push to the pump
+น้ำมัน {}/{} ลิตร	Fuel {}/{} L
+คันเร่ง	Gas
+เบรก	Brake
+กม./ชม.	km/h
+ผีกระสือ	Krasue ghost
+ผีนางตานี	Nang Tani ghost
+ผีนางตะเคียน	Nang Takhian ghost
+เปรต	Pret
+รถ	Car
+ชะลอ 20	Slow 20
+ชะลอความเร็ว 20 กม./ชม.	Slow down to 20 km/h
+{}! หักหลบ	{}! Swerve
+แซง{}	Overtaking {}
+{}สวนมา! หลบเข้าเลน	{} coming! Back into the lane
+กำลังขับไป {}	Driving to {}
+ใช้น้ำมัน {} ลิตร	Uses {} L of fuel
+ลิตร	L
+ระหว่างทางเวลาในเกมเดินไปตามระยะทาง (1 ชม. ในเกม = 90 วินาที)	On the road, game time passes with the distance (1 game hour = 90 seconds)
+ถึงในอีก	Arriving in
+น้ำมันไม่พอไปถึง เติมก่อนนะ	Not enough fuel to get there, fill up first
+ถังเต็มแล้ว	The tank is full
+จักรยานไม่ต้องเติมน้ำมัน	Bicycles don't need fuel
+ยังไม่มีรถคันนี้	You don't have this vehicle yet
+ไม่สำเร็จ ลองใหม่	Didn't work, try again
+เติมน้ำมัน	Fill up
+เติมน้ำมัน หรือขับไปที่อื่น	Fill up, or drive somewhere else
+เติมน้ำมันรถของคุณ	Fill up your vehicle
+ปั๊มน้ำมัน	Petrol station
+ไม่ต้องเติมน้ำมัน	No fuel needed
+ปั่นด้วยแรงขา	Pedal power
+฿{}/ลิตร	฿{}/L
+{} กม./ลิตร	{} km/L
+{} / {} ลิตร	{} / {} L
+฿100	฿100
+฿500	฿500
+เต็มถัง ฿{}	Fill the tank ฿{}
+ถังเต็ม	Tank full
+เติม {} ลิตร	Add {} L
+จ่าย ฿{}	Pay ฿{}
+-฿{} ค่าน้ำมัน	-฿{} fuel
+ขับรถของคุณเข้ามาที่ปั๊มก่อน	Drive your own vehicle into the station first
+แล้วเลือกจุดหมายที่จะขับไป	then choose where to drive to
+ปั่นไปเอง	Ride there yourself
+ไม่มีที่ให้ขับไปจากที่นี่	Nowhere to drive to from here
+ตัวเมือง (บ้านเกิด)	Town (hometown)
+ไม่ใช้น้ำมัน	No fuel used
+น้ำมันไม่พอ	Not enough fuel
+ออกเดินทาง	Set off
+ขับรถไปเมืองอื่น	Drive to another town
+ขับไปที่อื่น	Drive somewhere else
+ยังไม่มีรถของตัวเอง	You don't have your own vehicle yet
+ซื้อมอเตอร์ไซค์หรือรถยนต์ได้ที่ธนาคารในตัวเมือง	Buy a motorbike or a car at the bank in town
+ราคาหน้าปั๊มวันนี้	Today's pump prices
+{} ฿{}	{} ฿{}
+{} ฿{} ต่อลิตร	{} ฿{} per liter
+ลานชมขบวนเรือ	Royal barge viewing area
+วัดกลางเมือง	Central temple
+สถานีรถไฟ	Railway station
+องค์การบริหารส่วนจังหวัด	Provincial Administration
+มหาวิทยาลัย	University
+สถานีขนส่ง	Bus terminal
+แม่น้ำ	River
+ถึงแล้ว! จอดที่ปั๊มน้ำมัน	Arrived! Parked at the petrol station
+เชิญผ่านครับ	Go ahead, please
+ตร.	Police
+ทราบ	OK
+ตำรวจจราจร	Traffic police
+ตักเตือน	Warning
+ใบสั่งเจ้าพนักงานจราจร	Traffic ticket
+ด่านตรวจ	Checkpoint
+ไม่ชะลอความเร็วผ่านด่าน	Didn't slow down through the checkpoint
+ขับรถเร็วเกินกว่าที่กฎหมายกำหนด	Speeding over the legal limit
+ข้อหา	Offense
+ขับผ่านด่านตรวจโดยไม่หยุด/ชะลอ	Drove through a checkpoint without stopping/slowing down
+ความเร็วขณะผ่านด่าน	Speed through the checkpoint
+{} กม./ชม.	{} km/h
+ต้องชะลอให้ไม่เกิน	Must slow to no more than
+ขับรถเร็วเกินกำหนด	Speeding
+ความเร็วที่ตรวจจับได้	Measured speed
+ความเร็วที่กำหนด	Speed limit
+{} กม./ชม. (เกิน {})	{} km/h ({} over)
+ครั้งนี้ตักเตือน	Just a warning this time
+ขับช้าลงนะครับ	Please drive slower
+ค่าปรับ ฿{}	Fine ฿{}
+ชำระแล้ว	Paid
+-฿{} ค่าปรับ	-฿{} fine
+จันทบุรี	Chanthaburi
+ฉะเชิงเทรา	Chachoengsao
+ชลบุรี	Chonburi
+ชัยนาท	Chai Nat
+ชัยภูมิ	Chaiyaphum
+ชุมพร	Chumphon
+เชียงราย	Chiang Rai
+เชียงใหม่	Chiang Mai
+ตรัง	Trang
+ตราด	Trat
+ตาก	Tak
+นครนายก	Nakhon Nayok
+นครปฐม	Nakhon Pathom
+นครพนม	Nakhon Phanom
+นครราชสีมา	Nakhon Ratchasima
+นครศรีธรรมราช	Nakhon Si Thammarat
+นครสวรรค์	Nakhon Sawan
+นนทบุรี	Nonthaburi
+นราธิวาส	Narathiwat
+น่าน	Nan
+บึงกาฬ	Bueng Kan
+บุรีรัมย์	Buriram
+ปทุมธานี	Pathum Thani
+ประจวบคีรีขันธ์	Prachuap Khiri Khan
+ปราจีนบุรี	Prachinburi
+ปัตตานี	Pattani
+พระนครศรีอยุธยา	Phra Nakhon Si Ayutthaya
+พะเยา	Phayao
+พังงา	Phang Nga
+พัทลุง	Phatthalung
+พิจิตร	Phichit
+พิษณุโลก	Phitsanulok
+เพชรบุรี	Phetchaburi
+เพชรบูรณ์	Phetchabun
+แพร่	Phrae
+ภูเก็ต	Phuket
+มหาสารคาม	Maha Sarakham
+มุกดาหาร	Mukdahan
+แม่ฮ่องสอน	Mae Hong Son
+ยโสธร	Yasothon
+ยะลา	Yala
+ร้อยเอ็ด	Roi Et
+ระนอง	Ranong
+ระยอง	Rayong
+ราชบุรี	Ratchaburi
+ลพบุรี	Lopburi
+ลำปาง	Lampang
+ลำพูน	Lamphun
+เลย	Loei
+ศรีสะเกษ	Sisaket
+สกลนคร	Sakon Nakhon
+สงขลา	Songkhla
+สตูล	Satun
+สมุทรปราการ	Samut Prakan
+สมุทรสงคราม	Samut Songkhram
+สมุทรสาคร	Samut Sakhon
+สระแก้ว	Sa Kaeo
+สระบุรี	Saraburi
+สิงห์บุรี	Sing Buri
+สุโขทัย	Sukhothai
+สุราษฎร์ธานี	Surat Thani
+สุรินทร์	Surin
+หนองคาย	Nong Khai
+หนองบัวลำภู	Nong Bua Lamphu
+อ่างทอง	Ang Thong
+อำนาจเจริญ	Amnat Charoen
+อุดรธานี	Udon Thani
+อุตรดิตถ์	Uttaradit
+อุทัยธานี	Uthai Thani
+อุบลราชธานี	Ubon Ratchathani
+สุพรรณบุรี	Suphan Buri
+กรุงเทพมหานคร	Bangkok
+กระบี่	Krabi
+กาญจนบุรี	Kanchanaburi
+กาฬสินธุ์	Kalasin
+กำแพงเพชร	Kamphaeng Phet
+ขอนแก่น	Khon Kaen
+โบก	Hail
+รอ{}...	Waiting for the {}...
+{}กำลังจอดรับ	The {} is pulling over for you
+แตะแผนที่เลือกที่หมายได้	Tap the map to choose where to go
+ค่าโดยสาร {}	Fare {}
+ขึ้น{}	Get in the {}
+ค่ารถ {}	Fare {}
+แท็กซี่	Taxi
+เงินไม่พอค่า{} {}	Not enough money for the {} fare {}
+นั่ง{}เที่ยวรอบเมือง	Ride the {} around town
+ที่หมาย	Destination
+{}กำลังพาไป {}	The {} is taking you to {}
+ถนนไปไม่ถึงตรงนั้น ลองเลือกจุดอื่น	The road doesn't reach there, try another spot
+กดปุ่มแผนที่เพื่อเลือกที่หมาย	Press the map button to choose where to go
+ถึงที่หมายแล้ว	You've arrived
+รถสองแถว	Songthaew
+สองแถว	Songthaew
+กำลังไป {}	Going to {}
+อีกราว {}	About {} more
+เพื่อนบ้าน	Neighbor
+บ้านเลขที่ {} {} ถูกประกาศขายเพราะไม่ได้เข้าเกมนาน	House No. {} {} was put up for sale because you were away a long time
+ได้บ้านหลังใหม่แทน	You got a new house instead
+ย้ายบ้านแล้ว! {}	Moved house! {}
+ได้บ้านแล้ว! {}	Got a house! {}
+บ้านเลขที่ {} {}	House No. {} {}
+ศาลากลางหมู่บ้าน (ลานฝึกพื้นฐาน)	Village hall (basics practice)
+เวทีดนตรีระดับประเทศ สนามหลวง	National music stage, Sanam Luang
+เวทีดนตรีประจำจังหวัด	Provincial music stage
+ชุมชนตลาดเก่า	Old Market Community
+ชุมชนหลังสถานี	Behind-the-Station Community
+ชุมชนศรีเมือง	Si Mueang Community
+ชุมชนโพธิ์ทอง	Pho Thong Community
+ชุมชนสระแก้ว	Sa Kaeo Community
+ชุมชนหนองหาร	Nong Han Community
+ชุมชนวัดกลาง	Wat Klang Community
+ชุมชนบ้านใหม่	Ban Mai Community
+ชุมชนทุ่งศรีเมือง	Thung Si Mueang Community
+ชุมชนหนองประจักษ์	Nong Prajak Community
+ชุมชนชัยพฤกษ์	Chaiyaphruek Community
+ชุมชนศรีสุข	Si Suk Community
+ชุมชนท่าเตียน	Tha Tien Community
+ชุมชนบางลำพู	Banglamphu Community
+ชุมชนนางเลิ้ง	Nang Loeng Community
+ชุมชนบ้านบาตร	Ban Bat Community
+ชุมชนสามเพ็ง	Sampeng Community
+ชุมชนตรอกจันทน์	Trok Chan Community
+ชุมชนคลองสาน	Khlong San Community
+ชุมชนบางกอกน้อย	Bangkok Noi Community
+ชุมชนวัดอรุณ	Wat Arun Community
+ชุมชนบางโพ	Bang Pho Community
+ชุมชนพระโขนง	Phra Khanong Community
+ชุมชนบางรัก	Bang Rak Community
+<b>ที่นี่: {}</b>	<b>Here: {}</b>
+ปลาเข้าข้องแล้ว · นำไปขายที่ร้านค้าได้	Fish are in your basket · sell them at the shop
+หายาก	Rare
+{} กก.	{} kg
++฿{}	+฿{}
+พิกุลภาพยนตร์	Pikul Pictures
+หนังกลางแปลง · ฉายทุกคืนวันงาน	Outdoor cinema · showing every fair night
+การ์ดเลเวลอัป!	Level-up card!
+แชร์ไปที่ Facebook, LINE หรือแอปอื่นๆ	Share it to Facebook, LINE or any app
+ให้เพื่อนรู้ว่าคุณเก่งขึ้นแล้ว	and show your friends how far you've come
+แชร์สำเร็จรับ ฿{} + {} XP	Share it to get ฿{} + {} XP
+แชร์	Share
+ไว้ทีหลัง	Later
+บันทึกรูปแล้ว · แชร์ไปยังแอปโซเชียลเพื่อรับรางวัล	Image saved · share it to a social app for the reward
+แชร์สำเร็จ! +฿{} +{} XP	Shared! +฿{} +{} XP
+รับรางวัลแชร์ของเลเวลนี้ไปแล้ว	You already got the share reward for this level
+วันนี้รับรางวัลแชร์ครบแล้ว พรุ่งนี้มาใหม่นะ	That's all the share rewards for today, come back tomorrow
+การ์ดนี้เก่าแล้ว	This card is out of date
+รับรางวัลไม่สำเร็จ ลองใหม่อีกครั้ง	Couldn't get the reward, please try again
+ใช้ชีวิตแบบไทยไปด้วยกัน · ดาวน์โหลดได้ที่ App Store	Live the Thai life together · on the App Store
+เลเวลอัป! Lv {} ใน ThaiLife9	Level up! Lv {} in ThaiLife9
+เชียงใหม่  ขอนแก่น  อุบลฯ  บุรีรัมย์	Chiang Mai  Khon Kaen  Ubon  Buriram
+โคราช  หาดใหญ่  นครศรีฯ  อู่ตะเภา (พัทยา)	Korat  Hat Yai  Nakhon Si  U-Tapao (Pattaya)
+ขอนแก่น  อุบลฯ  โคราช  หาดใหญ่  บุรีรัมย์  นครศรีฯ	Khon Kaen  Ubon  Korat  Hat Yai  Buriram  Nakhon Si
+ปราสาทหินพิมาย	Phimai Historical Park
+ปราสาทหินทรายขาวที่ใหญ่ที่สุดในไทย	The largest white-sandstone Khmer temple in Thailand
+สะพานนาคราช	Naga bridge
+ท่าอากาศยานนครราชสีมา	Nakhon Ratchasima Airport
+สถานีรถไฟนครราชสีมา	Nakhon Ratchasima Railway Station
+ประตูสู่อีสาน	Gateway to Isan
+ถนนราชดำเนิน	Ratchadamnoen Road
+วัดศาลาลอย	Wat Sala Loi
+อุโบสถรูปเรือสำเภา	An ordination hall shaped like a junk
+ผนังกระเบื้องดินเผาด่านเกวียน	walls of Dan Kwian ceramic tiles
+← อนุสาวรีย์ท้าวสุรนารี	← Thao Suranari Monument
+ประตูชุมพล	Chumphon Gate
+↓ ด่านเกวียน	↓ Dan Kwian
+ไทรงาม	Sai Ngam
+↑ ปราสาทหินพิมาย	↑ Phimai Historical Park
+ทุ่งทานตะวัน	Sunflower fields
+เขาใหญ่ →	Khao Yai →
+ผัดหมี่โคราช	Korat fried noodles
+ร้านผ้าไหมปักธงชัย	Pak Thong Chai silk shop
+ร้านเครื่องปั้นดินเผา	Pottery shop
+อุทยานแห่งชาติเขาใหญ่	Khao Yai National Park
+มรดกโลก	World Heritage
+น้ำตกเหวสุวัต	Haew Suwat Waterfall
+เขาใหญ่	Khao Yai
+ไทรงาม พิมาย	Sai Ngam banyan, Phimai
+ต้นไทรอายุกว่า 350 ปี แผ่กิ่งก้านทั้งไร่	A banyan over 350 years old that spreads across a whole field
+เครื่องปั้นดินเผาด่านเกวียน	Dan Kwian pottery village
+ดินเผาสีสนิมเหล็ก	Rust-coloured fired clay
+โอ่ง แจกัน กระถาง	jars, vases, pots
+ทุ่งดอกทานตะวันบานเหลืองอร่าม ปลายฝนต้นหนาว	Golden sunflowers in bloom from the end of the rains into the cool season
+กังหันลมลำตะคอง	Lam Takhong wind turbines
+จุดชมวิวกังหันลมเหนืออ่างเก็บน้ำลำตะคอง	Viewpoint of the wind turbines over the Lam Takhong reservoir
+ถนนคนเดินโคราช	Korat Walking Street
+ตลาดของฝากโคราช	Korat souvenir market
+ผัดหมี่โคราช แหนม กุนเชียง ผ้าไหมปักธงชัย	Korat fried noodles, naem, Chinese sausage, Pak Thong Chai silk
+อนุสาวรีย์ท้าวสุรนารี	Thao Suranari Monument
+ย่าโม วีรสตรีเมืองโคราช	Ya Mo, heroine of Korat
+ท้าวสุรนารี	Thao Suranari
+จุดชมนก	Bird hide
+นครราชสีมา · ย่าโม ปราสาทหินพิมาย	Nakhon Ratchasima · Ya Mo, Phimai
+ย่าโม ปราสาทหินพิมาย	Ya Mo, Phimai
+โคราช	Korat

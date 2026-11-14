@@ -6,8 +6,17 @@ local M = {}
 M.CURRENCY = "baht"
 M.ITEMS = { collection = "inventory", key = "items" }
 
+-- Thai freshwater fish (canal / pond): weight = how common, kg = size range.
+-- Caught with the rod (fishing.lua) or by the auto fishing quest (quests.lua).
+M.FISH = {
+  { id = "tilapia",   name = "ปลานิล",     weight = 40, min_kg = 0.3, max_kg = 1.2 },
+  { id = "barb",      name = "ปลาตะเพียน", weight = 30, min_kg = 0.2, max_kg = 0.8 },
+  { id = "snakehead", name = "ปลาช่อน",    weight = 20, min_kg = 0.5, max_kg = 2.5 },
+  { id = "catfish",   name = "ปลาดุก",     weight = 10, min_kg = 0.4, max_kg = 1.8 },
+}
+
 -- Fishing rods: better rods bite sooner, favour rarer fish and land bigger ones.
--- weights are per fish id (see fishing.lua FISH)
+-- weights are per fish id (see M.FISH)
 M.RODS = {
   bamboo = { name = "เบ็ดไม้ไผ่",  bite_min = 2000, bite_max = 6000, size = 1.00,
              weights = { tilapia = 40, barb = 30, snakehead = 20, catfish = 10 } },

@@ -5,7 +5,7 @@ using UnityEngine;
 //   bgm_city    เมือง — lo-fi city beat: swung drums, electric-piano 7th chords, walking bass
 //   bgm_sea     ทะเล — tropical: steel-pan tune, off-beat strums, shaker, bouncy bass
 //   bgm_island  เกาะ — dreamy and slow: soft pads and a bell arpeggio, no drums
-// plus the stage loops (concert, morlam, ramwong). Notes wrap around so every loop is seamless.
+// plus the stage loops (concert, morlam, ramwong, movie — the หนังกลางแปลง soundtrack). Notes wrap around so every loop is seamless.
 // Everything sits in D, the key of the recorded tune (Thaimusic), so nothing clashes when
 // one track fades into another or a stage plays nearby.
 public static class SynthMusic
@@ -29,6 +29,7 @@ public static class SynthMusic
             case "concert": return Concert();
             case "morlam": return MorLam();
             case "ramwong": return Ramwong();
+            case "movie": return Movie();
             case "bgm_tambon": return Render(Tambon);
             case "bgm_city": return City();
             case "bgm_sea": return Sea();
@@ -153,6 +154,71 @@ public static class SynthMusic
                 if (s == 6 || s == 14) Snare(d, at, rng);
                 Pluck(d, at, root * Semis(riff[(s + bar * 3) % riff.Length]), s % 2 == 0 ? 0.3f : 0.16f, 0.9f, rng, 0.992f); // พิณ
             }
+        float max = 0.0001f;
+        foreach (float v in d) max = Mathf.Max(max, Mathf.Abs(v));
+        for (int i = 0; i < d.Length; i++) d[i] *= 0.7f / max;
+        return d;
+    }
+
+    // หนังกลางแปลง: the film's soundtrack booming out of the speaker stacks — a Thai ghost-and-drama
+    // score in D minor: swelling strings, timpani on the bar, an eerie theremin glide in the spooky
+    // bars, tremolo for the chase and a ระนาด line on top
+    private static float[] Movie()
+    {
+        const float bpm = 76f;
+        const int bars = 8;
+        float beat = 60f / bpm;
+        int barLen = (int)(4 * beat * Rate);
+        int length = barLen * bars;
+        var d = new float[length];
+        var rng = new System.Random(29);
+        float root = 146.83f; // D3
+        float[] chords = { 0, 0, -2, -4, 3, 1, -2, -5 };      // Dm Dm C Bb F Eb C A  (semitones from D)
+        bool[] minor = { true, true, false, false, false, false, false, false };
+        for (int bar = 0; bar < bars; bar++)
+        {
+            int start = bar * barLen;
+            float f = root * Semis(chords[bar]);
+            float third = minor[bar] ? Semis(3) : Semis(4);
+            bool tremolo = bar >= 4 && bar <= 6;
+            for (int i = 0; i < barLen; i++)
+            {
+                float t = (float)i / Rate;
+                float env = Mathf.Min(1f, i / (0.3f * Rate)) * Mathf.Min(1f, (barLen - i) / (0.15f * Rate));
+                float trem = tremolo ? 0.6f + 0.4f * Mathf.Sin(2f * Mathf.PI * 9f * t) : 1f;
+                float v = 0f;
+                foreach (float r in new[] { 1f, third, 1.5f, 2f })
+                {
+                    float fr = f * r;
+                    v += Mathf.Sin(2f * Mathf.PI * fr * t) + 0.35f * Mathf.Sin(2f * Mathf.PI * fr * 2.003f * t) + 0.5f * Mathf.Sin(2f * Mathf.PI * fr * 0.997f * t);
+                }
+                d[start + i] += v * env * trem * 0.03f;
+            }
+            Kick(d, start);                                             // timpani on the bar
+            if (bar == 3 || bar == 7)                                   // and a roll into the next phrase
+                for (int r = 0; r < 8; r++) Kick(d, start + (int)((3f + r * 0.125f) * beat * Rate));
+            if (bar >= 4) Hat(d, start + (int)(2 * beat * Rate), rng, 0.12f);
+            // ระนาด line over the top in the bright bars
+            if (bar == 4 || bar == 5 || bar == 6)
+                for (int n = 0; n < 8; n++)
+                {
+                    int[] line = { 12, 15, 17, 19, 17, 15, 12, 10 };
+                    Pluck(d, start + (int)(n * beat * 0.5f * Rate), root * 2f * Semis(line[(n + bar) % 8]), 0.22f, 0.95f, rng, 0.985f);
+                }
+        }
+        // the theremin: a ghostly sine sliding up and down through the spooky bars (2-3 and the end)
+        foreach (int from in new[] { 2, 7 })
+        {
+            int start = from * barLen, len = from == 7 ? barLen : barLen * 2;
+            float phase = 0f;
+            for (int i = 0; i < len; i++)
+            {
+                float k = (float)i / len;
+                float fr = root * 4f * Semis(Mathf.Sin(k * Mathf.PI * 3f) * 5f) * (1f + 0.012f * Mathf.Sin(2f * Mathf.PI * 6f * i / Rate));
+                phase += 2f * Mathf.PI * fr / Rate;
+                d[(start + i) % length] += Mathf.Sin(phase) * Mathf.Sin(Mathf.PI * k) * 0.09f;
+            }
+        }
         float max = 0.0001f;
         foreach (float v in d) max = Mathf.Max(max, Mathf.Abs(v));
         for (int i = 0; i < d.Length; i++) d[i] *= 0.7f / max;

@@ -50,6 +50,7 @@ public static class Locations
         new Location { Id = "khonkaen", NameTh = "ขอนแก่น · บึงแก่นนคร พระมหาธาตุ", Level = LocationLevel.Province, Scene = "KhonKaen", Intercity = true, Airport = true },
         new Location { Id = "ubon", NameTh = "อุบลราชธานี · แห่เทียนพรรษา แม่น้ำมูล", Level = LocationLevel.Province, Scene = "Ubon", Intercity = true, Airport = true },
         new Location { Id = "buriram", NameTh = "บุรีรัมย์ · สนามช้าง ปราสาทพนมรุ้ง", Level = LocationLevel.Province, Scene = "Buriram", Intercity = true, Airport = true },
+        new Location { Id = "korat", NameTh = "นครราชสีมา · ย่าโม ปราสาทหินพิมาย", Level = LocationLevel.Province, Scene = "Korat", Intercity = true, Airport = true },
         new Location { Id = "songkhla", NameTh = "สงขลา · หาดใหญ่ แหลมสมิหลา", Level = LocationLevel.Province, Scene = "Songkhla", Intercity = true, Airport = true },
         new Location { Id = "nakhonsi", NameTh = "นครศรีธรรมราช · วัดพระมหาธาตุ", Level = LocationLevel.Province, Scene = "NakhonSi", Intercity = true, Airport = true },
     };

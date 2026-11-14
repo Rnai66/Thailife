@@ -41,6 +41,37 @@ local function chapters(user_id)
   return out, level
 end
 
+-- Auto fishing brings up real fish: rolled with the equipped rod like fishing.lua, put in the fish
+-- bag (inventory/fish), and listed on the quest so the client can show a card for each.
+local FISH_BAG = { collection = "inventory", key = "fish" }
+
+local function auto_fish(user_id, count)
+  local items = data.read_items(user_id)
+  local rod = data.RODS[items.rod] or data.RODS.bamboo
+  local objects = nk.storage_read({ { collection = FISH_BAG.collection, key = FISH_BAG.key, user_id = user_id } })
+  local inv = (#objects > 0) and objects[1].value or {}
+  inv.counts = inv.counts or {}
+  local caught = {}
+  for _ = 1, count do
+    local total = 0
+    for _, f in ipairs(data.FISH) do total = total + (rod.weights[f.id] or f.weight) end
+    local r, fish = math.random() * total, data.FISH[#data.FISH]
+    for _, f in ipairs(data.FISH) do
+      r = r - (rod.weights[f.id] or f.weight)
+      if r <= 0 then fish = f; break end
+    end
+    local kg = (fish.min_kg + math.random() * (fish.max_kg - fish.min_kg)) * (rod.size or 1)
+    kg = math.floor(kg * 100 + 0.5) / 100
+    inv.counts[fish.id] = (inv.counts[fish.id] or 0) + 1
+    inv.total = (inv.total or 0) + 1
+    if kg > (inv.biggest_kg or 0) then inv.biggest_kg = kg; inv.biggest_name = fish.name end
+    table.insert(caught, { id = fish.id, name = fish.name, kg = kg })
+  end
+  nk.storage_write({ { collection = FISH_BAG.collection, key = FISH_BAG.key, user_id = user_id, value = inv,
+                       permission_read = 1, permission_write = 0 } })
+  return caught
+end
+
 -- Auto quests whose time is up get finished and their rewards paid (and the all-done bonus).
 -- Returns the baht paid.
 local function settle_auto(user_id, s)
@@ -52,6 +83,10 @@ local function settle_auto(user_id, s)
     local q = s.list[table.remove(a.queue, 1)]
     if q ~= nil then
       local def = quest.POOL[q.kind]
+      if q.kind == "fish" and q.have < def.need then
+        local ok, caught = pcall(auto_fish, user_id, def.need - q.have)
+        if ok then q.catch = caught end
+      end
       q.have = def.need
       if not q.claimed then q.claimed = true; paid = paid + def.reward end
     end
@@ -94,6 +129,7 @@ local function view(s, extra, user_id)
       id = i, kind = q.kind, title = def.title, hint = def.hint, need = def.need,
       have = q.have, reward = def.reward, done = q.have >= def.need, claimed = q.claimed,
       auto = finishes[i] ~= nil, auto_left_s = finishes[i] or 0,
+      catch = (q.catch ~= nil and #q.catch > 0) and q.catch or nil,
     })
   end
   local next_day_ms = life.EPOCH_MS + life.game_day(now) * life.DAY_MS

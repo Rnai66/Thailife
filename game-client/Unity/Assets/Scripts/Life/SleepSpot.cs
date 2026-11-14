@@ -56,7 +56,12 @@ public class SleepSpot : MonoBehaviour
     private void OnTriggerExit(Collider other)
     {
         if (other.GetComponent<PlayerController>() != null && sleeper == null)
+        {
             ContextButton.Hide(this);
+            // stepped away from a bed at home: back to the house's own button (แต่งบ้าน)
+            var home = GetComponentInParent<HomeInterior>();
+            if (home != null) home.ShowPrompt();
+        }
     }
 
     private void Update()

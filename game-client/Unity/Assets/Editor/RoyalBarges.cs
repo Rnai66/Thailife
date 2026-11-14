@@ -361,8 +361,8 @@ public static class RoyalBarges
     }
 
     // A sculpted (AI-made) figure, as tall as asked but its top under Clearance
-    private static void Figure(string name, Transform body, Vector3 at, float height, float yaw = 0f) =>
-        AiModels.Place(name, body, at, Mathf.Min(height, Clearance - at.y), yaw);
+    private static GameObject Figure(string name, Transform body, Vector3 at, float height, float yaw = 0f, float smoothness = 0.3f, float metallic = 0f) =>
+        AiModels.Place(name, body, at, Mathf.Min(height, Clearance - at.y), yaw, smoothness, metallic);
 
     private static void Finish(Transform root, string name)
     {
@@ -377,7 +377,7 @@ public static class RoyalBarges
     // from the beak and a garland round the neck, its tail curling up at the stern; the gold บุษบก
     // pavilion amidships, ฉัตร fore and aft
     // which way the sculpted swan and Narai face as made (turned so they look ahead, +Z)
-    private const float SwanYaw = 0f, NaraiYaw = 0f;
+    private const float SwanYaw = 0f, NaraiYaw = 0f, AsuraYaw = 0f;
 
     private static Transform Suphannahong(Transform p, Vector3 at)
     {
@@ -388,7 +388,14 @@ public static class RoyalBarges
 
         int mark = body.childCount;
         // the sculpted figure (AI-made) when present, else the built one
-        if (AiModels.Has("Swan")) Figure("Swan", body, new Vector3(0f, bowTop - 0.5f, L * 0.5f - 0.9f), 7.2f, SwanYaw);
+        if (AiModels.Has("Swan"))
+        {
+            // made from the photo of the real barge: the neck's foot is a quarter of its height behind the
+            // model's middle, so it goes forward by that much to stand on the stem; polished gold
+            float swanH = Clearance - (bowTop - 0.5f);
+            var swan = Figure("Swan", body, new Vector3(0f, bowTop - 0.5f, L * 0.5f - 0.9f + 0.25f * swanH), 7.2f, SwanYaw, 0.65f, 0.5f);
+            if (swan != null) SwanDressing(body, swan.transform);
+        }
         else
         {
             // the neck: up from the stem in an S, the head looking ahead
@@ -429,6 +436,88 @@ public static class RoyalBarges
             TieredUmbrella(body, new Vector3(0f, deck, z), 2.6f, 7, red);
         Finish(root, "Suphannahong");
         return root;
+    }
+
+    // What hangs on the real swan (from the photo): a crystal tassel (พู่) on a cord from the tip of the
+    // beak — gold hook, three jewelled balls, a crystal chandelier, a gold ball and a white yak-tail tuft
+    // (จามร) — a white pearl garland round the foot of the neck, and a red-and-white
+    // flower bunch (อุบะ) hanging from the garland. Placed on the sculpted figure's own beak tip and neck.
+    private static void SwanDressing(Transform body, Transform figure)
+    {
+        var mesh = figure.GetComponent<MeshFilter>().sharedMesh;
+        if (mesh == null) return;
+        var verts = mesh.vertices;
+        float minY = float.MaxValue, maxY = float.MinValue;
+        var pts = new Vector3[verts.Length];
+        for (int i = 0; i < verts.Length; i++)
+        {
+            pts[i] = body.InverseTransformPoint(figure.TransformPoint(verts[i]));
+            minY = Mathf.Min(minY, pts[i].y);
+            maxY = Mathf.Max(maxY, pts[i].y);
+        }
+        float h = maxY - minY;
+        // the beak tip: the point furthest forward in the top half
+        Vector3 tip = pts[0];
+        foreach (var q in pts) if (q.y > minY + h * 0.5f && q.z > tip.z) tip = q;
+        // the neck where it leaves the hull: the middle of the bottom slice, and how thick it is there
+        Vector3 c = Vector3.zero; int n = 0; float r = 0f;
+        foreach (var q in pts) if (q.y < minY + h * 0.14f && q.y > minY + h * 0.06f) { c += q; n++; }
+        if (n == 0) return;
+        c /= n;
+        foreach (var q in pts) if (q.y < minY + h * 0.14f && q.y > minY + h * 0.06f) r += new Vector2(q.x - c.x, q.z - c.z).magnitude;
+        r = Mathf.Max(0.25f, r / n * 1.15f); // (the mean: the flame fins at the back would make the max too wide)
+
+        var crystal = PrimitiveKit.Mat("BargeCrystal", new Color(0.9f, 0.95f, 1f), 0.95f, 0.5f);
+        var silver = PrimitiveKit.Mat("BargeSilver", new Color(0.78f, 0.78f, 0.8f), 0.85f, 0.85f);
+        var pearl = PrimitiveKit.Mat("BargePearl", new Color(0.96f, 0.95f, 0.9f), 0.7f);
+        var tuft = PrimitiveKit.Mat("BargeYakTail", new Color(0.93f, 0.9f, 0.84f), 0.15f);
+
+        // the tassel, hanging straight down from the tip of the beak
+        float drop = Mathf.Clamp(tip.y - 0.6f, 1.2f, 3.4f), k = drop / 3.4f;
+        var top = tip + new Vector3(0f, -0.05f, 0.02f);
+        Stick("TasselHook", body, gold, tip, top + Vector3.down * 0.25f * k, 0.03f);
+        float y = 0.3f * k;
+        for (int i = 0; i < 3; i++) // three jewelled balls on the cord
+        {
+            Part("TasselBead", body, Ball, i == 1 ? silver : gold, top + Vector3.down * (y + 0.13f * k), Vector3.one * 0.26f * k);
+            y += 0.3f * k;
+        }
+        Stick("TasselCord", body, gold, top + Vector3.down * 0.25f * k, top + Vector3.down * (y + 0.1f * k), 0.02f);
+        // the crystal chandelier: a cone of glass drops, widest at the bottom
+        Part("Chandelier", body, Cone, crystal, top + Vector3.down * (y + 1.0f * k), new Vector3(0.62f, -0.9f, 0.62f) * k);
+        for (int i = 0; i < 10; i++)
+        {
+            float a = i * Mathf.PI * 2f / 10f;
+            Stick("CrystalDrop", body, crystal, top + Vector3.down * (y + 0.95f * k) + new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a)) * 0.3f * k,
+                top + Vector3.down * (y + 1.18f * k) + new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a)) * 0.3f * k, 0.025f);
+        }
+        y += 1.2f * k;
+        Stick("TasselCord", body, gold, top + Vector3.down * y, top + Vector3.down * (y + 0.35f * k), 0.02f);
+        Part("TasselBall", body, Ball, silver, top + Vector3.down * (y + 0.45f * k), Vector3.one * 0.3f * k);
+        // the white yak-tail tuft
+        Part("YakTail_จามร", body, Cone, tuft, top + Vector3.down * (y + 0.55f * k), new Vector3(0.42f, -1.0f, 0.42f) * k);
+
+        var collarAt = c + Vector3.up * h * 0.1f; // (the sculpted swan has its own jewelled collar)
+        // the pearl garland: a loop slung round the neck, low at the front
+        var loop = new Vector3[25];
+        for (int i = 0; i < loop.Length; i++)
+        {
+            float a = i * Mathf.PI * 2f / (loop.Length - 1);
+            float front = Mathf.Max(0f, Mathf.Sin(a)); // +z side hangs lower
+            loop[i] = collarAt + new Vector3(Mathf.Cos(a) * r * 1.3f, h * 0.05f - front * h * 0.12f, Mathf.Sin(a) * r * 1.3f + front * 0.15f);
+        }
+        MeshKit.Place("PearlGarland_พวงมาลัย", body, MeshKit.Sweep("Barges/SwanGarland", loop, MeshKit.Taper(loop.Length, 0.075f, 0.075f), 6), pearl, Vector3.zero);
+        // the flower bunch hanging from the lowest point of the garland
+        var low = loop[loop.Length / 4];
+        Stick("UbaCord", body, pearl, low, low + Vector3.down * 0.4f, 0.02f);
+        for (int t = 0; t < 3; t++)
+            for (int i = 0; i < 6; i++)
+            {
+                float a = i * Mathf.PI / 3f + t * 0.5f, rr = 0.1f + t * 0.06f;
+                var at = low + new Vector3(Mathf.Cos(a) * rr, -0.45f - t * 0.17f, Mathf.Sin(a) * rr);
+                Part("Uba_อุบะ", body, Ball, (i + t) % 2 == 0 ? red : pearl, at, Vector3.one * 0.1f);
+                if (t == 2) Stick("UbaTassel", body, pearl, at, at + Vector3.down * 0.25f, 0.02f);
+            }
     }
 
     // บุษบก: the gold pavilion with a tiered spire, crimson curtains tied back, an officer at each corner
@@ -599,6 +688,14 @@ public static class RoyalBarges
         {
             // the sculpted monkey warrior (AI-made from a photo): gilded, dark-skinned, banners in hand
             Figure("Hanuman", body, new Vector3(0f, -0.15f, L * 0.5f - 1.5f), 4.2f);
+            Finish(root, name);
+            return root;
+        }
+        if (!monkey && AiModels.Has("Asura"))
+        {
+            // the sculpted green giant-bird (AI-made): crowned, beak open, the cannon under him
+            Figure("Asura", body, new Vector3(0f, D - 0.1f, L * 0.5f - 1.3f), 3.6f, AsuraYaw);
+            Part("Cannon", body, Rod, black, new Vector3(0f, D + 0.15f, L * 0.5f - 0.6f), new Vector3(0.3f, 1.3f, 0.3f), new Vector3(80f, 0f, 0f));
             Finish(root, name);
             return root;
         }

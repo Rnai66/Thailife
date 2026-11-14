@@ -164,7 +164,7 @@ public static class ProvinceTown
         PrimitiveKit.Box("TicketCounter", t, new Vector3(6f, 0.55f, -2f), new Vector3(6f, 1.1f, 1.2f), ProvinceKit.Gold);
         PrimitiveKit.Label("ขายตั๋วเครื่องบิน", t, new Vector3(6f, 1.6f, -1.35f), 0.035f, new Color(0.4f, 0.2f, 0.05f), 180f);
         PrimitiveKit.Box("Board", t, new Vector3(0f, 4.4f, -d * 0.5f + 0.3f), new Vector3(10f, 2.4f, 0.12f), PrimitiveKit.Glow("DepartureBoard", new Color(0.05f, 0.07f, 0.12f), 0.3f, 0.6f), collider: false);
-        PrimitiveKit.Label("ขาออก · เที่ยวบินในประเทศ\nกรุงเทพฯ (สุวรรณภูมิ)  เชียงใหม่  อู่ตะเภา\nขอนแก่น  อุบลฯ  หาดใหญ่  บุรีรัมย์  นครศรีฯ", t, new Vector3(0f, 4.4f, -d * 0.5f + 0.38f), 0.04f, new Color(1f, 0.85f, 0.3f), 180f);
+        PrimitiveKit.Label("ขาออก · เที่ยวบินในประเทศ\nกรุงเทพฯ (สุวรรณภูมิ)  เชียงใหม่  อู่ตะเภา\nขอนแก่น  อุบลฯ  โคราช  หาดใหญ่  บุรีรัมย์  นครศรีฯ", t, new Vector3(0f, 4.4f, -d * 0.5f + 0.38f), 0.04f, new Color(1f, 0.85f, 0.3f), 180f);
         var zone = new GameObject("FlightZone_ตั๋วเครื่องบิน");
         zone.transform.SetParent(t, false);
         zone.transform.localPosition = new Vector3(6f, 1f, -0.4f);

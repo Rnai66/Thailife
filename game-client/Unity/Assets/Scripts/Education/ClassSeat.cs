@@ -18,7 +18,7 @@ public static class ClassSeat
     private static float quietUntil;
 
     // `room` = the school building the desk zone belongs to; `near` = the desk zone
-    public static void Sit(Transform room, Vector3 near)
+    public static void Sit(Transform room, Vector3 near, bool writing = false)
     {
         if (sitter != null || room == null) return;
         var player = Object.FindAnyObjectByType<PlayerController>();
@@ -62,6 +62,7 @@ public static class ClassSeat
         player.Teleport(SeatedPose.RootFor(new Vector3(best.position.x, top + 0.08f, best.position.z) - facing.normalized * 0.08f, rot, hips), rot);
         player.enabled = false;
         pose = player.gameObject.AddComponent<SeatedPose>();
+        pose.Writing = writing;
     }
 
     public static void Stand(bool closing = false)

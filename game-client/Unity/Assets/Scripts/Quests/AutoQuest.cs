@@ -26,6 +26,7 @@ public class AutoQuest : MonoBehaviour
     private float idleUntil;
     private bool toldDone;
     private AudioSource song; // the tune while performing on auto
+    private bool seated;      // sat down at a desk in the classroom for the study quest
 
     public static void Toggle()
     {
@@ -48,6 +49,7 @@ public class AutoQuest : MonoBehaviour
             if (instance.player != null) instance.player.AutoMove = Vector3.zero;
             if (instance.song != null) Destroy(instance.song);
             ActivityPose.Clear();
+            if (instance.seated) { instance.seated = false; ClassSeat.Stand(); }
         }
         if (!string.IsNullOrEmpty(message)) UiKit.FloatAbovePlayer(message, new Color(1f, 0.85f, 0.4f));
     }
@@ -224,7 +226,16 @@ public class AutoQuest : MonoBehaviour
         if (next.kind == "feed" || next.kind == "sell_eggs") CoopUI.Hide();
         else if (next.kind == "music") MusicUI.Hide();
         else if (next.kind == "shop" || next.kind == "sell_produce") ShopUI.Hide();
-        else if (next.kind == "study") SchoolUI.Hide();
+        else if (next.kind == "study")
+        {
+            SchoolUI.Hide();
+            // into the room and down at a desk, writing in the book like the rest of the class
+            if (place != null && !ClassSeat.Seated)
+            {
+                ClassSeat.Sit(place.transform.parent, place.bounds.center, writing: true);
+                seated = ClassSeat.Seated;
+            }
+        }
 
         // Start the work on the server (energy now, done after a short wait)
         if (!next.auto)
@@ -262,7 +273,7 @@ public class AutoQuest : MonoBehaviour
             float left = q.auto_left_s - quests.Age;
             status = $"กำลัง{doing}… อีก {Mathf.Max(0, Mathf.CeilToInt(left))} วินาที";
             if (workAt.HasValue) Face(workAt.Value);
-            else if (place != null && next.kind != "music") Face(place.bounds.center);
+            else if (place != null && next.kind != "music" && !seated) Face(place.bounds.center);
             if (next.kind == "music" && song == null)
             {
                 // a หมอลำ tune from the stage while the character strums along
@@ -291,7 +302,8 @@ public class AutoQuest : MonoBehaviour
                     case "harvest": ActivityPose.Do("sweep", 1.4f); break;
                     case "feed": case "sell_eggs": ActivityPose.Do("scatter", 1.6f); break;
                     case "music": ActivityPose.Do("strum", MoveEvery("music") + 0.5f); break;
-                    default: if (model != null) model.Play(next.kind == "study" ? PlayerAction.Wai : PlayerAction.Wave); break;
+                    case "study": if (!seated && model != null) model.Play(PlayerAction.Wai); break;
+                    default: if (model != null) model.Play(PlayerAction.Wave); break;
                 }
             }
             // (what it's doing is on the auto status bar; no words popping up every few seconds)
@@ -301,6 +313,10 @@ public class AutoQuest : MonoBehaviour
         if (song != null) Destroy(song);
         song = null;
         ActivityPose.Clear();
+        if (seated) { seated = false; ClassSeat.Stand(); }
+        // the result card: what was done, what it paid (and the fish that came up)
+        var finished = Find(quests.Current, next.id);
+        if (finished != null && finished.done) AutoQuestCard.Show(finished);
         idleUntil = Time.time + 1.5f;
     }
 

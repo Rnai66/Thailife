@@ -2,12 +2,12 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
-// Full-screen catch card (ได้ปลา!): the screen dims, a burst of light spins behind a big picture of
-// the fish (Resources/Branding/Icons/sell_<fish id>), which pops in with its name and weight.
+// Full-screen catch card (ได้ปลา!): the screen dims, a burst of light spins behind the fish card
+// (FishCard: the painted fish, its stars, name and weight), which pops in.
 // Closes on a tap or after a few seconds.
 public class FishCatchUI : MonoBehaviour
 {
-    private const float Duration = 3.2f;
+    private const float Duration = 3.6f;
 
     private static FishCatchUI current;
     private static Sprite rays;
@@ -54,24 +54,20 @@ public class FishCatchUI : MonoBehaviour
         burstImage.sprite = rays != null ? rays : rays = MakeRays();
         burstImage.raycastTarget = false;
 
-        // The fish picture (or a big letter if there is no icon for it)
-        fish = UiKit.IconTile(dim, "sell_" + fishId, new Vector2(0f, 60f), new Vector2(460f, 460f));
-        if (UiKit.Art("Icons/sell_" + fishId) == null)
-            UiKit.Label(fish, 200, fishName.Length > 3 ? fishName.Substring(3, 1) : "ป", Vector2.zero, new Vector2(440f, 440f), UiKit.Ink);
-        fish.gameObject.AddComponent<Outline>().effectColor = UiKit.Gold;
-        fish.gameObject.AddComponent<Shadow>().effectDistance = new Vector2(0f, -14f);
+        // The fish card: the painted fish with its stars, name and weight
+        fish = FishCard.Make(dim, fishId, fishName, kg, new Vector2(0f, 10f), new Vector2(900f, 560f));
         fish.localScale = Vector3.zero;
 
         title = UiKit.Rect("Title", dim, new Color(0f, 0f, 0f, 0f));
-        title.anchoredPosition = new Vector2(0f, 360f);
+        title.anchoredPosition = new Vector2(0f, 385f);
         title.sizeDelta = new Vector2(1200f, 140f);
         var t = UiKit.Cartoon(UiKit.Label(title, 110, "ได้ปลา!", Vector2.zero, new Vector2(1200f, 140f), UiKit.GoldText), 6f);
         t.horizontalOverflow = HorizontalWrapMode.Overflow;
 
-        info = UiKit.WoodPlate(dim, new Vector2(0f, -270f), new Vector2(900f, 150f));
-        UiKit.Cartoon(UiKit.Label(info, 64, fishName, new Vector2(0f, 22f), new Vector2(860f, 80f), UiKit.WoodInk), 4f);
-        UiKit.Cartoon(UiKit.Label(info, 44, $"หนัก {kg:0.00} กิโลกรัม", new Vector2(0f, -38f), new Vector2(860f, 60f), UiKit.GoldText), 3f);
-        UiKit.Label(dim, 26, "แตะเพื่อเก็บใส่ข้อง", new Vector2(0f, -390f), new Vector2(800f, 40f), new Color(1f, 1f, 1f, 0.75f));
+        info = UiKit.Rect("Hint", dim, new Color(0f, 0f, 0f, 0f));
+        info.anchoredPosition = new Vector2(0f, -330f);
+        info.sizeDelta = new Vector2(900f, 60f);
+        UiKit.Label(info, 30, "แตะเพื่อเก็บใส่ข้อง", Vector2.zero, new Vector2(900f, 60f), new Color(1f, 1f, 1f, 0.8f));
 
         GameAudio.Play("bell", null, 0.7f);
     }
@@ -83,7 +79,7 @@ public class FishCatchUI : MonoBehaviour
         {
             float pop = EaseOutBack(Mathf.Clamp01(k / 0.55f));
             fish.localScale = Vector3.one * pop * (1f + Mathf.Sin(k * 3f) * 0.025f);
-            fish.localRotation = Quaternion.Euler(0f, 0f, Mathf.Sin(k * 2.2f) * 4f);
+            fish.localRotation = Quaternion.Euler(0f, 0f, Mathf.Sin(k * 2.2f) * 2f);
             title.localScale = Vector3.one * EaseOutBack(Mathf.Clamp01((k - 0.15f) / 0.5f));
             info.localScale = Vector3.one * EaseOutBack(Mathf.Clamp01((k - 0.3f) / 0.5f));
             group.alpha = Mathf.Clamp01(k / 0.2f);

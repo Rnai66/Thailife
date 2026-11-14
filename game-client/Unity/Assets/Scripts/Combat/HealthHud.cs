@@ -18,8 +18,8 @@ public class HealthHud : MonoBehaviour
     private CareerClient career;
     private Text clockLabel, offlineLabel;
     private ProfileClient profile;
-    private RectTransform energyFill;
-    private Text energyLabel;
+    private RectTransform energyFill, xpFill;
+    private Text energyLabel, xpLabel;
 
     private RectTransform menuColumn;
     private Image menuDisc, menuGlyph, questDisc, calendarDisc, autoDisc, socialDisc;
@@ -110,10 +110,15 @@ public class HealthHud : MonoBehaviour
             string why = conn != null && !string.IsNullOrEmpty(conn.LastError) ? $" — {conn.LastError}" : "";
             offlineLabel.text = $"ออฟไลน์{why} (ลองต่อใหม่ทุก 10 วิ)";
             careerCaption.text = "อาชีพ";
+            xpFill.anchorMax = new Vector2(0f, 1f);
+            xpLabel.text = "XP —";
             return;
         }
         offlineLabel.text = "";
         careerCaption.text = $"Lv {stats.level}";
+        float need = Mathf.Max(1, stats.xp_to_next);
+        xpFill.anchorMax = new Vector2(Mathf.Clamp01(stats.xp / need), 1f);
+        xpLabel.text = $"Lv {stats.level} · XP {stats.xp}/{stats.xp_to_next}";
     }
 
     private void Refresh(int health)
@@ -151,6 +156,24 @@ public class HealthHud : MonoBehaviour
         energyLabel.rectTransform.anchorMax = Vector2.one;
         energyLabel.rectTransform.offsetMin = energyLabel.rectTransform.offsetMax = Vector2.zero;
         energyLabel.color = new Color(0.15f, 0.1f, 0.05f);
+
+        // A slim XP bar under it: the player's level and how far to the next
+        var xpBg = CreateRect("XpBar", canvasGo.transform, new Color(0f, 0f, 0f, 0.55f));
+        xpBg.anchorMin = xpBg.anchorMax = new Vector2(0f, 1f);
+        xpBg.pivot = new Vector2(0f, 1f);
+        xpBg.anchoredPosition = new Vector2(124f, -80f);
+        xpBg.sizeDelta = new Vector2(432f, 24f);
+        xpFill = CreateRect("Fill", xpBg, new Color(0.35f, 0.75f, 1f));
+        xpFill.anchorMin = Vector2.zero;
+        xpFill.anchorMax = new Vector2(0f, 1f);
+        xpFill.offsetMin = new Vector2(3f, 3f);
+        xpFill.offsetMax = new Vector2(-3f, -3f);
+        xpLabel = CreateText("XpLabel", xpBg, font, 18, TextAnchor.MiddleCenter);
+        xpLabel.rectTransform.anchorMin = Vector2.zero;
+        xpLabel.rectTransform.anchorMax = Vector2.one;
+        xpLabel.rectTransform.offsetMin = xpLabel.rectTransform.offsetMax = Vector2.zero;
+        xpLabel.color = Color.white;
+        UiKit.Cartoon(xpLabel, 1.5f);
 
         // Only shown while the server can't be reached
         offlineLabel = CreateText("Offline", canvasGo.transform, font, 22, TextAnchor.MiddleLeft);
@@ -228,7 +251,7 @@ public class HealthHud : MonoBehaviour
         rt.SetParent(parent, false);
         rt.anchorMin = rt.anchorMax = new Vector2(0f, 1f);
         rt.pivot = new Vector2(0f, 1f);
-        rt.anchoredPosition = new Vector2(x, -92f);
+        rt.anchoredPosition = new Vector2(x, -116f); // under the energy and XP bars
         rt.sizeDelta = new Vector2(Disc, Disc);
         return rt;
     }

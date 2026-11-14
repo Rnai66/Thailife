@@ -188,7 +188,7 @@ public class SchoolUI : MonoBehaviour
         // Sit down for the lesson / the book, up again when it's over
         var desk = SchoolDesk.Current;
         if (inClass && !ClassSeat.Seated && backdrop.activeSelf && desk != null && desk.transform.parent != null)
-            ClassSeat.Sit(desk.transform.parent, desk.transform.position);
+            ClassSeat.Sit(desk.transform.parent, desk.transform.position, writing: true);
         else if (!inClass && ClassSeat.Seated) ClassSeat.Stand();
     }
 

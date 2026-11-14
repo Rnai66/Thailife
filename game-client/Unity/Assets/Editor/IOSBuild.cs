@@ -117,6 +117,8 @@ public static class IOSBuild
         var root = plist.root;
 
         root.SetString("NSLocalNetworkUsageDescription", "เชื่อมต่อเซิร์ฟเวอร์เกมในวง Wi-Fi เดียวกัน (สำหรับทดสอบ)");
+        // "Save Image" in the share sheet of the level-up card
+        root.SetString("NSPhotoLibraryAddUsageDescription", "บันทึกการ์ดเลเวลอัปลงในรูปภาพของคุณ");
 
         var ats = root["NSAppTransportSecurity"] as UnityEditor.iOS.Xcode.PlistElementDict
                   ?? root.CreateDict("NSAppTransportSecurity");

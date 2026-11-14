@@ -44,4 +44,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Ubon.unity
     guid: e06b8a45236774acdac838b08d918b73
+  - enabled: 1
+    path: Assets/Scenes/Korat.unity
+    guid: 395417be9e6514c0dae2e46c0bddacc0
   m_configObjects: {}

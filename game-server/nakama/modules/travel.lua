@@ -26,10 +26,11 @@ local PLACES = {
   khonkaen  = { lat = 16.43, lon = 102.83, bus = true, train = true, air = true },
   ubon      = { lat = 15.24, lon = 104.85, bus = true, train = true, air = true },
   buriram   = { lat = 14.99, lon = 103.10, bus = true, train = true, air = true },
+  korat     = { lat = 14.97, lon = 102.10, bus = true, train = true, air = true },
   songkhla  = { lat = 7.01,  lon = 100.47, bus = true, train = true, air = true },
   nakhonsi  = { lat = 8.43,  lon = 99.96,  bus = true, train = true, air = true },
 }
-local ORDER = { "city", "bangkok", "chiangmai", "pattaya", "khonkaen", "ubon", "buriram", "songkhla", "nakhonsi" }
+local ORDER = { "city", "bangkok", "chiangmai", "pattaya", "khonkaen", "ubon", "buriram", "korat", "songkhla", "nakhonsi" }
 
 -- Fare = base + per km; hours = fixed part + km / speed (by road a little longer than straight)
 local MODES = {

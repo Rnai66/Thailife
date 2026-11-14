@@ -40,7 +40,7 @@ public static class FestivalGrounds
         Booth(attractions, new Vector3(3.2f, 0f, -2f), "rings", "โยนห่วง", 0, PrimitiveKit.Mat("TentGreen", new Color(0.25f, 0.62f, 0.35f)), 90f);
         if (big) Booth(attractions, new Vector3(-11f, 0f, 6.4f), "bingo", "บิงโก", 30, PrimitiveKit.Mat("TentGreen", new Color(0.25f, 0.62f, 0.35f)));
 
-        Movie(attractions, new Vector3(0f, 0f, 11f));
+        Movie(attractions, new Vector3(0f, 0f, 11f), scale);
         Likay(attractions, new Vector3(-8f, 0f, 10f));
         if (big)
         {
@@ -504,20 +504,9 @@ public static class FestivalGrounds
         PrimitiveKit.Box("SeatMarker", k, new Vector3(1.2f, 0.46f, -0.5f), new Vector3(0.5f, 0.02f, 0.3f), PrimitiveKit.Glow("ClassMarker", new Color(1f, 0.78f, 0.3f), 0.6f), collider: false);
     }
 
-    // หนังกลางแปลง: big white screen on poles, mats on the grass in front
-    private static void Movie(Transform parent, Vector3 position)
-    {
-        var m = PrimitiveKit.Group("OutdoorMovie_หนังกลางแปลง", parent, position).transform;
-        var pole = PrimitiveKit.Mat("PoleConcrete", new Color(0.78f, 0.77f, 0.74f));
-        foreach (float x in new[] { -3.8f, 3.8f })
-            PrimitiveKit.Box("ScreenPole", m, new Vector3(x, 2.9f, 0f), new Vector3(0.18f, 5.8f, 0.18f), PrimitiveKit.Mat("Wire", new Color(0.1f, 0.1f, 0.1f)));
-        var screen = PrimitiveKit.Box("Screen", m, new Vector3(0f, 3.6f, 0f), new Vector3(7.2f, 4f, 0.06f), PrimitiveKit.Glow("MovieScreen", new Color(0.9f, 0.9f, 0.85f), 1.2f), collider: false);
-        screen.AddComponent<MovieScreen>();
-        var mat = PrimitiveKit.Mat("Mat", new Color(0.85f, 0.7f, 0.4f));
-        for (int i = 0; i < 3; i++)
-            PrimitiveKit.Box("Mat", m, new Vector3(-2f + i * 2f, 0.02f, -5f), new Vector3(1.6f, 0.02f, 2.2f), mat, collider: false);
-        Zone(m, new Vector3(0f, 1f, -5f), new Vector3(6.5f, 2f, 2.6f)).gameObject.AddComponent<FestivalBooth>().Configure("movie", "หนังกลางแปลง", 0);
-    }
+    // หนังกลางแปลง: the compact troupe cinema (OutdoorCinema)
+    private static void Movie(Transform parent, Vector3 position, string scale) =>
+        OutdoorCinema.Build(parent, position, 0f, big: false, gateScale: scale);
 
     // ลิเก: raised stage with a red-and-gold backdrop and two performers
     private static void Likay(Transform parent, Vector3 position)

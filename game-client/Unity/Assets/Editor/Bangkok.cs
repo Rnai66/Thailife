@@ -931,7 +931,7 @@ public static class Bangkok
         }
         PrimitiveKit.Box("TicketCounter", t, new Vector3(0f, 0.55f, 0f), new Vector3(6f, 1.1f, 1.2f), PrimitiveKit.Mat("TempleGold", new Color(0.95f, 0.75f, 0.2f), 0.75f, 0.8f));
         PrimitiveKit.Box("Board", t, new Vector3(0f, 4.6f, -1f), new Vector3(9f, 2.6f, 0.12f), PrimitiveKit.Glow("DepartureBoard", new Color(0.05f, 0.07f, 0.12f), 0.3f, 0.6f), collider: false);
-        PrimitiveKit.Label("ขาออก · เที่ยวบินในประเทศ\nเชียงใหม่  ขอนแก่น  อุบลฯ  บุรีรัมย์\nหาดใหญ่  นครศรีฯ  อู่ตะเภา (พัทยา)", t,
+        PrimitiveKit.Label("ขาออก · เที่ยวบินในประเทศ\nเชียงใหม่  ขอนแก่น  อุบลฯ  บุรีรัมย์\nโคราช  หาดใหญ่  นครศรีฯ  อู่ตะเภา (พัทยา)", t,
             new Vector3(0f, 4.6f, -0.92f), 0.04f, new Color(1f, 0.85f, 0.3f), 180f);
         PrimitiveKit.Label("ขายตั๋วเครื่องบิน", t, new Vector3(0f, 1.6f, 0.65f), 0.035f, new Color(0.4f, 0.2f, 0.05f), 180f);
         var zone = new GameObject("FlightZone_ตั๋วเครื่องบิน");

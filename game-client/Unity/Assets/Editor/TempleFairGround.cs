@@ -57,36 +57,10 @@ public static class TempleFairGround
         label.GetComponent<MeshRenderer>().sharedMaterial = font.material;
     }
 
-    // หนังกลางแปลงจอใหญ่: a huge white screen on scaffold poles, the film flickering on it, mats on the
-    // ground in front (+Z) and the projector stand at the back of the crowd
-    private static void BigMovie(Transform parent, Vector3 position)
-    {
-        var m = PrimitiveKit.Group("BigMovie_หนังกลางแปลง", parent, position, 180f).transform; // audience to the north
-        var steel = PrimitiveKit.Mat("Wire", new Color(0.1f, 0.1f, 0.1f));
-        foreach (float x in new[] { -7f, 7f })
-        {
-            PrimitiveKit.Box("ScreenPole", m, new Vector3(x, 4.5f, 0.1f), new Vector3(0.25f, 9f, 0.25f), steel);
-            PrimitiveKit.Box("Stay", m, new Vector3(x, 3f, 1.6f), new Vector3(0.08f, 6.4f, 0.08f), steel, new Vector3(-28f, 0f, 0f), collider: false);
-        }
-        PrimitiveKit.Box("ScreenFrame", m, new Vector3(0f, 5f, 0.06f), new Vector3(13.6f, 7.4f, 0.08f), PrimitiveKit.Mat("SpeakerBlack", new Color(0.08f, 0.08f, 0.09f)), collider: false);
-        var screen = PrimitiveKit.Box("Screen", m, new Vector3(0f, 5f, 0f), new Vector3(13f, 6.8f, 0.06f), PrimitiveKit.Glow("MovieScreen", new Color(0.9f, 0.9f, 0.85f), 1.2f), collider: false);
-        screen.AddComponent<MovieScreen>();
-        var mat = PrimitiveKit.Mat("Mat", new Color(0.85f, 0.7f, 0.4f));
-        for (int r = 0; r < 2; r++)
-            for (int i = 0; i < 4; i++)
-                PrimitiveKit.Box("Mat", m, new Vector3(-4.5f + i * 3f, 0.03f, -6f - r * 2.6f), new Vector3(2.4f, 0.02f, 2.2f), mat, collider: false);
-        // Projector on a little table behind the mats
-        PrimitiveKit.Box("ProjectorTable", m, new Vector3(0f, 0.45f, -11.5f), new Vector3(1.2f, 0.9f, 0.8f), PrimitiveKit.Mat("WoodPlank", new Color(0.6f, 0.4f, 0.22f)));
-        PrimitiveKit.Box("Projector", m, new Vector3(0f, 1.1f, -11.5f), new Vector3(0.5f, 0.4f, 0.7f), steel, collider: false);
-        PrimitiveKit.Sphere("Lens", m, new Vector3(0f, 1.12f, -11.15f), Vector3.one * 0.18f, PrimitiveKit.Glow("BulbWarm", new Color(1f, 0.85f, 0.55f), 2.5f));
-        var zone = new GameObject("PlayZone");
-        zone.transform.SetParent(m, false);
-        zone.transform.localPosition = new Vector3(0f, 1f, -7f);
-        var box = zone.AddComponent<BoxCollider>();
-        box.isTrigger = true;
-        box.size = new Vector3(12f, 2f, 5f);
-        zone.AddComponent<FestivalBooth>().Configure("movie", "หนังกลางแปลง", 0);
-    }
+    // หนังกลางแปลงจอใหญ่ (OutdoorCinema, big): the troupe screen with LED pixels, speakers and neon;
+    // the crowd sits to the north (+Z), the projector booth behind them
+    private static void BigMovie(Transform parent, Vector3 position) =>
+        OutdoorCinema.Build(parent, position, 180f, big: true, gateScale: "any"); // audience to the north
 
     // เวทีรำวงชาวบ้าน facing east (+X): deck, LED wall, speaker towers, the light rig (moving heads,
     // uplights, lasers — ConcertLights), a flower table in the middle with dancers circling it and the

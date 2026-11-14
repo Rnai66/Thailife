@@ -21,13 +21,8 @@ local MIN_CAST_INTERVAL_MS = 1000
 local GRPC_FAILED_PRECONDITION = 9
 local GRPC_RESOURCE_EXHAUSTED = 8
 
--- Thai freshwater fish: weight = how common, kg = size range
-local FISH = {
-  { id = "tilapia",   name = "ปลานิล",     weight = 40, min_kg = 0.3, max_kg = 1.2 },
-  { id = "barb",      name = "ปลาตะเพียน", weight = 30, min_kg = 0.2, max_kg = 0.8 },
-  { id = "snakehead", name = "ปลาช่อน",    weight = 20, min_kg = 0.5, max_kg = 2.5 },
-  { id = "catfish",   name = "ปลาดุก",     weight = 10, min_kg = 0.4, max_kg = 1.8 },
-}
+-- Thai freshwater fish (shared with the auto fishing quest)
+local FISH = data.FISH
 
 -- Sea fish from the pier at the beach (ทะเล): rods don't change these odds, only the size
 local SEA_FISH = {
