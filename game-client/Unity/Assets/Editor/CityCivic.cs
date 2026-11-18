@@ -274,13 +274,18 @@ public static class CityCivic
         var hall = PrimitiveKit.Group("Hall", w, new Vector3(-2f, 0f, 1.5f)).transform;
         hall.localScale = Vector3.one * 0.8f; // big enough to walk into (doorway 1.4 x 2.2 m)
         Places.Ubosot(hall, Vector3.zero, white, gold, orange, green);
-        var chedi = PrimitiveKit.Group("Chedi", w, new Vector3(6f, 0f, 5f)).transform;
+        var chedi = PrimitiveKit.Group("Chedi", w, new Vector3(6f, 0f, 7.2f)).transform;
         chedi.localScale = Vector3.one * 0.7f;
         Places.Chedi(chedi, Vector3.zero, white, gold);
-        // Low wall with a gate at the front (-Z)
-        PrimitiveKit.Box("WallBack", w, new Vector3(0f, 0.5f, 9f), new Vector3(20f, 1f, 0.3f), white);
-        PrimitiveKit.Box("WallL", w, new Vector3(-10f, 0.5f, 0f), new Vector3(0.3f, 1f, 18f), white);
-        PrimitiveKit.Box("WallR", w, new Vector3(10f, 0.5f, 0f), new Vector3(0.3f, 1f, 18f), white);
+        // Low wall with a gate at the front (-Z); the grounds run back to the temple ground's edge
+        const float back = 10.8f;
+        PrimitiveKit.Box("WallBack", w, new Vector3(0f, 0.5f, back), new Vector3(20f, 1f, 0.3f), white);
+        PrimitiveKit.Box("WallL", w, new Vector3(-10f, 0.5f, (back - 9f) * 0.5f), new Vector3(0.3f, 1f, back + 9f), white);
+        PrimitiveKit.Box("WallR", w, new Vector3(10f, 0.5f, (back - 9f) * 0.5f), new Vector3(0.3f, 1f, back + 9f), white);
+        PrimitiveKit.Box("Grounds", w, new Vector3(0f, 0.008f, (back - 9f) * 0.5f), new Vector3(19.7f, 0.012f, back + 8.7f),
+            PrimitiveKit.Mat("Pavement", new Color(0.72f, 0.7f, 0.66f)), collider: false);
+        // temple life inside the walls, in the front right corner beside the ubosot (TempleKit)
+        TempleLife.KitAt(w, new Vector3(6.25f, 0f, -2f), 0f);
         PrimitiveKit.Box("WallFrontL", w, new Vector3(-6.25f, 0.5f, -9f), new Vector3(7.5f, 1f, 0.3f), white);
         PrimitiveKit.Box("WallFrontR", w, new Vector3(6.25f, 0.5f, -9f), new Vector3(7.5f, 1f, 0.3f), white);
         PrimitiveKit.Box("GateL", w, new Vector3(-2.4f, 1.5f, -9f), new Vector3(0.45f, 3f, 0.45f), white);

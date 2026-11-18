@@ -44,6 +44,7 @@ public class BuildingInterior : MonoBehaviour
             var p = transform.InverseTransformPoint(child.position);
             if (root != transform && Mathf.Abs(p.x) > halfX + 0.4f) continue; // a neighbouring shop
             if (p.y >= ceilingY - 0.25f) shell.AddRange(child.GetComponentsInChildren<Renderer>());
+            else if (HighParts(child)) { }
             else if (IsWindow(child.name))
             {
                 string wall = p.z < -halfZ + 0.35f ? "WallFront" : p.z > halfZ - 0.35f ? "WallBack"
@@ -56,6 +57,25 @@ public class BuildingInterior : MonoBehaviour
 
         var pc = FindAnyObjectByType<PlayerController>();
         player = pc != null ? pc.transform : null;
+    }
+
+    // A part whose pivot sits below the ceiling but which is mostly above it (a gable end set on the
+    // wall top, a skirt roof leaning over the eaves): hide the high pieces of it with the roof
+    private bool HighParts(Transform child)
+    {
+        if (IsWindow(child.name)) return false;
+        bool any = false;
+        foreach (var r in child.GetComponentsInChildren<Renderer>())
+        {
+            var c = transform.InverseTransformPoint(r.bounds.center);
+            var top = transform.InverseTransformPoint(r.bounds.max);
+            if (c.y >= ceilingY - 0.5f || (c.y >= ceilingY - 1.2f && top.y >= ceilingY + 0.3f && !IsWindow(r.name)))
+            {
+                shell.Add(r);
+                any = true;
+            }
+        }
+        return any;
     }
 
     private static bool IsWindow(string n) =>

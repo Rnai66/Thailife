@@ -23,7 +23,7 @@ public static partial class TempleLife
         // Ubosot hall (world): floor at y 0.74, centre (-32, 24), the Buddha at the back (z ~30)
         foreach (float z in new[] { 21.5f, 23f, 24.5f })
             SeatedMonk(root, new Vector3(-35f, 0.74f, z), -90f);   // the west side, facing across the hall
-        Meditation(root, new Vector3(-32f, 0.74f, 27.2f));
+        // (the meditation mat before the Buddha comes with every ubosot: Places.Ubosot → UbosotMeditation)
 
         // Sala: two monks chanting
         foreach (float x in new[] { -42.2f, -39.8f })
@@ -84,6 +84,9 @@ public static partial class TempleLife
     }
 
     // ── Meditation mat before the Buddha ────────────────────────────────────────────────────
+    // In an ubosot (Places.Ubosot's own space: floor 0.74 up, the Buddha at the back, +Z)
+    public static void UbosotMeditation(Transform ubosot) => Meditation(ubosot, new Vector3(0f, 0.74f, 3.2f));
+
     private static void Meditation(Transform parent, Vector3 at)
     {
         var g = PrimitiveKit.Group("Meditation_ที่นั่งสมาธิ", parent, at).transform;

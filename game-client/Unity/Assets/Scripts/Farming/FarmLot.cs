@@ -6,8 +6,8 @@ using UnityEngine;
 // the owner's zones, four sides that take their fences, a sign with the lot number and owner, a "ว่าง"
 // board, and the spot by the sign where you arrange your own farm (FarmLotCounter, yours only).
 // What the owner built on it (fences, gates…: build.lua site "farm") stands on it too; your own are
-// drawn by BuiltPieces. A neighbour's farm is only to look at: the parts that would work your own rice, fish, cows and
-// chickens are taken off their copy before it wakes up.
+// drawn by BuiltPieces. A neighbour's farm is only to look at, but it shows what is really on it (FarmLots.FarmShow):
+// their rice growing in the paddies, the fish in their cages, their cows and chickens; nothing there works your own.
 public class FarmLot : MonoBehaviour
 {
     public static readonly string[] Sides = { "front", "back", "left", "right" };
@@ -36,7 +36,7 @@ public class FarmLot : MonoBehaviour
     }
 
     // Returns whether anything had to be built (the caller spreads that over frames)
-    public bool Show(FarmLots owner, string[] layout, FarmLots.Fences fences, string ownerName, bool mine, BuildClient.Piece[] pieces = null)
+    public bool Show(FarmLots owner, string[] layout, FarmLots.Fences fences, string ownerName, bool mine, BuildClient.Piece[] pieces = null, FarmLots.FarmShow farm = null)
     {
         bool rebuilt = false;
         ShowBuilt(pieces);
@@ -58,6 +58,7 @@ public class FarmLot : MonoBehaviour
                 Place(owner.Template($"Fence_{f[i]}_{part}"), sides[i], true);
             }
         }
+        if (!mine) ShowFarm(farm ?? new FarmLots.FarmShow(), ownerName);
         if (plate != null) plate.text = string.IsNullOrEmpty(ownerName) ? $"แปลงเกษตร {number}" : $"แปลงเกษตร {number}\n{ownerName}";
         if (vacant != null) vacant.SetActive(false);
         if (manage != null) manage.SetActive(mine);
@@ -139,23 +140,36 @@ public class FarmLot : MonoBehaviour
         built.Add(copy);
     }
 
-    // A neighbour's farm: no paddies, cages, pens or coop that would show or work your own
+    // A neighbour's farm: the counters and windows that would work your own farm come off; the paddies,
+    // cages, pen and coop stay to show the owner's (ShowFarm), switched to "theirs" before they wake up
     private static void Strip(GameObject copy)
     {
-        foreach (var c in copy.GetComponentsInChildren<FarmPlot>(true)) DestroyImmediate(c);
-        foreach (var c in copy.GetComponentsInChildren<FishPond>(true)) DestroyImmediate(c);
-        foreach (var c in copy.GetComponentsInChildren<CowPen>(true)) DestroyImmediate(c);
         foreach (var c in copy.GetComponentsInChildren<RanchCounter>(true)) DestroyImmediate(c);
         foreach (var c in copy.GetComponentsInChildren<WindowSpot>(true)) DestroyImmediate(c);
-        foreach (var c in copy.GetComponentsInChildren<ChickenPen>(true)) DestroyImmediate(c);
-        foreach (var c in copy.GetComponentsInChildren<CowWander>(true)) c.gameObject.SetActive(false);
-        foreach (var c in copy.GetComponentsInChildren<LandSite>(true))
+        foreach (var c in copy.GetComponentsInChildren<FarmPlot>(true)) c.ShowAs(null, "");
+        foreach (var c in copy.GetComponentsInChildren<FishPond>(true)) c.ShowAs(null);
+        foreach (var c in copy.GetComponentsInChildren<CowPen>(true)) c.ShowAs(0, null, 1);
+        foreach (var c in copy.GetComponentsInChildren<ChickenPen>(true)) c.ShowAs(null);
+        foreach (var c in copy.GetComponentsInChildren<LandSite>(true)) c.ShowAs(false);
+    }
+
+    // What the owner has on their farm now: rice in the paddies (and the canal-side ones if they own
+    // that land), fish in the cages, the cows and the chickens
+    private void ShowFarm(FarmLots.FarmShow farm, string ownerName)
+    {
+        foreach (var copy in built)
         {
-            var owned = c.transform.Find("Owned");
-            var sale = c.transform.Find("ForSale");
-            if (owned != null) owned.gameObject.SetActive(true);
-            if (sale != null) sale.gameObject.SetActive(false);
-            DestroyImmediate(c);
+            if (copy == null) continue;
+            foreach (var c in copy.GetComponentsInChildren<LandSite>(true)) c.ShowAs(farm.land_rice);
+            foreach (var c in copy.GetComponentsInChildren<FarmPlot>(true))
+            {
+                FarmClient.Plot plot = null;
+                if (farm.plots != null) foreach (var p in farm.plots) if (p.id == c.PlotId) plot = p;
+                c.ShowAs(plot, ownerName);
+            }
+            foreach (var c in copy.GetComponentsInChildren<FishPond>(true)) c.ShowAs(farm.cages);
+            foreach (var c in copy.GetComponentsInChildren<CowPen>(true)) c.ShowAs(farm.cows, farm.herd, Mathf.Max(1, farm.grown_days));
+            foreach (var c in copy.GetComponentsInChildren<ChickenPen>(true)) c.ShowAs(farm.chickens ?? new CoopClient.Chicken[0]);
         }
     }
 }

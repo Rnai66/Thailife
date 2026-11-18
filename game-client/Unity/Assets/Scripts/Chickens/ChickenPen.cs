@@ -20,17 +20,35 @@ public class ChickenPen : MonoBehaviour
 
     public void Configure(Vector2 penSize) => size = penSize;
 
-    private void Start()
+    // a neighbour's coop (FarmLot.ShowFarm): their chickens, not yours
+    private bool theirs;
+
+    public void ShowAs(CoopClient.Chicken[] chickens)
+    {
+        if (!theirs && CoopClient.Instance != null) CoopClient.Instance.Changed -= Sync;
+        theirs = true;
+        if (chickens == null) return; // just marked as theirs: the chickens come with the farm
+        if (template == null) Template();
+        Sync(new CoopClient.State { chickens = chickens });
+    }
+
+    private void Template()
     {
         var player = FindAnyObjectByType<PlayerController>();
         template = player != null ? player.GetComponent<Renderer>()?.sharedMaterial : null;
+    }
+
+    private void Start()
+    {
+        if (template == null) Template();
+        if (theirs) return;
         if (CoopClient.Instance != null) CoopClient.Instance.Changed += Sync;
         if (CoopClient.Instance?.Current != null) Sync(CoopClient.Instance.Current);
     }
 
     private void OnDestroy()
     {
-        if (CoopClient.Instance != null) CoopClient.Instance.Changed -= Sync;
+        if (!theirs && CoopClient.Instance != null) CoopClient.Instance.Changed -= Sync;
     }
 
     private void Sync(CoopClient.State state)

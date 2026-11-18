@@ -12,7 +12,18 @@ public class FarmLots : MonoBehaviour
 {
     [Serializable] public class Fences { public string front = "none", back = "none", left = "none", right = "none"; }
     [Serializable] public class Mine { public int moo, lot; public string[] layout; public Fences fences; public string moo_name, address; }
-    [Serializable] public class LotEntry { public int no; public bool vacant, mine; public string owner, owner_id; public string[] layout; public Fences fences; public BuildClient.Piece[] pieces; }
+    [Serializable] public class LotEntry { public int no; public bool vacant, mine; public string owner, owner_id; public string[] layout; public Fences fences; public BuildClient.Piece[] pieces; public FarmShow farm; }
+    // What is on a neighbour's farm now (farmlot.lua farm_show): shown on their lot for everyone to see
+    [Serializable]
+    public class FarmShow
+    {
+        public FarmClient.Plot[] plots;
+        public bool land_rice;
+        public PondClient.Cage[] cages;
+        public int cows, grown_days;
+        public RanchClient.Cow[] herd;
+        public CoopClient.Chicken[] chickens;
+    }
     [Serializable] public class Option { public string id, name; public int price; }
     [Serializable] public class View
     {
@@ -144,7 +155,7 @@ public class FarmLots : MonoBehaviour
         {
             if (!lots.TryGetValue(l.no, out var lot)) continue;
             if (l.vacant) lot.Clear(true);
-            else if (lot.Show(this, l.layout, l.fences, l.owner, l.mine, l.mine ? null : l.pieces) && ++done % 2 == 0) // your own pieces: BuiltPieces
+            else if (lot.Show(this, l.layout, l.fences, l.owner, l.mine, l.mine ? null : l.pieces, l.mine ? null : l.farm) && ++done % 2 == 0) // your own pieces: BuiltPieces
                 yield return null;
         }
         applying = null;

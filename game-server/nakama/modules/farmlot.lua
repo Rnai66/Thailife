@@ -9,6 +9,9 @@
 --                                 lots:[{no, vacant, owner, owner_id, layout, fences, mine}],
 --                                 fences_list:[{id, name, price}], modules:[{id, name}], layout_fee}
 --   farmlot_set {"layout": ["pond","rice","cows","coop"]?, "side": "back", "fence": "wood"?}
+--   (each neighbour's lot also carries `farm`: what is on it now, so everyone sees the rice, fish, cows
+--    and chickens on everyone's โคกหนองนา — {plots:[{id, stage, progress, variety_name}], land_rice,
+--    cages:[{id, stage, species, progress, ready_in_s}], cows, herd:[{g}], grown_days, chickens:[{id, sex, color, adult}]})
 --   farmlot_move {"moo": 3?, "lot": 7?} -> move your farm (free, everything on it comes along): a
 --                village resident to their own หมู่ (so farm and house are neighbours), anyone else to
 --                the หมู่ they pick; leave out lot for the first free one there
@@ -19,6 +22,7 @@
 
 local nk = require("nakama")
 local data = require("shop_data")
+local chickens = require("chicken_core")
 
 local SYSTEM = "00000000-0000-0000-0000-000000000000"
 local LOT_STORE = "lots"
@@ -186,15 +190,88 @@ local function farm_pieces(doc)
   return by
 end
 
+-- What is on each owner's farm now, to show on their lot for everyone (farming.lua, fishpond.lua,
+-- ranch.lua, chicken_core; the canal-side paddies need land_rice at the bank). Only what can be seen:
+-- stages and growth, never money, feed or eggs.
+local FISH_GROW_MS = { duk = 20, tilapia = 30, tapien = 45, prawn = 60 } -- minutes, as fishpond.lua SPECIES
+local RANCH_BASE, RANCH_STEP, GROWN_DAYS = 8, 4, 15                       -- as ranch.lua (the village pen)
+
+local function farm_show(doc)
+  local keys, owners = {}, {}
+  for _, l in pairs(doc.lots) do
+    if l.user and not owners[l.user] then
+      owners[l.user] = {}
+      for _, k in ipairs({ { "farm", "plots" }, { "fishpond", "cages" }, { "ranch", "herd" }, { "chickens", "coop" }, { "bank", "account" } }) do
+        table.insert(keys, { collection = k[1], key = k[2], user_id = l.user })
+      end
+    end
+  end
+  if #keys == 0 then return {} end
+  for _, o in ipairs(nk.storage_read(keys)) do
+    if owners[o.user_id] then owners[o.user_id][o.collection] = o.value end
+  end
+  local now = nk.time()
+  local by = {}
+  for user, v in pairs(owners) do
+    local f = { grown_days = GROWN_DAYS, cows = 0 }
+    f.land_rice = ((v.bank or {}).assets or {}).land_rice == true
+    local plots = {}
+    for i = 1, f.land_rice and 12 or 6 do
+      local p = (v.farm or {})[tostring(i)] or {}
+      local stage, progress, name = "empty", 0, ""
+      if p.state == "plowed" then stage = "plowed"
+      elseif p.state and p.state ~= "empty" and p.planted_ms then
+        local r = data.RICE[p.variety or "khao_niao"] or data.RICE.khao_niao
+        progress = math.min(1, (now - p.planted_ms) / r.grow_ms)
+        stage, name = (progress >= 1) and "ripe" or "growing", r.name
+      end
+      table.insert(plots, { id = i, stage = stage, progress = progress, variety_name = name })
+    end
+    f.plots = plots
+    local cages = {}
+    for i = 1, 3 do
+      local c = (v.fishpond or {})[tostring(i)] or {}
+      local grow = c.species and FISH_GROW_MS[c.species]
+      if grow and c.stocked_ms then
+        local ms = grow * 60 * 1000
+        local progress = math.min(1, (now - c.stocked_ms) / ms)
+        table.insert(cages, { id = i, stage = (progress >= 1) and "grown" or "growing", species = c.species, progress = progress,
+                              ready_in_s = math.max(0, math.ceil((c.stocked_ms + ms - now) / 1000)) })
+      else
+        table.insert(cages, { id = i, stage = "empty", species = "", progress = 0, ready_in_s = 0 })
+      end
+    end
+    f.cages = cages
+    local h = v.ranch or {}
+    if type(h.cows) == "table" and #h.cows > 0 then
+      local room = RANCH_BASE + RANCH_STEP * (h.pen or 0)
+      local herd = {}
+      for i = 1, math.min(#h.cows, room) do table.insert(herd, { g = math.min(h.cows[i].g or 0, GROWN_DAYS) }) end
+      f.cows, f.herd = #herd, herd
+    elseif type(h.cows) == "number" then
+      f.cows = math.min(h.cows, RANCH_BASE)
+    end
+    local list = {}
+    for _, c in ipairs((v.chickens or {}).chickens or {}) do
+      table.insert(list, { id = c.id, sex = c.sex, color = c.color or "", adult = chickens.is_adult(c, now) })
+    end
+    if #list > 0 then f.chickens = list end
+    by[user] = f
+  end
+  return by
+end
+
 local function view(user_id, s, moo, extra)
   local doc = read_lots(moo)
   local built = farm_pieces(doc)
+  local shows = farm_show(doc)
   local lots = {}
   for no = 1, FARM_LOTS do
     local l = doc.lots[tostring(no)]
     table.insert(lots, { no = no, vacant = l == nil, owner = l and l.name or "", owner_id = l and l.user or "",
                          layout = l and l.layout or DEFAULT_LAYOUT, fences = l and l.fences or NO_FENCES,
-                         mine = l ~= nil and l.user == user_id, pieces = l and built[l.user] or nil })
+                         mine = l ~= nil and l.user == user_id, pieces = l and built[l.user] or nil,
+                         farm = (l and l.user ~= user_id) and shows[l.user] or nil })
   end
   local r = { mine = { moo = s.moo or 0, lot = s.lot or 0, layout = s.layout, fences = s.fences,
                        moo_name = s.moo and moo_name(s.moo) or "",

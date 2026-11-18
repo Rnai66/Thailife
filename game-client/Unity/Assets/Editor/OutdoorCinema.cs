@@ -91,6 +91,25 @@ public static class OutdoorCinema
                 PrimitiveKit.Box("Mat", m, new Vector3((i - (perRow - 1) * 0.5f) * (big ? 3f : 2f), 0.03f, (big ? -6f : -4.6f) - r * 2.6f), new Vector3(big ? 2.4f : 1.6f, 0.02f, 2.2f), mat, collider: false);
         Booth(m, new Vector3(0f, 0f, big ? -12f : -7.4f), w, bottom, top, big);
 
+        // the audience sitting cross-legged on the mats, facing the screen, from the late afternoon on
+        var seats = new System.Collections.Generic.List<Vector3>();
+        var faces = new System.Collections.Generic.List<float>();
+        var poses = new System.Collections.Generic.List<SpectatorPose.Kind>();
+        for (int r = 0; r < rows; r++)
+            for (int i = 0; i < perRow; i++)
+            {
+                float cx = (i - (perRow - 1) * 0.5f) * (big ? 3f : 2f), cz = (big ? -6f : -4.6f) - r * 2.6f;
+                int each = big ? 3 : 2;
+                for (int k = 0; k < each; k++)
+                {
+                    float x = cx + (k - (each - 1) * 0.5f) * (big ? 0.75f : 0.7f), z = cz + ((k + i + r) % 2 == 0 ? 0.35f : -0.4f);
+                    seats.Add(new Vector3(x, 0f, z));
+                    faces.Add(((k * 7 + i * 3 + r) % 5 - 2) * 4f); // a little this way and that
+                    poses.Add(SpectatorPose.Kind.SitGround);
+                }
+            }
+        Npcs.Watchers(m, "Audience_คนดูหนัง", Vector3.zero, 0f, seats.ToArray(), faces.ToArray(), poses.ToArray(), "", 16, 2);
+
         var zone = new GameObject("PlayZone");
         zone.transform.SetParent(m, false);
         zone.transform.localPosition = new Vector3(0f, 1f, big ? -7f : -4.8f);
@@ -234,6 +253,48 @@ public static class OutdoorCinema
         t.gameObject.AddComponent<FilmProjector>().Configure(reels, new[] { 55f, 95f },
             new Renderer[] { outer.GetComponent<Renderer>(), core.GetComponent<Renderer>() },
             new[] { new Color(0.05f, 0.045f, 0.035f), new Color(0.06f, 0.055f, 0.045f) }, lamp);
+
+        // ── the sound gear on the left: an amplifier rack and the mixer on its stand ──
+        var rack = PrimitiveKit.Group("AmpRack_เครื่องขยายเสียง", t, new Vector3(-0.72f, 0f, 0.25f), -90f).transform;
+        var vu = new System.Collections.Generic.List<Renderer>();
+        PrimitiveKit.Box("Rack", rack, new Vector3(0f, 0.5f, 0f), new Vector3(0.62f, 1f, 0.42f), Black);
+        for (int i = 0; i < 3; i++)
+        {
+            float y = 0.2f + i * 0.3f;
+            PrimitiveKit.Box("Amp", rack, new Vector3(0f, y, -0.215f), new Vector3(0.56f, 0.24f, 0.02f), steel, collider: false);
+            foreach (float x in new[] { -0.18f, -0.06f, 0.06f })
+                PrimitiveKit.Cylinder("AmpKnob", rack, new Vector3(x, y - 0.04f, -0.23f), new Vector3(0.04f, 0.01f, 0.04f), Black, new Vector3(90f, 0f, 0f), collider: false);
+            vu.Add(PrimitiveKit.Box("Meter", rack, new Vector3(0.17f, y + 0.04f, -0.23f), new Vector3(0.14f, 0.07f, 0.01f), warm, collider: false).GetComponent<Renderer>());
+            vu.Add(PrimitiveKit.Box("PowerLed", rack, new Vector3(-0.24f, y + 0.07f, -0.23f), new Vector3(0.025f, 0.025f, 0.01f), Bulb, collider: false).GetComponent<Renderer>());
+        }
+        rack.gameObject.AddComponent<LedChase>().Configure(vu.ToArray(), LedChase.Mode.Pulse, new Color(1f, 0.55f, 0.15f), new Color(0.2f, 1f, 0.3f), 1.05f);
+        var mixer = PrimitiveKit.Group("Mixer_มิกเซอร์", t, new Vector3(-0.68f, 0f, -0.52f), 0f).transform;
+        PrimitiveKit.Box("Stand", mixer, new Vector3(0f, 0.38f, 0f), new Vector3(0.5f, 0.76f, 0.38f), PrimitiveKit.Mat("WoodPlank", new Color(0.6f, 0.4f, 0.22f)), collider: false);
+        PrimitiveKit.Box("Desk", mixer, new Vector3(0f, 0.8f, 0f), new Vector3(0.48f, 0.07f, 0.34f), Black, new Vector3(-12f, 0f, 0f), collider: false);
+        var faders = PrimitiveKit.Mat("PK_MixerFader", new Color(0.85f, 0.85f, 0.88f), 0.5f);
+        for (int i = 0; i < 6; i++)
+        {
+            float x = -0.18f + i * 0.072f;
+            PrimitiveKit.Box("Fader", mixer, new Vector3(x, 0.845f, 0.05f - (i % 3) * 0.02f), new Vector3(0.022f, 0.02f, 0.035f), faders, new Vector3(-12f, 0f, 0f), collider: false);
+            for (int k = 0; k < 3; k++)
+                PrimitiveKit.Cylinder("Knob", mixer, new Vector3(x, 0.84f + k * 0.012f, -0.13f + k * 0.05f), new Vector3(0.018f, 0.01f, 0.018f), i % 2 == 0 ? red : faders, collider: false);
+        }
+        // cables from the rack out to the speakers
+        PrimitiveKit.Box("Cable", t, new Vector3(-0.9f, 0.02f, 0.9f), new Vector3(0.03f, 0.02f, 1.2f), Black, collider: false);
+
+        // ── the film cans: a crate of reels in their round tins, two more stacked by it ──
+        var tins = PrimitiveKit.Mat("PK_FilmTin", new Color(0.62f, 0.6f, 0.55f), 0.6f, 0.6f);
+        var crate = PrimitiveKit.Group("FilmCans_กล่องฟิล์ม", t, new Vector3(0.66f, 0f, -0.52f)).transform;
+        PrimitiveKit.Box("Crate", crate, new Vector3(0f, 0.18f, 0f), new Vector3(0.52f, 0.36f, 0.4f), PrimitiveKit.Mat("WoodPlank", new Color(0.6f, 0.4f, 0.22f)), collider: false);
+        for (int i = 0; i < 4; i++)
+            PrimitiveKit.Cylinder("Tin", crate, new Vector3(-0.18f + i * 0.12f, 0.38f, 0f), new Vector3(0.36f, 0.04f, 0.36f), tins, new Vector3(0f, 0f, 90f), collider: false);
+        for (int i = 0; i < 3; i++)
+            PrimitiveKit.Cylinder("TinStack", crate, new Vector3(0f, 0.385f + i * 0.045f, -0.42f), new Vector3(0.34f, 0.02f, 0.34f), i == 1 ? red : tins, collider: false);
+        PrimitiveKit.Label("ฟิล์ม", crate, new Vector3(0f, 0.2f, -0.205f), 0.02f, new Color(1f, 0.9f, 0.5f));
+
+        // the projectionist (คนฉาย) on the reel side, minding his machine
+        Npcs.Watchers(t, "Projectionist_คนฉาย", Vector3.zero, 0f, new[] { new Vector3(0.78f, 0f, 0.15f) }, new[] { -90f },
+            new[] { SpectatorPose.Kind.Projectionist }, "", 16, 2);
 
         // the neon name box on the back
         var box = PrimitiveKit.Group("NameBox", t, new Vector3(0f, 2.15f, -0.88f)).transform;

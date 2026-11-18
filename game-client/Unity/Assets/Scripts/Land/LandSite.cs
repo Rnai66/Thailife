@@ -14,6 +14,17 @@ public class LandSite : MonoBehaviour
     public string Parcel => parcel;
     public void Configure(string parcelId) => parcel = parcelId;
 
+    // On a neighbour's farm lot (FarmLot.ShowFarm): owned or not by them, not by you
+    private bool theirs;
+
+    public void ShowAs(bool ownedByThem)
+    {
+        theirs = true;
+        if (land != null) { land.Changed -= OnChanged; land = null; }
+        if (builds == null) Awake();
+        Show(ownedByThem, "");
+    }
+
     private void Awake()
     {
         forSale = Find("ForSale");
@@ -32,6 +43,7 @@ public class LandSite : MonoBehaviour
 
     private void Start()
     {
+        if (theirs) return;
         land = LandClient.Instance;
         if (land == null) return;
         land.Changed += OnChanged;

@@ -297,7 +297,7 @@ public static class TambonBuilder
         Police.TrafficPoint(root, new Vector3(55.5f, 0f, -90f), 4f, new Vector3(62.5f, 0f, -85.5f));
         PetrolStation.Build(root, new Vector3(-100.5f, 0f, -50f), 90f, 28f, 25f, " กรุงเทพฯ");
         // เวทีดนตรีระดับประเทศ on สนามหลวง (musician Lv 18, every lesson up to บทที่ 7)
-        Places2.MusicStage(root, new Vector3(-38f, 0f, 4.5f), 0f, "national_stage", "เวทีดนตรีระดับประเทศ · สนามหลวง", new Color(0.55f, 0.1f, 0.12f));
+        Places2.MusicStage(root, new Vector3(-69.5f, 0f, 4.5f), 0f, "national_stage", "เวทีดนตรีระดับประเทศ · สนามหลวง", new Color(0.55f, 0.1f, 0.12f));
 
         var pave = PrimitiveKit.Mat("Pavement", new Color(0.72f, 0.7f, 0.66f));
         PrimitiveKit.Box("Pavement", root, new Vector3(0f, 0.008f, 19f), new Vector3(96f, 0.012f, 49f), pave, collider: false);
@@ -356,6 +356,7 @@ public static class TambonBuilder
         var root = new GameObject(rootName).transform;
         if (road) MainRoad(root, groundScale * 10f);
         content(root);
+        TempleLife.DressAll(root); // monks, merit and worshippers at every temple built above
 
         Directory.CreateDirectory(Path.GetDirectoryName(scenePath));
         EditorSceneManager.SaveScene(scene, scenePath);

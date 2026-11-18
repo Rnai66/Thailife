@@ -43,8 +43,22 @@ public class SocialClient : MonoBehaviour
     [Serializable] private class ProposeRequest { public string to; }
     [Serializable] private class AnswerRequest { public string from; public bool accept; }
 
+    // Gifts and money between friends (social.lua gift_get / gift_send)
+    [Serializable] public class GiftItem { public string id, name, unit; public int count; }
+    [Serializable]
+    public class GiftView
+    {
+        public string to, to_name, done;
+        public int baht, min_baht, max_baht, baht_left, sends_left;
+        public GiftItem[] items;
+    }
+    [Serializable] private class GiftTo { public string to; }
+    [Serializable] private class GiftMoney { public string to; public int baht; }
+    [Serializable] private class GiftThing { public string to, item; public int count; }
+    [Serializable] private class GiftNote { public string from, name, what; }
+
     public const int Friends = 0, Asked = 1, Requested = 2, Blocked = 3;
-    private const int NoteChat = 100, NoteProposal = 110, NoteAccepted = 111, NoteDeclined = 112, NoteDivorced = 113;
+    private const int NoteChat = 100, NoteProposal = 110, NoteAccepted = 111, NoteDeclined = 112, NoteDivorced = 113, NoteGift = 120;
     private const int NoteFriendRequest = -2, NoteFriendAccepted = -3;
     private const int Keep = 60;
 
@@ -230,6 +244,12 @@ public class SocialClient : MonoBehaviour
                 if (!quiet) UiKit.FloatAbovePlayer(n.Code == NoteFriendRequest ? "มีคนขอเป็นเพื่อน! (เมนู → เพื่อน)" : "เป็นเพื่อนกันแล้ว!", gold);
                 _ = Quietly(RefreshFriendsAsync);
                 break;
+            case NoteGift:
+                // shown even when it came while we were away
+                UiKit.FloatAbovePlayer(n.Subject, new Color(1f, 0.85f, 0.4f));
+                GameAudio.Play("coins");
+                if (WalletClient.Instance != null) _ = WalletClient.Instance.RefreshAsync();
+                break;
             case NoteProposal:
             case NoteAccepted:
             case NoteDeclined:
@@ -325,6 +345,18 @@ public class SocialClient : MonoBehaviour
         return Wedding;
     }
 
+    // ── Gifts ──────────────────────────────────────────────────────────────────────────────
+    public Task<GiftView> GiftGetAsync(string to) => Gift("gift_get", JsonUtility.ToJson(new GiftTo { to = to }));
+    public Task<GiftView> GiftMoneyAsync(string to, int baht) => Gift("gift_send", JsonUtility.ToJson(new GiftMoney { to = to, baht = baht }));
+    public Task<GiftView> GiftItemAsync(string to, string item, int count) => Gift("gift_send", JsonUtility.ToJson(new GiftThing { to = to, item = item, count = count }));
+
+    private async Task<GiftView> Gift(string rpc, string payload)
+    {
+        var r = await connection.Client.RpcAsync(connection.Session, rpc, payload);
+        if (rpc != "gift_get" && WalletClient.Instance != null) _ = WalletClient.Instance.RefreshAsync();
+        return JsonUtility.FromJson<GiftView>(r.Payload);
+    }
+
     // A Thai message for a refusal from social.lua
     public static string Explain(Exception e)
     {
@@ -333,7 +365,14 @@ public class SocialClient : MonoBehaviour
             : m.Contains("muted") ? "ถูกระงับการแชทชั่วคราว"
             : m.Contains("empty") ? "พิมพ์ข้อความก่อน"
             : m.Contains("not friends") ? "ต้องเป็นเพื่อนกันก่อน"
-            : m.Contains("not enough baht") ? "เงินไม่พอซื้อแหวน"
+            : m.Contains("not enough baht") ? "เงินไม่พอ"
+            : m.Contains("too many gifts") ? "วันนี้ส่งของขวัญครบโควตาแล้ว พรุ่งนี้ส่งได้ใหม่"
+            : m.Contains("day limit") ? "วันนี้โอนเงินเกินโควตาแล้ว (วันละ 100,000 บาท)"
+            : m.Contains("bad amount") ? "จำนวนเงินไม่ถูกต้อง (10 – 50,000 บาทต่อครั้ง)"
+            : m.Contains("not enough items") ? "ของมีไม่พอ"
+            : m.Contains("barn full") ? "ยุ้งข้าวของเพื่อนเต็ม"
+            : m.Contains("store full") ? "โรงเก็บผลผลิตของเพื่อนเต็ม"
+            : m.Contains("cannot give") ? "ของชิ้นนี้ให้กันไม่ได้"
             : m.Contains("they are married") ? "คนนี้แต่งงานไปแล้ว"
             : m.Contains("already married") ? "คุณแต่งงานอยู่แล้ว"
             : m.Contains("already proposed") ? "ขอแต่งงานไปแล้ว รอคำตอบก่อน"

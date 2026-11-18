@@ -18,6 +18,19 @@ public class FarmPlot : MonoBehaviour
     private Material leafMaterial, earMaterial;
     private bool playerInside;
     private bool busy;
+    // a neighbour's paddy (FarmLot.ShowFarm): shows their rice, works nothing of yours
+    private bool theirs;
+    private FarmClient.Plot theirPlot;
+    private string theirName;
+
+    public int PlotId => plotId;
+
+    public void ShowAs(FarmClient.Plot plot, string owner)
+    {
+        theirs = true;
+        theirPlot = plot;
+        theirName = owner;
+    }
 
     private static readonly Color Soil = new Color(0.35f, 0.24f, 0.15f);
     private static readonly Color Seedling = new Color(0.55f, 0.85f, 0.32f);
@@ -152,6 +165,12 @@ public class FarmPlot : MonoBehaviour
 
     private void Update()
     {
+        if (theirs)
+        {
+            UpdateVisual(null, theirPlot);
+            if (playerInside) OfferTheirs();
+            return;
+        }
         var farm = FarmClient.Instance;
         var plot = farm != null ? farm.GetPlot(plotId) : null;
         UpdateVisual(farm, plot);
@@ -182,7 +201,7 @@ public class FarmPlot : MonoBehaviour
         cropRenderer.enabled = false;
         rice.gameObject.SetActive(true);
 
-        float progress = stage == "ripe" ? 1f : farm.ProgressOf(plot);
+        float progress = stage == "ripe" ? 1f : farm == null ? plot.progress : farm.ProgressOf(plot);
         float height = Mathf.Lerp(0.22f, 0.95f, Mathf.SmoothStep(0f, 1f, progress));
         rice.localScale = new Vector3(1f, height, 1f); // planted across the whole paddy; only the height grows
         leafMaterial.color = progress < 0.7f ? Color.Lerp(Seedling, Green, progress / 0.7f) : Color.Lerp(Green, Straw, (progress - 0.7f) / 0.3f);
@@ -194,6 +213,18 @@ public class FarmPlot : MonoBehaviour
             ears.transform.localScale = new Vector3(1f, Mathf.Lerp(0.85f, 1f, k), 1f);
             earMaterial.color = Color.Lerp(EarGreen, Golden, k);
         }
+    }
+
+    // Standing in a neighbour's paddy: whose rice it is and how it is coming on
+    private void OfferTheirs()
+    {
+        string who = string.IsNullOrEmpty(theirName) ? "เพื่อนบ้าน" : theirName;
+        string stage = theirPlot?.stage ?? "empty";
+        string what = stage == "plowed" ? "ไถเตรียมดำนาแล้ว"
+            : stage == "growing" ? $"{theirPlot.variety_name} กำลังโต ({Mathf.RoundToInt(theirPlot.progress * 100f)}%)"
+            : stage == "ripe" ? $"{theirPlot.variety_name} สุกแล้ว รอเกี่ยว"
+            : "ยังว่างอยู่";
+        ContextButton.Show(this, "นาของ\n" + who, $"แปลงนา {plotId} ของ{who} · {what}", null, enabled: false);
     }
 
     private void Offer(FarmClient farm, FarmClient.Plot plot)

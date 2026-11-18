@@ -104,8 +104,9 @@ public static class Bangkok
 
         Cloister(t, hw, hd, wallH, white, lacquer, orange, gold);
 
-        // The ordination hall of the Emerald Buddha, long side east-west, its door facing west
-        var hall = PrimitiveKit.Group("UbosotPhraKaew_พระอุโบสถ", t, new Vector3(-13f, 0f, -6.5f), 90f).transform;
+        // The ordination hall of the Emerald Buddha, long side east-west, its door facing east onto the
+        // courtyard (the way in from the gate)
+        var hall = PrimitiveKit.Group("UbosotPhraKaew_พระอุโบสถ", t, new Vector3(-13f, 0f, -6.5f), -90f).transform;
         hall.localScale = Vector3.one * 1.05f;
         Places.Ubosot(hall, Vector3.zero, white, gold, orange, green);
 

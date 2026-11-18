@@ -16,14 +16,31 @@ public class CowPen : MonoBehaviour
 
     public bool HasCows { get; private set; }
 
+    // a neighbour's pen (FarmLot.ShowFarm): their cows, not yours
+    private bool theirs;
+    private int theirCount, theirGrownDays = 1;
+    private RanchClient.Cow[] theirHerd;
+
+    public void ShowAs(int count, RanchClient.Cow[] herd, int grownDays)
+    {
+        theirs = true;
+        theirCount = count;
+        theirHerd = herd;
+        theirGrownDays = grownDays;
+        if (ranch != null) { ranch.Changed -= OnChanged; ranch = null; }
+        if (cows.Count > 0) Show(0, count, herd, grownDays);
+    }
+
     private void Awake()
     {
         foreach (var w in GetComponentsInChildren<CowWander>(true)) { cows.Add(w.gameObject); sizes.Add(w.transform.localScale); }
-        Show(0, 0, null, 1);
+        if (theirs) Show(0, theirCount, theirHerd, theirGrownDays);
+        else Show(0, 0, null, 1);
     }
 
     private void Start()
     {
+        if (theirs) return;
         ranch = RanchClient.Instance;
         if (ranch == null) return;
         ranch.Changed += OnChanged;

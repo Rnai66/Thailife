@@ -7,12 +7,22 @@ public class FishPond : MonoBehaviour
 {
     [SerializeField] private GameObject[] fish = new GameObject[0];
 
+    private bool theirs; // a neighbour's pond (FarmLot.ShowFarm): their fish, no window of yours
+
     public void Configure(GameObject[] cageFish) => fish = cageFish;
+
+    public void ShowAs(PondClient.Cage[] cages)
+    {
+        theirs = true;
+        PondClient.Changed -= Show;
+        Show(new PondClient.State { cages = cages ?? new PondClient.Cage[0] });
+    }
 
     private void Reset() => GetComponent<Collider>().isTrigger = true;
 
     private void OnEnable()
     {
+        if (theirs) return;
         PondClient.Changed += Show;
         if (PondClient.Current != null) Show(PondClient.Current);
     }
@@ -33,7 +43,7 @@ public class FishPond : MonoBehaviour
 
     private async void OnTriggerEnter(Collider other)
     {
-        if (other.GetComponent<PlayerController>() == null) return;
+        if (other.GetComponent<PlayerController>() == null || theirs) return;
         ContextButton.Show(this, "เลี้ยงปลาในกระชัง", "ปล่อยลูกปลา · ให้อาหาร · จับปลาขาย", FishPondUI.Show);
         if (PondClient.Online)
             try { await PondClient.GetAsync(); } catch (System.Exception) { }

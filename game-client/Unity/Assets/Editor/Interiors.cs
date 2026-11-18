@@ -295,6 +295,53 @@ public static class Interiors
         PrimitiveKit.Box("CrossH", r, new Vector3(0f, 3.2f, hd - 0.05f), new Vector3(1f, 0.18f, 0.06f), gold, collider: false);
         foreach (float x in new[] { -0.7f, 0.7f })
             PrimitiveKit.Sphere("Candle", r, new Vector3(x, 1.2f, hd - 0.8f), new Vector3(0.08f, 0.15f, 0.08f), PrimitiveKit.Glow("CandleGlow", new Color(1f, 0.7f, 0.35f), 2f));
+
+        // ── where you pray: a kneeler on the aisle before the altar step, a stand of votive candles ──
+        float kneelZ = hd - 2.4f;
+        PrimitiveKit.Box("Kneeler", r, new Vector3(0f, 0.08f, kneelZ), new Vector3(0.9f, 0.12f, 0.45f), PrimitiveKit.Mat("KneelerRed", new Color(0.55f, 0.08f, 0.1f)), collider: false);
+        var stand = PrimitiveKit.Group("CandleStand", r, new Vector3(-hw + 0.7f, 0f, hd - 2.2f)).transform;
+        PrimitiveKit.Box("Stand", stand, new Vector3(0f, 0.45f, 0f), new Vector3(0.7f, 0.9f, 0.4f), PrimitiveKit.Mat("PewWood", new Color(0.45f, 0.28f, 0.15f), 0.5f), collider: false);
+        var wax = PrimitiveKit.Mat("CandleWhite", new Color(0.97f, 0.95f, 0.88f));
+        var flames = PrimitiveKit.Group("Flames", stand, Vector3.zero);
+        for (int i = 0; i < 6; i++)
+        {
+            var c = new Vector3(-0.25f + (i % 3) * 0.25f, 0.98f, i < 3 ? -0.08f : 0.08f);
+            PrimitiveKit.Cylinder("Votive", stand, c, new Vector3(0.06f, 0.07f, 0.06f), wax, collider: false);
+            PrimitiveKit.Sphere("Flame", flames.transform, c + Vector3.up * 0.11f, new Vector3(0.035f, 0.07f, 0.035f), PrimitiveKit.Glow("CandleGlow", new Color(1f, 0.7f, 0.35f), 2f));
+        }
+        PrayerPlace(r, "church", new Vector3(0f, 0.05f, kneelZ), flames);
+
+        // the faithful: a few praying through the day, the pews full for the service with the pastor at the altar
+        var pewSeats = new System.Collections.Generic.List<Vector3>();
+        for (int row = 0; row < 5; row++)
+            foreach (float sx in new[] { -1f, 1f })
+                for (int k = 0; k < 2; k++)
+                    pewSeats.Add(new Vector3(sx * (1.3f + k * 1.1f), 0f, -hd + 1.6f + row * 1.3f + 0.05f));
+        var few = new[] { pewSeats[3], pewSeats[8], pewSeats[14] };
+        Npcs.Watchers(r, "Faithful_ผู้ศรัทธา", Vector3.zero, 0f, few, new[] { 0f, 0f, 0f },
+            new[] { SpectatorPose.Kind.Pew, SpectatorPose.Kind.Pew, SpectatorPose.Kind.Pew }, "", 8, 19);
+        var service = new System.Collections.Generic.List<Vector3>();
+        var kinds = new System.Collections.Generic.List<SpectatorPose.Kind>();
+        var faces = new System.Collections.Generic.List<float>();
+        for (int i = 0; i < pewSeats.Count; i++)
+        {
+            if (i == 3 || i == 8 || i == 14) continue;
+            service.Add(pewSeats[i]); kinds.Add(SpectatorPose.Kind.Pew); faces.Add(0f);
+        }
+        service.Add(new Vector3(1.55f, 0.2f, hd - 1.3f)); kinds.Add(SpectatorPose.Kind.Watch); faces.Add(180f); // the pastor, on the altar step
+        Npcs.Watchers(r, "Congregation_ผู้ร่วมนมัสการ", Vector3.zero, 0f, service.ToArray(), faces.ToArray(), kinds.ToArray(), "", 0, 24)
+            .GetComponent<Spectators>().DuringFaith("church", false);
+    }
+
+    // A place to pray (FaithUI): the seat the player kneels on, facing +Z, and the trigger round it
+    private static void PrayerPlace(Transform r, string place, Vector3 seatAt, GameObject candles)
+    {
+        var seat = PrimitiveKit.Group("PraySeat", r, seatAt);
+        var zone = PrimitiveKit.Group("PrayZone", r, seatAt + new Vector3(0f, 0.95f, -0.2f));
+        var box = zone.AddComponent<BoxCollider>();
+        box.isTrigger = true;
+        box.size = new Vector3(1.6f, 2f, 1.8f);
+        zone.AddComponent<PrayerSpot>().Configure(place, seat.transform, candles);
     }
 
     // Mosque prayer hall: carpet in rows facing the mihrab niche, the minbar and a chandelier
@@ -315,6 +362,35 @@ public static class Interiors
             float a = i * Mathf.PI / 4f;
             PrimitiveKit.Sphere("ChandelierBulb", r, new Vector3(Mathf.Cos(a) * 0.8f, h - 1.3f, Mathf.Sin(a) * 0.8f), Vector3.one * 0.15f, PrimitiveKit.Glow("PendantGlow", new Color(1f, 0.85f, 0.6f), 2f));
         }
+
+        // ── where you pray: a place in the third row, facing the mihrab (qibla) ──
+        float RowZ(int row) => -hd + 1.6f + row * 1.2f + 0.45f;
+        PrimitiveKit.Box("PrayerMat", r, new Vector3(0f, 0.07f, RowZ(2)), new Vector3(0.7f, 0.01f, 1.1f), PrimitiveKit.Mat("PrayerMatGreen", new Color(0.12f, 0.45f, 0.3f)), collider: false);
+        PrayerPlace(r, "mosque", new Vector3(0f, 0.05f, RowZ(2)), null);
+        // a rack for shoes by the door and the ablution taps (ที่อาบน้ำละหมาด) along the left wall
+        PrimitiveKit.Box("ShoeRack", r, new Vector3(hw - 0.8f, 0.3f, -hd + 0.4f), new Vector3(1.2f, 0.6f, 0.35f), PrimitiveKit.Mat("PewWood", new Color(0.45f, 0.28f, 0.15f), 0.5f), collider: false);
+        PrimitiveKit.Box("Ablution", r, new Vector3(-hw + 0.35f, 0.45f, -hd + 1.6f), new Vector3(0.5f, 0.9f, 2.2f), PrimitiveKit.Mat("TableWhite", new Color(0.95f, 0.95f, 0.93f)), collider: false);
+        for (int i = 0; i < 3; i++)
+            PrimitiveKit.Cylinder("Tap", r, new Vector3(-hw + 0.62f, 0.95f, -hd + 0.9f + i * 0.7f), new Vector3(0.05f, 0.08f, 0.05f), PrimitiveKit.Mat("Steel", new Color(0.75f, 0.76f, 0.78f), 0.8f, 0.8f), new Vector3(0f, 0f, 90f), collider: false);
+
+        // the faithful: one or two praying through the day; the rows filled at each of the five prayers,
+        // the imam in front
+        Npcs.Watchers(r, "Faithful_ผู้ศรัทธา", Vector3.zero, 0f, new[] { new Vector3(-2.4f, 0f, RowZ(3)), new Vector3(2.8f, 0f, RowZ(1)) },
+            new[] { 0f, 0f }, new[] { SpectatorPose.Kind.Sujud, SpectatorPose.Kind.Sujud }, "", 6, 20).GetComponent<Spectators>().DuringFaith("", true);
+        var rows = new System.Collections.Generic.List<Vector3>();
+        for (int row = 2; row <= 3; row++)
+            for (float x = -hw + 1f; x <= hw - 0.99f; x += 0.85f)
+            {
+                if (row == 2 && Mathf.Abs(x) < 0.7f) continue;    // your place
+                if (Mathf.Abs(x + 2.4f) < 0.4f && row == 3) continue;
+                rows.Add(new Vector3(x, 0f, RowZ(row)));
+            }
+        rows.Add(new Vector3(0f, 0f, hd - 1.2f)); // the imam
+        var kinds = new SpectatorPose.Kind[rows.Count];
+        var faces = new float[rows.Count];
+        for (int i = 0; i < kinds.Length; i++) kinds[i] = SpectatorPose.Kind.Sujud;
+        Npcs.Watchers(r, "Jamaah_ผู้ร่วมละหมาด", Vector3.zero, 0f, rows.ToArray(), faces, kinds, "", 0, 24)
+            .GetComponent<Spectators>().DuringFaith("mosque", true);
     }
 
     // Ordination hall (โบสถ์): the gold Buddha on a tiered altar, red carpet, candles, lotus, murals

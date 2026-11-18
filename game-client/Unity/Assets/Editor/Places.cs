@@ -221,6 +221,9 @@ public static class Places
         RoofSection(h, 0f, 9f, wallTop, 0f, halfWidth, slope, rise, pitch, orange, green, gold);
         RoofSection(h, -6.05f, 3.1f, wallTop - 0.45f, 0.45f, halfWidth, slope, rise, pitch, orange, green, gold, frontGable: true);
         RoofSection(h, 6.05f, 3.1f, wallTop - 0.45f, 0.45f, halfWidth, slope, rise, pitch, orange, green, gold, backGable: true);
+
+        // the meditation mat before the Buddha, with its incense urn and candles (นั่งสมาธิ)
+        TempleLife.UbosotMeditation(h);
     }
 
     private static void RoofSection(Transform h, float z, float length, float baseY, float drop, float halfWidth, float slope, float rise,
@@ -853,6 +856,12 @@ public static class Places
         zone.size = new Vector3(3f, 2f, 1.6f);
         spot.AddComponent<FightSpot>().Configure(title, centre.transform, events);
         Sign(t, new Vector3(2.4f, 0f, -4.4f), title + "\nเดินมาที่บันไดเวที", 0f);
+
+        // คนดูมวย round the ring: a full cheering crowd at the fair and tambon rings (during the fair /
+        // in the day and evening), a few lookers-on at a training camp
+        bool camp = System.Array.IndexOf(events, "pads") >= 0;
+        bool fair = System.Array.IndexOf(events, "fair") >= 0;
+        Npcs.RingCrowd(t, !camp, fair ? "any" : "", camp ? 7 : 9, camp ? 20 : 23);
         return centre.transform;
     }
 

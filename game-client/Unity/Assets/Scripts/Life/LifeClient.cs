@@ -98,6 +98,7 @@ public class LifeClient : MonoBehaviour
         if (GetComponent<BuildClient>() == null) gameObject.AddComponent<BuildClient>();
         if (GetComponent<LandClient>() == null) gameObject.AddComponent<LandClient>();
         if (GetComponent<TempleClient>() == null) gameObject.AddComponent<TempleClient>();
+        if (GetComponent<FaithClient>() == null) gameObject.AddComponent<FaithClient>();
         if (GetComponent<HotelClient>() == null) gameObject.AddComponent<HotelClient>();
         if (GetComponent<TutorialGuide>() == null) gameObject.AddComponent<TutorialGuide>();
         if (GetComponent<AutoQuest>() == null) gameObject.AddComponent<AutoQuest>();

@@ -164,11 +164,12 @@ public class SocialUI : MonoBehaviour
     // A row: a name and a few small buttons on the right
     private void Row(string label, Color ink, params (string text, Color fill, Color ink, Action act)[] buttons)
     {
+        bool upright = UiKit.Portrait;
+        if (buttons.Length >= 5) { TallRow(label, ink, buttons); return; }
         const float h = 74f;
         y -= h * 0.5f;
         var card = Top(UiKit.Panel("Row", content, Color.white, new Vector2(0f, y), new Vector2(Width - 20f, h), shadow: false));
         card.gameObject.AddComponent<Outline>().effectColor = UiKit.CardBorder;
-        bool upright = UiKit.Portrait;
         float bw = buttons.Length > 3 ? (upright ? 108f : 150f) : (upright ? 128f : 170f);
         float labelW = Width - 60f - buttons.Length * (bw + 10f);
         UiKit.Label(card, 24, label, new Vector2(-(Width - 20f) * 0.5f + 20f + labelW * 0.5f, 0f), new Vector2(labelW, h - 10f), ink, TextAnchor.MiddleLeft);
@@ -180,6 +181,28 @@ public class SocialUI : MonoBehaviour
             var btn = UiKit.RoundButton(card, b.text, new Vector2(x, 0f), new Vector2(bw, 56f), b.fill, b.ink, () => act?.Invoke(), upright ? 18 : 20);
             btn.interactable = !busy && act != null;
             x -= bw + 10f;
+        }
+        y -= h * 0.5f + 10f;
+    }
+
+    // Many buttons: the name on its own line, the buttons across the card under it
+    private void TallRow(string label, Color ink, (string text, Color fill, Color ink, Action act)[] buttons)
+    {
+        const float h = 128f;
+        y -= h * 0.5f;
+        var card = Top(UiKit.Panel("Row", content, Color.white, new Vector2(0f, y), new Vector2(Width - 20f, h), shadow: false));
+        card.gameObject.AddComponent<Outline>().effectColor = UiKit.CardBorder;
+        bool upright = UiKit.Portrait;
+        UiKit.Label(card, 24, label, new Vector2(0f, 32f), new Vector2(Width - 60f, 44f), ink, TextAnchor.MiddleLeft);
+        float bw = Mathf.Min(170f, (Width - 50f - (buttons.Length - 1) * 8f) / buttons.Length);
+        float x = (Width - 20f) * 0.5f - 12f - bw * 0.5f;
+        for (int i = buttons.Length - 1; i >= 0; i--)
+        {
+            var b = buttons[i];
+            var act = b.act;
+            var btn = UiKit.RoundButton(card, b.text, new Vector2(x, -28f), new Vector2(bw, 54f), b.fill, b.ink, () => act?.Invoke(), upright ? 17 : 20);
+            btn.interactable = !busy && act != null;
+            x -= bw + 8f;
         }
         y -= h * 0.5f + 10f;
     }
@@ -216,7 +239,7 @@ public class SocialUI : MonoBehaviour
         }
         s.Viewing = tab == ChatTab ? (talkingTo ?? "") : null;
         if (tab == ChatTab) { s.MarkRead(talkingTo); RenderChat(s); Finish(top: false); }
-        else if (tab == FriendsTab) { subtitleText.text = "ขอเป็นเพื่อน แชทส่วนตัว และขอแต่งงาน"; RenderFriends(s); Finish(top: true); }
+        else if (tab == FriendsTab) { subtitleText.text = "ขอเป็นเพื่อน แชทส่วนตัว ให้ของขวัญ โอนเงิน และขอแต่งงาน"; RenderFriends(s); Finish(top: true); }
         else { subtitleText.text = "แต่งงานกับเพื่อนที่รู้ใจ"; RenderLove(s); Finish(top: true); }
     }
 
@@ -328,6 +351,7 @@ public class SocialUI : MonoBehaviour
             Row((f.online ? "● " : "○ ") + f.name + (spouse ? "  · คู่ชีวิต" : ""), f.online ? UiKit.OkGreen : UiKit.Ink,
                 ("แชท", UiKit.PayGreen, Color.white, () => { talkingTo = id; tab = ChatTab; Render(); }),
                 ("เยี่ยมบ้าน", new Color(0.8f, 0.9f, 1f), new Color(0.1f, 0.25f, 0.5f), () => Visit(id)),
+                ("ให้ของ", UiKit.Gold, UiKit.GoldInk, () => GiftUI.Open(id, f.name)),
                 (spouse ? "คู่ชีวิต" : armed == proposeKey ? $"ยืนยัน {ring:N0}฿" : "ขอแต่งงาน", new Color(1f, 0.85f, 0.9f), new Color(0.6f, 0.1f, 0.3f), spouse ? null : propose),
                 (armed == removeKey ? "ยืนยันลบ" : "ลบเพื่อน", plain.Item1, plain.Item2, spouse ? null : (Action)(() => Arm(removeKey, c => c.RemoveFriendAsync(id), "ลบเพื่อนแล้ว"))));
         }
