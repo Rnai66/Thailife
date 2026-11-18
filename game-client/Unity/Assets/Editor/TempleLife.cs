@@ -214,6 +214,9 @@ public static partial class TempleLife
         box.isTrigger = true;
         box.size = new Vector3(3.6f, 2f, 2.2f);
         zone.AddComponent<TempleCounter>().Configure(TempleUI.Amulets);
+
+        // ต้นกฐิน / ต้นผ้าป่า at the pavilion's other front corner, facing the same way (MeritTree)
+        MeritTree(p, new Vector3(3.6f, 0f, -1.1f), 0f);
     }
 
     // ── Dogs ───────────────────────────────────────────────────────────────────────────────

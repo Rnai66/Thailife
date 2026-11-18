@@ -31,6 +31,11 @@ public static class BuildKit
             case "carport": return new Color(0.75f, 0.77f, 0.8f);
             case "sala": return new Color(0.55f, 0.33f, 0.17f);
             case "planter": return new Color(0.62f, 0.35f, 0.22f);
+            case "garage": return new Color(0.88f, 0.86f, 0.8f);      // rendered wall
+            case "toilet": return new Color(0.82f, 0.86f, 0.88f);     // tiled block
+            case "watertower": return new Color(0.82f, 0.84f, 0.87f); // stainless tank
+            case "well": return new Color(0.62f, 0.56f, 0.5f);        // brick ring
+            case "cowshed": return new Color(0.66f, 0.2f, 0.15f);     // red metal roof
             default: return new Color(0.58f, 0.38f, 0.2f); // wood
         }
     }
@@ -50,6 +55,9 @@ public static class BuildKit
         if (m.HasProperty("_Smoothness")) m.SetFloat("_Smoothness", 0.25f);
         return lit[c] = m;
     }
+
+    // A plain unlit colour (the build grid's lines)
+    public static Material FlatMat(Color c) => Flat(c);
 
     private static Material Flat(Color c)
     {
@@ -217,6 +225,111 @@ public static class BuildKit
                     go.GetComponent<Renderer>().sharedMaterial = M(flowers[i % flowers.Length]);
                 }
                 Block(new Vector3(0f, 0.25f, 0f), new Vector3(1f, 0.5f, 0.4f));
+                break;
+            }
+            case "garage": // โรงจอดรถแบบปิด: walls on three sides, a gable roof, the roller shutter rolled up over the open front
+            {
+                var roof = M(new Color(0.45f, 0.2f, 0.14f));
+                Box(new Vector3(0f, 0.04f, 0f), new Vector3(3.6f, 0.08f, 6f), grey);
+                foreach (float x in new[] { -1.75f, 1.75f })
+                {
+                    Box(new Vector3(x, 1.3f, 0f), new Vector3(0.12f, 2.6f, 6f), paintMat);
+                    Block(new Vector3(x, 1.3f, 0f), new Vector3(0.14f, 2.6f, 6f));
+                }
+                Box(new Vector3(0f, 1.3f, 2.94f), new Vector3(3.6f, 2.6f, 0.12f), paintMat);
+                Block(new Vector3(0f, 1.3f, 2.94f), new Vector3(3.6f, 2.6f, 0.14f));
+                Box(new Vector3(0f, 2.45f, -2.96f), new Vector3(3.5f, 0.3f, 0.12f), dark); // the rolled-up shutter
+                foreach (float s in new[] { -1f, 1f })
+                    Box(new Vector3(s * 0.95f, 2.98f, 0f), new Vector3(2.15f, 0.07f, 6.4f), roof, new Vector3(0f, 0f, s * -22f));
+                Box(new Vector3(0f, 3.38f, 0f), new Vector3(0.14f, 0.1f, 6.4f), dark);
+                foreach (float z in new[] { -2.94f, 2.94f }) Box(new Vector3(0f, 2.82f, z), new Vector3(2.6f, 0.36f, 0.1f), paintMat); // gable ends
+                break;
+            }
+            case "cowshed": // โรงเรือนวัว: open-sided, concrete floor, steel posts, a gable metal roof, a trough and hay at the back
+            {
+                var steel = M(new Color(0.32f, 0.34f, 0.36f));
+                var hay = M(new Color(0.9f, 0.78f, 0.38f));
+                Box(new Vector3(0f, 0.04f, 0f), new Vector3(6f, 0.08f, 4f), grey);
+                foreach (float x in new[] { -2.9f, 0f, 2.9f })
+                    foreach (float z in new[] { -1.9f, 1.9f })
+                    {
+                        Box(new Vector3(x, 1.25f, z), new Vector3(0.12f, 2.5f, 0.12f), steel);
+                        Block(new Vector3(x, 1.25f, z), new Vector3(0.14f, 2.5f, 0.14f));
+                    }
+                foreach (float s in new[] { -1f, 1f })
+                    Box(new Vector3(0f, 2.82f, s * 1.1f), new Vector3(6.5f, 0.06f, 2.4f), paintMat, new Vector3(s * 18f, 0f, 0f));
+                Box(new Vector3(0f, 3.2f, 0f), new Vector3(6.6f, 0.1f, 0.18f), steel);
+                Box(new Vector3(0f, 0.3f, 1.5f), new Vector3(5f, 0.4f, 0.55f), grey);           // feed trough
+                Box(new Vector3(0f, 0.47f, 1.5f), new Vector3(4.7f, 0.05f, 0.38f), hay);
+                for (int i = 0; i < 2; i++) Box(new Vector3(-2.3f + i * 1.02f, 0.3f, 0.6f), new Vector3(1f, 0.6f, 0.7f), hay);
+                Block(new Vector3(0f, 0.3f, 1.5f), new Vector3(5f, 0.6f, 0.55f));
+                break;
+            }
+            case "hut": // กระท่อม (เถียงนา): a raised bamboo floor on posts, a thatched roof, steps up at the front
+            {
+                var thatch = M(paint == 0 ? new Color(0.72f, 0.6f, 0.34f) : main);
+                var bamboo = M(new Color(0.74f, 0.64f, 0.36f));
+                Box(new Vector3(0f, 0.6f, 0f), new Vector3(3f, 0.1f, 2.6f), bamboo);
+                foreach (float x in new[] { -1.4f, 1.4f })
+                    foreach (float z in new[] { -1.2f, 1.2f })
+                    {
+                        Box(new Vector3(x, 1.25f, z), new Vector3(0.12f, 2.5f, 0.12f), wood);
+                        Block(new Vector3(x, 1.25f, z), new Vector3(0.14f, 2.5f, 0.14f));
+                    }
+                foreach (float s in new[] { -1f, 1f })
+                    Box(new Vector3(0f, 2.75f, s * 0.8f), new Vector3(3.5f, 0.14f, 1.9f), thatch, new Vector3(s * 30f, 0f, 0f));
+                Box(new Vector3(0f, 0.95f, 1.25f), new Vector3(3f, 0.6f, 0.06f), bamboo);    // back wall, low
+                Box(new Vector3(0.6f, 0.3f, -1.55f), new Vector3(0.8f, 0.08f, 0.35f), wood); // step
+                Block(new Vector3(0f, 0.6f, 0f), new Vector3(3f, 0.12f, 2.6f));
+                break;
+            }
+            case "toilet": // ห้องน้ำ: a small block-built bathroom, a door at the front, a vent and a water jar beside it
+            {
+                Box(new Vector3(0f, 1.1f, 0f), new Vector3(1.5f, 2.2f, 1.5f), paintMat);
+                Box(new Vector3(0f, 2.26f, 0f), new Vector3(1.7f, 0.12f, 1.7f), grey);
+                Box(new Vector3(0f, 0.95f, -0.76f), new Vector3(0.7f, 1.8f, 0.04f), wood);
+                Box(new Vector3(0.25f, 0.95f, -0.79f), new Vector3(0.06f, 0.06f, 0.04f), dark); // handle
+                Box(new Vector3(0f, 1.95f, 0.76f), new Vector3(0.5f, 0.16f, 0.04f), dark);      // vent
+                Cyl(new Vector3(0.95f, 0.3f, 0.3f), 0.25f, 0.6f, M(new Color(0.42f, 0.24f, 0.12f)));
+                Block(new Vector3(0f, 1.1f, 0f), new Vector3(1.5f, 2.2f, 1.5f));
+                break;
+            }
+            case "storeshed": // โรงเก็บของ: wooden walls, a door, a lean-to roof
+            {
+                var roof = M(new Color(0.5f, 0.52f, 0.55f));
+                Box(new Vector3(0f, 1.1f, 0f), new Vector3(3f, 2.2f, 2.4f), paintMat);
+                Box(new Vector3(0f, 2.42f, 0f), new Vector3(3.3f, 0.06f, 2.8f), roof, new Vector3(-10f, 0f, 0f));
+                Box(new Vector3(-0.6f, 0.95f, -1.21f), new Vector3(1f, 1.9f, 0.04f), dark);
+                Box(new Vector3(0.8f, 1.4f, -1.21f), new Vector3(0.7f, 0.5f, 0.04f), M(new Color(0.35f, 0.5f, 0.62f)));
+                Block(new Vector3(0f, 1.1f, 0f), new Vector3(3f, 2.2f, 2.4f));
+                break;
+            }
+            case "watertower": // หอถังน้ำ: a round tank up on four steel legs, a ladder up the side
+            {
+                var steel = M(new Color(0.32f, 0.34f, 0.36f));
+                foreach (float x in new[] { -0.6f, 0.6f })
+                    foreach (float z in new[] { -0.6f, 0.6f })
+                    {
+                        Box(new Vector3(x, 1.5f, z), new Vector3(0.1f, 3f, 0.1f), steel);
+                        Block(new Vector3(x, 1.5f, z), new Vector3(0.12f, 3f, 0.12f));
+                    }
+                Box(new Vector3(0f, 3.02f, 0f), new Vector3(1.5f, 0.08f, 1.5f), steel);
+                Cyl(new Vector3(0f, 3.75f, 0f), 0.68f, 1.4f, paintMat);
+                Cyl(new Vector3(0f, 4.5f, 0f), 0.5f, 0.12f, paintMat);
+                foreach (float x in new[] { -0.2f, 0.2f }) Box(new Vector3(x, 1.5f, -0.66f), new Vector3(0.04f, 3f, 0.04f), steel);
+                for (int i = 0; i < 8; i++) Box(new Vector3(0f, 0.3f + i * 0.36f, -0.66f), new Vector3(0.4f, 0.03f, 0.03f), steel);
+                break;
+            }
+            case "well": // บ่อน้ำ: a round brick ring, two posts, a crossbar with a pulley and a bucket, a little roof
+            {
+                Cyl(new Vector3(0f, 0.35f, 0f), 0.65f, 0.7f, paintMat);
+                Cyl(new Vector3(0f, 0.69f, 0f), 0.5f, 0.04f, M(new Color(0.2f, 0.35f, 0.42f)));
+                foreach (float x in new[] { -0.6f, 0.6f }) Box(new Vector3(x, 1.1f, 0f), new Vector3(0.1f, 1.5f, 0.1f), wood);
+                Box(new Vector3(0f, 1.75f, 0f), new Vector3(1.3f, 0.08f, 0.08f), wood);
+                Cyl(new Vector3(0f, 1.4f, 0f), 0.12f, 0.2f, M(new Color(0.55f, 0.55f, 0.58f)));
+                foreach (float s in new[] { -1f, 1f })
+                    Box(new Vector3(0f, 2f, s * 0.35f), new Vector3(1.5f, 0.05f, 0.8f), M(new Color(0.55f, 0.25f, 0.15f)), new Vector3(s * 28f, 0f, 0f));
+                Block(new Vector3(0f, 0.35f, 0f), new Vector3(1.3f, 0.7f, 1.3f));
                 break;
             }
             default:

@@ -168,6 +168,28 @@ public static class LandParcels
             PrimitiveKit.Box("RailFrontR", pen, new Vector3(5.75f, y, -hz), new Vector3(7.5f, 0.1f, 0.08f), fence);
         }
         PrimitiveKit.Box("Trough", pen, new Vector3(0f, 0.3f, 5.6f), new Vector3(3f, 0.5f, 0.7f), PrimitiveKit.Mat("Concrete", new Color(0.75f, 0.75f, 0.72f)));
+        // โรงเรือนวัวแบบฟาร์มมาตรฐาน: the back half under an open-sided barn — concrete floor, steel posts,
+        // a gable roof of metal sheet, and a long feed trough along the front of it
+        {
+            const float z0 = 1.2f, depth = hz - 0.3f - z0, zc = z0 + depth * 0.5f;
+            var floor = PrimitiveKit.Mat("BarnFloor", new Color(0.7f, 0.7f, 0.67f));
+            var steel = PrimitiveKit.Mat("BarnSteel", new Color(0.32f, 0.34f, 0.36f));
+            var sheet = PrimitiveKit.Mat("BarnRoof", new Color(0.55f, 0.16f, 0.12f), 0.35f, 0.3f);
+            PrimitiveKit.Box("BarnFloor", pen, new Vector3(0f, 0.04f, zc), new Vector3(hx * 2f - 0.6f, 0.08f, depth), floor, collider: false);
+            for (float x = -hx + 0.4f; x <= hx - 0.39f; x += (hx * 2f - 0.8f) / 4f)
+                foreach (float z in new[] { z0, hz - 0.3f })
+                    PrimitiveKit.Box("BarnPost", pen, new Vector3(x, 1.3f, z), new Vector3(0.14f, 2.6f, 0.14f), steel);
+            foreach (float z in new[] { z0, hz - 0.3f })
+                PrimitiveKit.Box("BarnBeam", pen, new Vector3(0f, 2.62f, z), new Vector3(hx * 2f - 0.6f, 0.14f, 0.14f), steel, collider: false);
+            float half = depth * 0.5f + 0.5f, rise = 1.1f;
+            float tilt = Mathf.Atan2(rise, half) * Mathf.Rad2Deg, slope = Mathf.Sqrt(half * half + rise * rise);
+            PrimitiveKit.Box("BarnRoofFront", pen, new Vector3(0f, 2.7f + rise * 0.5f, zc - half * 0.5f), new Vector3(hx * 2f + 0.4f, 0.06f, slope), sheet, new Vector3(-tilt, 0f, 0f), collider: false);
+            PrimitiveKit.Box("BarnRoofBack", pen, new Vector3(0f, 2.7f + rise * 0.5f, zc + half * 0.5f), new Vector3(hx * 2f + 0.4f, 0.06f, slope), sheet, new Vector3(tilt, 0f, 0f), collider: false);
+            PrimitiveKit.Box("BarnRidge", pen, new Vector3(0f, 2.72f + rise, zc), new Vector3(hx * 2f + 0.5f, 0.1f, 0.22f), steel, collider: false);
+            var trough = PrimitiveKit.Mat("Concrete", new Color(0.75f, 0.75f, 0.72f));
+            PrimitiveKit.Box("FeedTrough", pen, new Vector3(0f, 0.3f, z0 + 0.6f), new Vector3(hx * 2f - 2f, 0.4f, 0.6f), trough, collider: false);
+            PrimitiveKit.Box("FeedHay", pen, new Vector3(0f, 0.47f, z0 + 0.6f), new Vector3(hx * 2f - 2.3f, 0.06f, 0.42f), PrimitiveKit.Mat("Hay", new Color(0.9f, 0.78f, 0.38f)), collider: false);
+        }
         var hay = PrimitiveKit.Mat("Hay", new Color(0.9f, 0.78f, 0.38f));
         for (int i = 0; i < 3; i++)
             PrimitiveKit.Box("HayBale", pen, new Vector3(-6f + i * 1.05f, 0.3f, 5.8f), new Vector3(1f, 0.6f, 0.7f), hay);

@@ -14,7 +14,7 @@ local trade = require("trade_core")
 
 local COLLECTION = "career"
 local KEY = "stats"
-local MAX_LEVEL = 100
+local MAX_LEVEL = 999 -- main (career) level cap
 
 -- Training tiers: banana tree (ต้นกล้วย) -> punching bag (กระสอบทราย) -> boxing camp (ค่ายมวย)
 -- energy = พลังงาน spent per hit (harder training is more tiring and worth more XP)

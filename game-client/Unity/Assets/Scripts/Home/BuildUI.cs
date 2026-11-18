@@ -11,18 +11,23 @@ using UnityEngine.UI;
 //     next fence carries on from the end of the last one (turn it to go round a corner).
 //   Editing (แก้ไข): the piece nearest you is picked out in yellow (ถัดไป for the next). ย้าย lifts it
 //     to follow you until วางที่นี่; หมุน and สี change it at once; รื้อถอน pulls it down (half back).
+//   No walking needed (EditTouchSurface): tap a piece to pick it, put a finger on it and drag to move it
+//     over the grid on the ground (BuildGrid, half-metre steps); let go to set it down. While placing,
+//     tap the ground to put the new piece there, or drag its ghost. Home's own things (YardProps: the
+//     banana trees, punching bag, jars, rice barn, coop) are picked and dragged the same way.
 public class BuildUI : MonoBehaviour
 {
     private enum Mode { Place, Edit, Move }
 
-    private const float Grid = 0.25f;
+    private const float Grid = 0.5f;
     private static BuildUI instance;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     private static void ResetStatics() => instance = null;
 
     private GameObject canvasGo;
-    private RectTransform panel, tiles;
+    private RectTransform panel, tiles, tabRow;
+    private string category;                  // the catalogue tab on show (Category)
     private Text title, info;
     private readonly List<Button> buttons = new List<Button>();
     private readonly List<Text> buttonLabels = new List<Text>();
@@ -37,6 +42,16 @@ public class BuildUI : MonoBehaviour
     private Transform player;
     private float ghostX, ghostZ, ghostYaw;
     private string site = "home";
+
+    // touch editing
+    private EditTouchSurface touch;
+    private BuildGrid grid;
+    private string selectedProp;              // a yard thing (YardProps) picked instead of a piece
+    private bool holding;                     // a finger is carrying the ghost / the picked piece
+    private bool hasSpot;                     // placing: you put the ghost somewhere with a finger
+    private float spotX, spotZ;
+    private float dragX, dragZ;               // where the carried piece is (house space)
+    private Vector3 holdOffset;               // from the finger's ground point to the piece's middle
 
     private static string SiteTitle(string s) => s == "farm" ? "ก่อสร้างในแปลงเกษตร" : s == "home" ? "ก่อสร้างรอบบ้าน" : "ก่อสร้างในที่ดินของคุณ";
     private static string SiteWhere(string s) => s == "farm" ? "แปลงเกษตรของคุณ" : s == "home" ? "แปลงบ้านของคุณ" : "ที่ดินของคุณ";
@@ -115,6 +130,7 @@ public class BuildUI : MonoBehaviour
         canvasGo.SetActive(true);
         mode = Mode.Place;
         chainId = -1;
+        hasSpot = false;
         Render();
     }
 
@@ -123,8 +139,12 @@ public class BuildUI : MonoBehaviour
         if (canvasGo != null) canvasGo.SetActive(false);
         ClearGhost();
         BuiltPieces.Hide(-1);
+        if (YardProps.Held != null) { YardProps.Held = null; YardProps.Reapply(); }
+        holding = false;
         selected = -1;
+        selectedProp = null;
         armedRemove = -1;
+        if (grid != null) grid.Hide();
     }
 
     private static Vector3 Flat(Vector3 v) => new Vector3(v.x, 0f, v.z);
@@ -142,7 +162,13 @@ public class BuildUI : MonoBehaviour
         scaler.referenceResolution = new Vector2(1920f, 1080f);
         scaler.matchWidthOrHeight = 0.5f;
 
-        const float W = 900f, H = 262f;
+        touch = EditTouchSurface.Make(canvasGo.transform);
+        touch.Grab = Grab;
+        touch.Move = DragTo;
+        touch.Drop = Drop;
+        touch.Tap = Tap;
+
+        const float W = 900f, H = 420f;
         panel = UiKit.Panel("BuildPanel", canvasGo.transform, new Color(0.14f, 0.08f, 0.04f, 0.9f), Vector2.zero, new Vector2(W, H));
         panel.anchorMin = panel.anchorMax = new Vector2(0.5f, 1f);
         panel.pivot = new Vector2(0.5f, 1f);
@@ -156,12 +182,20 @@ public class BuildUI : MonoBehaviour
         var close = UiKit.RoundButton(panel, "✕", new Vector2(W * 0.5f - 34f, -30f), new Vector2(48f, 48f), UiKit.Danger, Color.white, Close, 26, circle: true);
         ((RectTransform)close.transform).anchorMin = ((RectTransform)close.transform).anchorMax = new Vector2(0.5f, 1f);
 
-        // the catalogue: a row of tiles that scrolls sideways
+        // the catalogue's tabs (รั้ว/ประตู, โรงรถ, อาคาร, ฟาร์ม, ตกแต่ง), then its picture tiles
+        tabRow = new GameObject("Tabs", typeof(RectTransform)).GetComponent<RectTransform>();
+        tabRow.SetParent(panel, false);
+        tabRow.anchorMin = tabRow.anchorMax = new Vector2(0.5f, 1f);
+        tabRow.pivot = new Vector2(0.5f, 1f);
+        tabRow.anchoredPosition = new Vector2(0f, -58f);
+        tabRow.sizeDelta = new Vector2(W - 30f, 54f);
+
+        // the catalogue: a row of picture tiles that scrolls sideways
         var view = UiKit.Rect("Catalogue", panel, new Color(0f, 0f, 0f, 0.25f));
         view.anchorMin = view.anchorMax = new Vector2(0.5f, 1f);
         view.pivot = new Vector2(0.5f, 1f);
-        view.anchoredPosition = new Vector2(0f, -58f);
-        view.sizeDelta = new Vector2(W - 30f, 96f);
+        view.anchoredPosition = new Vector2(0f, -118f);
+        view.sizeDelta = new Vector2(W - 30f, 196f);
         view.gameObject.AddComponent<RectMask2D>();
         var scroll = view.gameObject.AddComponent<ScrollRect>();
         scroll.horizontal = true;
@@ -171,7 +205,7 @@ public class BuildUI : MonoBehaviour
         tiles.SetParent(view, false);
         tiles.anchorMin = tiles.anchorMax = new Vector2(0f, 0.5f);
         tiles.pivot = new Vector2(0f, 0.5f);
-        tiles.sizeDelta = new Vector2(10f, 90f);
+        tiles.sizeDelta = new Vector2(10f, 190f);
         scroll.content = tiles;
 
         // up to six buttons along the bottom
@@ -207,27 +241,69 @@ public class BuildUI : MonoBehaviour
         if (client?.Current == null || canvasGo == null) return;
         var state = client.Current;
         tiles.parent.gameObject.SetActive(mode == Mode.Place);
+        tabRow.gameObject.SetActive(mode == Mode.Place);
+        panel.sizeDelta = new Vector2(panel.sizeDelta.x, mode == Mode.Place ? 420f : 170f);
 
         if (mode == Mode.Place)
         {
             title.text = SiteTitle(site);
+            // tabs: only the groups there is something in
+            var groups = new List<string>();
+            foreach (var k in state.catalog) { var g = Category(k); if (!groups.Contains(g)) groups.Add(g); }
+            if (category == null || !groups.Contains(category)) category = Category(client.GetKind(kind)) ?? (groups.Count > 0 ? groups[0] : null);
+            UiKit.Clear(tabRow);
+            float tabW = Mathf.Min(170f, (tabRow.sizeDelta.x - 8f * (groups.Count - 1)) / Mathf.Max(1, groups.Count));
+            float tx = -(groups.Count * tabW + (groups.Count - 1) * 8f) * 0.5f + tabW * 0.5f;
+            foreach (var g in groups)
+            {
+                var name = g;
+                bool on = name == category;
+                var tab = UiKit.RoundButton(tabRow, name, new Vector2(tx, -27f), new Vector2(tabW, 50f), on ? UiKit.Gold : new Color(0.35f, 0.22f, 0.12f), on ? UiKit.GoldInk : UiKit.Cream,
+                    () => { category = name; Render(); }, 22);
+                var trt = (RectTransform)tab.transform;
+                trt.anchorMin = trt.anchorMax = new Vector2(0.5f, 1f);
+                tx += tabW + 8f;
+            }
+
             UiKit.Clear(tiles);
             float x = 6f;
             foreach (var k in state.catalog)
             {
+                if (Category(k) != category) continue;
                 var id = k.id;
                 bool picked = id == kind;
-                var tile = UiKit.RoundButton(tiles, "", Vector2.zero, new Vector2(164f, 84f), picked ? UiKit.Gold : UiKit.Cream, UiKit.Ink, () => { kind = id; chainId = -1; Render(); }, 22);
+                var tile = UiKit.RoundButton(tiles, "", Vector2.zero, new Vector2(160f, 182f), picked ? UiKit.Gold : UiKit.Cream, UiKit.Ink, () => { kind = id; chainId = -1; Render(); }, 20);
                 var rt = (RectTransform)tile.transform;
                 rt.anchorMin = rt.anchorMax = new Vector2(0f, 0.5f);
                 rt.pivot = new Vector2(0f, 0.5f);
                 rt.anchoredPosition = new Vector2(x, 0f);
+                // the picture
+                var pic = new GameObject("Picture", typeof(RectTransform), typeof(RawImage));
+                var prt = (RectTransform)pic.transform;
+                prt.SetParent(tile.transform, false);
+                prt.anchorMin = prt.anchorMax = new Vector2(0.5f, 1f);
+                prt.pivot = new Vector2(0.5f, 1f);
+                prt.anchoredPosition = new Vector2(0f, -8f);
+                prt.sizeDelta = new Vector2(112f, 112f);
+                var raw = pic.GetComponent<RawImage>();
+                raw.texture = BuildThumbs.Get(id);
+                raw.raycastTarget = false;
                 var label = tile.GetComponentInChildren<Text>();
+                var lrt = label.rectTransform;
+                lrt.anchorMin = new Vector2(0f, 0f);
+                lrt.anchorMax = new Vector2(1f, 0f);
+                lrt.pivot = new Vector2(0.5f, 0f);
+                lrt.anchoredPosition = new Vector2(0f, 4f);
+                lrt.sizeDelta = new Vector2(-8f, 60f);
                 label.text = $"{k.name}\n{k.price:N0} บาท";
-                label.lineSpacing = 0.9f;
-                x += 172f;
+                label.lineSpacing = 0.85f;
+                label.resizeTextForBestFit = true;
+                label.resizeTextMinSize = 14;
+                label.resizeTextMaxSize = 20;
+                x += 168f;
             }
-            tiles.sizeDelta = new Vector2(x + 6f, 90f);
+            tiles.sizeDelta = new Vector2(x + 6f, 190f);
+            tiles.anchoredPosition = new Vector2(0f, tiles.anchoredPosition.y);
             var kd = client.GetKind(kind);
             bool line = kd != null && kd.group != "build";
             int count = state.pieces?.Length ?? 0;
@@ -237,14 +313,25 @@ public class BuildUI : MonoBehaviour
                 ("หมุน ⟳", UiKit.Cream, () => { yawTurn = (yawTurn + 45) % 360; }),
                 (line ? (chain ? "ต่อแนว: เปิด" : "ต่อแนว: ปิด") : "วางหน้าตัว", UiKit.Cream, () => { chain = !chain; chainId = -1; Render(); }),
                 ($"สี: {ColorName(paint)}", UiKit.Cream, () => { paint = (paint + 1) % Mathf.Max(1, state.colors?.Length ?? 1); Render(); }),
-                ("แก้ไข", UiKit.Pill, () => { mode = Mode.Edit; ClearGhost(); SelectNearest(-1); Render(); }));
+                ("แก้ไข / ย้าย", UiKit.Pill, () => { mode = Mode.Edit; ClearGhost(); SelectNearest(-1, null); Render(); }));
+        }
+        else if (mode == Mode.Edit && selectedProp != null)
+        {
+            var item = YardProps.Get(selectedProp);
+            title.text = "จัดของในบ้าน";
+            info.text = item == null ? "แตะของที่จะย้าย" : $"{item.label} · ลากเพื่อย้าย";
+            SetButtons(
+                ("หมุน ⟳", UiKit.Cream, () => { if (item != null) SaveProp(item, item.t.position, item.t.eulerAngles.y + 45f); }),
+                ("คืนที่เดิม", UiKit.Cream, () => { if (item != null) SaveProp(item, item.home, item.homeYaw); }),
+                ("ถัดไป", UiKit.Cream, () => { SelectNearest(-1, selectedProp); Render(); }),
+                ("กลับไปสร้าง", UiKit.Pill, () => { mode = Mode.Place; selectedProp = null; ClearGhost(); BuiltPieces.Hide(-1); Render(); }));
         }
         else if (mode == Mode.Edit)
         {
             var p = client.GetPiece(selected);
             var kd = p != null ? client.GetKind(p.kind) : null;
             title.text = "แก้ไขสิ่งก่อสร้าง";
-            info.text = p == null ? "ยังไม่มีอะไรใกล้ตัว · เดินไปใกล้ชิ้นที่จะแก้" : $"{kd?.name ?? p.kind} · สี{ColorName(p.color)}";
+            info.text = p == null ? "แตะชิ้นที่จะแก้ · ลากเพื่อย้าย" : $"{kd?.name ?? p.kind} · สี{ColorName(p.color)} · ลากเพื่อย้าย";
             bool armed = p != null && armedRemove == p.id;
             SetButtons(
                 ("ย้าย", UiKit.Cream, () => { if (p != null) { mode = Mode.Move; yawTurn = 0; BuiltPieces.Hide(p.id); Render(); } }),
@@ -255,9 +342,9 @@ public class BuildUI : MonoBehaviour
                     if (p == null) return;
                     if (armedRemove != p.id) { armedRemove = p.id; Render(); return; }
                     armedRemove = -1;
-                    Send(client.RemoveAsync(p.id), () => SelectNearest(-1));
+                    Send(client.RemoveAsync(p.id), () => SelectNearest(-1, null));
                 }),
-                ("ถัดไป", UiKit.Cream, () => { SelectNearest(selected); Render(); }),
+                ("ถัดไป", UiKit.Cream, () => { SelectNearest(selected, null); Render(); }),
                 ("กลับไปสร้าง", UiKit.Pill, () => { mode = Mode.Place; ClearGhost(); BuiltPieces.Hide(-1); Render(); }));
         }
         else // Move
@@ -274,6 +361,20 @@ public class BuildUI : MonoBehaviour
                 }),
                 ("หมุน ⟳", UiKit.Cream, () => { yawTurn = (yawTurn + 45) % 360; }),
                 ("ยกเลิก", UiKit.Pill, () => { mode = Mode.Edit; ClearGhost(); BuiltPieces.Hide(-1); Render(); }));
+        }
+    }
+
+    // Which catalogue tab a piece is under
+    private static string Category(BuildClient.Kind k)
+    {
+        if (k == null) return null;
+        if (k.group == "fence" || k.group == "gate") return "รั้ว / ประตู";
+        switch (k.id)
+        {
+            case "carport": case "garage": return "โรงรถ";
+            case "cowshed": case "watertower": case "well": return "ฟาร์ม";
+            case "planter": return "ตกแต่ง";
+            default: return "อาคาร";
         }
     }
 
@@ -301,11 +402,39 @@ public class BuildUI : MonoBehaviour
             return;
         }
 
+        ShowGrid(house, client);
         if (mode == Mode.Place) Follow(house, client, kind, paint, true);
         else if (mode == Mode.Move)
         {
             var p = client.GetPiece(selected);
             if (p != null) Follow(house, client, p.kind, p.color, false);
+        }
+        else if (selectedProp != null) // Edit: a ring under the yard thing you picked
+        {
+            var item = YardProps.Get(selectedProp);
+            if (item == null) { ClearGhost(); return; }
+            if (ghost == null || ghostKey != "prop" + item.name)
+            {
+                ClearGhost();
+                ghost = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                Destroy(ghost.GetComponent<Collider>());
+                ghost.GetComponent<Renderer>().sharedMaterial = BuildKit.FlatMat(new Color(1f, 0.85f, 0.2f));
+                ghost.name = "BuildGhost";
+                ghostKey = "prop" + item.name;
+            }
+            float pulse = 1f + Mathf.Sin(Time.unscaledTime * 6f) * 0.05f;
+            ghost.transform.position = item.t.position + Vector3.up * 0.03f;
+            ghost.transform.localScale = new Vector3(item.size * 1.3f * pulse, 0.01f, item.size * 1.3f * pulse);
+        }
+        else if (holding) // Edit: carrying a piece with a finger
+        {
+            var p = client.GetPiece(selected);
+            if (p == null) { ClearGhost(); return; }
+            bool ok = client.Inside(site, dragX, dragZ);
+            ShowGhost(p.kind, ok ? new Color(0.3f, 0.95f, 0.4f) : new Color(0.95f, 0.25f, 0.2f), $"drag{p.id}/{ok}");
+            BuiltPieces.Place(ghost.transform, house, dragX, dragZ, p.yaw);
+            ghost.transform.position += Vector3.up * 0.01f;
+            ghost.transform.localScale = Vector3.one;
         }
         else // Edit: outline the selected piece
         {
@@ -341,6 +470,11 @@ public class BuildUI : MonoBehaviour
                     + Quaternion.Euler(0f, yaw, 0f) * Vector3.right * (len * 0.5f);
             x = c.x; z = c.z;
         }
+        else if (allowChain && hasSpot) // put down with a finger
+        {
+            yaw = Mathf.Repeat(yawTurn, 360f);
+            x = spotX; z = spotZ;
+        }
         else
         {
             yaw = Mathf.Repeat(Mathf.Round(facing / 45f) * 45f + yawTurn, 360f);
@@ -373,25 +507,229 @@ public class BuildUI : MonoBehaviour
         ghostKey = null;
     }
 
-    private void SelectNearest(int after)
+    // The next piece or yard thing near you, after the one picked now (cycling with ถัดไป)
+    private void SelectNearest(int after, string afterProp)
     {
         var client = BuildClient.Instance;
         var house = BuiltPieces.AnchorOf(site);
         selected = -1;
+        selectedProp = null;
         armedRemove = -1;
         if (client?.Current?.pieces == null || house == null || player == null) return;
         var local = house.InverseTransformPoint(player.position);
-        var near = new List<(float d, int id)>();
+        var near = new List<(float d, int id, string prop)>();
         foreach (var p in client.Current.pieces)
         {
             if (BuildClient.SiteOf(p) != site) continue;
             float d = new Vector2(p.x - local.x, p.z - local.z).magnitude;
-            if (d < 10f) near.Add((d, p.id));
+            if (d < 10f) near.Add((d, p.id, null));
         }
+        if (site == "home")
+            foreach (var item in YardProps.All)
+            {
+                if (item.t == null) continue;
+                float d = Flat(item.t.position - player.position).magnitude;
+                if (d < 10f) near.Add((d, -1, item.name));
+            }
         if (near.Count == 0) return;
         near.Sort((a, b) => a.d.CompareTo(b.d));
-        int at = near.FindIndex(n => n.id == after);
-        selected = near[(at + 1) % near.Count].id;
+        int at = afterProp != null ? near.FindIndex(n => n.prop == afterProp) : near.FindIndex(n => n.prop == null && n.id == after);
+        var next = near[(at + 1) % near.Count];
+        selected = next.id;
+        selectedProp = next.prop;
+    }
+
+    // ── Touch: pick, drag, drop ─────────────────────────────────────────────────
+    private bool FingerOnGround(Vector2 screen, Transform house, out Vector3 local)
+    {
+        local = default;
+        if (house == null || !EditTouchSurface.GroundPoint(screen, house.position.y, out var world)) return false;
+        local = house.InverseTransformPoint(world);
+        local.y = 0f;
+        return true;
+    }
+
+    private static float Snap(float v) => Mathf.Round(v / Grid) * Grid;
+
+    // What is under the finger: a piece of this site (by its footprint) or a yard thing; (-1, null): nothing
+    private (int id, string prop) PickAt(Vector3 local, Transform house)
+    {
+        var client = BuildClient.Instance;
+        float best = float.MaxValue;
+        (int, string) found = (-1, null);
+        foreach (var p in client.Current.pieces)
+        {
+            if (BuildClient.SiteOf(p) != site) continue;
+            var kd = client.GetKind(p.kind);
+            float len = kd != null ? kd.length : 2f;
+            // into the piece's own axes: along it (x) and across it (z)
+            var rel = Quaternion.Euler(0f, -p.yaw, 0f) * new Vector3(local.x - p.x, 0f, local.z - p.z);
+            float halfX = len * 0.5f + 0.4f, halfZ = (kd != null && kd.group == "build" ? Mathf.Max(1f, len * 0.6f) : 0.3f) + 0.4f;
+            if (Mathf.Abs(rel.x) > halfX || Mathf.Abs(rel.z) > halfZ) continue;
+            float d = rel.sqrMagnitude;
+            if (d < best) { best = d; found = (p.id, null); }
+        }
+        if (site == "home")
+            foreach (var item in YardProps.All)
+            {
+                if (item.t == null) continue;
+                var l = house.InverseTransformPoint(item.t.position);
+                float d = new Vector2(l.x - local.x, l.z - local.z).sqrMagnitude;
+                float r = item.size * 0.6f + 0.4f;
+                if (d <= r * r && d < best) { best = d; found = (-1, item.name); }
+            }
+        return found;
+    }
+
+    private bool Grab(Vector2 screen)
+    {
+        var client = BuildClient.Instance;
+        var house = BuiltPieces.AnchorOf(site);
+        if (busy || client?.Current == null || !FingerOnGround(screen, house, out var local)) return false;
+        if (mode == Mode.Place)
+        {
+            if (ghost == null) return false;
+            var kd = client.GetKind(kind);
+            float len = kd != null ? kd.length : 2f;
+            if (new Vector2(ghostX - local.x, ghostZ - local.z).magnitude > Mathf.Max(1.2f, len * 0.6f)) return false;
+            holding = true;
+            holdOffset = new Vector3(ghostX - local.x, 0f, ghostZ - local.z);
+            return true;
+        }
+        if (mode != Mode.Edit) return false;
+        var (id, prop) = PickAt(local, house);
+        if (id < 0 && prop == null) return false;
+        armedRemove = -1;
+        if (prop != null)
+        {
+            selected = -1;
+            selectedProp = prop;
+            var item = YardProps.Get(prop);
+            if (item == null) return false;
+            var l = house.InverseTransformPoint(item.t.position);
+            holdOffset = new Vector3(l.x - local.x, 0f, l.z - local.z);
+        }
+        else
+        {
+            selected = id;
+            selectedProp = null;
+            var p = client.GetPiece(id);
+            holdOffset = new Vector3(p.x - local.x, 0f, p.z - local.z);
+            dragX = p.x; dragZ = p.z;
+        }
+        holding = true;
+        Render();
+        return true;
+    }
+
+    private void DragTo(Vector2 screen)
+    {
+        var house = BuiltPieces.AnchorOf(site);
+        if (!holding || !FingerOnGround(screen, house, out var local)) return;
+        float x = Snap(local.x + holdOffset.x), z = Snap(local.z + holdOffset.z);
+        if (mode == Mode.Place)
+        {
+            hasSpot = true;
+            chainId = -1; // a fence line starts again from where you dragged it
+            spotX = x; spotZ = z;
+            return;
+        }
+        if (selectedProp != null)
+        {
+            var item = YardProps.Get(selectedProp);
+            if (item == null) return;
+            YardProps.Held = item.name;
+            var world = house.TransformPoint(new Vector3(x, 0f, z));
+            YardProps.Put(item, world.x - item.home.x, world.z - item.home.z, item.t.eulerAngles.y);
+            return;
+        }
+        BuiltPieces.Hide(selected);
+        dragX = x; dragZ = z;
+    }
+
+    private void Drop(Vector2 screen, bool moved)
+    {
+        if (!holding) return;
+        holding = false;
+        var client = BuildClient.Instance;
+        if (mode == Mode.Place || !moved || client == null)
+        {
+            if (YardProps.Held != null) { YardProps.Held = null; YardProps.Reapply(); }
+            BuiltPieces.Hide(-1);
+            Render();
+            return;
+        }
+        if (selectedProp != null)
+        {
+            var item = YardProps.Get(selectedProp);
+            if (item != null) SaveProp(item, item.t.position, item.t.eulerAngles.y);
+            return;
+        }
+        var p = client.GetPiece(selected);
+        if (p == null) { BuiltPieces.Hide(-1); return; }
+        if (!client.Inside(site, dragX, dragZ))
+        {
+            ScreenToast.Show(site == "home" ? (client.OnLot ? "ต้องวางในแปลงบ้านของคุณ" : "ไกลบ้านเกินไป") : $"ต้องวางใน{SiteWhere(site)}", UiKit.Danger);
+            BuiltPieces.Hide(-1);
+            return;
+        }
+        p.x = dragX; p.z = dragZ;
+        Send(client.EditAsync(p), null, () => BuiltPieces.Hide(-1));
+    }
+
+    private void Tap(Vector2 screen)
+    {
+        var client = BuildClient.Instance;
+        var house = BuiltPieces.AnchorOf(site);
+        if (busy || client?.Current == null || !FingerOnGround(screen, house, out var local)) return;
+        if (mode == Mode.Place)
+        {
+            // put the ghost where you tapped (a fence line starts again from there)
+            hasSpot = true;
+            chainId = -1;
+            spotX = Snap(local.x); spotZ = Snap(local.z);
+            return;
+        }
+        if (mode != Mode.Edit) return;
+        var (id, prop) = PickAt(local, house);
+        if (id < 0 && prop == null) return;
+        selected = id;
+        selectedProp = prop;
+        armedRemove = -1;
+        Render();
+    }
+
+    // Save where a yard thing stands now (world position and yaw)
+    private void SaveProp(YardProps.Item item, Vector3 world, float yaw)
+    {
+        var client = BuildClient.Instance;
+        if (client == null || item == null || busy) return;
+        YardProps.Held = item.name;
+        YardProps.Put(item, world.x - item.home.x, world.z - item.home.z, yaw);
+        Send(client.MovePropAsync(item.name, world.x - item.home.x, world.z - item.home.z, Mathf.Repeat(yaw, 360f)), null, () =>
+        {
+            YardProps.Held = null;
+            YardProps.Reapply();
+        });
+    }
+
+    // The grid over the ground you may build on
+    private void ShowGrid(Transform house, BuildClient client)
+    {
+        if (grid == null) grid = BuildGrid.Make("BuildGrid_ตาราง");
+        float x0, x1, z0, z1;
+        if (site == "home")
+        {
+            if (client.OnLot) { var b = client.Current.bounds; x0 = b.x0; x1 = b.x1; z0 = b.z0; z1 = b.z1; }
+            else { float r = Mathf.Min(client.Current.radius, 18f); x0 = z0 = -r; x1 = z1 = r; }
+        }
+        else
+        {
+            var b = client.SiteBounds(site);
+            if (b == null) { grid.Hide(); return; }
+            x0 = b.x0; x1 = b.x1; z0 = b.z0; z1 = b.z1;
+        }
+        grid.Show(house, x0, x1, z0, z1, BuiltPieces.GroundAt(house.position, house.position.y));
     }
 
     // ── Server calls ────────────────────────────────────────────────────────────
@@ -411,7 +749,7 @@ public class BuildUI : MonoBehaviour
         });
     }
 
-    private async void Send(System.Threading.Tasks.Task<BuildClient.State> call, Action after = null)
+    private async void Send(System.Threading.Tasks.Task<BuildClient.State> call, Action after = null, Action always = null)
     {
         busy = true;
         try
@@ -434,6 +772,7 @@ public class BuildUI : MonoBehaviour
         finally
         {
             busy = false;
+            always?.Invoke();
             if (IsOpen) Render();
         }
     }

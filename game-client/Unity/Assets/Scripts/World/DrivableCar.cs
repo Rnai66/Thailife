@@ -71,8 +71,11 @@ public class DrivableCar : MonoBehaviour
         lean = 0f;
         if (!CarModels.TwoWheels(id))
         {
-            hidden = player.GetComponentsInChildren<Renderer>();
-            foreach (var r in hidden) if (r != null) r.enabled = false;
+            // only what shows now: the placeholder capsule (off once the character model is on) stays off on getting out
+            var shown = new System.Collections.Generic.List<Renderer>();
+            foreach (var r in player.GetComponentsInChildren<Renderer>())
+                if (r != null && r.enabled) { r.enabled = false; shown.Add(r); }
+            hidden = shown.ToArray();
         }
         else
         {
@@ -104,7 +107,7 @@ public class DrivableCar : MonoBehaviour
     {
         if (!Driving) return;
         Report();
-        ParkedCar.Home(); // DriveJourney says where it ends up
+        ParkedCar.Home(id); // DriveJourney says where it ends up
         GetOut(save: false);
         Destroy(gameObject);
     }
@@ -134,7 +137,7 @@ public class DrivableCar : MonoBehaviour
         ShowExitButton(false);
         if (!save) return;
         // parked here: under the house it's home again, anywhere else it stays where it is
-        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "ThaiVillage" && HomeCar.AtHome(transform.position)) ParkedCar.Home();
+        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "ThaiVillage" && HomeCar.AtHome(transform.position)) ParkedCar.Home(id);
         else ParkedCar.Save(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name, id, carName, transform.position, transform.eulerAngles.y);
     }
 

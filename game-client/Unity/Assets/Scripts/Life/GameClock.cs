@@ -26,6 +26,8 @@ public static class GameClock
     public static int Day => Day0 + 1;
     public static int DayOfMonth => Day0 % DaysPerMonth + 1;
     public static string MonthTh => MonthsTh[(Day0 / DaysPerMonth) % 12];
+    // The date of game day `day` (1 = the first), e.g. "14 ต.ค."
+    public static string DateOf(int day) => $"{(day - 1) % DaysPerMonth + 1} {MonthsTh[((day - 1) / DaysPerMonth) % 12]}";
 
     // 0..1440
     public static float MinuteOfDay => (float)(TotalGameMinutes % MinutesPerDay);

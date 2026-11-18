@@ -103,19 +103,48 @@ local function write(user_id, a)
                        permission_read = 1, permission_write = 0 } })
 end
 
+-- The statement (สมุดบัญชี / inbox): what came into savings by itself — business takings, land rent,
+-- interest — one line per kind per game day, the newest first, the last INBOX_SIZE kept
+local INBOX_SIZE = 40
+local function note(a, kind, label, amount)
+  amount = math.floor(amount)
+  if amount == 0 then return end
+  a.inbox = a.inbox or {}
+  local day = life.game_day(nk.time())
+  local top = a.inbox[1]
+  for i = 1, math.min(#a.inbox, 8) do -- today's line for this already?
+    local e = a.inbox[i]
+    if e.day ~= day then break end
+    if e.kind == kind and e.label == label then
+      e.amount = e.amount + amount
+      e.at = nk.time()
+      return
+    end
+  end
+  table.insert(a.inbox, 1, { day = day, at = nk.time(), kind = kind, label = label, amount = amount })
+  while #a.inbox > INBOX_SIZE do table.remove(a.inbox) end
+end
+
 -- Bring interest, land rent and business takings up to now
 local function settle(user_id, a)
   local now = game_days(nk.time())
   local days = math.max(0, now - a.settled)
   if days > 0 then
+    local before = a.savings
     a.savings = math.floor(a.savings * (1 + SAVINGS_RATE) ^ days)
+    note(a, "interest", "ดอกเบี้ยเงินฝาก", a.savings - before)
     a.loan = math.floor(a.loan * (1 + LOAN_RATE) ^ days + 0.5)
     local rent = 0
     for id, _ in pairs(a.assets) do
       local x = ASSETS[id]
       if x and x.rent then rent = rent + x.price * x.rent * days end
     end
-    a.savings = a.savings + math.floor(rent) -- land rent is paid into savings
+    -- land rent is paid into savings; the fractions carry over so small amounts aren't lost
+    a.rent_carry = (a.rent_carry or 0) + rent
+    local whole = math.floor(a.rent_carry)
+    a.rent_carry = a.rent_carry - whole
+    a.savings = a.savings + whole
+    note(a, "rent", "ค่าเช่าที่ดิน", whole)
     a.settled = now
   end
   -- Business takings go straight into savings (a loss comes out of savings, then onto the loan)
@@ -129,7 +158,9 @@ local function settle(user_id, a)
       local profit = math.floor((revenue - t.rent - t.wage * b.staff) * d)
       income = income + profit
       b.earned = (b.earned or 0) + profit
+      note(a, "business", t.name .. (BUILDINGS[b.building] and (" · " .. BUILDINGS[b.building]) or ""), profit)
     end
+    if (b.till or 0) ~= 0 then note(a, "business", (t and t.name or "ธุรกิจ") .. " (เงินค้างในลิ้นชัก)", b.till) end
     income = income + (b.till or 0) -- anything left from before the takings went to the bank
     b.till = 0
     b.settled = now
@@ -193,7 +224,7 @@ local function view(user_id, a, extra)
     savings_rate = SAVINGS_RATE, loan_rate = LOAN_RATE, loan_level = LOAN_LEVEL,
     business_level = BUSINESS_LEVEL, business_cash = BUSINESS_CASH, max_staff = MAX_STAFF,
     assets = assets, business_types = types, buildings = buildings, till = till, speed = speed,
-    income = a.income or 0, inbox = a.inbox,
+    income = a.income or 0, inbox = (a.inbox and #a.inbox > 0) and a.inbox or nil, today = life.game_day(nk.time()),
   }
   if #mine > 0 then result.businesses = mine end
   for k, v in pairs(extra or {}) do result[k] = v end

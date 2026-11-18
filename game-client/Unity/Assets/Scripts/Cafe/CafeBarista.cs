@@ -35,7 +35,7 @@ public class CafeBarista : MonoBehaviour
         if (chest == null) return;
         // hands at the bar top, working in small circles
         float t = Time.time * 2.2f + seed;
-        Vector3 work = root.position + u * 1.08f * s + f * 0.38f * s;
+        Vector3 work = root.position + u * 0.08f * s + f * 0.38f * s; // root = 1 above the feet (CafeSite), bar top ~1.08 m
         Vector3 left = work - r * 0.16f * s + new Vector3(Mathf.Sin(t), 0f, Mathf.Cos(t)) * 0.04f * s;
         Vector3 right = work + r * 0.14f * s + u * (0.05f + 0.04f * Mathf.Sin(t * 1.3f)) * s;
         Arm(HumanBodyBones.LeftUpperArm, HumanBodyBones.LeftLowerArm, HumanBodyBones.LeftHand, -u + f * 0.35f - r * 0.15f, left);

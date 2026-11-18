@@ -8,9 +8,10 @@ using UnityEngine.UI;
 //  · เจ้าอาวาส — ordain (บวช), leave the monkhood (สึก) or come out a หมอผี at monk Lv 30, your บารมี,
 //    adopt a temple dog or raise a กุมารทอง to guard the house, and what came for your home lately
 //  · บูชาพระเครื่อง — amulets and yantra cloths for the home shrine; each keeps ghosts and thieves away
+//  · ทำบุญ — give to the กฐิน / ผ้าป่า during those festivals for บารมี and XP (also at the money tree)
 public class TempleUI : MonoBehaviour
 {
-    public const string Abbot = "abbot", Amulets = "amulets";
+    public const string Abbot = "abbot", Amulets = "amulets", Merit = "merit";
 
     private static TempleUI instance;
 
@@ -132,11 +133,11 @@ public class TempleUI : MonoBehaviour
     private void Render()
     {
         bool upright = UiKit.Portrait;
-        titleText.text = tab == Abbot ? "กุฏิเจ้าอาวาส" : "ศาลาบูชาพระเครื่อง";
-        subtitleText.text = tab == Abbot ? "บวช สึก เลี้ยงหมาวัดและกุมารทอง" : "พระเครื่องและผ้ายันต์ ขึ้นหิ้งพระที่บ้าน กันผีกันขโมย";
+        titleText.text = tab == Abbot ? "กุฏิเจ้าอาวาส" : tab == Merit ? "ร่วมทำบุญ ทอดกฐิน · ทอดผ้าป่า" : "ศาลาบูชาพระเครื่อง";
+        subtitleText.text = tab == Abbot ? "บวช สึก เลี้ยงหมาวัดและกุมารทอง" : tab == Merit ? "ทำบุญถวายวัด ได้บารมีและ XP" : "พระเครื่องและผ้ายันต์ ขึ้นหิ้งพระที่บ้าน กันผีกันขโมย";
         UiKit.Clear(tabs);
-        float tw = upright ? 330f : 360f;
-        foreach (var (id, label, x) in new[] { (Abbot, "เจ้าอาวาส", -tw * 0.5f - 6f), (Amulets, "บูชาพระเครื่อง", tw * 0.5f + 6f) })
+        float tw = upright ? 220f : 330f;
+        foreach (var (id, label, x) in new[] { (Abbot, "เจ้าอาวาส", -tw - 8f), (Amulets, upright ? "พระเครื่อง" : "บูชาพระเครื่อง", 0f), (Merit, "ทำบุญ", tw + 8f) })
         {
             bool on = tab == id;
             string which = id;
@@ -161,6 +162,7 @@ public class TempleUI : MonoBehaviour
                                           : "\nนั่งสมาธิในโบสถ์หน้าพระประธานเพื่อเพิ่มบารมี (จุดธูปเทียนได้บารมีมากขึ้น)");
 
         if (tab == Abbot) RenderAbbot(s);
+        else if (tab == Merit) RenderMerit(s);
         else RenderAmulets(s);
         content.sizeDelta = new Vector2(content.sizeDelta.x, Mathf.Max(viewport.sizeDelta.y, -y + 20f));
     }
@@ -284,6 +286,46 @@ public class TempleUI : MonoBehaviour
         return null;
     }
 
+    // ── ทำบุญ: งานทอดกฐิน / งานทอดผ้าป่า ──────────────────────────────────────────────────────
+    private void RenderMerit(TempleClient.State s)
+    {
+        var m = s.merit;
+        if (m == null) { Note("ต้องออนไลน์ก่อน", UiKit.Muted); return; }
+        if (!m.open)
+        {
+            Heading("ยังไม่ถึงช่วงงาน");
+            Note($"งานครั้งหน้า: {m.next_name} · อีก {m.next_in} วันในเกม", UiKit.Price, 24);
+            Note("ร่วมทำบุญได้ช่วงงานทอดกฐิน (ต.ค.) และงานทอดผ้าป่า (มี.ค. · ธ.ค.)", UiKit.Muted);
+            Note("ทุก 25 บาทได้บารมี 1 · ทุก 20 บาทได้ XP 1 · นับสูงสุด " + m.cap.ToString("N0") + " บาทต่องาน · กฐินได้ 1.5 เท่า", UiKit.Muted, 19);
+            if (m.lifetime > 0) Note($"คุณร่วมทำบุญไปแล้วทั้งหมด {m.lifetime:N0} บาท สาธุ", UiKit.OkGreen);
+            return;
+        }
+        bool kathin = m.id == "kathin";
+        Heading(m.name + (kathin ? " · บุญใหญ่ ได้บารมีและ XP 1.5 เท่า" : ""));
+        Note($"ยอดร่วมบุญทั้งหมู่บ้าน {m.town_total:N0} บาท · คุณร่วมแล้ว {m.given:N0} บาท", UiKit.Price, 24);
+        int left = Mathf.Max(0, m.cap - m.counted);
+        Note(left > 0 ? $"นับบารมีและ XP ได้อีก {left:N0} บาทในงานนี้" : "ครบยอดที่นับบารมีของงานนี้แล้ว ทำบุญต่อได้ (ไม่ได้แต้มเพิ่ม)",
+            left > 0 ? UiKit.Muted : UiKit.OkGreen);
+        float bonus = kathin ? m.kathin_bonus : 1f;
+        if (m.amounts != null)
+            foreach (int amt in m.amounts)
+            {
+                int a = amt;
+                int counts = Mathf.Min(a, left);
+                int barami = counts > 0 ? Mathf.FloorToInt(counts / (float)m.barami_per * bonus) + 4 : 0;
+                int xp = Mathf.FloorToInt(counts / (float)m.xp_per * bonus);
+                string gain = counts > 0 ? $" · บารมี +{barami} · XP +{xp}" : "";
+                bool big = a >= 1000;
+                string key = "donate" + a;
+                bool confirm = armed == key;
+                Wide(confirm ? $"แตะอีกครั้ง ยืนยันทำบุญ {a:N0} บาท" : $"ร่วมทำบุญ {a:N0} บาท{gain}", UiKit.Gold, UiKit.GoldInk, true,
+                    () => { if (big) Arm(key, t => t.DonateAsync(a)); else Do(t => t.DonateAsync(a)); }, 22, 72f);
+            }
+        Heading("อนุโมทนาบุญ");
+        if (m.donors == null || m.donors.Length == 0) Note("ยังไม่มีใครร่วมทำบุญ เป็นคนแรกเลย", UiKit.Muted);
+        else foreach (var d in m.donors) Note($"{d.name} · {d.amount:N0} บาท", UiKit.Ink, 20);
+    }
+
     private void ItemButton(TempleClient.State s, TempleClient.Item it, string what)
     {
         if (it == null) return;
@@ -312,6 +354,7 @@ public class TempleUI : MonoBehaviour
         {
             var r = await action(t);
             if (!string.IsNullOrEmpty(r.done)) Notify(r.done, UiKit.PayGreen);
+            if (r.gained_xp > 0) UiKit.FloatAbovePlayer($"บารมี +{r.gained_barami} · XP +{r.gained_xp}", new Color(1f, 0.85f, 0.4f));
             GameAudio.Play("bell");
         }
         catch (ApiResponseException e) { Notify(TempleClient.Explain(e), UiKit.Danger); }

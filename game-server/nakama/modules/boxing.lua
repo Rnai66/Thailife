@@ -16,7 +16,7 @@ local quest = require("quest_core")
 local RECORD = { collection = "boxing", key = "record" }
 local CAREER = { collection = "career", key = "stats" }
 local CURRENCY = data.CURRENCY
-local MAX_LEVEL = 100
+local MAX_LEVEL = 999 -- main (career) level cap
 local FIGHT_LEVEL_CAP = 20 -- opponents and fight strength top out here; levels above are prestige
 local GRPC_INVALID_ARGUMENT = 3
 local GRPC_FAILED_PRECONDITION = 9

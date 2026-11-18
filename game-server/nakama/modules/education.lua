@@ -24,7 +24,7 @@ local STORE = { collection = "education", key = "state" }
 local CAREER = { collection = "career", key = "stats" }
 local GRPC_INVALID_ARGUMENT = 3
 local GRPC_FAILED_PRECONDITION = 9
-local MAX_LEVEL = 100
+local MAX_LEVEL = 999 -- main (career) level cap
 local SUBJECT_MAX = 30
 
 local CLASS_SECONDS = 30

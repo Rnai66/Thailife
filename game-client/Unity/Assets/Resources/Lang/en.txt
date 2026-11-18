@@ -3793,3 +3793,28 @@ ThaiVillage (หมู่บ้าน), Tambon (ตำบล), City (เมื�
 ปีนี้ข้าวงามนะ	Good rice this year
 นวดข้าวกันเถอะ	Let's thresh the rice
 ขายได้กี่บาทเกวียนนี้?	How much a ton this time?
+สมุดบัญชี	Statement
+บัญชี	Account
+ที่ดิน/รถ	Land/Cars
+วันนี้	Today
+7 วันล่าสุด	Last 7 days
+กำไรธุรกิจรวม	Total business profit
+เมื่อวาน	Yesterday
+ดอกเบี้ยเงินฝาก	Savings interest
+ค่าเช่าที่ดิน	Land rent
+ยังไม่มีเงินเข้าอัตโนมัติ\nเปิดธุรกิจ ซื้อที่ดินให้เช่า หรือฝากเงินไว้ แล้วรายการจะขึ้นที่นี่	No automatic deposits yet\nOpen a business, buy land to rent out or keep savings, and they'll show up here
+ทำบุญ	Merit
+พระเครื่อง	Amulets
+ร่วมทำบุญ	Make merit
+ร่วมทำบุญ ทอดกฐิน · ทอดผ้าป่า	Kathin & Pha Pa offerings
+ทำบุญถวายวัด ได้บารมีและ XP	Give to the temple for merit and XP
+ยังไม่ถึงช่วงงาน	Not festival time yet
+ร่วมทำบุญได้ช่วงงานทอดกฐิน (ต.ค.) และงานทอดผ้าป่า (มี.ค. · ธ.ค.)	Give during the Kathin (Oct) and Pha Pa (Mar · Dec) festivals
+อนุโมทนาบุญ	Rejoicing in merit
+ยังไม่มีใครร่วมทำบุญ เป็นคนแรกเลย	No one has given yet. Be the first
+ร่วมทำบุญได้เฉพาะช่วงงานทอดกฐินและงานทอดผ้าป่า	You can only give during the Kathin and Pha Pa festivals
+ตู้ทำบุญ	Donation box
+ต้นกฐิน · ต้นผ้าป่า\nร่วมทำบุญช่วงงาน ได้บารมีและ XP	Kathin · Pha Pa money tree\nGive during the festival for merit and XP
+ครบยอดที่นับบารมีของงานนี้แล้ว ทำบุญต่อได้ (ไม่ได้แต้มเพิ่ม)	This festival's merit limit is reached. You can still give (no more points)
+แตะหรือลากไปตรงที่ต้องการ แล้วกด วางตรงนี้	tap or drag it to the spot, then tap Place here
+แตะของที่ต้องการจัด · ลากเพื่อย้าย	Tap an item to arrange it · drag to move it

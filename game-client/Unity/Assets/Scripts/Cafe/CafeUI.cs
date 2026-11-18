@@ -11,12 +11,16 @@ using UnityEngine.UI;
 // joystick. The piece nearest you gets a gold ring → ย้าย / หมุน / เก็บ (half the price back).
 // "ซื้อของ" lists the café furniture; pick one and it rides in front of you → วางตรงนี้ buys it.
 // "สไตล์ร้าน" picks the walls and floor (มินิมอล วินเทจ ลอฟท์ ไทยร่วมสมัย) and the name on the sign.
+// No walking needed (EditTouchSurface): tap a piece to pick it, put a finger on it and drag it over the
+// floor grid (BuildGrid, half-metre steps); letting go saves where it went. A new piece from ซื้อของ can
+// be tapped into place or dragged too, then วางตรงนี้ buys it.
 // "ถ่ายรูป" takes the screen without the buttons and opens the phone's share sheet (Facebook, LINE,
 // Instagram, save to Photos…, Plugins/iOS/ThaiShare.mm).
 public class CafeUI : MonoBehaviour
 {
     private const float CarryDistance = 1.4f;
     private const float SelectRange = 1.6f;
+    private const float Cell = 0.5f;
 
     private static CafeUI instance;
     public static bool IsOpen => instance != null && instance.bar != null && instance.bar.activeSelf;
@@ -44,6 +48,14 @@ public class CafeUI : MonoBehaviour
     private int selectedId;
     private bool busy;
 
+    // touch editing
+    private EditTouchSurface touch;
+    private BuildGrid grid;
+    private int pinnedId;        // picked with a finger: stays picked wherever you stand
+    private bool fingerPlaced;   // the carried piece was put somewhere with a finger: it stays there
+    private bool holding;        // a finger is on the carried piece
+    private Vector3 holdOffset;
+
     private static CafeClient Client => CafeClient.Instance;
 
     public static void Open(CafeSite site)
@@ -62,6 +74,9 @@ public class CafeUI : MonoBehaviour
         instance.listBackdrop.SetActive(false);
         instance.styleBackdrop.SetActive(false);
         instance.ring.SetActive(false);
+        if (instance.grid != null) instance.grid.Hide();
+        instance.pinnedId = 0;
+        instance.holding = false;
     }
 
     private void Awake()
@@ -75,6 +90,12 @@ public class CafeUI : MonoBehaviour
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1920f, 1080f);
         scaler.matchWidthOrHeight = 0.5f;
+
+        touch = EditTouchSurface.Make(canvasGo.transform);
+        touch.Grab = Grab;
+        touch.Move = DragTo;
+        touch.Drop = Drop;
+        touch.Tap = Tap;
 
         var panel = UiKit.Panel("CafeBar", canvasGo.transform, UiKit.TeakDark, Vector2.zero, new Vector2(1260f, 170f), shadow: true);
         panel.anchorMin = panel.anchorMax = new Vector2(0.5f, 0f);
@@ -146,19 +167,22 @@ public class CafeUI : MonoBehaviour
         if (player == null) return;
         if (!site.Inside(player.transform.position) && carried == null) { Close(); return; }
 
+        ShowGrid();
         if (carried != null)
         {
-            carried.transform.localPosition = site.SpotInFront(player.transform, CarryDistance);
+            if (!fingerPlaced) carried.transform.localPosition = site.SpotInFront(player.transform, CarryDistance);
             carried.transform.localRotation = Quaternion.Euler(0f, carriedRot, 0f);
             string price = carriedId == 0 ? $" · {Price(carriedItem):N0} ฿" : "";
-            infoText.text = $"{Lang.T("กำลังวาง")}: {s.NameOf(carriedItem)}{price} — {Lang.T("เดินไปตรงที่ต้องการแล้วกด วางตรงนี้")}";
+            infoText.text = $"{Lang.T("กำลังวาง")}: {s.NameOf(carriedItem)}{price} — {Lang.T("แตะหรือลากไปตรงที่ต้องการ แล้วกด วางตรงนี้")}";
             placeButton.interactable = !busy;
             ring.SetActive(false);
             return;
         }
 
         selectedId = 0;
-        float best = SelectRange;
+        if (pinnedId != 0 && site.Pieces.TryGetValue(pinnedId, out var pinned) && pinned != null) selectedId = pinnedId;
+        else pinnedId = 0;
+        float best = selectedId != 0 ? -1f : SelectRange;
         Vector3 me = site.Room.InverseTransformPoint(player.transform.position);
         foreach (var kv in site.Pieces)
         {
@@ -182,7 +206,7 @@ public class CafeUI : MonoBehaviour
         else
         {
             ring.SetActive(false);
-            infoText.text = (s.pieces?.Length ?? 0) == 0 ? Lang.T("ร้านยังว่าง — กด ซื้อของ แล้วเริ่มจากเคาน์เตอร์บาร์กับเครื่องชงกาแฟ") : Lang.T("เดินไปใกล้ของที่ต้องการจัด");
+            infoText.text = (s.pieces?.Length ?? 0) == 0 ? Lang.T("ร้านยังว่าง — กด ซื้อของ แล้วเริ่มจากเคาน์เตอร์บาร์กับเครื่องชงกาแฟ") : Lang.T("แตะของที่ต้องการจัด · ลากเพื่อย้าย");
         }
     }
 
@@ -198,6 +222,98 @@ public class CafeUI : MonoBehaviour
         var pieces = Client?.Current?.pieces;
         if (pieces != null) foreach (var p in pieces) if (p.id == id) return p.item;
         return "";
+    }
+
+    // ── Touch: pick, drag, drop ─────────────────────────────────────────────────
+    private bool FingerOnFloor(Vector2 screen, out Vector3 local)
+    {
+        local = default;
+        if (site == null || !EditTouchSurface.GroundPoint(screen, site.Room.position.y, out var world)) return false;
+        local = site.Room.InverseTransformPoint(world);
+        local.y = 0f;
+        return true;
+    }
+
+    // Snapped to the grid and kept in the room
+    private Vector3 Snapped(Vector3 local)
+    {
+        var s = Client?.Current;
+        float hw = s != null ? s.half_w : site.HalfW - 0.2f, hd = s != null ? s.half_d : site.HalfD - 0.2f;
+        float x = Mathf.Round(local.x / Cell) * Cell, z = Mathf.Round(local.z / Cell) * Cell;
+        return new Vector3(Mathf.Clamp(x, -hw, hw), 0f, Mathf.Clamp(z, -hd, hd));
+    }
+
+    private int PieceAt(Vector3 local)
+    {
+        int found = 0;
+        float best = float.MaxValue;
+        foreach (var kv in site.Pieces)
+        {
+            if (kv.Value == null) continue;
+            Vector3 p = kv.Value.transform.localPosition;
+            float d = Vector2.Distance(new Vector2(p.x, p.z), new Vector2(local.x, local.z));
+            float reach = CafeFurniture.Size(ItemOf(kv.Key)) + 0.3f;
+            if (d <= reach && d < best) { best = d; found = kv.Key; }
+        }
+        return found;
+    }
+
+    private bool Grab(Vector2 screen)
+    {
+        if (busy || site == null || listBackdrop.activeSelf || styleBackdrop.activeSelf || !FingerOnFloor(screen, out var local)) return false;
+        if (carried != null)
+        {
+            Vector3 c = carried.transform.localPosition;
+            if (Vector2.Distance(new Vector2(c.x, c.z), new Vector2(local.x, local.z)) > CafeFurniture.Size(carriedItem) + 0.5f) return false;
+            holdOffset = c - local;
+            holding = true;
+            return true;
+        }
+        int id = PieceAt(local);
+        if (id == 0) return false;
+        pinnedId = selectedId = id;
+        PickUpSelected();
+        if (carried == null) return false;
+        holdOffset = carried.transform.localPosition - local;
+        holding = true;
+        return true;
+    }
+
+    private void DragTo(Vector2 screen)
+    {
+        if (!holding || carried == null || !FingerOnFloor(screen, out var local)) return;
+        fingerPlaced = true;
+        carried.transform.localPosition = Snapped(local + holdOffset);
+    }
+
+    private void Drop(Vector2 screen, bool moved)
+    {
+        if (!holding) return;
+        holding = false;
+        if (carried == null) return;
+        if (carriedId == 0) return;          // a new piece: วางตรงนี้ buys it
+        if (!moved) { CancelCarry(); ShowRows(); return; } // a tap on it: just picked
+        PutDown();
+    }
+
+    private void Tap(Vector2 screen)
+    {
+        if (busy || site == null || listBackdrop.activeSelf || styleBackdrop.activeSelf || !FingerOnFloor(screen, out var local)) return;
+        if (carried != null)
+        {
+            fingerPlaced = true;
+            carried.transform.localPosition = Snapped(local);
+            return;
+        }
+        pinnedId = PieceAt(local);
+    }
+
+    private void ShowGrid()
+    {
+        if (grid == null) grid = BuildGrid.Make("CafeGrid_ตาราง");
+        var s = Client?.Current;
+        float hw = s != null ? s.half_w : site.HalfW - 0.2f, hd = s != null ? s.half_d : site.HalfD - 0.2f;
+        grid.Show(site.Room, -hw, hw, -hd, hd, site.Room.position.y, Cell, site.Room.lossyScale.x);
     }
 
     // ── Buying ──────────────────────────────────────────────────────────────────
@@ -233,6 +349,7 @@ public class CafeUI : MonoBehaviour
         carriedItem = item;
         carriedId = 0;
         carriedRot = 180; // facing you
+        fingerPlaced = false;
         ShowRows();
     }
 
@@ -246,6 +363,7 @@ public class CafeUI : MonoBehaviour
         carriedRot = Mathf.RoundToInt(go.transform.localEulerAngles.y / 15f) * 15 % 360;
         originalPosition = go.transform.localPosition;
         originalRotation = go.transform.localRotation;
+        fingerPlaced = false;
         Solid(go, false);
         ShowRows();
     }
@@ -435,10 +553,22 @@ public class CafeUI : MonoBehaviour
         string text = $"{(string.IsNullOrEmpty(s.name) ? Lang.T("ร้านกาแฟของฉัน") : s.name)} · {Lang.T("สไตล์")}{s.StyleName} · ThaiLife9";
 #if UNITY_IOS && !UNITY_EDITOR
         ThaiShare_Image(photoPath, text, gameObject.name);
+#elif UNITY_ANDROID && !UNITY_EDITOR
+        androidSharing = AndroidShare.ShareImage(photoPath, text);
+        if (!androidSharing) Notify(Lang.T("แชร์ไม่ได้ ลองใหม่"), UiKit.Danger);
 #else
         Debug.Log($"[Cafe] (editor) photo saved at {photoPath}");
         OnShareDone("1|editor");
 #endif
+    }
+
+    // Android: the share sheet gives no answer; count it when the player comes back to the game
+    private bool androidSharing;
+    private void OnApplicationFocus(bool focus)
+    {
+        if (!focus || !androidSharing) return;
+        androidSharing = false;
+        OnShareDone("1|android");
     }
 
     // From the native share sheet: "1|<activity type>" shared or saved, "0|" closed

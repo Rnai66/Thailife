@@ -328,6 +328,9 @@ public class CafeSite : MonoBehaviour
         go.transform.SetParent(people, false);
         go.transform.localPosition = at;
         go.transform.localRotation = face;
+        // A bare CharacterModel hangs its feet 1 unit below its origin (the player's capsule centre):
+        // lift the standing ones so their feet are on the floor, not sunk to the waist
+        if (!seated) go.transform.position += go.transform.up * go.transform.lossyScale.y;
         var model = go.AddComponent<CharacterModel>();
         var look = Look.Random(seed);
         if (apron) look.Top = 0;

@@ -55,9 +55,10 @@ public class TempleClient : MonoBehaviour
         public Night[] log;
         public string[] banished;
         public Alms alms;
+        public Merit merit;
         // results
         public string done, token, ghost, ghost_name;
-        public int seconds, sigils, need, gained_barami, gained_monk, gained_energy, reward, xp;
+        public int seconds, sigils, need, gained_barami, gained_monk, gained_energy, gained_xp, reward, xp;
         public bool won;
     }
 
@@ -72,6 +73,23 @@ public class TempleClient : MonoBehaviour
         public int[] given;
     }
 
+    // ทำบุญ at งานทอดกฐิน / งานทอดผ้าป่า (temple.lua merit_view): the festival on now (or the next one, in
+    // game days), what you've given this time and how much of it counted, the village's total and the
+    // latest donors, and how the บารมี and XP are worked out
+    [Serializable]
+    public class Merit
+    {
+        public bool open;
+        public string id, name, next_name;
+        public int next_in, given, counted, cap, min, town_total, lifetime, barami_per, xp_per;
+        public float kathin_bonus;
+        public int[] amounts;
+        public Donor[] donors;
+    }
+
+    [Serializable] public class Donor { public string name; public int amount; }
+
+    [Serializable] private class DonateRequest { public int amount; }
     [Serializable] private class AlmsRequest { public int monk; public string food; }
     [Serializable] private class MeditateRequest { public string action, token; public bool incense; }
     [Serializable] private class GhostRequest { public string spot, ghost, token; public int hits; }
@@ -181,6 +199,7 @@ public class TempleClient : MonoBehaviour
     public Task<State> WearAsync(string item, bool wear) => Call("temple_wear", JsonUtility.ToJson(new WearRequest { item = item, wear = wear }));
     public Task<State> MeditateStartAsync(bool incense) => Call("temple_meditate", JsonUtility.ToJson(new MeditateRequest { action = "start", incense = incense }));
     public Task<State> MeditateFinishAsync(string token) => Call("temple_meditate", JsonUtility.ToJson(new MeditateRequest { action = "finish", token = token }));
+    public Task<State> DonateAsync(int amount) => Call("temple_donate", JsonUtility.ToJson(new DonateRequest { amount = amount }));
     public Task<State> AlmsAsync(int monk, string food) => Call("temple_alms", JsonUtility.ToJson(new AlmsRequest { monk = monk, food = food }));
     public bool GaveAlms(int monk)
     {
@@ -203,6 +222,7 @@ public class TempleClient : MonoBehaviour
         {
             if (WalletClient.Instance != null) _ = WalletClient.Instance.RefreshAsync();
             LifeClient.Instance?.Refresh();
+            if (rpc == "temple_donate") CareerClient.Instance?.Reload(); // the main XP
             if (rpc == "temple_ordain" || rpc == "temple_disrobe")
             {
                 if (ProfileClient.Instance != null) _ = ProfileClient.Instance.ReloadLookAsync();
@@ -235,6 +255,7 @@ public class TempleClient : MonoBehaviour
     {
         string m = e.Message;
         return m.Contains("not enough baht") ? "เงินไม่พอ"
+            : m.Contains("no merit festival") ? "ร่วมทำบุญได้เฉพาะช่วงงานทอดกฐินและงานทอดผ้าป่า"
             : m.Contains("not enough energy") ? "พลังงานไม่พอ — พักก่อน"
             : m.Contains("sleeping") ? "กำลังนอนอยู่"
             : m.Contains("monk level") ? "ต้องเป็นพระเลเวล 30 ก่อนจึงสึกออกมาเป็นหมอผีได้"

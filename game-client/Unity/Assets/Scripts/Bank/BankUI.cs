@@ -8,6 +8,7 @@ using UnityEngine.UI;
 //   บัญชี     savings (deposit / withdraw, interest) and loans (borrow / repay)
 //   ทรัพย์สิน  land and cars to buy
 //   ธุรกิจ     your businesses (staff, takings), opening a new one in a rented building
+//   สมุดบัญชี  the statement: what came into savings by itself (business takings, land rent, interest)
 public class BankUI : MonoBehaviour
 {
     private static readonly long[] Amounts = { 1000, 10000, 100000, 1000000, -1 }; // -1 = ทั้งหมด
@@ -78,18 +79,21 @@ public class BankUI : MonoBehaviour
         var s = bank.Current;
         subtitleText.text = $"ระดับผู้เล่น Lv {s.level} · เงินสด {s.cash:N0} ฿ · เงินฝาก {s.savings:N0} ฿ · หนี้ {s.loan:N0} ฿";
 
-        string[] ids = { "account", "assets", "business" };
-        string[] names = { "บัญชี / สินเชื่อ", "ที่ดิน / รถ", "ธุรกิจ" };
+        string[] ids = { "account", "assets", "business", "inbox" };
+        string[] names = { P ? "บัญชี" : "บัญชี / สินเชื่อ", P ? "ที่ดิน/รถ" : "ที่ดิน / รถ", "ธุรกิจ", "สมุดบัญชี" };
         for (int i = 0; i < ids.Length; i++)
         {
             string id = ids[i];
             bool on = tab == id;
-            UiKit.RoundButton(tabs, names[i], new Vector2((i - 1) * (P ? 232f : 300f), 0f), new Vector2(P ? 222f : 280f, 70f),
-                on ? UiKit.Gold : UiKit.Pill, on ? UiKit.GoldInk : UiKit.Price, () => { tab = id; Render(); }, 28);
+            string label = names[i];
+            if (id == "inbox" && NewEntries(s) > 0) label += $" ({NewEntries(s)})";
+            UiKit.RoundButton(tabs, label, new Vector2((i - 1.5f) * (P ? 170f : 300f), 0f), new Vector2(P ? 162f : 280f, 70f),
+                on ? UiKit.Gold : UiKit.Pill, on ? UiKit.GoldInk : UiKit.Price, () => { tab = id; Render(); }, P ? 22 : 28);
         }
 
         if (tab == "account") RenderAccount(s);
         else if (tab == "assets") RenderAssets(s);
+        else if (tab == "inbox") RenderInbox(s);
         else RenderBusiness(s);
     }
 
@@ -134,6 +138,91 @@ public class BankUI : MonoBehaviour
     }
 
     private long Pick(long all) => amount < 0 ? all : amount;
+
+    // ── สมุดบัญชี ─────────────────────────────────────────────────────────────────────────
+    private const string SeenKey = "bank_inbox_seen";
+
+    // Lines newer than the last time the statement was looked at
+    private static int NewEntries(BankClient.State s)
+    {
+        if (s.inbox == null) return 0;
+        long seen = long.TryParse(PlayerPrefs.GetString(SeenKey, "0"), out long v) ? v : 0;
+        int n = 0;
+        foreach (var e in s.inbox) if (e.at > seen) n++;
+        return n;
+    }
+
+    private void RenderInbox(BankClient.State s)
+    {
+        var lines = s.inbox ?? new BankClient.Entry[0];
+        long newest = 0;
+        foreach (var e in lines) newest = Math.Max(newest, e.at);
+        long seen = long.TryParse(PlayerPrefs.GetString(SeenKey, "0"), out long v) ? v : 0;
+        if (newest > seen) PlayerPrefs.SetString(SeenKey, newest.ToString());
+
+        // the totals: today, the last 7 game days, since the takings started going to the bank
+        long today = 0, week = 0;
+        foreach (var e in lines)
+        {
+            if (e.day == s.today) today += e.amount;
+            if (e.day > s.today - 7) week += e.amount;
+        }
+        float w = P ? 690f : 1400f;
+        var head = Card(P ? new Vector2(0f, 500f) : new Vector2(0f, 215f), new Vector2(w, P ? 170f : 110f));
+        string[] titles = { "วันนี้", "7 วันล่าสุด", "กำไรธุรกิจรวม" };
+        long[] values = { today, week, s.income };
+        for (int i = 0; i < 3; i++)
+        {
+            float x = (i - 1) * (P ? 225f : 450f);
+            UiKit.Label(head, P ? 20 : 22, titles[i], new Vector2(x, P ? 38f : 24f), new Vector2(P ? 220f : 420f, 34f), UiKit.Muted);
+            UiKit.Label(head, P ? 30 : 34, $"{(values[i] >= 0 ? "+" : "")}{values[i]:N0} ฿", new Vector2(x, P ? -14f : -20f), new Vector2(P ? 220f : 420f, 50f),
+                values[i] >= 0 ? UiKit.OkGreen : UiKit.Danger).fontStyle = FontStyle.Bold;
+        }
+
+        // the lines, newest first, in a scrolling list
+        float listH = P ? 900f : 470f;
+        var card = Card(P ? new Vector2(0f, -45f) : new Vector2(0f, -100f), new Vector2(w, listH));
+        if (lines.Length == 0)
+        {
+            UiKit.Label(card, 24, "ยังไม่มีเงินเข้าอัตโนมัติ\nเปิดธุรกิจ ซื้อที่ดินให้เช่า หรือฝากเงินไว้ แล้วรายการจะขึ้นที่นี่", Vector2.zero, new Vector2(w - 60f, 120f), UiKit.Muted);
+            return;
+        }
+        var viewport = UiKit.Rect("Viewport", card, new Color(0f, 0f, 0f, 0f));
+        viewport.sizeDelta = new Vector2(w - 20f, listH - 20f);
+        viewport.gameObject.AddComponent<RectMask2D>();
+        var list = new GameObject("Lines", typeof(RectTransform)).GetComponent<RectTransform>();
+        list.SetParent(viewport, false);
+        list.anchorMin = list.anchorMax = new Vector2(0.5f, 1f);
+        list.pivot = new Vector2(0.5f, 1f);
+        const float rowH = 78f;
+        list.sizeDelta = new Vector2(w - 20f, Mathf.Max(listH - 20f, lines.Length * rowH + 10f));
+        var scroll = viewport.gameObject.AddComponent<ScrollRect>();
+        scroll.content = list;
+        scroll.viewport = viewport;
+        scroll.horizontal = false;
+        scroll.movementType = ScrollRect.MovementType.Clamped;
+        scroll.scrollSensitivity = 30f;
+
+        float rowW = w - 50f;
+        for (int i = 0; i < lines.Length; i++)
+        {
+            var e = lines[i];
+            bool fresh = e.at > seen;
+            var row = UiKit.Panel("Line", list, fresh ? new Color(1f, 0.97f, 0.86f) : (i % 2 == 0 ? new Color(0.975f, 0.97f, 0.96f) : Color.white),
+                Vector2.zero, new Vector2(rowW, rowH - 8f));
+            row.anchorMin = row.anchorMax = new Vector2(0.5f, 1f);
+            row.anchoredPosition = new Vector2(0f, -10f - i * rowH - rowH * 0.5f);
+            Color tint = e.kind == "business" ? new Color(0.85f, 0.55f, 0.15f) : e.kind == "rent" ? new Color(0.25f, 0.6f, 0.35f) : new Color(0.2f, 0.45f, 0.75f);
+            string icon = e.kind == "business" ? "ร้าน" : e.kind == "rent" ? "ที่ดิน" : "ดอก";
+            UiKit.PillLabel(row, icon, new Vector2(-rowW * 0.5f + 60f, 0f), new Vector2(92f, 46f), tint, Color.white, 18);
+            string when = e.day == s.today ? "วันนี้" : e.day == s.today - 1 ? "เมื่อวาน" : $"{s.today - e.day} วันก่อน";
+            UiKit.Label(row, P ? 22 : 24, e.label, new Vector2(-rowW * 0.5f + 120f + (rowW - 380f) * 0.5f, 12f), new Vector2(rowW - 380f, 34f), UiKit.Ink, TextAnchor.MiddleLeft).fontStyle = FontStyle.Bold;
+            UiKit.Label(row, 18, $"{GameClock.DateOf(e.day)} · {when}" + (fresh ? " · ใหม่" : ""), new Vector2(-rowW * 0.5f + 120f + (rowW - 380f) * 0.5f, -18f),
+                new Vector2(rowW - 380f, 28f), fresh ? UiKit.Price : UiKit.Muted, TextAnchor.MiddleLeft);
+            UiKit.Label(row, P ? 26 : 30, $"{(e.amount >= 0 ? "+" : "")}{e.amount:N0} ฿", new Vector2(rowW * 0.5f - 130f, 0f), new Vector2(240f, 50f),
+                e.amount >= 0 ? UiKit.OkGreen : UiKit.Danger, TextAnchor.MiddleRight).fontStyle = FontStyle.Bold;
+        }
+    }
 
     private void RenderAssets(BankClient.State s)
     {

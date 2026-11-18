@@ -3,8 +3,9 @@ using UnityEngine.Events;
 using UnityEngine.UI;
 
 // The game HUD, kept as clean as possible: the energy bar in the top-left corner with round buttons
-// down the left side (กระเป๋า, เมนู — the menu folds out a second column: your name, profession,
-// quests, food, greetings, calendar, settings), the minimap and the time in the top-right corner and
+// down the left side (กระเป๋า, เมนู — the menu opens a panel beside them, its buttons in groups:
+// ตัวฉัน (name, profession, quests, food), บ้านและสังคม (address, building, greetings, friends),
+// อื่นๆ (calendar, stuck?, settings)), the minimap and the time in the top-right corner and
 // a "KO!" banner. Money, level and gear are in the bag (BagUI). Builds its own canvas at runtime.
 [RequireComponent(typeof(PlayerCombat))]
 public class HealthHud : MonoBehaviour
@@ -212,25 +213,58 @@ public class HealthHud : MonoBehaviour
         Round(left, 2, "auto", "ออโต้", AutoQuest.Toggle, out autoDisc, out _, out autoCaption); // the character does today's quests
         Round(left, 3, "home", "บ้าน", () => HomeChoiceUI.Show(), out _, out _, out _); // where you live: go home or move house
 
-        menuColumn = Column(canvasGo.transform, "MenuColumn", 120f + Disc + 56f);
-        int row = 0;
-        int perColumn = ScreenFit.Portrait ? 8 : 5; // landscape: a second column instead of running off the screen
+        // The menu: a wooden panel beside the buttons, its buttons in groups of up to four a row
+        const int PerRow = 4;
+        const float Gap = 30f, Pad = 22f, Header = 46f, RowH = Disc + 48f;
+        menuColumn = CreateRect("MenuPanel", canvasGo.transform, new Color(0.14f, 0.08f, 0.04f, 0.92f));
+        menuColumn.anchorMin = menuColumn.anchorMax = new Vector2(0f, 1f);
+        menuColumn.pivot = new Vector2(0f, 1f);
+        menuColumn.anchoredPosition = new Vector2(120f + Disc + 34f, -100f);
+        var panelImg = menuColumn.GetComponent<Image>();
+        panelImg.sprite = UiKit.RoundedSprite;
+        panelImg.type = Image.Type.Sliced;
+        panelImg.raycastTarget = true; // taps on the panel don't fall through to the world
+        var edge = menuColumn.gameObject.AddComponent<Outline>();
+        edge.effectColor = UiKit.Gold;
+        edge.effectDistance = new Vector2(2f, -2f);
+        float y = -Pad, widest = 0f;
+        int inRow = 0;
+        void Group(string title)
+        {
+            if (inRow > 0) y -= RowH;
+            inRow = 0;
+            var h = UiKit.Cartoon(UiKit.Label(menuColumn, 26, title, Vector2.zero, new Vector2(PerRow * (Disc + Gap), Header), UiKit.GoldText, TextAnchor.MiddleLeft), 2f);
+            var hr = h.rectTransform;
+            hr.anchorMin = hr.anchorMax = new Vector2(0f, 1f);
+            hr.pivot = new Vector2(0f, 1f);
+            hr.anchoredPosition = new Vector2(Pad, y);
+            y -= Header;
+        }
         void Entry(string icon, string caption, UnityAction open, out Image disc, out Text label)
         {
-            int r = row++;
-            Round(menuColumn, r % perColumn, icon, caption, () => { open(); ToggleMenu(); }, out disc, out _, out label, (r / perColumn) * (Disc + 56f));
+            if (inRow == PerRow) { y -= RowH; inRow = 0; }
+            float x = Pad + inRow * (Disc + Gap);
+            Round(menuColumn, 0, icon, caption, () => { open(); ToggleMenu(); }, out disc, out _, out label);
+            disc.rectTransform.anchoredPosition = new Vector2(x + Disc * 0.5f, y - Disc * 0.5f);
+            widest = Mathf.Max(widest, x + Disc);
+            inRow++;
         }
+        Group("ตัวฉัน");
         Entry("person", "ตั้งชื่อ", () => NameUI.Show(firstTime: false), out _, out nameCaption);
-        Entry("home", "ที่อยู่", AddressUI.Toggle, out _, out _);
         Entry("star", "อาชีพ", ProfessionUI.Toggle, out _, out careerCaption);
         Entry("quest", "ภารกิจ", QuestUI.Toggle, out questDisc, out questCaption);
         Entry("food", "กิน", FoodUI.Toggle, out _, out _);
+        Group("บ้านและสังคม");
+        Entry("home", "ที่อยู่", AddressUI.Toggle, out _, out _);
         Entry("hammer", "ก่อสร้าง", BuildUI.Toggle, out _, out _);
         Entry("chat", "ทักทาย", EmoteUI.Toggle, out _, out _);
         Entry("friends", "เพื่อน/แชท", SocialUI.Toggle, out socialDisc, out socialCaption);
+        Group("อื่นๆ");
         Entry("calendar", "ปฏิทินงาน", EventCalendarUI.Toggle, out calendarDisc, out _);
         Entry("auto", "ติดอยู่?", StuckRescue.Rescue, out _, out _);
         Entry("gear", "ตั้งค่า", SoundUI.Toggle, out _, out _);
+        y -= RowH;
+        menuColumn.sizeDelta = new Vector2(widest + Pad, -y + Pad * 0.5f);
         menuColumn.gameObject.SetActive(false);
 
         var ko = CreateText("KO", canvasGo.transform, font, 160, TextAnchor.MiddleCenter);

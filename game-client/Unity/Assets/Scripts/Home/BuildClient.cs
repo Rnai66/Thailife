@@ -33,6 +33,10 @@ public class BuildClient : MonoBehaviour
     [Serializable]
     public class Sites { public Area farm, plain, city; }
 
+    // One of the yard's own things moved from where the map put it (build.lua build_prop, YardProps)
+    [Serializable]
+    public class Prop { public string name; public float dx, dz, yaw; }
+
     public static readonly string[] OtherSites = { "farm", "plain", "city" };
     public static string SiteOf(Piece p) => string.IsNullOrEmpty(p.site) ? "home" : p.site;
 
@@ -49,11 +53,13 @@ public class BuildClient : MonoBehaviour
         public string done;
         public Sites sites;
         public string anchor; // "village_stilt": the pieces stand round the village's own stilt house (BuiltPieces.AnchorFor)
+        public Prop[] props;
     }
 
     [Serializable] private class PlaceRequest { public string kind, site; public float x, z, yaw; public int color; }
     [Serializable] private class EditRequest { public int id; public float x, z, yaw; public int color; }
     [Serializable] private class IdRequest { public int id; }
+    [Serializable] private class PropRequest { public string name; public float dx, dz, yaw; }
     [Serializable] private class LotsRequest { public string area; public int moo; }
     [Serializable] public class LotPieces { public int no; public string user_id, anchor; public Piece[] pieces; }
     [Serializable] private class LotsReply { public LotPieces[] lots; }
@@ -71,6 +77,7 @@ public class BuildClient : MonoBehaviour
         Instance = this;
         connection = GetComponent<NakamaConnection>();
         if (GetComponent<BuiltPieces>() == null) gameObject.AddComponent<BuiltPieces>();
+        if (GetComponent<YardProps>() == null) gameObject.AddComponent<YardProps>();
     }
 
     private void OnEnable()
@@ -148,12 +155,22 @@ public class BuildClient : MonoBehaviour
     public Task<State> EditAsync(Piece p) =>
         Call("build_edit", JsonUtility.ToJson(new EditRequest { id = p.id, x = p.x, z = p.z, yaw = p.yaw, color = p.color }));
     public Task<State> RemoveAsync(int id) => Call("build_remove", JsonUtility.ToJson(new IdRequest { id = id }));
+    public Task<State> MovePropAsync(string name, float dx, float dz, float yaw) =>
+        Call("build_prop", JsonUtility.ToJson(new PropRequest { name = name, dx = dx, dz = dz, yaw = yaw }));
+
+    public Prop GetProp(string name)
+    {
+        if (Current?.props == null) return null;
+        foreach (var p in Current.props) if (p.name == name) return p;
+        return null;
+    }
 
     private async Task<State> Call(string rpc, string payload = "{}")
     {
         var result = await connection.Client.RpcAsync(connection.Session, rpc, payload);
         var state = JsonUtility.FromJson<State>(result.Payload);
         if (state.pieces == null) state.pieces = new Piece[0];
+        if (state.props == null) state.props = new Prop[0];
         Current = state;
         Version++;
         Changed?.Invoke(state);

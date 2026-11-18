@@ -259,10 +259,22 @@ public class LevelUpShare : MonoBehaviour
         string text = Lang.T($"เลเวลอัป! Lv {level} ใน ThaiLife9");
 #if UNITY_IOS && !UNITY_EDITOR
         ThaiShare_Image(cardPath, text, gameObject.name);
+#elif UNITY_ANDROID && !UNITY_EDITOR
+        androidSharing = AndroidShare.ShareImage(cardPath, text);
+        if (!androidSharing && status != null) status.text = Lang.T("แชร์ไม่ได้ ลองใหม่");
 #else
         Debug.Log($"[LevelUpShare] (editor) card saved at {cardPath}");
         OnShareDone("1|editor");
 #endif
+    }
+
+    // Android: the share sheet gives no answer, so the share counts when the player comes back to the game
+    private bool androidSharing;
+    private void OnApplicationFocus(bool focus)
+    {
+        if (!focus || !androidSharing) return;
+        androidSharing = false;
+        OnShareDone("1|android");
     }
 
     // From the native share sheet: "1|<activity type>" shared, "0|" closed

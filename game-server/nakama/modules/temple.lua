@@ -14,6 +14,10 @@
 --   temple_alms      {"monk": n, "food": id}             -> ตักบาตร: give one food from the bag to monk n of
 --                                                           the morning alms round; บารมี as much as one
 --                                                           meditation, once per monk per game day
+--   temple_donate    {"amount": n}                       -> ร่วมทำบุญ during งานทอดกฐิน / งานทอดผ้าป่า: baht
+--                                                           into the กฐิน/ผ้าป่า tree, บารมี and main XP back
+--                                                           (up to MERIT.cap baht a festival counts), the
+--                                                           whole village's total and the latest donors shown
 --   ghost_start      {"spot": "...", "ghost": id}        -> {token, ghost, sigils, seconds, need}
 --   ghost_finish     {"token": "...", "hits": n}         -> view + result (exorcists only, at night)
 --
@@ -41,6 +45,14 @@ local LOG_SIZE = 6
 local ALMS = { barami = MEDITATE.barami, from = 330, to = 540, slack = 20, normal = 5, wan_phra = 10, special = 20 }
 local ALMS_DAYS = { makha = true, phapa_1 = true, visakha = true, asalha = true, khao_phansa = true, ok_phansa = true,
                     tak_bat_thewo = true, kathin = true, phapa_2 = true, temple_annual = true, songkran = true }
+
+-- ทำบุญ at the merit-making festivals (life_core FESTIVALS): what you give counts for บารมี and XP up to
+-- `cap` baht a festival (give more if you like: it's merit all the same, just no more points);
+-- กฐิน is the big one and counts half again
+local MERIT = { min = 20, max = 100000, cap = 10000, barami_per = 25, xp_per = 20, kathin_bonus = 1.5,
+                amounts = { 20, 100, 500, 1000, 5000 }, donors = 8 }
+local MERIT_DAYS = { kathin = true, phapa_1 = true, phapa_2 = true }
+local MERIT_BOARD = "merit" -- system storage: key = the festival's instance, { total, donors = { {name, amount} } }
 
 -- บูชา at the temple. guard = keeps ghosts away, luck = keeps thieves away (percent points),
 -- barami = the บารมี level needed to keep it
@@ -266,6 +278,59 @@ local function alms_view(s, now)
            from = ALMS.from, to = ALMS.to, barami = ALMS.barami, given = (#given > 0) and given or nil }
 end
 
+-- The merit festival on now (id, instance, name) or nil, and the next one (name, game days to go)
+local current_env -- the calling RPC's runtime env: FAIR_ALWAYS_OPEN=true makes a test ผ้าป่า for testing
+local function merit_now(now)
+  local test = current_env ~= nil and current_env.fair_always_open == "true"
+  local open, inst, _, _, ev = life.fair(now, test)
+  if open and ev and MERIT_DAYS[ev.id] then return ev.id, "m" .. tostring(inst), ev.name end
+  if open and ev and ev.id == "test" then return "phapa_test", "mtest" .. tostring(inst), "งานทอดผ้าป่า (โหมดทดสอบ)" end
+  return nil
+end
+
+local function merit_next(now)
+  local day0 = math.floor((now - life.EPOCH_MS) / life.DAY_MS)
+  local doy = day0 % life.YEAR_DAYS
+  local best, name
+  for _, f in ipairs(life.EVENTS) do
+    if MERIT_DAYS[f.id] then
+      local ahead = f.start - doy
+      if ahead <= 0 then ahead = ahead + life.YEAR_DAYS end
+      if not best or ahead < best then best, name = ahead, f.name end
+    end
+  end
+  return name, best
+end
+
+local function board_read(key)
+  local objects = nk.storage_read({ { collection = MERIT_BOARD, key = key } })
+  return (#objects > 0) and objects[1].value or { total = 0, donors = {} }
+end
+
+local function merit_view(s, now)
+  local id, key, name = merit_now(now)
+  local next_name, next_in = merit_next(now)
+  local m = { open = id ~= nil, id = id, name = name, next_name = next_name, next_in = next_in,
+              cap = MERIT.cap, min = MERIT.min, amounts = MERIT.amounts,
+              barami_per = MERIT.barami_per, xp_per = MERIT.xp_per, kathin_bonus = MERIT.kathin_bonus }
+  if id then
+    local mine = (s.merit and s.merit.key == key) and s.merit or { given = 0, counted = 0 }
+    m.given, m.counted = mine.given, mine.counted
+    local b = board_read(key)
+    m.town_total = b.total or 0
+    m.donors = (b.donors and #b.donors > 0) and b.donors or nil
+  end
+  m.lifetime = s.merit_total or 0
+  return m
+end
+
+local function display_name(user_id)
+  local u = nk.account_get_id(user_id).user or {}
+  local n = u.display_name
+  if not n or n == "" then n = u.username or "ผู้ใจบุญ" end
+  return n
+end
+
 -- ── View ──────────────────────────────────────────────────────────────────────────────────────
 local function view(user_id, s, extra)
   local trades = trade.read(user_id)
@@ -297,6 +362,7 @@ local function view(user_id, s, extra)
     worn_max = amulet.WORN_MAX, my_powers = powers_or_nil(amulet.totals_list(amulet.totals(s.worn))),
     night = is_night(nk.time()), wan_phra = life.wan_phra(nk.time()), items = catalog, ghosts = ghosts,
     alms = alms_view(s, nk.time()),
+    merit = merit_view(s, nk.time()),
     log = (#s.log > 0) and s.log or nil, banished = (#banished > 0) and banished or nil,
   }
   for k, v in pairs(extra or {}) do result[k] = v end
@@ -306,6 +372,7 @@ end
 local function rpc(fn)
   return function(context, payload)
     local user_id = context.user_id
+    current_env = context.env
     local s = read(user_id)
     settle_nights(user_id, s, nk.time())
     local extra = fn(context, user_id, s, decode(payload)) or {}
@@ -392,6 +459,40 @@ nk.register_rpc(rpc(function(context, user_id, s, req)
   add_barami(s, ALMS.barami)
   return { gained_barami = ALMS.barami, done = "ใส่บาตร" .. food.name .. "แล้ว สาธุ · บารมี +" .. ALMS.barami }
 end), "temple_alms")
+
+nk.register_rpc(rpc(function(context, user_id, s, req)
+  local now = nk.time()
+  local id, key, name = merit_now(now)
+  if not id then err("no merit festival") end
+  local amount = math.floor(tonumber(req.amount) or 0)
+  if amount < MERIT.min or amount > MERIT.max then err("bad amount", GRPC_INVALID_ARGUMENT) end
+  pay(user_id, amount, "merit_" .. id)
+  if not s.merit or s.merit.key ~= key then s.merit = { key = key, given = 0, counted = 0 } end
+  local counts = math.max(0, math.min(amount, MERIT.cap - s.merit.counted))
+  s.merit.given = s.merit.given + amount
+  s.merit.counted = s.merit.counted + counts
+  s.merit_total = (s.merit_total or 0) + amount
+  local bonus = (id == "kathin") and MERIT.kathin_bonus or 1
+  local barami = math.floor(counts / MERIT.barami_per * bonus)
+  if counts > 0 then barami = barami + 4 end -- the blessing itself
+  local xp = math.floor(counts / MERIT.xp_per * bonus)
+  if barami > 0 then add_barami(s, barami) end
+  if xp > 0 then trade.add_main_xp(user_id, xp) end
+
+  -- the village's board: the total and the latest names read out by the monks
+  local b = board_read(key)
+  b.total = (b.total or 0) + amount
+  b.donors = b.donors or {}
+  table.insert(b.donors, 1, { name = display_name(user_id), amount = amount })
+  while #b.donors > MERIT.donors do table.remove(b.donors) end
+  nk.storage_write({ { collection = MERIT_BOARD, key = key, value = b, permission_read = 2, permission_write = 0 } })
+
+  local what = (id == "kathin") and "ทอดกฐิน" or "ทอดผ้าป่า"
+  local done = "ร่วม" .. what .. " " .. amount .. " บาท อนุโมทนาบุญ สาธุ!"
+  if counts > 0 then done = done .. " · บารมี +" .. barami .. " · XP +" .. xp
+  else done = done .. " (ครบ " .. MERIT.cap .. " บาทที่นับบารมีของงานนี้แล้ว)" end
+  return { gained_barami = barami, gained_xp = xp, done = done }
+end), "temple_donate")
 
 nk.register_rpc(rpc(function(context, user_id, s, req)
   local it = ITEMS[req.item or ""]

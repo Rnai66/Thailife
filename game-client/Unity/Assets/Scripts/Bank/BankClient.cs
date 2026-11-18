@@ -11,11 +11,14 @@ public class BankClient : MonoBehaviour
     [Serializable] public class BusinessType { public string id, name; public int setup, rent, wage, revenue; }
     [Serializable] public class Business { public int slot, staff, till, per_day, earned; public string type, name, building; }
     [Serializable] public class Building { public string id, name; public bool taken; }
+    // One line of the statement (bank.lua note): what came into savings by itself on a game day
+    [Serializable] public class Entry { public int day, amount; public long at; public string kind, label; }
 
     [Serializable]
     public class State
     {
-        public int level, cash, savings, loan, loan_limit, loan_level, business_level, business_cash, max_staff, till, income;
+        public int level, cash, savings, loan, loan_limit, loan_level, business_level, business_cash, max_staff, till, income, today;
+        public Entry[] inbox;
         public float savings_rate, loan_rate, speed = 1f;
         public Asset[] assets;
         public BusinessType[] business_types;

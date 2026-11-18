@@ -7,6 +7,11 @@
 --   build_place  {kind, x, z, yaw, color}                   -> the same view + done; costs the price
 --   build_edit   {id, x?, z?, yaw?, color?}                 -> the same view + done; free
 --   build_remove {id}                                       -> the same view + done; refunds REFUND
+--   build_prop   {name, dx, dz, yaw}                        -> the same view + done; free: moves one of the
+--                                                              yard's own things (PROPS: banana trees, the
+--                                                              punching bag, the jars, the rice barn, the coop)
+--                                                              by (dx, dz) from where the map put it, turned to yaw;
+--                                                              only on this player's screen (`props` in the view)
 --
 --   build_lots   {area, moo}                                -> {lots:[{no, user_id, pieces}]}: what everyone on
 --                                                              that หมู่'s house lots built, to draw round their houses
@@ -46,6 +51,13 @@ local CATALOG = {
   { id = "carport",      group = "build", name = "โรงรถ",              price = 15000, length = 3.4 },
   { id = "sala",         group = "build", name = "ศาลาพักผ่อน",        price = 9000,  length = 3 },
   { id = "planter",      group = "build", name = "กระถางไม้ดอก",       price = 250,   length = 1 },
+  { id = "garage",       group = "build", name = "โรงจอดรถ (ปิด)",     price = 25000, length = 3.6 },
+  { id = "cowshed",      group = "build", name = "โรงเรือนวัว",         price = 18000, length = 6 },
+  { id = "hut",          group = "build", name = "กระท่อม",            price = 6000,  length = 3 },
+  { id = "toilet",       group = "build", name = "ห้องน้ำ",             price = 4500,  length = 1.6 },
+  { id = "storeshed",    group = "build", name = "โรงเก็บของ",          price = 7000,  length = 3 },
+  { id = "watertower",   group = "build", name = "หอถังน้ำ",            price = 5000,  length = 1.6 },
+  { id = "well",         group = "build", name = "บ่อน้ำ",              price = 2500,  length = 1.4 },
 }
 local BY_ID = {}
 for _, c in ipairs(CATALOG) do BY_ID[c.id] = c end
@@ -132,6 +144,19 @@ local function write(user_id, s)
                        permission_read = 1, permission_write = 0 } })
 end
 
+-- The yard's own things a player may move round (client: YardProps), and how far from where the map puts them
+local PROPS = { banana1 = true, banana2 = true, bag = true, jar1 = true, jar2 = true, granary = true, coop = true }
+local PROP_REACH = 25
+
+local function props_list(s)
+  local list = {}
+  for name, v in pairs(s.props or {}) do
+    if PROPS[name] then table.insert(list, { name = name, dx = v.dx, dz = v.dz, yaw = v.yaw }) end
+  end
+  table.sort(list, function(a, b) return a.name < b.name end)
+  return list
+end
+
 local function view(s, extra, b, user_id)
   -- an empty Lua table encodes as {} rather than []: leave the list out when there is nothing built
   local big = admin.is(user_id)
@@ -141,6 +166,8 @@ local function view(s, extra, b, user_id)
               max = big and ADMIN_PIECES or MAX_PIECES, radius = big and ADMIN_RADIUS or RADIUS,
               bounds = b, outside = out, admin = big,
               anchor = big and ANCHOR or nil, sites = sites_for(user_id) }
+  local props = props_list(s)
+  if #props > 0 then r.props = props end
   for k, v in pairs(extra or {}) do r[k] = v end
   return nk.json_encode(r)
 end
@@ -311,3 +338,20 @@ nk.register_rpc(function(context, payload)
   end
   return view(s, { done = "รื้อถอนแล้ว · ได้คืน " .. back .. " บาท" }, bounds_for(home_of(user_id), user_id), user_id)
 end, "build_remove")
+
+nk.register_rpc(function(context, payload)
+  local user_id = context.user_id
+  local req = decode(payload)
+  local name = tostring(req.name or "")
+  if not PROPS[name] then err("bad prop", GRPC_INVALID_ARGUMENT) end
+  local dx = round(num(req.dx, "dx"), 0.05)
+  local dz = round(num(req.dz, "dz"), 0.05)
+  if math.abs(dx) > PROP_REACH or math.abs(dz) > PROP_REACH then err("too far") end
+  local yaw = round(num(req.yaw, "yaw"), 15) % 360
+  local s = read(user_id)
+  s.props = s.props or {}
+  if math.abs(dx) < 0.01 and math.abs(dz) < 0.01 and req.reset then s.props[name] = nil
+  else s.props[name] = { dx = dx, dz = dz, yaw = yaw } end
+  write(user_id, s)
+  return view(s, { done = "ย้ายแล้ว" }, bounds_for(home_of(user_id), user_id), user_id)
+end, "build_prop")

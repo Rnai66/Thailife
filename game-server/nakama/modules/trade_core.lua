@@ -13,7 +13,8 @@ local nk = require("nakama")
 local M = {}
 
 M.STORE = { collection = "career", key = "trades" }
-M.MAX_LEVEL = 100
+M.MAX_LEVEL = 100 -- profession (trade) level cap
+M.MAIN_MAX_LEVEL = 999 -- main (career) level cap, same as career.lua
 M.TIERS = { 1, 10, 25, 50, 75, 100 }
 
 M.ORDER = { "boxer", "fisher", "farmer", "fishpond", "chicken", "cattle", "musician", "merchant",
@@ -161,14 +162,17 @@ local function add_main_xp(user_id, amount)
   local c = (#objects > 0) and objects[1].value or {}
   c.level = c.level or 1
   c.xp = (c.xp or 0) + amount
-  while c.level < M.MAX_LEVEL and c.xp >= main_xp_to_next(c.level) do
+  while c.level < M.MAIN_MAX_LEVEL and c.xp >= main_xp_to_next(c.level) do
     c.xp = c.xp - main_xp_to_next(c.level)
     c.level = c.level + 1
   end
-  if c.level >= M.MAX_LEVEL then c.xp = 0 end
+  if c.level >= M.MAIN_MAX_LEVEL then c.xp = 0 end
   nk.storage_write({ { collection = MAIN.collection, key = MAIN.key, user_id = user_id, value = c,
                        permission_read = 1, permission_write = 0 } })
 end
+
+-- The main level only (no profession): merit-making, say
+M.add_main_xp = add_main_xp
 
 -- Several professions at once: gains = { trade = xp, ... }; main = also raise the main level
 function M.gain_many(user_id, gains, main)

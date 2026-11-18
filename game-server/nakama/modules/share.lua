@@ -9,7 +9,7 @@ local data = require("shop_data")
 local STORE = { collection = "share", key = "levelup" }
 local CAREER = { collection = "career", key = "stats" }
 local DAILY = 3
-local MAX_LEVEL = 100 -- career.lua MAX_LEVEL
+local MAX_LEVEL = 999 -- career.lua MAX_LEVEL
 
 local GRPC_INVALID_ARGUMENT = 3
 local GRPC_FAILED_PRECONDITION = 9
