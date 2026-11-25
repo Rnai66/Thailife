@@ -6,12 +6,23 @@ using UnityEngine;
 // the walls and floor in your style, the furniture where you put it (CafeClient), baristas behind the
 // bar (one per staff, up to 2) and customers in the seats while it's open (07:00-20:00). Stand inside
 // for "จัดร้าน" (CafeUI). Otherwise it's an empty shop to let.
+// Kind "hotel" is the lobby of the hotel in the City (HotelBiz, HotelShopClient): the same, with
+// receptionists behind the desk and guests on the sofas from 06:00 to 22:00, decorated from the
+// บริหารโรงแรม window (HotelSite) instead of a button of its own. Kind "shophouse" is the ground
+// floor of the shophouse on your city land (LandParcels, ShophouseClient): "ตึกแถวของ <you>" over the
+// door unless you name it, "ตกแต่งตึกแถว" inside, and someone at the table during office hours.
+// Everyone may come in: order at the counter (เครื่องดื่ม ขนม, served to you and eaten there) and sit
+// in any free seat. A café nobody runs (for you) is the town's own café, furnished and staffed.
 public class CafeSite : MonoBehaviour
 {
     [SerializeField] private float halfW = 4.7f, halfD = 3.8f, height = 2.4f; // the room, metres
     [SerializeField] private Vector3 signAt;                                   // over the door (local)
+    [SerializeField] private string kind = "cafe";                             // "cafe" / "hotel" / "shophouse"
 
-    private const int OpenFrom = 7 * 60, OpenTo = 20 * 60;
+    private bool IsHotel => kind == "hotel";
+    private bool IsShophouse => kind == "shophouse";
+    private int OpenFrom => IsHotel ? 6 * 60 : IsShophouse ? 8 * 60 : 7 * 60;
+    private int OpenTo => IsHotel ? 22 * 60 : IsShophouse ? 18 * 60 : 20 * 60;
 
     private Transform interior, decor, styleLayer, people;
     private TextMesh sign;
@@ -24,7 +35,27 @@ public class CafeSite : MonoBehaviour
     private Transform player;
     private float nextCrowd;
 
-    public static CafeSite Instance { get; private set; }
+    // What's shown: the owner's shop, or (a café nobody here runs) the town's own café, open to all
+    private CafeClient.State shown;
+    private bool publicView;
+
+    // Anyone in the shop: order at the counter (ShopUI "cafe", served to you), sit in a free seat
+    private readonly HashSet<string> taken = new HashSet<string>(); // seats the customers are in ("id:n")
+    private readonly object visit = new object();                     // ContextButton key for ordering/sitting
+    private string visitShown;
+    private PlayerController sitter;
+    private SeatedPose sitPose;
+    private Vector3 standAt, sitRoot;
+    private Quaternion sitRot;
+    private float sitSince;
+
+    public static CafeSite Instance { get; private set; } // the café
+    public static CafeSite Hotel { get; private set; }    // the hotel lobby
+    public static CafeSite Shophouse { get; private set; } // the shophouse on your city land
+    public static CafeSite Of(string kind) => kind == "hotel" ? Hotel : kind == "shophouse" ? Shophouse : Instance;
+    public string Kind => kind;
+    public CafeClient Client => client;
+    public string Noun => IsHotel ? Lang.T("โรงแรม") : IsShophouse ? Lang.T("ตึกแถว") : Lang.T("ร้าน");
     public Transform Room => decor;
     public float HalfW => halfW;
     public float HalfD => halfD;
@@ -32,17 +63,20 @@ public class CafeSite : MonoBehaviour
     public CafeStyle Style { get; private set; } = CafeStyle.Of("minimal");
     public bool Mine => client != null && client.Current != null && client.Current.open;
 
-    public void Configure(float roomHalfW, float roomHalfD, float roomHeight, Vector3 signPosition)
+    public void Configure(float roomHalfW, float roomHalfD, float roomHeight, Vector3 signPosition, string siteKind = "cafe")
     {
         halfW = roomHalfW;
         halfD = roomHalfD;
         height = roomHeight;
         signAt = signPosition;
+        kind = siteKind;
     }
 
     private void Awake()
     {
-        Instance = this;
+        if (IsHotel) Hotel = this;
+        else if (IsShophouse) Shophouse = this;
+        else Instance = this;
         interior = transform.Find("Interior");
         if (interior == null) interior = transform;
         // A space in metres at the floor's middle, whatever the building's scale
@@ -70,7 +104,7 @@ public class CafeSite : MonoBehaviour
         Destroy(board.GetComponent<Collider>());
         board.transform.SetParent(transform, false);
         board.transform.localPosition = signAt;
-        board.transform.localScale = new Vector3(5.2f, 0.7f, 0.12f);
+        board.transform.localScale = new Vector3(IsHotel || IsShophouse ? 6.4f : 5.2f, 0.7f, 0.12f);
         board.GetComponent<Renderer>().sharedMaterial = CafeFurniture.Mat(new Color(0.16f, 0.12f, 0.1f), 0.5f);
         var label = new GameObject("Label");
         label.transform.SetParent(board.transform.parent, false);
@@ -110,7 +144,9 @@ public class CafeSite : MonoBehaviour
         var m = t.AddComponent<TextMesh>();
         m.font = font;
         t.GetComponent<MeshRenderer>().sharedMaterial = font.material;
-        m.text = Lang.T("ร้านว่าง ให้เช่า\nเปิดร้านกาแฟ\nที่ธนาคาร");
+        m.text = IsHotel ? Lang.T("โรงแรมว่าง ให้เช่า\nเปิดธุรกิจโรงแรม\nที่ธนาคาร")
+            : IsShophouse ? Lang.T("ตึกแถวของคุณ\nกำลังโหลด...")
+            : Lang.T("ร้านว่าง ให้เช่า\nเปิดร้านกาแฟ\nที่ธนาคาร");
         m.fontSize = 48;
         m.characterSize = 0.022f;
         m.anchor = TextAnchor.MiddleCenter;
@@ -118,9 +154,13 @@ public class CafeSite : MonoBehaviour
         m.color = Color.white;
     }
 
-    private void Start()
+    private void Start() => Attach();
+
+    // The client may come up after this site: keep looking until it's there
+    private void Attach()
     {
-        client = CafeClient.Instance;
+        if (client != null) return;
+        client = CafeClient.Of(kind);
         if (client == null) return;
         client.Changed += Show;
         if (client.Current != null) Show(client.Current);
@@ -128,13 +168,21 @@ public class CafeSite : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (sitter != null) Stand();
+        if (visitShown != null) ContextButton.Hide(visit);
         if (client != null) client.Changed -= Show;
         if (Instance == this) Instance = null;
+        if (Hotel == this) Hotel = null;
+        if (Shophouse == this) Shophouse = null;
         if (hadButton) ContextButton.Hide(this);
     }
 
     private void Show(CafeClient.State s)
     {
+        publicView = kind == "cafe" && !(s != null && s.open);
+        if (publicView) s = PublicCafe;
+        shown = s;
+        if (sitter != null) Stand(); // the seats are about to be rebuilt
         bool open = s != null && s.open;
         string style = open ? s.style : "minimal";
         if (style != shownStyle)
@@ -143,7 +191,9 @@ public class CafeSite : MonoBehaviour
             Style = CafeStyle.Of(style);
             ApplyStyle();
         }
-        sign.text = open ? (string.IsNullOrEmpty(s.name) ? Lang.T("ร้านกาแฟ") : s.name) : Lang.T("ให้เช่า");
+        string fallback = IsHotel ? Lang.T("โรงแรมของคุณ") : IsShophouse ? OwnerSign : Lang.T("ร้านกาแฟ");
+        sign.text = open ? (string.IsNullOrEmpty(s.name) ? fallback : s.name) : (IsHotel ? Lang.T("โรงแรมให้เช่า") : IsShophouse ? OwnerSign : Lang.T("ให้เช่า"));
+        signedAs = ProfileClient.Instance != null ? ProfileClient.Instance.DisplayName : null;
         toLet.SetActive(!open);
 
         foreach (var go in pieces.Values) if (go != null) Destroy(go);
@@ -238,8 +288,24 @@ public class CafeSite : MonoBehaviour
         return new Vector3(Mathf.Clamp(p.x, -hw, hw), 0f, Mathf.Clamp(p.z, -hd, hd));
     }
 
+    // "ตึกแถวของ <your name>" until you give it a name of your own
+    private string signedAs;
+    private static string OwnerSign
+    {
+        get
+        {
+            string who = ProfileClient.Instance != null ? ProfileClient.Instance.DisplayName : null;
+            return string.IsNullOrEmpty(who) ? Lang.T("ตึกแถวของคุณ") : $"{Lang.T("ตึกแถวของ")} {who}";
+        }
+    }
+
     private void Update()
     {
+        if (client == null) { Attach(); if (client == null) return; }
+        // the profile (your name) may load after the shop
+        if (IsShophouse && client.Current != null && string.IsNullOrEmpty(client.Current.name)
+            && ProfileClient.Instance != null && ProfileClient.Instance.DisplayName != signedAs)
+            Show(client.Current);
         if (player == null)
         {
             var pc = FindAnyObjectByType<PlayerController>();
@@ -247,14 +313,19 @@ public class CafeSite : MonoBehaviour
             player = pc.transform;
         }
         bool inside = Inside(player.position);
+        Visit(inside);
 
         // The owner, standing inside: จัดร้าน
-        bool offer = inside && Mine && !CafeUI.IsOpen && !ContextButton.TakenByOther(this);
+        bool offer = !IsHotel && inside && Mine && !CafeUI.IsOpen && visitShown == null && !ContextButton.TakenByOther(this);
         if (offer && !ContextButton.IsShownBy(this))
         {
             var s = client.Current;
-            ContextButton.Show(this, "จัดร้าน", $"{(string.IsNullOrEmpty(s.name) ? Lang.T("ร้านกาแฟของคุณ") : s.name)} · {Lang.T("สไตล์")}{s.StyleName} · {Lang.T("พนักงาน")} {s.staff} {Lang.T("คน")}",
-                () => CafeUI.Open(this));
+            if (IsShophouse)
+                ContextButton.Show(this, "ตกแต่งตึกแถว", $"{(string.IsNullOrEmpty(s.name) ? OwnerSign : s.name)} · {Lang.T("สไตล์")}{s.StyleName} · {Lang.T("ตั้งชื่อ จัดเฟอร์นิเจอร์")}",
+                    () => CafeUI.Open(this));
+            else
+                ContextButton.Show(this, "จัดร้าน", $"{(string.IsNullOrEmpty(s.name) ? Lang.T("ร้านกาแฟของคุณ") : s.name)} · {Lang.T("สไตล์")}{s.StyleName} · {Lang.T("พนักงาน")} {s.staff} {Lang.T("คน")}",
+                    () => CafeUI.Open(this));
             hadButton = true;
         }
         else if (!offer && hadButton)
@@ -280,9 +351,10 @@ public class CafeSite : MonoBehaviour
     private void Crowd(bool on)
     {
         crowdOpen = on;
+        taken.Clear();
         for (int i = people.childCount - 1; i >= 0; i--) Destroy(people.GetChild(i).gameObject);
-        if (!on) return;
-        var s = client.Current;
+        if (!on || shown == null) return;
+        var s = shown;
         int seed = GameClock.Day * 31;
 
         // Baristas: behind the first counter (or the espresso machine), facing out
@@ -317,6 +389,7 @@ public class CafeSite : MonoBehaviour
                 at.y = 0f;
                 Quaternion face = Quaternion.Inverse(decor.rotation) * go.transform.rotation;
                 Person($"Customer_{n + 1}", at, face, seed + 100 + n * 13, seated: true, apron: false, seatHeight: seat.y);
+                taken.Add($"{p.id}:{System.Array.IndexOf(seats, seat)}");
                 n++;
             }
         }
@@ -341,5 +414,138 @@ public class CafeSite : MonoBehaviour
             go.AddComponent<CafeSitter>().Configure(seatHeight, seed);
         }
         else go.AddComponent<CafeBarista>().Configure(seed);
+    }
+
+    // ── The town's café (nobody here runs it): a counter, cakes and coffee, tables and a sofa ──────
+    private static CafeClient.State publicCafe;
+    private static CafeClient.State PublicCafe
+    {
+        get
+        {
+            if (publicCafe != null) return publicCafe;
+            var list = new List<CafeClient.Piece>();
+            void Add(string item, float x, float z, int r) =>
+                list.Add(new CafeClient.Piece { id = 900 + list.Count, item = item, x = x, z = z, r = r });
+            Add("counter", -1.6f, 2.55f, 180);
+            Add("espresso", 0.3f, 3.3f, 180);
+            Add("cake_display", 2.0f, 3.15f, 180);
+            Add("shelf_cups", -3.8f, 3.4f, 180);
+            Add("menu_board", 3.9f, 3.3f, 180);
+            Add("stool_bar", -2.3f, 1.7f, 0);
+            Add("stool_bar", -1.0f, 1.7f, 0);
+            Add("table_round", -2.7f, -0.6f, 0);
+            Add("chair_wood", -2.7f, -1.35f, 0);
+            Add("chair_wood", -2.7f, 0.15f, 180);
+            Add("table_round", 0.2f, -0.6f, 0);
+            Add("chair_wood", 0.2f, -1.35f, 0);
+            Add("chair_wood", 0.2f, 0.15f, 180);
+            Add("table_square", 3.0f, -1.9f, 0);
+            Add("armchair", 3.0f, -2.75f, 0);
+            Add("armchair", 3.0f, -1.05f, 180);
+            Add("sofa", 3.95f, 0.9f, 270);
+            Add("rug", 0.2f, -0.6f, 0);
+            Add("plant_big", -4.2f, -3.2f, 0);
+            Add("plant_big", 4.2f, 2.3f, 0);
+            Add("lamp_pendant", -2.7f, -0.6f, 0);
+            Add("lamp_pendant", 0.2f, -0.6f, 0);
+            Add("art_frame", -4.55f, 0.6f, 90);
+            publicCafe = new CafeClient.State
+            {
+                open = true, staff = 2, name = Lang.T("ร้านกาแฟในเมือง"), style = "vintage",
+                half_w = 4.5f, half_d = 3.56f, pieces = list.ToArray(),
+            };
+            return publicCafe;
+        }
+    }
+
+    // ── Visiting: order at the counter, sit down ───────────────────────────────────────────
+    private void Visit(bool inside)
+    {
+        if (sitter != null) return; // sitting: LateUpdate keeps you there, the stick stands you up
+        string want = null, message = null;
+        Transform seatPiece = null;
+        Vector3 seatLocal = default;
+        if (inside && !CafeUI.IsOpen && shown != null && shown.open && shownOpen && !PoolSwim.Swimming)
+        {
+            float best = 1.7f * 1.7f;
+            foreach (var p in shown.pieces ?? new CafeClient.Piece[0])
+            {
+                if (p.item != "counter" && p.item != "espresso" && p.item != "cake_display") continue;
+                if (!pieces.TryGetValue(p.id, out var go) || go == null) continue;
+                // the customer's side of the counter (its local +Z, the baristas are on -Z)
+                float d = (go.transform.TransformPoint(new Vector3(0f, 0f, 0.7f)) - player.position).sqrMagnitude;
+                if (d < best) { best = d; want = "order"; }
+            }
+            best = 0.95f * 0.95f;
+            foreach (var p in shown.pieces ?? new CafeClient.Piece[0])
+            {
+                var seats = CafeFurniture.Seats(p.item);
+                if (seats == null || !pieces.TryGetValue(p.id, out var go) || go == null) continue;
+                for (int i = 0; i < seats.Length; i++)
+                {
+                    if (crowdOpen && taken.Contains($"{p.id}:{i}")) continue;
+                    var at = go.transform.TransformPoint(new Vector3(seats[i].x, 0f, seats[i].z));
+                    var flat = at - player.position;
+                    flat.y = 0f;
+                    if (flat.sqrMagnitude < best) { best = flat.sqrMagnitude; want = "sit"; seatPiece = go.transform; seatLocal = seats[i]; }
+                }
+            }
+        }
+        if (want == "order") message = Lang.T("กาแฟ ชา โกโก้ เค้ก · สั่งแล้วนั่งทานในร้านได้เลย");
+        else if (want == "sit") message = Lang.T("นั่งพักจิบกาแฟ · ขยับจอยสติ๊กเพื่อลุก");
+        string key = want == "sit" ? want + seatPiece.name + seatLocal.x : want;
+        if (key == visitShown) return;
+        if (want == null) { ContextButton.Hide(visit); visitShown = null; return; }
+        if (ContextButton.TakenByOther(visit) && !ContextButton.IsShownBy(this)) return;
+        if (ContextButton.IsShownBy(this)) { ContextButton.Hide(this); hadButton = false; }
+        visitShown = key;
+        if (want == "order") ContextButton.Show(visit, "สั่งเมนู", message, () => ShopUI.Show("cafe"));
+        else
+        {
+            var piece = seatPiece;
+            var local = seatLocal;
+            ContextButton.Show(visit, "นั่ง", message, () => Sit(piece, local));
+        }
+    }
+
+    private void Sit(Transform piece, Vector3 seat)
+    {
+        if (piece == null || sitter != null) return;
+        var pc = player != null ? player.GetComponent<PlayerController>() : null;
+        if (pc == null || !pc.InputEnabled) return;
+        sitter = pc;
+        standAt = pc.transform.position;
+        sitRot = Quaternion.LookRotation(Vector3.ProjectOnPlane(piece.forward, Vector3.up), Vector3.up);
+        var hips = SeatedPose.HipsOffset(pc.transform);
+        sitRoot = SeatedPose.RootFor(piece.TransformPoint(seat) + Vector3.up * 0.06f, sitRot, hips);
+        pc.Teleport(sitRoot, sitRot);
+        pc.enabled = false;
+        sitPose = pc.gameObject.AddComponent<SeatedPose>();
+        sitSince = Time.time;
+        visitShown = "seated";
+        ContextButton.Show(visit, "สั่งเมนู", Lang.T("นั่งอยู่ · สั่งเครื่องดื่มหรือขนมมาเสิร์ฟที่โต๊ะ · ขยับจอยสติ๊กเพื่อลุก"), () => ShopUI.Show("cafe"), highlight: true);
+    }
+
+    private void Stand()
+    {
+        var pc = sitter;
+        sitter = null;
+        if (sitPose != null) Destroy(sitPose);
+        sitPose = null;
+        if (pc != null)
+        {
+            pc.enabled = true;
+            pc.Teleport(standAt + Vector3.up * 0.05f, sitRot);
+        }
+        ContextButton.Hide(visit);
+        visitShown = null;
+    }
+
+    private void LateUpdate()
+    {
+        if (sitter == null) return;
+        // a moment to settle, then the stick (or the window closing on a knock-out) gets you up
+        if (Time.time - sitSince > 0.4f && (sitter.PeekMoveInput().sqrMagnitude > 0.2f || !sitter.InputEnabled)) { Stand(); return; }
+        sitter.transform.SetPositionAndRotation(sitRoot, sitRot);
     }
 }

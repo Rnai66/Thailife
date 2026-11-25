@@ -8,11 +8,19 @@ public static class CafeShop
 {
     public static readonly Vector3 Site = new Vector3(66f, 0f, -31f); // front to the road (yaw 180 faces +Z)
 
+    // The entrance's "ยินดีต้อนรับ" sits just under the owner's name board over the door: take it away
+    public static void DropWelcome(Transform b)
+    {
+        foreach (var t in b.GetComponentsInChildren<TextMesh>(true))
+            if (t != null && t.text == "ยินดีต้อนรับ") Object.DestroyImmediate(t.gameObject);
+    }
+
     public static void Build(Transform root)
     {
         const float width = 13f, depth = 10.5f;
         var b = CityCivic.Block(root, Site, 180f, "ร้านกาแฟ", width, depth, 2, new Color(0.93f, 0.9f, 0.84f), new Color(0.24f, 0.18f, 0.14f),
             new Color(0.24f, 0.18f, 0.14f), new Color(1f, 0.86f, 0.6f), "CoffeeShop_ร้านกาแฟ", kiosk: null, interior: "empty");
+        DropWelcome(b);
         float s = b.localScale.x;
         // the room in metres (Interiors.Rooms: 0.2 walls, a 3.2 storey, all scaled)
         b.gameObject.AddComponent<CafeSite>().Configure((width * 0.5f - 0.2f) * s, (depth * 0.5f - 0.2f) * s, 3.2f * s,

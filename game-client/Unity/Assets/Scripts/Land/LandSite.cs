@@ -1,8 +1,10 @@
 using UnityEngine;
 
 // A parcel of land in the scene (built by the editor's LandParcels): shows it the way it is for this
-// player. Children named "ForSale" (not yours yet: a for-sale board), "Owned" (yours) and
-// "Build_<id>" (what you built on it: field, pen, rental, shophouse) are switched on and off.
+// player. Children named "ForSale" (not yours yet: a for-sale board and the rope round it), "Owned"
+// (the old "yours" board: kept hidden — once it's bought the land is left clear, the board's spot
+// still offers ที่ดินของคุณ, LandCounter) and "Build_<id>" (what you built on it: field, pen, rental,
+// shophouse) are switched on and off.
 public class LandSite : MonoBehaviour
 {
     [SerializeField] private string parcel = "plain"; // plain | rice | city
@@ -29,6 +31,13 @@ public class LandSite : MonoBehaviour
     {
         forSale = Find("ForSale");
         owned = Find("Owned");
+        // The "yours" board comes down once it's bought; whatever else is in Owned (the canal-side
+        // paddies 7-12 on a farm lot) stays and shows with the land
+        if (owned != null)
+        {
+            var board = owned.transform.Find("Board");
+            if (board != null) board.gameObject.SetActive(false);
+        }
         var list = new System.Collections.Generic.List<GameObject>();
         foreach (Transform child in transform) if (child.name.StartsWith("Build_")) list.Add(child.gameObject);
         builds = list.ToArray();

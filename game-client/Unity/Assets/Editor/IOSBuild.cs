@@ -43,6 +43,7 @@ public static class IOSBuild
         }
 
         Configure();
+        WorldBuilder.KeepEmission(); // Unity drops _EMISSION from glow materials now and then: the lights would build dark
         if (release)
         {
             PlayerSettings.iOS.buildNumber = System.DateTime.Now.ToString("yyMMddHHmm"); // to the minute, above the first upload (2026102114)

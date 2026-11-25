@@ -120,6 +120,10 @@ public class ShopUI : MonoBehaviour
             case "city_food":
                 list.Add(new Category { Name = "อาหาร", Tile = new Color32(0xFA, 0xEE, 0xDA, 0xFF), TileInk = new Color32(0x85, 0x4F, 0x0B, 0xFF), Has = id => id.StartsWith("food_") });
                 break;
+            case "cafe":
+                list.Add(new Category { Name = "เครื่องดื่ม", Tile = new Color32(0xF1, 0xE6, 0xDA, 0xFF), TileInk = new Color32(0x6B, 0x3E, 0x1E, 0xFF), Has = id => id == "food_latte" || id == "food_americano" || id == "food_matcha" || id == "food_cocoa" || id == "food_mocktail" });
+                list.Add(new Category { Name = "ขนม", Tile = new Color32(0xFB, 0xEA, 0xF0, 0xFF), TileInk = new Color32(0x99, 0x35, 0x56, 0xFF), Has = id => id == "food_croissant" || id == "food_choc_cake" });
+                break;
             default:
                 list.Add(new Category { Name = "สมัคร", Tile = new Color32(0xFC, 0xEB, 0xEB, 0xFF), TileInk = new Color32(0xA3, 0x2D, 0x2D, 0xFF), Has = id => id == "camp_membership" });
                 break;
@@ -176,6 +180,27 @@ public class ShopUI : MonoBehaviour
         Render(last);
     }
 
+    // ร้านกาแฟ: what you ordered is brought to you and you have it there and then (life_eat each one;
+    // once you're full the rest waits in your bag)
+    private async void Serve(Dictionary<string, int> order)
+    {
+        var life = LifeClient.Instance;
+        if (life == null) return;
+        int ate = 0;
+        foreach (var kv in order)
+            for (int i = 0; i < kv.Value; i++)
+            {
+                try { await life.EatAsync(kv.Key.Substring("food_".Length)); ate++; }
+                catch (Exception) { i = kv.Value; }
+            }
+        if (this == null) return;
+        if (ate > 0)
+        {
+            UiKit.FloatAbovePlayer("อร่อย~ อิ่มสบาย", new Color(0.55f, 0.95f, 0.6f));
+        }
+        else Toast("อิ่มแล้ว เก็บไว้ในกระเป๋าก่อน", Muted);
+    }
+
     private async void Checkout()
     {
         var wallet = WalletClient.Instance;
@@ -186,9 +211,11 @@ public class ShopUI : MonoBehaviour
         try
         {
             var result = await wallet.CheckoutAsync(cart);
+            var served = shopId == "cafe" ? new Dictionary<string, int>(cart) : null;
             cart.Clear();
             Render(result);
             Toast($"ซื้อเรียบร้อย จ่าย {result.spent:N0} บาท", PayGreen);
+            if (served != null) Serve(served);
             GameAudio.Play("coins");
             FarmClient.Instance?.Refresh();  // seeds / barn size
             CoopClient.Instance?.Refresh();  // chickens / feed
@@ -254,6 +281,7 @@ public class ShopUI : MonoBehaviour
             : shopId == "noodle" ? "ร้านก๋วยเตี๋ยว"
             : shopId == "beach" ? "ร้านอาหารริมทะเล"
             : shopId == "city_food" ? "ร้านอาหารในเมือง"
+            : shopId == "cafe" ? "ร้านกาแฟ · สั่งแล้วเสิร์ฟที่โต๊ะ"
             : shopId == "music" ? "ร้านเครื่องดนตรี"
             : "ค่ายมวย · โต๊ะรับสมัคร";
         var market = MarketOf(snapshot);

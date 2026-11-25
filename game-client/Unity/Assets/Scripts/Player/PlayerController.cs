@@ -172,6 +172,9 @@ public class PlayerController : MonoBehaviour
         if ((hit & CollisionFlags.Sides) != 0) VehicleSpeed *= 0.5f; // ran into something
     }
 
+    // The stick or keys right now, for things that move the player themselves (PoolSwim)
+    public Vector2 PeekMoveInput() => ReadMoveInput();
+
     private Vector2 ReadMoveInput()
     {
         if (ExternalMoveInput.sqrMagnitude > 0.0001f)

@@ -207,10 +207,11 @@ public static class Seaside
         Room(area, new Vector3(28f, 0f, 0f), "suite", "สวีทริมหาด");
     }
 
-    // An open-topped room (the camera looks in over the walls): bed to sleep in, decor by tier, door out
-    private static void Room(Transform area, Vector3 pos, string tier, string title)
+    // An open-topped room (the camera looks in over the walls): bed to sleep in, decor by tier, door out.
+    // "owner" is the hotel owner's penthouse in the City (HotelBiz): done up like the suite.
+    internal static void Room(Transform area, Vector3 pos, string tier, string title)
     {
-        bool deluxe = tier != "standard", suite = tier == "suite";
+        bool deluxe = tier != "standard", suite = tier == "suite" || tier == "owner";
         float w = suite ? 16f : 12f, d = suite ? 11f : 9f, h = 2.6f;
         var r = PrimitiveKit.Group("HotelRoom_" + tier, area, pos).transform;
         var floor = PrimitiveKit.Mat(suite ? "MarbleFloor" : deluxe ? "WoodFloorWarm" : "CarpetBeige",
@@ -225,7 +226,8 @@ public static class Seaside
         PrimitiveKit.Box("WallL", r, new Vector3(-w * 0.5f, h * 0.5f, 0f), new Vector3(0.2f, h, d), wall);
         PrimitiveKit.Box("WallR", r, new Vector3(w * 0.5f, h * 0.5f, 0f), new Vector3(0.2f, h, d), wall);
         PrimitiveKit.Box("Door", r, new Vector3(-w * 0.5f + 1.6f, 1.05f, -d * 0.5f + 0.12f), new Vector3(1.1f, 2.1f, 0.06f), PrimitiveKit.Mat("DarkWood", new Color(0.36f, 0.22f, 0.12f)), collider: false);
-        PrimitiveKit.Label(title, r, new Vector3(0f, 2.2f, d * 0.5f - 0.12f), 0.06f, new Color(0.45f, 0.3f, 0.15f));
+        if (tier != "owner") // up on a roof in the City the name would show through the walls from the street
+            PrimitiveKit.Label(title, r, new Vector3(0f, 2.2f, d * 0.5f - 0.12f), 0.06f, new Color(0.45f, 0.3f, 0.15f));
 
         // Window (sea view in the better rooms)
         float winW = suite ? 7f : deluxe ? 5f : 2f;

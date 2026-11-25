@@ -500,7 +500,7 @@ public static class CityTraffic
     }
 
     // Saloon car: lower body, glass cabin, roof; returns its size
-    private static Vector3 Sedan(Transform v, Color paint, float length, float width, bool chrome, Color? cabinPaint = null)
+    internal static Vector3 Sedan(Transform v, Color paint, float length, float width, bool chrome, Color? cabinPaint = null)
     {
         var body = M("CarPaint" + ColorUtility.ToHtmlStringRGB(paint), paint, 0.85f, 0.4f);
         var upper = cabinPaint.HasValue ? M("CarPaint" + ColorUtility.ToHtmlStringRGB(cabinPaint.Value), cabinPaint.Value, 0.85f, 0.4f) : body;

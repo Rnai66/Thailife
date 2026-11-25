@@ -36,6 +36,7 @@ public static class MeshKit
         if (existing != null)
         {
             EditorUtility.CopySerialized(mesh, existing); // rebuilt with new numbers: update in place
+            existing.name = key.Substring(key.LastIndexOf('/') + 1); // CopySerialized brings the blank name along
             Object.DestroyImmediate(mesh);
             return existing;
         }

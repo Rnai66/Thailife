@@ -35,3 +35,6 @@ game-client/Unity/Assets/Resources/Characters/
 game-client/Unity/Assets/Resources/Characters.meta
 game-server/deploy/.env.prod
 game-server/deploy/backups/
+
+# Unity build temp
+game-client/Unity/.utmp/

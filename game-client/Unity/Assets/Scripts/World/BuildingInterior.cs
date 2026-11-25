@@ -12,6 +12,7 @@ public class BuildingInterior : MonoBehaviour
     [SerializeField] private float shellCenterX;  // this unit's x in shellRoot (shophouse rows)
 
     private readonly List<Renderer> shell = new List<Renderer>();
+    private readonly List<Renderer> labels = new List<Renderer>(); // TextMesh in the room: drawn through walls, so only while inside
     private readonly Dictionary<string, List<Renderer>> windows = new Dictionary<string, List<Renderer>>();
     private readonly Dictionary<string, Renderer[]> walls = new Dictionary<string, Renderer[]>();
     private Transform player, cam;
@@ -55,6 +56,16 @@ public class BuildingInterior : MonoBehaviour
             }
         }
 
+        var room = transform.Find("Interior");
+        if (room != null)
+            foreach (var t in room.GetComponentsInChildren<TextMesh>(true))
+            {
+                var r = t.GetComponent<Renderer>();
+                if (r == null) continue;
+                labels.Add(r);
+                r.enabled = false;
+            }
+
         var pc = FindAnyObjectByType<PlayerController>();
         player = pc != null ? pc.transform : null;
     }
@@ -91,6 +102,7 @@ public class BuildingInterior : MonoBehaviour
         {
             inside = now;
             foreach (var r in shell) if (r != null) r.enabled = !inside;
+            foreach (var r in labels) if (r != null) r.enabled = inside;
             if (lamp == null && inside) MakeLamp();
             if (lamp != null) lamp.enabled = inside;
             if (!inside) ShowWalls(true, true, true, true);
@@ -138,6 +150,7 @@ public class BuildingInterior : MonoBehaviour
         if (!inside) return;
         inside = false;
         foreach (var r in shell) if (r != null) r.enabled = true;
+        foreach (var r in labels) if (r != null) r.enabled = false;
         ShowWalls(true, true, true, true);
     }
 }

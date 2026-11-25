@@ -251,6 +251,7 @@ public static class BusTerminal
         PrimitiveKit.Box("Kiosk", hall, new Vector3(-6.4f, 0.75f, -0.5f), new Vector3(1.8f, 1.1f, 1.4f), PrimitiveKit.Mat("PK_KioskGreen", new Color(0.1f, 0.55f, 0.3f), 0.5f));
         PrimitiveKit.Label("ร้านค้า · น้ำดื่ม ขนม", hall, new Vector3(-6.4f, 1.6f, -1.25f), 0.03f, Color.white);
         TambonBuilder.ShopZone(hall, new Vector3(-6.4f, 0.2f, -1.7f), "city_food");
+        StreetFurniture.Atm(hall, new Vector3(7.1f, 0.2f, -3f), 90f, 2); // against the east end, facing in
         Npcs.TouristCrowd(hall, new Vector3(0f, 0.2f, 0f), new Vector2(12f, 4f), 6, 2, 5, 22);
         StreetFurniture.HangingLight(hall, new Vector3(-4f, 4.6f, 0f));
         StreetFurniture.HangingLight(hall, new Vector3(4f, 4.6f, 0f));

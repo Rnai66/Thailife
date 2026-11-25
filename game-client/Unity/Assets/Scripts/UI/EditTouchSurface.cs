@@ -16,6 +16,9 @@ public class EditTouchSurface : MonoBehaviour, IPointerDownHandler, IDragHandler
     public Action<Vector2> Tap;
 
     private const float DragPixels = 14f, TapSeconds = 0.4f;
+    // How far a finger on a piece has to go before the piece follows it (a steady hand shouldn't nudge it)
+    public float HoldPixels = 14f;
+    private bool holdMoved;
     private const float DegreesPerWidth = 270f, DegreesPerHeight = 120f;
 
     private readonly Dictionary<int, Vector2> fingers = new Dictionary<int, Vector2>();
@@ -33,7 +36,7 @@ public class EditTouchSurface : MonoBehaviour, IPointerDownHandler, IDragHandler
         {
             downAt = e.position;
             downTime = Time.unscaledTime;
-            moved = false;
+            moved = holdMoved = false;
             if (Grab != null && Grab(e.position)) holdId = e.pointerId;
         }
         else if (fingers.Count == 2 && holdId == int.MinValue) pinchStart = PinchDistance();
@@ -45,7 +48,8 @@ public class EditTouchSurface : MonoBehaviour, IPointerDownHandler, IDragHandler
         if ((e.position - downAt).sqrMagnitude > DragPixels * DragPixels) moved = true;
         if (e.pointerId == holdId)
         {
-            if (moved) Move?.Invoke(e.position);
+            if ((e.position - downAt).sqrMagnitude > HoldPixels * HoldPixels) holdMoved = true;
+            if (holdMoved) Move?.Invoke(e.position);
             return;
         }
         if (holdId != int.MinValue) return; // a second finger while carrying something: ignore it
@@ -70,7 +74,7 @@ public class EditTouchSurface : MonoBehaviour, IPointerDownHandler, IDragHandler
         if (e.pointerId == holdId)
         {
             holdId = int.MinValue;
-            Drop?.Invoke(e.position, moved);
+            Drop?.Invoke(e.position, holdMoved);
             return;
         }
         if (fingers.Count == 0 && !moved && Time.unscaledTime - downTime < TapSeconds) Tap?.Invoke(e.position);
@@ -79,7 +83,7 @@ public class EditTouchSurface : MonoBehaviour, IPointerDownHandler, IDragHandler
     // Lost the finger (the screen closed under it): let go where it was
     private void OnDisable()
     {
-        if (holdId != int.MinValue && fingers.TryGetValue(holdId, out var at)) Drop?.Invoke(at, moved);
+        if (holdId != int.MinValue && fingers.TryGetValue(holdId, out var at)) Drop?.Invoke(at, holdMoved);
         holdId = int.MinValue;
         fingers.Clear();
     }

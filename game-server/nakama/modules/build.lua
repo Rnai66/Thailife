@@ -82,7 +82,8 @@ local function lot_size(area, lot)
   return nil
 end
 local HOUSE_AT = { stilt = { -0.2, 2 }, concrete1 = { -0.3, 1 }, wood1 = { -0.3, 1 }, half2 = { -0.3, 1 },
-                   townhouse = { -2.4, 1.5 }, townhome = { -2.4, 1.5 }, city_single = { 0, 1.5 }, bkk_single = { 0, 1.5 } }
+                   townhouse = { -2.4, 1.5 }, townhome = { -2.4, 1.5 }, city_single = { 0, 1.5 }, bkk_single = { 0, 1.5 },
+                   condo = { 0, 1.5 }, apartment = { 0, 1.5 } }
 local MARGIN = 0.2
 
 local function bounds_for(home, user_id)

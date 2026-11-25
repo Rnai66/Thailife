@@ -28,6 +28,17 @@ local function read(user_id)
   return (#objects > 0) and objects[1].value or {}
 end
 
+-- Runs a hotel business (bank.lua bank_open "hotel"): the owner's penthouse on the roof of the City
+-- hotel is theirs to sleep in any time, no booking needed
+function M.owns(user_id)
+  local objects = nk.storage_read({ { collection = "bank", key = "account", user_id = user_id } })
+  local a = (#objects > 0) and objects[1].value or {}
+  for _, b in ipairs(a.businesses or {}) do
+    if b.type == "hotel" then return true end
+  end
+  return false
+end
+
 -- The active booking or nil
 function M.active(user_id)
   local b = read(user_id)

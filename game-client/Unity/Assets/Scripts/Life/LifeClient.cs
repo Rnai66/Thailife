@@ -93,7 +93,11 @@ public class LifeClient : MonoBehaviour
         if (GetComponent<ActivityAlerts>() == null) gameObject.AddComponent<ActivityAlerts>();
         if (GetComponent<FairClient>() == null) gameObject.AddComponent<FairClient>();
         if (GetComponent<BankClient>() == null) gameObject.AddComponent<BankClient>();
-        if (GetComponent<CafeClient>() == null) gameObject.AddComponent<CafeClient>();
+        bool cafe = false; // GetComponent<CafeClient> would also find the hotel's (a subclass)
+        foreach (var c in GetComponents<CafeClient>()) if (c.GetType() == typeof(CafeClient)) cafe = true;
+        if (!cafe) gameObject.AddComponent<CafeClient>();
+        if (GetComponent<HotelShopClient>() == null) gameObject.AddComponent<HotelShopClient>();
+        if (GetComponent<ShophouseClient>() == null) gameObject.AddComponent<ShophouseClient>();
         if (GetComponent<RanchClient>() == null) gameObject.AddComponent<RanchClient>();
         if (GetComponent<BuildClient>() == null) gameObject.AddComponent<BuildClient>();
         if (GetComponent<LandClient>() == null) gameObject.AddComponent<LandClient>();

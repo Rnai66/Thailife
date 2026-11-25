@@ -230,6 +230,37 @@ public static class TrafficNet
         return best < float.MaxValue;
     }
 
+    // The lane a car at p heading `heading` is driving in (GPS for your own car): the nearest road
+    // within `within` metres that runs the same way. False off the roads.
+    public static bool Locate(Vector3 p, Vector3 heading, out int route, out float at, float within = 9f)
+    {
+        EnsureBuilt();
+        route = -1;
+        at = 0f;
+        heading.y = 0f;
+        bool moving = heading.sqrMagnitude > 0.0001f;
+        if (moving) heading.Normalize();
+        float best = within;
+        for (int i = 0; i < Count; i++)
+        {
+            float off = Nearest(routes[i], p, out float along, out Vector3 dir);
+            if (moving && Vector3.Dot(dir, heading) < 0.2f) off += 6f; // the other way: only if nothing else
+            if (off < best) { best = off; route = i; at = along; }
+        }
+        return route >= 0;
+    }
+
+    // The way along the roads from a car at p (heading) to the road nearest dest, or null
+    public static List<Vector3> RouteFrom(Vector3 p, Vector3 heading, Vector3 dest)
+    {
+        if (!Locate(p, heading, out int from, out float at)) return null;
+        var steps = Plan(from, at, dest, out int goal, out float goalAt);
+        if (steps == null) return null;
+        var line = Line(from, at, steps, goal, goalAt);
+        if (line.Count > 0) line.Insert(0, new Vector3(p.x, line[0].y, p.z));
+        return line;
+    }
+
     // How far a car on r at `a` metres drives to reach `b` metres (open routes can't go back)
     private static float Ahead(Route r, float a, float b, float least)
     {

@@ -6,7 +6,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: 
+  m_Name: ProjectorBeam_small_core
   serializedVersion: 12
   m_SubMeshes:
   - serializedVersion: 2
@@ -17,8 +17,8 @@ Mesh:
     firstVertex: 0
     vertexCount: 16
     localAABB:
-      m_Center: {x: 0, y: 1.0712003, z: 3.2249231}
-      m_Extent: {x: 1.9800001, y: 1.1007098, z: 3.2303262}
+      m_Center: {x: 0, y: 0.78514105, z: 3.321206}
+      m_Extent: {x: 1.9800001, y: 0.9900002, z: 3.3247256}
   m_Shapes:
     vertices: []
     shapes: []
@@ -97,7 +97,7 @@ Mesh:
       format: 0
       dimension: 0
     m_DataSize: 384
-    _typelessdata: 8fc2f5bccfbdf1bc640bb13b000000006bd97fbfc2870c3d8fc2f53ccfbdf1bc640bb13b000000006bd97fbfc2870c3da570fd3ff883443e6791ce40000000006bd97fbfc2870c3da570fdbff883443e6791ce40000000006bd97fbfc2870c3d8fc2f53ccfbdf1bc640bb13b1615753f63b0c8bae1ec93be8fc2f53ccfbdf13c640bb1bbc9ea753f4afe4cbda7f38bbea570fd3f93000b406791ce401615753f63b0c8bae1ec93bea570fd3ff883443e6791ce40ae0b753f00000000b02b94be8fc2f53ccfbdf13c640bb1bb000000000bfd723f4f27a1be8fc2f5bccfbdf13c640bb1bb000000000afd723f5027a1bea570fdbf93000b406791ce40000000000bfd723f4f27a1bea570fd3f93000b406791ce40000000000afd723f4f27a1be8fc2f5bccfbdf13c640bb1bb171575bf64b0c8bae2ec93be8fc2f5bccfbdf1bc640bb13b81d574bf717d57bd351e93bea570fdbff883443e6791ce40171575bf64b0c8bae2ec93bea570fdbf93000b406791ce40771475bf000000008df193be
+    _typelessdata: 8fc2f5bc1010f4bc72aa663b000000003fe97fbf01d5d7bc8fc2f53c1010f4bc72aa663b0000000040e97fbf02d5d7bca570fd3f98c651be79abd440000000003fe97fbf01d5d7bca570fdbf98c651be79abd4400000000040e97fbf01d5d7bc8fc2f53c1010f4bc72aa663bf8a6753fe3a17eba9e1890be8fc2f53c1010f43c72aa66bbc01a763f4e5104bda6008cbea570fd3fd437e33f79abd440f8a6753fe3a17eba9e1890bea570fd3f98c651be79abd44053a2753f000000007d3890be8fc2f53c1010f43c72aa66bb00000000c29c773f92fc81be8fc2f5bc1010f43c72aa66bb00000000c29c773f93fc81bea570fdbfd437e33f79abd44000000000c29c773f92fc81bea570fd3fd437e33f79abd44000000000c19c773f92fc81be8fc2f5bc1010f43c72aa66bbf8a675bfe3a17eba9e1890be8fc2f5bc1010f4bc72aa663bbe6f75bfb39e08bd038e90bea570fdbf98c651be79abd440f8a675bfe3a17eba9e1890bea570fdbfd437e33f79abd4409ba775bf000000007f1490be
   m_CompressedMesh:
     m_Vertices:
       m_NumItems: 0
@@ -151,8 +151,8 @@ Mesh:
       m_BitSize: 0
     m_UVInfo: 0
   m_LocalAABB:
-    m_Center: {x: 0, y: 1.0712003, z: 3.2249231}
-    m_Extent: {x: 1.9800001, y: 1.1007098, z: 3.2303262}
+    m_Center: {x: 0, y: 0.78514105, z: 3.321206}
+    m_Extent: {x: 1.9800001, y: 0.9900002, z: 3.3247256}
   m_CookingOptions: 30
   m_PreBakeConvexCollisionMesh: 0
   m_PreBakeTriangleCollisionMesh: 0

@@ -232,6 +232,54 @@ public static class CafeFurniture
                     Sph(root, new Vector3(-0.09f + i * 0.06f, 0.94f, 0.66f + (i % 2) * 0.05f), new Vector3(0.08f, 0.08f, 0.08f), i % 2 == 0 ? new Color(0.95f, 0.5f, 0.6f) : new Color(1f, 0.9f, 0.4f));
                 break;
 
+            // ── the hotel lobby's own pieces ──
+            case "key_rack": // ตู้กุญแจห้องพัก: pigeonholes on the wall behind the desk, a brass key in most
+                Box(root, new Vector3(0f, 1.55f, -0.04f), new Vector3(1.5f, 1.1f, 0.06f), wood, 0.5f);
+                Box(root, new Vector3(0f, 2.16f, 0f), new Vector3(1.6f, 0.12f, 0.14f), wood, 0.5f);
+                Box(root, new Vector3(0f, 0.96f, 0f), new Vector3(1.6f, 0.06f, 0.14f), wood, 0.5f);
+                for (int row = 0; row < 4; row++)
+                    for (int col = 0; col < 6; col++)
+                    {
+                        float x = -0.6f + col * 0.24f, y = 1.13f + row * 0.26f;
+                        Box(root, new Vector3(x, y, 0.01f), new Vector3(0.2f, 0.2f, 0.03f), Color.Lerp(wood, Color.black, 0.45f), 0.3f, null, false);
+                        if ((row * 7 + col * 3) % 5 == 0) continue; // out with a guest
+                        Cyl(root, new Vector3(x, y + 0.02f, 0.04f), new Vector3(0.03f, 0.005f, 0.03f), new Color(0.9f, 0.72f, 0.3f), 0.8f, new Vector3(90f, 0f, 0f));
+                        Box(root, new Vector3(x, y - 0.05f, 0.04f), new Vector3(0.035f, 0.08f, 0.008f), new Color(0.75f, 0.15f, 0.12f), 0.4f, null, false);
+                    }
+                Box(root, new Vector3(0f, 2.16f, 0.075f), new Vector3(0.8f, 0.07f, 0.01f), Glow(new Color(1f, 0.85f, 0.5f), 0.8f), null, false);
+                break;
+            case "luggage_cart": // รถเข็นกระเป๋า: a brass trolley with a hanging rail and suitcases on it
+                Color brass = new Color(0.88f, 0.7f, 0.32f);
+                Box(root, new Vector3(0f, 0.2f, 0f), new Vector3(1.0f, 0.06f, 0.6f), new Color(0.55f, 0.12f, 0.12f), 0.3f);
+                foreach (float x in new[] { -0.45f, 0.45f })
+                    foreach (float z in new[] { -0.25f, 0.25f })
+                        Sph(root, new Vector3(x, 0.08f, z), new Vector3(0.12f, 0.12f, 0.12f), new Color(0.12f, 0.12f, 0.12f));
+                foreach (float x in new[] { -0.47f, 0.47f })
+                {
+                    Cyl(root, new Vector3(x, 0.95f, 0f), new Vector3(0.04f, 0.75f, 0.04f), brass, 0.8f);
+                }
+                Cyl(root, new Vector3(0f, 1.7f, 0f), new Vector3(0.04f, 0.47f, 0.04f), brass, 0.8f, new Vector3(0f, 0f, 90f));
+                Box(root, new Vector3(-0.22f, 0.5f, 0f), new Vector3(0.42f, 0.56f, 0.24f), new Color(0.2f, 0.35f, 0.6f), 0.4f);
+                Box(root, new Vector3(0.24f, 0.42f, 0.02f), new Vector3(0.36f, 0.4f, 0.22f), new Color(0.6f, 0.35f, 0.18f), 0.4f);
+                Box(root, new Vector3(0.22f, 0.71f, 0f), new Vector3(0.3f, 0.18f, 0.2f), new Color(0.85f, 0.75f, 0.55f), 0.3f, null, false);
+                Box(root, new Vector3(0f, 1.25f, 0.02f), new Vector3(0.3f, 0.7f, 0.08f), new Color(0.15f, 0.15f, 0.18f), 0.3f, null, false); // a suit bag on the rail
+                break;
+            case "chandelier": // โคมระย้าคริสตัล: rings of glass drops round warm bulbs, hung from the ceiling
+                Cyl(root, new Vector3(0f, 2.25f, 0f), new Vector3(0.015f, 0.12f, 0.015f), new Color(0.85f, 0.7f, 0.35f), 0.8f);
+                Cyl(root, new Vector3(0f, 2.05f, 0f), new Vector3(0.7f, 0.02f, 0.7f), new Color(0.88f, 0.72f, 0.35f), 0.85f);
+                var drop = Glow(new Color(0.85f, 0.95f, 1f), 0.6f, 0.6f);
+                var bulb = Glow(new Color(1f, 0.85f, 0.55f), 2.4f);
+                for (int i = 0; i < 12; i++)
+                {
+                    float a = i * Mathf.PI * 2f / 12f;
+                    Sph(root, new Vector3(Mathf.Cos(a) * 0.33f, 1.93f, Mathf.Sin(a) * 0.33f), new Vector3(0.05f, 0.11f, 0.05f), drop);
+                    if (i % 2 == 0) Sph(root, new Vector3(Mathf.Cos(a) * 0.2f, 1.82f, Mathf.Sin(a) * 0.2f), new Vector3(0.045f, 0.1f, 0.045f), drop);
+                    if (i % 3 == 0) Sph(root, new Vector3(Mathf.Cos(a) * 0.3f, 2.1f, Mathf.Sin(a) * 0.3f), new Vector3(0.08f, 0.08f, 0.08f), bulb);
+                }
+                Sph(root, new Vector3(0f, 1.72f, 0f), new Vector3(0.09f, 0.16f, 0.09f), drop);
+                Light(root, new Vector3(0f, 1.8f, 0f), 4.5f, 1.2f);
+                break;
+
             default:
                 Box(root, new Vector3(0f, 0.3f, 0f), new Vector3(0.6f, 0.6f, 0.6f), wood);
                 break;
@@ -243,7 +291,7 @@ public static class CafeFurniture
     public static float Size(string item) => item switch
     {
         "counter" => 1.3f, "sofa" => 1.05f, "table_long" => 1.05f, "rug" => 1.3f, "shelf_cups" => 0.85f, "bicycle" => 0.8f,
-        "bookshelf" => 0.65f, "espresso" => 0.6f, "cake_display" => 0.65f, _ => 0.45f,
+        "bookshelf" => 0.65f, "espresso" => 0.6f, "cake_display" => 0.65f, "key_rack" => 0.8f, "luggage_cart" => 0.6f, "chandelier" => 0.45f, _ => 0.45f,
     };
 
     // Where people sit (local to the piece): chairs, stools, sofas

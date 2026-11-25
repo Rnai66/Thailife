@@ -96,10 +96,19 @@ M.FOODS = {
   seafood_rice = { name = "ข้าวผัดทะเล",         energy = 36 },
   -- Temple-fair prizes only (สอยดาว)
   mama         = { name = "มาม่า",                energy = 12 },
+  -- The café in town (ร้านกาแฟ, open to everyone) and the hotel's pool bar
+  latte        = { name = "ลาเต้เย็น",           energy = 20 },
+  americano    = { name = "อเมริกาโน่",          energy = 16 },
+  matcha       = { name = "มัทฉะลาเต้",          energy = 20 },
+  cocoa        = { name = "โกโก้ปั่น",           energy = 18 },
+  croissant    = { name = "ครัวซองต์เนยสด",       energy = 22 },
+  choc_cake    = { name = "เค้กช็อกโกแลต",       energy = 26 },
+  mocktail     = { name = "ม็อกเทลผลไม้",        energy = 15 },
 }
 M.FOOD_ORDER = { "soda", "iced_coffee", "moo_ping", "som_tam", "thai_tea", "coffee", "khao_man_gai",
                  "jok", "fruit", "pad_thai", "look_chin", "fried_chicken", "bubble_tea", "mango_sticky",
-                 "noodle_boat", "noodle_tomyum", "kao_lao", "grilled_squid", "coconut", "seafood_rice", "mama" }
+                 "noodle_boat", "noodle_tomyum", "kao_lao", "grilled_squid", "coconut", "seafood_rice", "mama",
+                 "latte", "americano", "matcha", "cocoa", "croissant", "choc_cake", "mocktail" }
 
 -- Household goods won at the temple fair (ของทำบุญวัดที่เอามาเป็นรางวัลสอยดาว): kept in the bag
 -- and sold to the community shop with the fish and rice. price = what the shop pays.
@@ -193,6 +202,14 @@ M.CATALOG = {
   { id = "food_thai_tea",     shop = "city_food", price = 35, name = "ชาไทย",             desc = "พลังงาน +18", food = "thai_tea",    consumable = true },
   { id = "food_coffee",       shop = "city_food", price = 45, name = "กาแฟสด",            desc = "พลังงาน +25", food = "coffee",      consumable = true },
   { id = "food_khao_man_gai", shop = "city_food", price = 50, name = "ข้าวมันไก่",         desc = "พลังงาน +35", food = "khao_man_gai", consumable = true },
+  -- The café (ร้านกาแฟ): sit down and it's served to your table (eaten straight away, ShopUI)
+  { id = "food_latte",        shop = "cafe", price = 55, name = "ลาเต้เย็น",       desc = "พลังงาน +20", food = "latte",     consumable = true },
+  { id = "food_americano",    shop = "cafe", price = 45, name = "อเมริกาโน่",      desc = "พลังงาน +16", food = "americano", consumable = true },
+  { id = "food_matcha",       shop = "cafe", price = 60, name = "มัทฉะลาเต้",      desc = "พลังงาน +20", food = "matcha",    consumable = true },
+  { id = "food_cocoa",        shop = "cafe", price = 50, name = "โกโก้ปั่น",       desc = "พลังงาน +18", food = "cocoa",     consumable = true },
+  { id = "food_croissant",    shop = "cafe", price = 65, name = "ครัวซองต์เนยสด",   desc = "พลังงาน +22", food = "croissant", consumable = true },
+  { id = "food_choc_cake",    shop = "cafe", price = 85, name = "เค้กช็อกโกแลต",   desc = "พลังงาน +26", food = "choc_cake", consumable = true },
+  { id = "food_mocktail",     shop = "cafe", price = 70, name = "ม็อกเทลผลไม้",    desc = "พลังงาน +15 · บาร์ริมสระ", food = "mocktail", consumable = true },
   { id = "seed_khao_niao",  shop = "community", price = 120, name = "พันธุ์ข้าวเหนียว กข6 (1 ถุง)", desc = "ปลูกได้ 1 แปลง (1 งาน · 4 แปลง = 1 ไร่ ได้ราว 10,000 บาท) · โต 120 วันในเกม · ขาย 14 บาท/กก.", seed = "khao_niao", consumable = true },
   { id = "seed_hommali",    shop = "community", price = 160, name = "พันธุ์ข้าวหอมมะลิ 105 (1 ถุง)", desc = "ปลูกได้ 1 แปลง (1 งาน · 4 แปลง = 1 ไร่ ได้ราว 10,000 บาท) · โต 120 วันในเกม · ขาย 20 บาท/กก.", seed = "hommali", consumable = true },
   { id = "chicken_feed",    shop = "community", price = 15,  name = "อาหารไก่ (1 ถุง)", desc = "ให้อาหารเล้า 1 ครั้ง อิ่ม 1 วันในเกม (แม่ไก่ถึงจะออกไข่)", feed = true, consumable = true },

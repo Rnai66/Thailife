@@ -59,6 +59,9 @@ public class CameraFollow : MonoBehaviour
         distance = Mathf.Clamp(Mathf.Max(offset.magnitude, DefaultDistance), MinDistance, MaxDistance);
         pitch = Mathf.Clamp(DefaultPitch, MinPitch, MaxPitch);
         if (target != null) { yaw = target.eulerAngles.y; lastTargetPos = target.position; }
+        // roofs, leaves and walls between the camera and the player get out of the way
+        if (!TryGetComponent<CameraOcclusion>(out var clear)) clear = gameObject.AddComponent<CameraOcclusion>();
+        clear.Target = target;
     }
 
     private void LateUpdate()

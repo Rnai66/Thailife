@@ -12,6 +12,11 @@ using UnityEngine.UI;
 // with a turning ดอกพิกุล on it, the kilometres and the time to go. The trip takes the game clock's time
 // for the distance (a game hour is 90 real seconds), then the new map loads with you and the vehicle
 // at its petrol station (ParkedCarSpawner).
+// The way follows the real highways (ThaiHighways: ทล.1, 2, 4, 24, 226, 304…) town by town: a blue
+// highway sign at the start of each, a welcome arch and a junction sign at every town on the way,
+// a km post every ten kilometres and a petrol station every 40-80 km (แวะปั๊ม pulls in for a break).
+// You drive it yourself (เร่ง / เบรก, ซ้าย / ขวา: mind the oncoming lane and the checkpoints) or let
+// it drive itself (ขับอัตโนมัติ); a little map of Thailand shows the way and where you are on it.
 public class DriveJourney : MonoBehaviour
 {
     private const float Lane = 1.75f;          // lane centre from the middle of the road
@@ -56,8 +61,22 @@ public class DriveJourney : MonoBehaviour
     private Thing overtaking;
     private bool night;
 
+    // the highways: the legs town to town, where each ends along this road, what's been put up
+    private List<ThaiHighways.Leg> legs = new List<ThaiHighways.Leg>();
+    private string fromTown, toTown;
+    private float[] legEnd;
+    private int legsBuilt, legShown = -1;
+    private float roadTotal, perKm, postEvery, nextPost, nextStation;
+    private readonly List<float> stations = new List<float>();
+    private bool manual = true;
+    private float restAt = -1f, restUntil, crashUntil, offRoadSaid;
+
     // the screen over it
-    private Text leftText, timeText, speedText, eventText;
+    private Text leftText, timeText, speedText, eventText, roadText, nextText, modeLabel;
+    private HoldButton gasButton, brakeButton, leftButton, rightButton;
+    private GameObject restButton;
+    private RectTransform mapDot;
+    private float mapW, mapH;
     private RectTransform fill, marker;
     private float lineW, eventUntil;
 
@@ -73,6 +92,9 @@ public class DriveJourney : MonoBehaviour
         running.drive = d;
         running.carId = car.CarId;
         running.carName = car.CarName;
+        running.fromTown = ThaiHighways.TownOf(Locations.Current != null ? Locations.Current.Id : null);
+        running.toTown = ThaiHighways.TownOf(to.Id);
+        running.legs = ThaiHighways.Route(running.fromTown, running.toTown);
         var player = FindAnyObjectByType<PlayerController>();
         running.template = player != null ? player.GetComponent<Renderer>()?.sharedMaterial : null;
         var model = player != null ? player.GetComponentInChildren<CharacterModel>() : null;
@@ -197,6 +219,7 @@ public class DriveJourney : MonoBehaviour
         cruise = (carId == "car_bicycle" ? 18f : carId == "car_motorbike" ? 60f : carId == "car_pickup" ? 80f : carId == "car_sedan" ? 85f : 90f) / 3.6f;
         speed = cruise * 0.7f;
         nextOncoming = 6f;
+        PlanRoad();
         PlaceCamera(1f);
     }
 
@@ -464,6 +487,241 @@ public class DriveJourney : MonoBehaviour
         return mesh;
     }
 
+    // ── the highway ─────────────────────────────────────────────────────────────────────────────
+    // How long this road is (about the trip's time at cruising speed) and where each town falls on it
+    private void PlanRoad()
+    {
+        roadTotal = Mathf.Max(600f, cruise * 0.9f * Mathf.Max(3f, drive.seconds));
+        perKm = roadTotal / Mathf.Max(1f, drive.km);
+        postEvery = perKm * (perKm * 10f < 45f ? 50f : 10f);
+        nextPost = postEvery;
+        nextStation = drive.km >= 40f ? perKm * Random.Range(40f, 80f) : float.MaxValue;
+        float sum = 0f;
+        foreach (var l in legs) sum += l.km;
+        legEnd = new float[legs.Count];
+        float run = 0f;
+        for (int i = 0; i < legs.Count; i++)
+        {
+            run += legs[i].km;
+            legEnd[i] = i == legs.Count - 1 ? roadTotal - 60f : roadTotal * run / sum;
+        }
+        // the highway's sign right at the start
+        if (legs.Count > 0) Shield(40f, legs[0].highway, legs[0].to);
+    }
+
+    private int LegAt(float z)
+    {
+        for (int i = 0; i < legEnd.Length; i++) if (z < legEnd[i]) return i;
+        return legEnd.Length - 1;
+    }
+
+    // a sign by the left verge, facing the traffic: a board of `color` with `text` on it
+    private Transform Board(string name, float z, float x, Vector2 size, float height, Color color, string text, Color ink, float charSize = 0.04f)
+    {
+        var t = Group(name, x, z);
+        t.localRotation = Quaternion.Euler(0f, 180f, 0f);
+        foreach (float s in new[] { -0.4f, 0.4f })
+            Part(PrimitiveType.Cube, t, new Vector3(s * size.x, height * 0.5f, 0f), new Vector3(0.1f, height, 0.1f), new Color(0.7f, 0.7f, 0.72f));
+        Part(PrimitiveType.Cube, t, new Vector3(0f, height + size.y * 0.5f, 0f), new Vector3(size.x, size.y, 0.08f), color);
+        Part(PrimitiveType.Cube, t, new Vector3(0f, height + size.y * 0.5f, 0.01f), new Vector3(size.x + 0.12f, size.y + 0.12f, 0.06f), Color.white);
+        var label = SignText(t, text, new Vector3(0f, height + size.y * 0.5f, 0.06f));
+        label.color = ink;
+        label.characterSize = charSize;
+        scenery.Add(t);
+        return t;
+    }
+
+    // ป้ายทางหลวง: the highway's number and where it goes
+    private void Shield(float z, string highway, string toward) =>
+        Board("Highway", z, -(Lane * 2f + 2.6f), new Vector2(2.6f, 1.7f), 1.6f, new Color(0.1f, 0.3f, 0.68f),
+            $"ทางหลวง {highway}\nไป {ThaiHighways.Short(toward)}", Color.white, 0.035f);
+
+    // หลักกิโลเมตร: white with a yellow top, the kilometres from where you set out
+    private void KmPost(float z)
+    {
+        var t = Group("KmPost", -(Lane * 2f + 1.7f), z);
+        t.localRotation = Quaternion.Euler(0f, 180f, 0f);
+        Part(PrimitiveType.Cube, t, new Vector3(0f, 0.45f, 0f), new Vector3(0.42f, 0.9f, 0.18f), Color.white);
+        Part(PrimitiveType.Cube, t, new Vector3(0f, 1.0f, 0f), new Vector3(0.42f, 0.25f, 0.18f), new Color(0.98f, 0.8f, 0.1f));
+        var label = SignText(t, $"{Mathf.RoundToInt(z / perKm)}", new Vector3(0f, 0.55f, 0.1f));
+        label.color = new Color(0.1f, 0.1f, 0.1f);
+        label.characterSize = 0.025f;
+        scenery.Add(t);
+    }
+
+    // ปั๊มน้ำมัน on the left: a forecourt, a canopy over the pumps, the price board and a mini-mart
+    private void Station(float z)
+    {
+        stations.Add(z);
+        var t = Group("PetrolStation", -(Lane * 2f + 12f), z);
+        var brand = new Color(0.12f, 0.55f, 0.3f);
+        Part(PrimitiveType.Cube, t, new Vector3(2f, -0.045f, 0f), new Vector3(20f, 0.1f, 28f), new Color(0.55f, 0.55f, 0.57f));
+        foreach (float a in new[] { -3.5f, 3.5f })
+            foreach (float b in new[] { -4.5f, 4.5f })
+                Part(PrimitiveType.Cube, t, new Vector3(a + 2f, 2.3f, b), new Vector3(0.35f, 4.6f, 0.35f), Color.white);
+        Part(PrimitiveType.Cube, t, new Vector3(2f, 4.75f, 0f), new Vector3(10f, 0.5f, 12f), Color.white);
+        Part(PrimitiveType.Cube, t, new Vector3(2f, 4.75f, 0f), new Vector3(10.1f, 0.25f, 12.1f), brand);
+        foreach (float b in new[] { -2.5f, 2.5f })
+        {
+            Part(PrimitiveType.Cube, t, new Vector3(2f, 0.15f, b), new Vector3(1f, 0.3f, 2.4f), new Color(0.8f, 0.8f, 0.8f));
+            Part(PrimitiveType.Cube, t, new Vector3(2f, 1f, b), new Vector3(0.6f, 1.5f, 0.9f), brand);
+            Part(PrimitiveType.Cube, t, new Vector3(2f, 1.3f, b), new Vector3(0.62f, 0.4f, 0.6f), new Color(0.1f, 0.1f, 0.12f));
+        }
+        Part(PrimitiveType.Cube, t, new Vector3(-6f, 1.6f, 9f), new Vector3(7f, 3.2f, 6f), new Color(0.95f, 0.93f, 0.88f)); // the mini-mart
+        Part(PrimitiveType.Cube, t, new Vector3(-2.45f, 1.2f, 9f), new Vector3(0.05f, 2f, 4.5f), new Color(0.5f, 0.7f, 0.85f));
+        Board("StationSign", z - 16f, -(Lane * 2f + 3.2f), new Vector2(2.4f, 2.2f), 3.2f, brand,
+            "ปั๊มน้ำมัน\nไทยรุ่งเรือง\nห้องน้ำ · กาแฟ", Color.white, 0.03f);
+        scenery.Add(t);
+    }
+
+    // A town on the way: the welcome arch over the road, a crossroad and the sign to the next highway
+    private void TownGate(int i)
+    {
+        var leg = legs[i];
+        float z = legEnd[i];
+        bool last = i == legs.Count - 1;
+        var arch = Group("Welcome", 0f, z);
+        arch.localRotation = Quaternion.Euler(0f, 180f, 0f);
+        var gold = new Color(0.85f, 0.65f, 0.2f);
+        foreach (float s in new[] { -1f, 1f })
+            Part(PrimitiveType.Cube, arch, new Vector3(s * (Lane * 2f + 1.8f), 3f, 0f), new Vector3(0.8f, 6f, 0.8f), Color.white);
+        Part(PrimitiveType.Cube, arch, new Vector3(0f, 6.4f, 0f), new Vector3(Lane * 4f + 4.8f, 1.6f, 0.6f), new Color(0.55f, 0.12f, 0.1f));
+        Part(PrimitiveType.Cube, arch, new Vector3(0f, 7.45f, 0f), new Vector3(Lane * 4f + 5.4f, 0.5f, 0.7f), gold);
+        var label = SignText(arch, $"ยินดีต้อนรับสู่ จ.{ThaiHighways.Short(leg.to)}", new Vector3(0f, 6.4f, 0.32f));
+        label.color = new Color(1f, 0.9f, 0.6f);
+        label.characterSize = 0.06f;
+        scenery.Add(arch);
+        if (last) return;
+        var cross = Group("Crossroad", 0f, z + 30f);
+        Part(PrimitiveType.Cube, cross, new Vector3(0f, -0.045f, 0f), new Vector3(64f, 0.1f, 7f), new Color(0.26f, 0.26f, 0.28f));
+        foreach (float s in new[] { -1f, 1f })
+            Part(PrimitiveType.Cube, cross, new Vector3(s * 1.75f, 0.006f, -4.2f), new Vector3(3.2f, 0.02f, 0.3f), Color.white);
+        scenery.Add(cross);
+        var next = legs[i + 1];
+        Board("Junction", z + 12f, -(Lane * 2f + 3f), new Vector2(3.4f, 1.9f), 2f, new Color(0.08f, 0.45f, 0.25f),
+            $"แยก{ThaiHighways.Short(leg.to)}\nทล.{next.highway} ไป {ThaiHighways.Short(next.to)}", Color.white, 0.035f);
+        Shield(z + 60f, next.highway, next.to);
+    }
+
+    // ── driving yourself ──
+    private bool Key(params UnityEngine.InputSystem.Key[] keys)
+    {
+        var k = UnityEngine.InputSystem.Keyboard.current;
+        if (k == null) return false;
+        foreach (var key in keys) if (k[key].isPressed) return true;
+        return false;
+    }
+
+    private void DriveManual(float dt)
+    {
+        MoveThings(dt);
+        bool gas = gasButton.Held || Key(UnityEngine.InputSystem.Key.UpArrow, UnityEngine.InputSystem.Key.W);
+        bool brake = brakeButton.Held || Key(UnityEngine.InputSystem.Key.DownArrow, UnityEngine.InputSystem.Key.S);
+        float steer = (rightButton.Held || Key(UnityEngine.InputSystem.Key.RightArrow, UnityEngine.InputSystem.Key.D) ? 1f : 0f)
+                    - (leftButton.Held || Key(UnityEngine.InputSystem.Key.LeftArrow, UnityEngine.InputSystem.Key.A) ? 1f : 0f);
+        float top = cruise * 1.3f;
+        float edge = Lane * 2f + 0.7f;
+
+        // pulling in at a petrol station: off to the left and stop by the pumps
+        if (restAt > 0f)
+        {
+            gas = brake = false;
+            steer = 0f;
+            float gap = restAt - carZ;
+            float want = Time.unscaledTime < restUntil ? 0f : Mathf.Sqrt(2f * 3.5f * Mathf.Max(0f, gap));
+            speed = Mathf.MoveTowards(speed, Mathf.Min(want, 14f), 8f * dt);
+            carX = Mathf.MoveTowards(carX, -(edge + 2.2f), 2.5f * dt);
+            if (restUntil == 0f && gap < 1.5f && speed < 0.6f)
+            {
+                restUntil = Time.unscaledTime + 4f;
+                Say("แวะพักที่ปั๊ม · เข้าห้องน้ำ ซื้อกาแฟ ยืดเส้นยืดสาย", new Color(0.7f, 1f, 0.75f));
+                GameAudio.Play("door_chime", null, 0.6f);
+            }
+            if (restUntil > 0f && Time.unscaledTime >= restUntil)
+            {
+                restAt = -1f;
+                restUntil = 0f;
+                Say("พักหายเหนื่อยแล้ว ออกเดินทางต่อ", Color.white);
+            }
+        }
+        else
+        {
+            if (brake) speed = Mathf.MoveTowards(speed, 0f, 10f * dt);
+            else if (gas) speed = Mathf.MoveTowards(speed, top, (speed < cruise ? 4f : 1.4f) * dt);
+            else speed = Mathf.MoveTowards(speed, 0f, 0.7f * dt);
+            float side = steer * Mathf.Lerp(1.2f, 3.6f, Mathf.Clamp01(speed / 10f)) * (speed > 0.3f ? 1f : 0f);
+            carX = Mathf.Clamp(carX + side * dt, -edge - 0.6f, edge + 0.6f);
+            // on the shoulder: rough and slow
+            if (Mathf.Abs(carX) > edge)
+            {
+                speed = Mathf.Min(speed, Mathf.Max(8f, speed - 6f * dt));
+                if (Time.unscaledTime - offRoadSaid > 4f) { offRoadSaid = Time.unscaledTime; Say("ออกไหล่ทาง! กลับเข้าเลน", new Color(1f, 0.75f, 0.4f)); }
+            }
+        }
+
+        // checkpoints: slow down through them, the officer waves you on (or blows the whistle)
+        foreach (var th in things)
+        {
+            if (th.kind != Kind.Checkpoint) continue;
+            float from = th.z - th.half, to = th.z + th.half;
+            if (carZ > from - 45f && carZ < to && !th.told)
+            {
+                th.told = true;
+                Say("ด่านตรวจ · ชะลอความเร็ว 20 กม./ชม.", new Color(1f, 0.8f, 0.2f));
+                GameAudio.Play("whistle", null, 0.5f);
+            }
+            if (th.officer != null && carZ > from - 10f && carZ < from) th.officer.Wave();
+            if (carZ > from && carZ < to && speed > 32f / 3.6f && th.bob >= 0f)
+            {
+                th.bob = -1f; // (said once)
+                Say("ตำรวจเป่านกหวีด! ขับช้าๆ ผ่านด่าน", new Color(1f, 0.45f, 0.35f));
+                GameAudio.Play("whistle", null, 0.8f);
+            }
+        }
+
+        // bumping into things
+        foreach (var th in things)
+        {
+            if (th.kind == Kind.Checkpoint || Mathf.Abs(th.x - carX) > 1.35f || Mathf.Abs(th.z - carZ) > th.half + 2f) continue;
+            if (th.kind == Kind.Ghost)
+            {
+                if (!th.told) { th.told = true; Say($"ทะลุ{th.name}! ขนลุกซู่", new Color(0.7f, 1f, 0.75f)); GameAudio.Play("ghost", null, 0.4f); }
+                continue;
+            }
+            if (th.z > carZ) carZ = th.z - th.half - 2.05f;
+            if (Time.unscaledTime < crashUntil) { speed = Mathf.Min(speed, Mathf.Max(0f, th.speed)); continue; }
+            crashUntil = Time.unscaledTime + 1.5f;
+            speed = th.kind == Kind.Oncoming ? 0f : Mathf.Max(0f, Mathf.Min(speed, th.speed) * 0.5f);
+            Say(th.kind == Kind.Oncoming ? $"ชนประสานงากับ{th.name}! อันตราย อยู่เลนซ้ายไว้" : $"ชนท้าย{th.name}! เว้นระยะห่างหน่อย", new Color(1f, 0.4f, 0.3f));
+            GameAudio.Play("punch_heavy", null, 0.7f);
+        }
+
+        float before = car.localPosition.x;
+        float lateral = (carX - before) / Mathf.Max(0.0001f, dt);
+        yaw = Mathf.Lerp(yaw, Mathf.Atan2(lateral, Mathf.Max(3f, speed)) * Mathf.Rad2Deg, 8f * dt);
+        carZ += speed * dt;
+        car.localPosition = new Vector3(carX, 0f, carZ);
+        car.localRotation = Quaternion.Euler(0f, yaw, 0f);
+    }
+
+    private void PullIn()
+    {
+        if (!manual || restAt > 0f) return;
+        foreach (float z in stations)
+            if (z > carZ + 12f && z < carZ + 160f) { restAt = z; restUntil = 0f; Say("เปิดไฟเลี้ยวซ้าย เข้าปั๊ม", Color.white); return; }
+    }
+
+    private void ToggleMode()
+    {
+        manual = !manual;
+        restAt = -1f;
+        laneTarget = OurLane;
+        overtaking = null;
+        modeLabel.text = manual ? "ขับอัตโนมัติ" : "ขับเอง";
+        foreach (var b in new[] { gasButton, brakeButton, leftButton, rightButton }) b.gameObject.SetActive(manual);
+        Say(manual ? "ขับเองแล้ว · เร่ง เบรก เลี้ยวซ้ายขวา" : "ขับอัตโนมัติ · นั่งชมวิวได้เลย", UiKit.GoldText);
+    }
+
     // ── driving ──
     // Nothing in `lane` between z0 and z1
     private bool LaneClear(float lane, float z0, float z1)
@@ -501,8 +759,13 @@ public class DriveJourney : MonoBehaviour
     private void Drive(float dt)
     {
         float want = cruise;
+        MoveThings(dt);
+        DriveAuto(dt, want);
+    }
 
-        // the things on the road move (oncoming traffic slows for us in its lane)
+    // the things on the road move (oncoming traffic slows for us in its lane, slow traffic behind us)
+    private void MoveThings(float dt)
+    {
         foreach (var th in things)
         {
             if (th.kind == Kind.Oncoming)
@@ -517,10 +780,15 @@ public class DriveJourney : MonoBehaviour
                 foreach (var o in things)
                     if (o != th && o.kind != Kind.Oncoming && Mathf.Abs(o.x - th.x) < 1.4f && o.z > th.z && o.z - th.z < 16f)
                         lim = o.kind == Kind.Checkpoint ? Mathf.Min(lim, 5.5f) : o.kind == Kind.Ghost ? 0f : Mathf.Min(lim, o.speed);
+                if (Mathf.Abs(carX - th.x) < 1.5f && carZ > th.z && carZ - th.z < 16f) lim = Mathf.Min(lim, speed);
                 th.speed = Mathf.MoveTowards(th.speed, lim, 6f * dt);
             }
             th.z += th.speed * dt;
         }
+    }
+
+    private void DriveAuto(float dt, float want)
+    {
 
         // police checkpoint: slow right down through it, the officer waves us on
         bool slowZone = false;
@@ -613,6 +881,14 @@ public class DriveJourney : MonoBehaviour
         while (nextScenery < carZ + 230f) { SpawnScenery(nextScenery); nextScenery += Random.Range(4f, 10f); }
         while (nextPole < carZ + 230f) { SpawnPole(nextPole); nextPole += 32f; }
         while (nextEvent < carZ + 170f) { SpawnEvent(nextEvent); nextEvent += Random.Range(55f, 110f); }
+        // the highway: km posts, petrol stations, the towns on the way
+        while (nextPost < carZ + 230f && nextPost < roadTotal - 20f) { KmPost(nextPost); nextPost += postEvery; }
+        while (nextStation < carZ + 230f && nextStation < roadTotal - 150f)
+        {
+            Station(nextStation);
+            nextStation += perKm * Random.Range(40f, 80f);
+        }
+        while (legsBuilt < legEnd.Length && legEnd[legsBuilt] < carZ + 230f) { TownGate(legsBuilt); legsBuilt++; }
         if (carZ + 240f > nextOncoming)
         {
             if (LaneClear(OtherLane, carZ + 180f, carZ + 270f)) SpawnOncoming(carZ + 250f);
@@ -672,7 +948,7 @@ public class DriveJourney : MonoBehaviour
         viewGo.GetComponent<RawImage>().texture = target;
 
         // the card at the top
-        float w = portrait ? 980f : 1240f, h = 300f;
+        float w = portrait ? 980f : 1240f, h = 350f;
         var card = UiKit.Panel("Card", root, new Color(0.13f, 0.08f, 0.05f, 0.86f), Vector2.zero, new Vector2(w, h), shadow: true);
         card.anchorMin = card.anchorMax = new Vector2(0.5f, 1f);
         card.anchoredPosition = new Vector2(0f, -(portrait ? 230f : 180f));
@@ -680,7 +956,7 @@ public class DriveJourney : MonoBehaviour
         string to = destination.NameTh.Split('·')[0].Trim();
         string from = Locations.Current != null ? Locations.Current.NameTh.Split('·')[0].Trim() : "";
         UiKit.Cartoon(UiKit.Label(card, 44, $"กำลังขับไป {to}", new Vector2(0f, 105f), new Vector2(w - 60f, 60f), UiKit.GoldText), 3f);
-        UiKit.Label(card, 24, $"{carName} · {drive.km:0} กม. · ใช้น้ำมัน {drive.litres:0.0} ลิตร · เหลือ {drive.left:0.0} ลิตร",
+        roadText = UiKit.Label(card, 24, $"{carName} · {drive.km:0} กม. · ใช้น้ำมัน {drive.litres:0.0} ลิตร · เหลือ {drive.left:0.0} ลิตร",
             new Vector2(0f, 58f), new Vector2(w - 60f, 36f), UiKit.HeaderSub);
         lineW = w - 240f;
         var track = UiKit.Panel("Track", card, new Color(1f, 1f, 1f, 0.15f), new Vector2(0f, 6f), new Vector2(lineW, 12f));
@@ -694,7 +970,19 @@ public class DriveJourney : MonoBehaviour
             dot.sizeDelta = new Vector2(30f, 30f);
             UiKit.Label(card, 22, name, new Vector2(x, -30f), new Vector2(240f, 32f), UiKit.HeaderText);
         }
+        // the towns on the way along the line
+        float sumKm = 0f;
+        foreach (var l in legs) sumKm += l.km;
+        for (int i = 0, run = 0; i < legs.Count - 1; i++)
+        {
+            run += Mathf.RoundToInt(legs[i].km);
+            var dot = UiKit.Rect("Town", card, Color.white);
+            dot.GetComponent<Image>().sprite = UiKit.CircleSprite;
+            dot.anchoredPosition = new Vector2(-lineW * 0.5f + lineW * run / Mathf.Max(1f, sumKm), 6f);
+            dot.sizeDelta = new Vector2(16f, 16f);
+        }
         marker = PikulSpinner.Make(card, new Vector2(-lineW * 0.5f, 6f), 64f);
+        nextText = UiKit.Label(card, 24, "", new Vector2(0f, -148f), new Vector2(w - 60f, 36f), new Color(0.75f, 0.9f, 1f));
         leftText = UiKit.Label(card, 30, "", new Vector2(-w * 0.25f, -100f), new Vector2(w * 0.45f, 46f), Color.white);
         timeText = UiKit.Label(card, 30, "", new Vector2(w * 0.25f, -100f), new Vector2(w * 0.45f, 46f), UiKit.GoldText);
 
@@ -702,33 +990,172 @@ public class DriveJourney : MonoBehaviour
         eventText = UiKit.Cartoon(UiKit.Label(root, 40, "", Vector2.zero, new Vector2(1000f, 60f), Color.white), 3f);
         var er = (RectTransform)eventText.transform;
         er.anchorMin = er.anchorMax = new Vector2(0.5f, 1f);
-        er.anchoredPosition = new Vector2(0f, -(portrait ? 430f : 370f));
+        er.anchoredPosition = new Vector2(0f, -(portrait ? 480f : 410f));
 
         // the speedometer
         var gauge = UiKit.Panel("Speed", root, new Color(0.1f, 0.08f, 0.06f, 0.8f), Vector2.zero, new Vector2(300f, 90f), shadow: true);
-        gauge.anchorMin = gauge.anchorMax = new Vector2(0f, 0f);
-        gauge.anchoredPosition = new Vector2(190f, portrait ? 160f : 110f);
+        gauge.anchorMin = gauge.anchorMax = new Vector2(0.5f, 0f);
+        gauge.anchoredPosition = new Vector2(0f, portrait ? 300f : 190f);
         gauge.gameObject.AddComponent<Outline>().effectColor = new Color(0.95f, 0.75f, 0.3f, 0.7f);
         speedText = UiKit.Cartoon(UiKit.Label(gauge, 40, "", Vector2.zero, new Vector2(280f, 80f), Color.white), 2.5f);
         var tip = UiKit.Label(root, 22, "ระหว่างทางเวลาในเกมเดินไปตามระยะทาง (1 ชม. ในเกม = 90 วินาที)", Vector2.zero, new Vector2(900f, 34f), new Color(1f, 1f, 1f, 0.85f));
         var tr = (RectTransform)tip.transform;
         tr.anchorMin = tr.anchorMax = new Vector2(0.5f, 0f);
-        tr.anchoredPosition = new Vector2(portrait ? 0f : 200f, portrait ? 60f : 50f);
+        tr.anchoredPosition = new Vector2(0f, portrait ? 60f : 40f);
         tip.gameObject.AddComponent<Shadow>().effectDistance = new Vector2(2f, -2f);
+
+        // driving it yourself: the pedals on the right, left and right on the left
+        gasButton = Pedal(root, "เร่ง", new Vector2(1f, 0f), new Vector2(-150f, 200f), 200f, UiKit.PayGreen);
+        brakeButton = Pedal(root, "เบรก", new Vector2(1f, 0f), new Vector2(-370f, 150f), 160f, UiKit.Danger);
+        leftButton = Pedal(root, "<", new Vector2(0f, 0f), new Vector2(140f, 170f), 170f, UiKit.Teak);
+        rightButton = Pedal(root, ">", new Vector2(0f, 0f), new Vector2(340f, 170f), 170f, UiKit.Teak);
+        foreach (var b in new[] { leftButton, rightButton }) b.GetComponentInChildren<Text>().fontSize = 64;
+        var mode = UiKit.RoundButton(root, "ขับอัตโนมัติ", Vector2.zero, new Vector2(260f, 70f), new Color(0.13f, 0.08f, 0.05f, 0.9f), UiKit.GoldText, ToggleMode, 26);
+        var mr = (RectTransform)mode.transform;
+        mr.anchorMin = mr.anchorMax = new Vector2(0.5f, 0f);
+        mr.anchoredPosition = new Vector2(0f, portrait ? 400f : 290f);
+        mode.gameObject.AddComponent<Outline>().effectColor = UiKit.Gold;
+        modeLabel = mode.GetComponentInChildren<Text>();
+        var rest = UiKit.RoundButton(root, "แวะปั๊ม", Vector2.zero, new Vector2(220f, 80f), new Color(0.12f, 0.55f, 0.3f), Color.white, PullIn, 28);
+        var rr = (RectTransform)rest.transform;
+        rr.anchorMin = rr.anchorMax = new Vector2(1f, 0f);
+        rr.anchoredPosition = portrait ? new Vector2(-200f, 520f) : new Vector2(-430f, 330f);
+        restButton = rest.gameObject;
+        restButton.SetActive(false);
+
+        CountryMap(root, portrait);
+    }
+
+    private static HoldButton Pedal(Transform root, string label, Vector2 anchor, Vector2 at, float size, Color color)
+    {
+        var b = UiKit.RoundButton(root, label, Vector2.zero, new Vector2(size, size), color, Color.white, () => { }, 34, circle: true);
+        var rt = (RectTransform)b.transform;
+        rt.anchorMin = rt.anchorMax = anchor;
+        rt.anchoredPosition = at;
+        b.gameObject.AddComponent<Outline>().effectColor = new Color(1f, 1f, 1f, 0.6f);
+        return b.gameObject.AddComponent<HoldButton>();
+    }
+
+    // แผนที่ประเทศไทย at the side: every highway thin, the way you're going in blue, you on it
+    private const float MinLat = 5.4f, MaxLat = 20.7f, MinLon = 97.2f, MaxLon = 106f;
+
+    private Vector2 MapPoint(Vector2 latLon) => new Vector2(
+        (latLon.y - MinLon) / (MaxLon - MinLon) * mapW, (latLon.x - MinLat) / (MaxLat - MinLat) * mapH);
+
+    private void CountryMap(Transform root, bool portrait)
+    {
+        mapW = 150f;
+        mapH = mapW * (MaxLat - MinLat) / ((MaxLon - MinLon) * 0.97f);
+        var panel = UiKit.Panel("Thailand", root, new Color(0.13f, 0.08f, 0.05f, 0.82f), Vector2.zero, new Vector2(mapW + 24f, mapH + 54f), shadow: true);
+        panel.anchorMin = panel.anchorMax = new Vector2(1f, 0.5f);
+        panel.anchoredPosition = new Vector2(-(mapW * 0.5f + 40f), portrait ? 80f : -20f);
+        panel.gameObject.AddComponent<Outline>().effectColor = new Color(0.95f, 0.75f, 0.3f, 0.7f);
+        panel.GetComponent<Image>().raycastTarget = false;
+        UiKit.Label(panel, 20, "เส้นทางหลวง", new Vector2(0f, mapH * 0.5f + 12f), new Vector2(mapW, 28f), UiKit.GoldText);
+
+        int px = Mathf.RoundToInt(mapW), py = Mathf.RoundToInt(mapH);
+        var tex = new Texture2D(px, py, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Bilinear };
+        var pixels = new Color32[px * py];
+        void Line(Vector2 a, Vector2 b, Color32 c, int thick)
+        {
+            float len = Vector2.Distance(a, b);
+            for (float u = 0f; u <= len; u += 0.5f)
+            {
+                var p = Vector2.Lerp(a, b, len > 0f ? u / len : 0f);
+                for (int dx = -thick; dx <= thick; dx++)
+                    for (int dy = -thick; dy <= thick; dy++)
+                    {
+                        int x = Mathf.RoundToInt(p.x) + dx, y = Mathf.RoundToInt(p.y) + dy;
+                        if (x >= 0 && y >= 0 && x < px && y < py) pixels[y * px + x] = c;
+                    }
+            }
+        }
+        foreach (var (a, b, _) in ThaiHighways.AllRoads()) Line(MapPoint(a), MapPoint(b), new Color32(0xC9, 0xB8, 0x98, 0xC0), 0);
+        foreach (var l in legs) Line(MapPoint(ThaiHighways.LatLon(l.from)), MapPoint(ThaiHighways.LatLon(l.to)), new Color32(0x3D, 0x9B, 0xFF, 0xFF), 1);
+        tex.SetPixels32(pixels);
+        tex.Apply();
+        var img = new GameObject("Roads", typeof(RectTransform), typeof(RawImage));
+        var ir = (RectTransform)img.transform;
+        ir.SetParent(panel, false);
+        ir.sizeDelta = new Vector2(mapW, mapH);
+        ir.anchoredPosition = new Vector2(0f, -12f);
+        var raw = img.GetComponent<RawImage>();
+        raw.texture = tex;
+        raw.raycastTarget = false;
+        foreach (var town in new[] { fromTown, toTown })
+        {
+            var d = UiKit.Rect("End", ir, UiKit.Gold);
+            d.GetComponent<Image>().sprite = UiKit.CircleSprite;
+            d.GetComponent<Image>().raycastTarget = false;
+            d.anchorMin = d.anchorMax = Vector2.zero;
+            d.sizeDelta = new Vector2(12f, 12f);
+            d.anchoredPosition = MapPoint(ThaiHighways.LatLon(town));
+        }
+        mapDot = UiKit.Rect("You", ir, new Color(1f, 0.3f, 0.25f));
+        mapDot.GetComponent<Image>().sprite = UiKit.CircleSprite;
+        mapDot.GetComponent<Image>().raycastTarget = false;
+        mapDot.anchorMin = mapDot.anchorMax = Vector2.zero;
+        mapDot.sizeDelta = new Vector2(14f, 14f);
+        mapDot.gameObject.AddComponent<Outline>().effectColor = Color.white;
+        mapDot.anchoredPosition = MapPoint(ThaiHighways.LatLon(fromTown));
+    }
+
+    // Where you are on the map: along the leg you're on
+    private Vector2 MapAt(float z)
+    {
+        if (legs.Count == 0) return MapPoint(ThaiHighways.LatLon(fromTown));
+        int i = LegAt(z);
+        float a = i == 0 ? 0f : legEnd[i - 1], b = legEnd[i];
+        float k = Mathf.Clamp01((z - a) / Mathf.Max(1f, b - a));
+        return Vector2.Lerp(MapPoint(ThaiHighways.LatLon(legs[i].from)), MapPoint(ThaiHighways.LatLon(legs[i].to)), k);
+    }
+
+    // The highway you're on and what's coming up
+    private void UpdateRoadInfo()
+    {
+        if (legs.Count > 0)
+        {
+            int i = LegAt(carZ);
+            if (i != legShown)
+            {
+                legShown = i;
+                roadText.text = $"ทางหลวงหมายเลข {legs[i].highway} · มุ่งหน้า {ThaiHighways.Short(legs[i].to)} · {carName}";
+                if (i > 0) Say($"เข้าสู่ ทล.{legs[i].highway} ไป{ThaiHighways.Short(legs[i].to)}", new Color(0.75f, 0.9f, 1f));
+            }
+        }
+        string next = "";
+        if (legs.Count > 1)
+        {
+            int i = LegAt(carZ);
+            if (i < legs.Count - 1)
+                next = $"แยกต่อไป {ThaiHighways.Short(legs[i].to)} อีก {Mathf.Max(0f, (legEnd[i] - carZ) / perKm):0} กม. (ต่อ ทล.{legs[i + 1].highway})";
+        }
+        float station = float.MaxValue;
+        foreach (float z in stations) if (z > carZ + 5f && z < station) station = z;
+        if (station == float.MaxValue && nextStation < roadTotal - 150f) station = nextStation;
+        if (station < float.MaxValue)
+            next += (next.Length > 0 ? " · " : "") + $"ปั๊มถัดไป {Mathf.Max(0f, (station - carZ) / perKm):0} กม.";
+        nextText.text = next;
+        restButton.SetActive(manual && restAt < 0f && station < carZ + 160f && station > carZ + 12f);
     }
 
     private IEnumerator Run()
     {
-        float total = Mathf.Max(3f, drive.seconds);
-        for (float t = 0f; t < total; t += Time.unscaledDeltaTime)
+        float t = 0f;
+        Say("ขับเองได้เลย · ปุ่มเร่ง เบรก และเลี้ยวซ้ายขวา (หรือกดขับอัตโนมัติ)", UiKit.GoldText);
+        while (carZ < roadTotal)
         {
             float dt = Mathf.Min(0.05f, Time.unscaledDeltaTime);
+            t += Time.unscaledDeltaTime;
             Recycle();
-            Drive(dt);
+            if (manual) DriveManual(dt);
+            else Drive(dt);
             Animate(t);
             PlaceCamera(1f - Mathf.Exp(-6f * dt));
+            UpdateRoadInfo();
+            mapDot.anchoredPosition = MapAt(carZ);
 
-            float k = t / total;
+            float k = Mathf.Clamp01(carZ / roadTotal);
             marker.anchoredPosition = new Vector2(-lineW * 0.5f + lineW * k, 6f);
             fill.sizeDelta = new Vector2(lineW * k, 12f);
             leftText.text = $"อีก {drive.km * (1f - k):0} กม.";

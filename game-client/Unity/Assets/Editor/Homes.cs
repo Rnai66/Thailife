@@ -71,6 +71,8 @@ public static class Homes
         {
             Townhouse(HouseLotsBuilder.Template(tpl, "townhouse"), new Vector3(-2.4f, 0f, 1.5f), 0f, modern: false, solo: true);
             Single(HouseLotsBuilder.Template(tpl, "city_single"), new Vector3(0f, 0f, 1.5f), 0f, "city_single", modern: false);
+            Tower(HouseLotsBuilder.Template(tpl, "condo"), new Vector3(0f, 0f, 1.5f), "condo");
+            Tower(HouseLotsBuilder.Template(tpl, "apartment"), new Vector3(0f, 0f, 1.5f), "apartment");
         }, lawn: true);
     }
 
@@ -399,5 +401,100 @@ public static class Homes
         Pot(t, new Vector3(-2.7f, 0f, -4.4f), 9);
         Nature.Bush(t, new Vector3(-4.3f, 0f, 2.5f), 1.1f, 11, flowers: true);
         Finish(t, style, floorY, -3.1f);
+    }
+
+    // คอนโดมิเนียม / ตึกอพาร์ตเมนต์ on a city lot: your room is the unit on the ground floor, behind the
+    // glass of the lobby front (the same 5.6 x 4.6 m room as every home), with the floors of the
+    // neighbours' units stacked above. Everything round and over your room is named Roof* so it steps
+    // out of the way while you're inside (HomeInterior), like a house's roof.
+    //   condo: an 8-storey glass tower, balconies with glass rails, a canopy at the lobby, the name on top
+    //   apartment: a 4-storey walk-up, open corridors with railings and doors, air-cons and washing lines
+    private static void Tower(Transform parent, Vector3 at, string style)
+    {
+        bool condo = style == "condo";
+        const float floorY = 0.3f, storey = 3f, halfW = 5.2f, front = -2.3f, back = 4.3f;
+        int floors = condo ? 8 : 4;
+        var t = Plot(parent, "Home_" + style, at, 0f);
+        var white = PrimitiveKit.Mat("PlasterWhite", new Color(0.93f, 0.92f, 0.88f));
+        var body = condo ? PrimitiveKit.Mat("CondoGrey", new Color(0.78f, 0.79f, 0.8f), 0.35f) : PrimitiveKit.Mat("ApartmentPeach", new Color(0.96f, 0.82f, 0.66f));
+        var trim = condo ? PrimitiveKit.Mat("CondoDark", new Color(0.18f, 0.2f, 0.23f), 0.5f) : PrimitiveKit.Mat("ApartmentRust", new Color(0.62f, 0.3f, 0.18f));
+        var glass = condo ? PrimitiveKit.Mat("CondoGlass", new Color(0.36f, 0.55f, 0.68f), 0.9f, 0.3f) : PrimitiveKit.Mat("WindowGlassBlue", new Color(0.45f, 0.6f, 0.7f));
+        var slab = PrimitiveKit.Mat("Concrete", new Color(0.75f, 0.75f, 0.72f));
+        var rail = condo ? PrimitiveKit.Mat("GlassClear", new Color(0.7f, 0.85f, 0.9f), 0.9f) : PrimitiveKit.Mat("FenceMetal", new Color(0.2f, 0.22f, 0.24f));
+        float depth = back - front, mid = (back + front) * 0.5f;
+
+        // the ground floor: your room in the middle, the lobby and the neighbours either side and behind
+        PrimitiveKit.Box("Foundation", t, new Vector3(0f, floorY * 0.5f, mid), new Vector3(halfW * 2f, floorY, depth), slab);
+        Room(t, floorY, white, PrimitiveKit.Mat("DoorGlassModern", new Color(0.55f, 0.7f, 0.78f), 0.9f), glass, 0f);
+        float side = halfW - RoomW * 0.5f;
+        foreach (float sx in new[] { -1f, 1f })
+        {
+            PrimitiveKit.Box("RoofGroundSide", t, new Vector3(sx * (RoomW * 0.5f + side * 0.5f), floorY + storey * 0.5f - 0.15f, mid), new Vector3(side, storey - 0.3f, depth), body);
+            PrimitiveKit.Box("RoofGroundGlass", t, new Vector3(sx * (RoomW * 0.5f + side * 0.5f), floorY + 1.3f, front - 0.03f), new Vector3(side - 0.4f, 1.8f, 0.04f), glass, collider: false);
+        }
+        PrimitiveKit.Box("RoofGroundBack", t, new Vector3(0f, floorY + storey * 0.5f - 0.15f, (RoomD * 0.5f + back) * 0.5f), new Vector3(RoomW, storey - 0.3f, back - RoomD * 0.5f), body);
+        PrimitiveKit.Box("RoofGroundTop", t, new Vector3(0f, floorY + RoomH + (storey - RoomH) * 0.5f, 0f), new Vector3(RoomW, storey - RoomH, RoomD), body);
+
+        // the floors above
+        for (int f = 1; f < floors; f++)
+        {
+            float y = floorY + f * storey;
+            PrimitiveKit.Box("RoofFloor", t, new Vector3(0f, y + storey * 0.5f, mid), new Vector3(halfW * 2f - 0.3f, storey, depth), body);
+            PrimitiveKit.Box("RoofSlab", t, new Vector3(0f, y + 0.08f, mid - 0.45f), new Vector3(halfW * 2f, 0.16f, depth + 0.9f), condo ? white : slab, collider: false);
+            if (condo)
+            {
+                PrimitiveKit.Box("RoofGlassBand", t, new Vector3(0f, y + 1.5f, front - 0.02f), new Vector3(halfW * 2f - 0.9f, 2.3f, 0.04f), glass, collider: false);
+                PrimitiveKit.Box("RoofBalconyRail", t, new Vector3(0f, y + 0.65f, front - 0.85f), new Vector3(halfW * 2f - 0.2f, 0.95f, 0.04f), rail, collider: false);
+                foreach (float x in new[] { -halfW + 0.15f, 0f, halfW - 0.15f })
+                    PrimitiveKit.Box("RoofFin", t, new Vector3(x, y + storey * 0.5f, front - 0.45f), new Vector3(0.14f, storey, 0.9f), trim, collider: false);
+                PrimitiveKit.Box("RoofPlanter", t, new Vector3(-halfW + 1.2f, y + 0.35f, front - 0.6f), new Vector3(1.6f, 0.4f, 0.35f), PrimitiveKit.Mat("Grass", new Color(0.36f, 0.56f, 0.24f)), collider: false);
+            }
+            else
+            {
+                // the open corridor along the front: a rail, three doors and windows, an air-con by each
+                PrimitiveKit.Box("RoofCorridorRail", t, new Vector3(0f, y + 0.95f, front - 0.85f), new Vector3(halfW * 2f - 0.2f, 0.08f, 0.08f), rail, collider: false);
+                PrimitiveKit.Box("RoofCorridorWall", t, new Vector3(0f, y + 0.45f, front - 0.85f), new Vector3(halfW * 2f - 0.2f, 0.75f, 0.06f), trim, collider: false);
+                for (int u = -1; u <= 1; u++)
+                {
+                    float x = u * 3.4f;
+                    PrimitiveKit.Box("RoofUnitDoor", t, new Vector3(x - 0.7f, y + 1.1f, front - 0.03f), new Vector3(0.9f, 2f, 0.04f), trim, collider: false);
+                    PrimitiveKit.Box("RoofUnitWindow", t, new Vector3(x + 0.7f, y + 1.5f, front - 0.03f), new Vector3(1f, 0.9f, 0.04f), glass, collider: false);
+                    PrimitiveKit.Box("RoofAirCon", t, new Vector3(x + 0.7f, y + 0.55f, front - 0.25f), new Vector3(0.7f, 0.45f, 0.3f), white, collider: false);
+                    if ((u + f) % 2 == 0) // somebody's washing on a line along the rail
+                        foreach (var (dx, col) in new[] { (-0.4f, new Color(0.9f, 0.3f, 0.3f)), (0f, new Color(0.3f, 0.5f, 0.9f)), (0.4f, new Color(0.95f, 0.85f, 0.3f)) })
+                            PrimitiveKit.Box("RoofWashing", t, new Vector3(x + dx, y + 0.75f, front - 0.92f), new Vector3(0.3f, 0.4f, 0.02f), PrimitiveKit.Mat("Cloth" + col.GetHashCode(), col), collider: false);
+                }
+            }
+        }
+
+        // the top: a crown with the building's name in lights (condo), a water tank and parapet (apartment)
+        float top = floorY + floors * storey;
+        PrimitiveKit.Box("RoofParapet", t, new Vector3(0f, top + 0.4f, mid), new Vector3(halfW * 2f, 0.8f, depth), trim, collider: false);
+        if (condo)
+        {
+            PrimitiveKit.Box("RoofCrown", t, new Vector3(0f, top + 1.6f, mid + 0.6f), new Vector3(halfW * 1.4f, 1.6f, depth - 1.2f), trim, collider: false);
+            PrimitiveKit.Box("RoofNameBoard", t, new Vector3(0f, top + 1.6f, front + 0.55f), new Vector3(halfW * 1.3f, 0.9f, 0.06f), PrimitiveKit.Glow("CondoSign", new Color(0.95f, 0.95f, 1f), 1.4f), collider: false);
+            PrimitiveKit.Label("ศรีเมือง คอนโด", t, new Vector3(0f, top + 1.6f, front + 0.5f), 0.07f, new Color(0.1f, 0.2f, 0.35f));
+            // the lobby canopy over the door, on two slim posts
+            PrimitiveKit.Box("RoofCanopy", t, new Vector3(0f, floorY + 2.75f, front - 1.1f), new Vector3(3.6f, 0.14f, 2.2f), trim, collider: false);
+            foreach (float x in new[] { -1.6f, 1.6f })
+                PrimitiveKit.Box("Column", t, new Vector3(x, floorY + 1.35f, front - 2.05f), new Vector3(0.1f, 2.7f, 0.1f), trim);
+        }
+        else
+        {
+            PrimitiveKit.Cylinder("RoofWaterTank", t, new Vector3(3f, top + 1.6f, mid + 1f), new Vector3(1.4f, 0.8f, 1.4f), white, collider: false);
+            PrimitiveKit.Box("RoofStairHouse", t, new Vector3(-3.2f, top + 1.4f, mid + 1f), new Vector3(2.4f, 2f, 2.4f), body, collider: false);
+            PrimitiveKit.Box("RoofSignBoard", t, new Vector3(0f, floorY + 2.75f, front - 0.06f), new Vector3(4.4f, 0.5f, 0.06f), trim, collider: false);
+            PrimitiveKit.Label("อพาร์ตเมนต์ · ห้องพักรายเดือน", t, new Vector3(0f, floorY + 2.75f, front - 0.1f), 0.03f, new Color(1f, 0.92f, 0.75f));
+            // the stair up the side to the corridors
+            PrimitiveKit.Box("RoofStairCore", t, new Vector3(halfW + 0.7f, floorY + (floors - 1) * storey * 0.5f + 1.5f, back - 1.5f), new Vector3(1.4f, (floors - 1) * storey + 3f, 2.6f), trim);
+        }
+
+        // the forecourt: paving to the door, a planter, a bench, the motorbike bay
+        PrimitiveKit.Box("Forecourt", t, new Vector3(0f, 0.03f, front - 2.6f), new Vector3(halfW * 2f, 0.04f, 4.4f), PrimitiveKit.Mat("Pavement", new Color(0.72f, 0.7f, 0.66f)), collider: false);
+        Pot(t, new Vector3(3.6f, 0f, front - 1.4f), condo ? 13 : 14);
+        Nature.Bush(t, new Vector3(4.2f, 0f, front - 3.8f), 1f, condo ? 15 : 16, flowers: true);
+        Steps(t, floorY, 1.4f, front - 0.9f, slab);
+        Finish(t, style, floorY, front - 1.0f, Carport(t, new Vector3(-3.2f, 0f, -5.6f), 180f));
     }
 }

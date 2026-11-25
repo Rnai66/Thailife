@@ -45,6 +45,10 @@ public class RideMapUI : MonoBehaviour
 
     // the ride
     private TrafficCar car;
+    private Transform driver;                          // GPS mode: your own car (no TrafficCar)
+    private Func<Vector3, List<Vector3>> planner;      // GPS mode: the way from your car to a spot
+    private List<Vector3> gpsTrip;                     // GPS mode: the way being followed now
+    private Text goLabel, roamLabel;
     private Action<Vector3, string> onGo;
     private Action onRoam, onOpen;
     private bool hasChoice;
@@ -65,8 +69,26 @@ public class RideMapUI : MonoBehaviour
     {
         var ui = Instance;
         ui.car = vehicle;
+        ui.driver = null;
+        ui.planner = null;
+        ui.gpsTrip = null;
         ui.onGo = go;
         ui.onRoam = roam;
+        ui.Show();
+    }
+
+    // GPS for your own car (GpsNav): the same map; "นำทาง" starts guiding to the spot, the other
+    // button stops it. plan(spot) gives the way from where the car is, null when the roads don't go there.
+    public static void OpenGps(Transform car, Func<Vector3, List<Vector3>> plan, List<Vector3> following,
+        Action<Vector3, string> go, Action stop)
+    {
+        var ui = Instance;
+        ui.car = null;
+        ui.driver = car;
+        ui.planner = plan;
+        ui.gpsTrip = following;
+        ui.onGo = go;
+        ui.onRoam = stop;
         ui.Show();
     }
 
@@ -201,7 +223,8 @@ public class RideMapUI : MonoBehaviour
 
         float bw = (sideW - 20f) * 0.5f, by = bottom + buttonsH * 0.5f;
         goButton = UiKit.RoundButton(body, "ไปที่นี่", new Vector2(sideX - sideW * 0.5f + bw * 0.5f, by), new Vector2(bw, buttonsH), UiKit.PayGreen, Color.white, Go, 32);
-        UiKit.RoundButton(body, "เที่ยวรอบเมือง", new Vector2(sideX + sideW * 0.5f - bw * 0.5f, by), new Vector2(bw, buttonsH), UiKit.Teak, UiKit.HeaderText, Roam, 28);
+        goLabel = goButton.GetComponentInChildren<Text>();
+        roamLabel = UiKit.RoundButton(body, "เที่ยวรอบเมือง", new Vector2(sideX + sideW * 0.5f - bw * 0.5f, by), new Vector2(bw, buttonsH), UiKit.Teak, UiKit.HeaderText, Roam, 28).GetComponentInChildren<Text>();
         window.SetActive(false);
     }
 
@@ -227,7 +250,10 @@ public class RideMapUI : MonoBehaviour
         FillList();
         hasChoice = false;
         chosenName = null;
-        var trip = car != null ? car.TripLine() : null;
+        bool gps = car == null && driver != null;
+        if (goLabel != null) goLabel.text = gps ? "นำทาง" : "ไปที่นี่";
+        if (roamLabel != null) roamLabel.text = gps ? (gpsTrip != null ? "เลิกนำทาง" : "ปิดแผนที่") : "เที่ยวรอบเมือง";
+        var trip = car != null ? car.TripLine() : gpsTrip;
         DrawLine(trip);
         if (trip != null && trip.Count > 0)
         {
@@ -242,7 +268,7 @@ public class RideMapUI : MonoBehaviour
             destName.text = "ยังไม่ได้เลือกที่หมาย";
             destInfo.text = "แตะสถานที่ในรายการ หรือแตะบนแผนที่ตรงไหนก็ได้";
         }
-        subtitle.text = car != null ? "รถพาไปตามถนน แล้วจอดส่งให้ถึงที่" : "";
+        subtitle.text = car != null ? "รถพาไปตามถนน แล้วจอดส่งให้ถึงที่" : gps ? "GPS นำทาง · เส้นทางขึ้นบนมินิแมพระหว่างขับ" : "";
         goButton.interactable = false;
         Update();
     }
@@ -250,7 +276,9 @@ public class RideMapUI : MonoBehaviour
     // The map picture: drawn once per town (it doesn't change while you're there)
     private void DrawMap()
     {
-        string key = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name + TrafficNet.Count;
+        string key = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name + TrafficNet.Count
+                     + (HotelSite.Instance != null && HotelSite.Instance.Mine != null ? "h1" : "")
+                     + (HotelSite.Second != null && HotelSite.Second.Mine != null ? "h2" : ""); // your hotels, once the bank has answered
         if (key == drawnFor && mapTex != null) return;
         drawnFor = key;
         TrafficNet.EnsureBuilt();
@@ -305,7 +333,7 @@ public class RideMapUI : MonoBehaviour
     private void FillList()
     {
         UiKit.Clear(listContent);
-        var here = car != null ? car.transform.position : centre;
+        var here = car != null ? car.transform.position : driver != null ? driver.position : centre;
         var list = places.FindAll(p => !p.water);
         list.Sort((a, b) => Flat(a.at - here).CompareTo(Flat(b.at - here)));
         float w = listContent.sizeDelta.x, rowH = 86f, y = -8f;
@@ -359,7 +387,12 @@ public class RideMapUI : MonoBehaviour
         pin.gameObject.SetActive(true);
         pin.anchoredPosition = ToMap(road) + new Vector2(0f, 24f);
         destName.text = name;
-        if (car != null && car.Preview(road, out var line, out float metres))
+        List<Vector3> line = null;
+        float metres = 0f;
+        bool found = car != null ? car.Preview(road, out line, out metres)
+            : planner != null && (line = planner(road)) != null;
+        if (found && car == null) metres = TrafficNet.LineLength(line);
+        if (found)
         {
             DrawLine(line);
             float minutes = metres / CruiseSpeed / 60f;
@@ -443,9 +476,10 @@ public class RideMapUI : MonoBehaviour
 
     private void Update()
     {
-        if (window == null || !window.activeSelf || car == null) return;
-        carDot.anchoredPosition = ToMap(car.transform.position);
-        carDot.localRotation = Quaternion.Euler(0f, 0f, -car.transform.eulerAngles.y);
+        var at = car != null ? car.transform : driver;
+        if (window == null || !window.activeSelf || at == null) return;
+        carDot.anchoredPosition = ToMap(at.position);
+        carDot.localRotation = Quaternion.Euler(0f, 0f, -at.eulerAngles.y);
     }
 
     private void OnDestroy()

@@ -268,6 +268,7 @@ public static class PetrolStation
         Box("Body", atm, new Vector3(0f, 0.95f, 0f), new Vector3(0.9f, 1.9f, 0.7f), M("Atm", new Color(0.15f, 0.3f, 0.65f), 0.5f), collider: true);
         Box("Screen", atm, new Vector3(0f, 1.25f, -0.36f), new Vector3(0.5f, 0.35f, 0.02f), PrimitiveKit.Glow("PK_StationAtmScreen", new Color(0.4f, 0.8f, 1f), 1f, 0.7f));
         PrimitiveKit.Label("ATM", atm, new Vector3(0f, 1.75f, -0.37f), 0.035f, Color.white);
+        StreetFurniture.Zone(atm, new Vector3(0f, 1f, -1.0f)); // it works: the bank, any time
         var ice = PrimitiveKit.Group("IceChest", s, new Vector3(w * 0.5f - 1.1f, 0.2f, front - 0.6f)).transform;
         Box("Chest", ice, new Vector3(0f, 0.5f, 0f), new Vector3(1.4f, 1f, 0.8f), White, collider: true);
         Box("Lid", ice, new Vector3(0f, 1.02f, 0f), new Vector3(1.45f, 0.06f, 0.85f), M("IceBlue", new Color(0.3f, 0.6f, 0.9f), 0.5f));

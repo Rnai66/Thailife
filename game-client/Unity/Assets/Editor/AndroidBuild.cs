@@ -82,6 +82,7 @@ public static class AndroidBuild
         Directory.CreateDirectory(OutputDir);
         string file = $"ThaiLife9-{PlayerSettings.bundleVersion}-{PlayerSettings.Android.bundleVersionCode}" + (release ? ".aab" : ".apk");
         string path = Path.Combine(OutputDir, file);
+        WorldBuilder.KeepEmission(); // Unity drops _EMISSION from glow materials now and then: the lights would build dark
         var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
         {
             scenes = IOSBuild.BuildScenes(),

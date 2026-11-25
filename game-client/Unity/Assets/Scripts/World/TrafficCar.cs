@@ -76,6 +76,11 @@ public class TrafficCar : MonoBehaviour
 
     public bool IsStopped => speed < 0.05f && dwell <= 0f;
 
+    // For people on foot (NpcMind): every car on the road, how fast it's going, how long it is
+    public static System.Collections.Generic.IReadOnlyList<TrafficCar> Active => active;
+    public float Speed => speed;
+    public float HalfLength => halfLength;
+
     // Pull up beside a point (someone hailing): at the nearest place on the route a little way ahead,
     // or as soon as it can if that place is behind or far off
     public void StopNear(Vector3 world)

@@ -199,6 +199,8 @@ public static class TambonBuilder
         TempleGround(root);
         LandParcels.BuildCity(root); // ที่ดินติดถนน next to the bank (a shophouse to let once it's yours)
         CafeShop.Build(root); // ร้านกาแฟของผู้เล่น: east of the land lot, decorated by whoever runs a coffee business
+        HotelBiz.Build(root); // โรงแรมของผู้เล่น: east of the café, the lobby and a rooftop penthouse for whoever runs a hotel business
+        HotelBiz.BuildSecond(root); // and a second one on the ring road, for a second hotel business
         Homes.City(root); // หมู่บ้านในเมือง: the townhouse and the detached house players can live in
 
         // ตลาดสดเทศบาล east of the clock tower (morning market, 05:00-13:00)
@@ -276,10 +278,17 @@ public static class TambonBuilder
         foreach (var pos in new[] { new Vector3(-10f, 0f, 30f), new Vector3(10f, 0f, 30f), new Vector3(-30f, 0f, 9.3f), new Vector3(-44f, 0f, 4f) })
             Nature.Bush(root, pos, 1.2f, (int)(pos.x + pos.z), flowers: true);
 
-        // ป้ายแผนที่ท่องเที่ยว: on the civic pavement by the songthaew stop, and in the bus terminal
+        // ป้ายแผนที่ท่องเที่ยว: on the station forecourt (north of ถนนหน้าสถานีรถไฟ, clear of the hall
+        // and the platform ramp), where visitors step off the train, and in the bus terminal
         var sights = TouristMap.Collect(root);
-        TouristMap.Build(root, "(ตัวเมือง)", sights, new Vector3(13f, 0f, -20.6f), 0f, half: 100f);
+        TouristMap.Build(root, "(ตัวเมือง)", sights, new Vector3(2f, 0f, 52f), 0f, half: 100f);
         TouristMap.Build(root, "(ตัวเมือง)", sights, new Vector3(17.5f, 0f, -46f), 90f, half: 100f);
+
+        // ตู้ ATM round town (the station's, the bus terminal's and the petrol station's come with them):
+        // where the map board stood by the songthaew stop, by the fresh market, in front of the hospital
+        StreetFurniture.Atm(root, new Vector3(13f, 0f, -20.6f), 0f, 0);
+        StreetFurniture.Atm(root, new Vector3(39f, 0f, 1f), 0f, 1);
+        StreetFurniture.Atm(root, new Vector3(-45.5f, 0f, 31.5f), 0f, 2);
     }, road: false);
 
     // กรุงเทพฯ: another province, reached by coach, train or plane (TravelMenu). The same avenue and

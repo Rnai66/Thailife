@@ -40,7 +40,8 @@ nk.register_rpc(function(context, payload)
   local user_id = context.user_id
   local ok, req = pcall(nk.json_decode, payload or "")
   if not ok or type(req) ~= "table" then req = {} end
-  if req.spot == "hotel" and not require("hotel").active(user_id) then
+  local hotel = req.spot == "hotel" and require("hotel") or nil
+  if hotel and not hotel.active(user_id) and not hotel.owns(user_id) then
     error({ "no booking", GRPC_FAILED_PRECONDITION })
   end
   local spot = PAID_SPOTS[req.spot or ""]

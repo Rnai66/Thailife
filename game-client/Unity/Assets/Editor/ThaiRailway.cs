@@ -93,6 +93,7 @@ public static class ThaiRailway
         foreach (float rx in new[] { 6f, -28f })
             PrimitiveKit.Box("Ramp", st, new Vector3(rx, ph * 0.5f - 0.05f, pz - 1.6f - 1.45f), new Vector3(3f, 0.2f, 3.05f), concrete, new Vector3(-10.5f, 0f, 0f));
         PrimitiveKit.Box("Forecourt", st, new Vector3(-6f, 0.015f, -12f), new Vector3(40f, 0.02f, 9f), pave, collider: false);
+        StreetFurniture.Atm(line, new Vector3(10.5f, 0f, -9f), 0f, 3); // on the forecourt, clear of the ramp
 
         // the canopy over the platform: turned wooden posts with carved brackets, a red tin roof, lace fascia
         for (float x = -pl * 0.5f + 2f; x <= pl * 0.5f - 2f; x += 4f)

@@ -15,6 +15,9 @@ public static class OutdoorCinema
     private static Material Black => PrimitiveKit.Mat("SpeakerBlack", new Color(0.08f, 0.08f, 0.09f));
     private static Material Grille => PrimitiveKit.Mat("PK_CinemaGrille", new Color(0.16f, 0.16f, 0.18f), 0.3f);
     private static Material Bulb => PrimitiveKit.Glow("PK_LedPixel", Color.white, 1.5f, 0.8f);
+    // the projector's beam (additive): bright enough to read as a cone of light through the night air
+    private static readonly Color BeamOuter = new Color(0.16f, 0.145f, 0.11f, 1f);
+    private static readonly Color BeamCore = new Color(0.22f, 0.2f, 0.15f, 1f);
 
     public static Transform Build(Transform parent, Vector3 position, float yaw, bool big, string gateScale)
     {
@@ -90,6 +93,8 @@ public static class OutdoorCinema
             for (int i = 0; i < perRow; i++)
                 PrimitiveKit.Box("Mat", m, new Vector3((i - (perRow - 1) * 0.5f) * (big ? 3f : 2f), 0.03f, (big ? -6f : -4.6f) - r * 2.6f), new Vector3(big ? 2.4f : 1.6f, 0.02f, 2.2f), mat, collider: false);
         Booth(m, new Vector3(0f, 0f, big ? -12f : -7.4f), w, bottom, top, big);
+        Searchlights(m, big ? new[] { new Vector3(-w * 0.5f - 2.5f, 0f, -12f), new Vector3(w * 0.5f + 2.5f, 0f, -12f) }
+                            : new[] { new Vector3(w * 0.5f + 1.6f, 0f, -7.4f) }, s);
 
         // the audience sitting cross-legged on the mats, facing the screen, from the late afternoon on
         var seats = new System.Collections.Generic.List<Vector3>();
@@ -118,6 +123,31 @@ public static class OutdoorCinema
         box.size = big ? new Vector3(12f, 2f, 5f) : new Vector3(6.5f, 2f, 2.6f);
         zone.AddComponent<FestivalBooth>().Configure("movie", "หนังกลางแปลง", 0);
         return root.transform;
+    }
+
+    // the troupe's searchlights (ไฟส่องฟ้า) beside the booth: after dark their beams sweep the sky so the
+    // whole district can see there's a film on tonight (SkyBeams; they go up only while the show is on)
+    private static void Searchlights(Transform parent, Vector3[] at, float s)
+    {
+        var group = PrimitiveKit.Group("SkyLights_ไฟส่องฟ้า", parent, Vector3.zero).transform;
+        var beam = MeshKit.Lathe("CinemaSkyBeam", new[] { new Vector2(0.3f, 0f), new Vector2(2.2f, 40f) }, 16, capTop: false, capBottom: false);
+        var beamMat = PrimitiveKit.Beam("CinemaSkyBeam", new Color(0.8f, 0.78f, 0.6f, 1f));
+        var lens = PrimitiveKit.Glow("StageLens", Color.white, 6f, 0.5f);
+        foreach (var p in at)
+        {
+            var stand = PrimitiveKit.Group("SearchlightStand", group, p).transform;
+            PrimitiveKit.Box("Trailer", stand, new Vector3(0f, 0.35f, 0f), new Vector3(1f, 0.5f, 1.3f), Black);
+            foreach (float x in new[] { -0.55f, 0.55f })
+                PrimitiveKit.Cylinder("Wheel", stand, new Vector3(x, 0.25f, 0f), new Vector3(0.5f, 0.06f, 0.5f), Black, new Vector3(0f, 0f, 90f), collider: false);
+            var head = PrimitiveKit.Group("Searchlight", group, p + Vector3.up * 0.9f).transform;
+            PrimitiveKit.Cylinder("Lamp", head, new Vector3(0f, 0.3f, 0f), new Vector3(0.75f, 0.3f, 0.75f), Black, collider: false);
+            PrimitiveKit.Cylinder("Lens", head, new Vector3(0f, 0.61f, 0f), new Vector3(0.66f, 0.02f, 0.66f), lens, collider: false);
+            var b = MeshKit.Place("Beam", head, beam, beamMat, new Vector3(0f, 0.63f, 0f));
+            var r = b.GetComponent<MeshRenderer>();
+            r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            r.receiveShadows = false;
+        }
+        group.gameObject.AddComponent<SkyBeams>();
     }
 
     private static Renderer Pixel(Transform parent, Vector3 at, float s) =>
@@ -161,74 +191,163 @@ public static class OutdoorCinema
         t.gameObject.AddComponent<LedChase>().Configure(segs, index % 2 == 0 ? LedChase.Mode.Climb : LedChase.Mode.Rainbow, a[index % 3], b[index % 3], 0.9f + index * 0.07f);
     }
 
-    // the projector booth: a tin roof on four posts over a film projector of the old travelling kind —
-    // a gold pedestal, a black lamp house with its chimney, the steel film head with the lens, two big
-    // reels on arms (top one full, bottom one taking up) — and the lamp's beam reaching all the way to
-    // the screen (FilmProjector turns the reels and flickers the beam). A neon name box on the back.
+    // the projector booth: a steel truss deck (no roof, so the machine stands up against the night sky)
+    // with a 35 mm film projector of the old travelling kind on it — a gold pedestal on bolted feet, the
+    // long black arc-lamp house with chrome bands, a fin along the top, little lit windows and its
+    // chimney breathing smoke; the grey-green film head in front with the brass lens, and two big wire
+    // reels, the full one up top and the take-up one below. The lamp's beam reaches all the way to the
+    // screen (FilmProjector turns the reels, flickers the beam and puffs the smoke). Sound gear, flight
+    // cases of film and the projectionist share the deck; the troupe's neon name box stands at the back.
     private static void Booth(Transform parent, Vector3 at, float w, float bottom, float top, bool big)
     {
         var t = PrimitiveKit.Group("ProjectorBooth", parent, at).transform;
-        foreach (float x in new[] { -0.95f, 0.95f })
-            foreach (float z in new[] { -0.75f, 0.75f })
-                PrimitiveKit.Box("Post", t, new Vector3(x, 1.25f, z), new Vector3(0.05f, 2.5f, 0.05f), Black, collider: false);
-        PrimitiveKit.Box("Roof", t, new Vector3(0f, 2.55f, 0f), new Vector3(2.2f, 0.06f, 1.8f), PrimitiveKit.Mat("PK_RoofTin", new Color(0.55f, 0.5f, 0.45f), 0.5f), new Vector3(0f, 0f, 4f), collider: false);
-        PrimitiveKit.Box("Floor", t, new Vector3(0f, 0.03f, 0f), new Vector3(2f, 0.06f, 1.6f), PrimitiveKit.Mat("WoodPlank", new Color(0.6f, 0.4f, 0.22f)), collider: false);
-
         var gold = PrimitiveKit.Mat("PK_ProjectorGold", new Color(0.78f, 0.6f, 0.3f), 0.6f, 0.7f);
         var steel = PrimitiveKit.Mat("PK_ProjectorSteel", new Color(0.72f, 0.73f, 0.75f), 0.7f, 0.8f);
+        var chrome = PrimitiveKit.Mat("PK_ProjectorChrome", new Color(0.88f, 0.89f, 0.92f), 0.93f, 0.95f);
         var enamel = PrimitiveKit.Mat("PK_ProjectorEnamel", new Color(0.06f, 0.06f, 0.07f), 0.85f, 0.3f);
+        var paint = PrimitiveKit.Mat("PK_ProjectorHead", new Color(0.5f, 0.56f, 0.5f), 0.6f, 0.45f);
+        var brass = PrimitiveKit.Mat("PK_ProjectorBrass", new Color(0.82f, 0.64f, 0.3f), 0.8f, 0.9f);
         var red = PrimitiveKit.Mat("PK_ProjectorKnob", new Color(0.8f, 0.08f, 0.06f), 0.7f);
         var film = PrimitiveKit.Mat("PK_FilmCoil", new Color(0.18f, 0.12f, 0.08f), 0.6f);
         var warm = PrimitiveKit.Glow("BulbWarm", new Color(1f, 0.85f, 0.55f), 2.5f);
 
+        // ── the truss deck ──
+        const float deckW = 2.8f, deckD = 2.3f, P = 0.45f;
+        var truss = PrimitiveKit.Mat("PK_TrussSteel", new Color(0.78f, 0.79f, 0.82f), 0.7f, 0.85f);
+        PrimitiveKit.Box("Deck", t, new Vector3(0f, P - 0.03f, 0f), new Vector3(deckW, 0.06f, deckD), PrimitiveKit.Mat("PK_DeckPlate", new Color(0.3f, 0.31f, 0.33f), 0.45f, 0.6f));
+        foreach (var (a, b) in new[]
+        {
+            (new Vector3(-deckW, 0f, -deckD) * 0.5f, new Vector3(deckW, 0f, -deckD) * 0.5f),
+            (new Vector3(-deckW, 0f, deckD) * 0.5f, new Vector3(deckW, 0f, deckD) * 0.5f),
+            (new Vector3(-deckW, 0f, -deckD) * 0.5f, new Vector3(-deckW, 0f, deckD) * 0.5f),
+            (new Vector3(deckW, 0f, -deckD) * 0.5f, new Vector3(deckW, 0f, deckD) * 0.5f),
+        })
+        {
+            float lo = 0.05f, hi = P - 0.09f;
+            Rod("Chord", t, a + Vector3.up * hi, b + Vector3.up * hi, 0.045f, truss);
+            Rod("Chord", t, a + Vector3.up * lo, b + Vector3.up * lo, 0.045f, truss);
+            int bays = Mathf.Max(2, Mathf.RoundToInt((b - a).magnitude / 0.6f));
+            for (int i = 0; i <= bays; i++)
+            {
+                var p = Vector3.Lerp(a, b, i / (float)bays);
+                Rod("Post", t, p, p + Vector3.up * hi, 0.04f, truss);
+                if (i == bays) continue;
+                var q = Vector3.Lerp(a, b, (i + 1) / (float)bays);
+                Rod("Brace", t, p + Vector3.up * (i % 2 == 0 ? lo : hi), q + Vector3.up * (i % 2 == 0 ? hi : lo), 0.025f, truss);
+            }
+        }
+        PrimitiveKit.Box("Step", t, new Vector3(0.6f, P * 0.25f, -deckD * 0.5f - 0.22f), new Vector3(0.7f, P * 0.5f, 0.4f), truss);
+
         // ── the pedestal ──
-        PrimitiveKit.Box("Base", t, new Vector3(0f, 0.1f, 0.1f), new Vector3(0.9f, 0.08f, 0.8f), gold);
-        foreach (float x in new[] { -0.38f, 0.38f })
-            foreach (float z in new[] { -0.25f, 0.45f })
-                PrimitiveKit.Cylinder("Foot", t, new Vector3(x, 0.15f, z), new Vector3(0.07f, 0.03f, 0.07f), steel, collider: false);
-        PrimitiveKit.Box("Plinth", t, new Vector3(0f, 0.32f, 0.1f), new Vector3(0.6f, 0.36f, 0.55f), gold, collider: false);
-        PrimitiveKit.Cylinder("Column", t, new Vector3(0f, 0.8f, 0.1f), new Vector3(0.24f, 0.32f, 0.24f), steel, collider: false);
-        PrimitiveKit.Box("Table", t, new Vector3(0f, 1.15f, 0.1f), new Vector3(0.5f, 0.06f, 0.7f), gold, collider: false);
+        var foot = MeshKit.Lathe("Cinema/ProjectorFoot", new[]
+        {
+            new Vector2(0.46f, 0f), new Vector2(0.46f, 0.05f), new Vector2(0.34f, 0.1f), new Vector2(0.17f, 0.58f), new Vector2(0.14f, 0.62f),
+        }, 4);
+        MeshKit.Place("Pedestal", t, foot, gold, new Vector3(0f, P, 0.05f), new Vector3(0f, 45f, 0f));
+        foreach (float x in new[] { -0.3f, 0.3f })
+            foreach (float z in new[] { -0.3f, 0.3f })
+            {
+                PrimitiveKit.Cylinder("FootBolt", t, new Vector3(x, P + 0.065f, 0.05f + z), new Vector3(0.08f, 0.02f, 0.08f), chrome, collider: false);
+                PrimitiveKit.Sphere("BoltCap", t, new Vector3(x, P + 0.09f, 0.05f + z), Vector3.one * 0.045f, chrome);
+            }
+        PrimitiveKit.Cylinder("Column", t, new Vector3(0f, P + 0.79f, 0.05f), new Vector3(0.17f, 0.17f, 0.17f), chrome, collider: false);
+        PrimitiveKit.Cylinder("Collar", t, new Vector3(0f, P + 0.97f, 0.05f), new Vector3(0.24f, 0.03f, 0.24f), gold, collider: false);
+        PrimitiveKit.Cylinder("TiltWheel", t, new Vector3(0.13f, P + 0.82f, 0.05f), new Vector3(0.16f, 0.012f, 0.16f), chrome, new Vector3(0f, 0f, 90f), collider: false);
+        PrimitiveKit.Box("Saddle", t, new Vector3(0f, P + 1.03f, 0.05f), new Vector3(0.34f, 0.07f, 0.6f), gold, collider: false);
+        foreach (float x in new[] { -0.15f, 0.15f })
+            PrimitiveKit.Box("Yoke", t, new Vector3(x, P + 1.1f, 0.05f), new Vector3(0.03f, 0.14f, 0.22f), gold, collider: false);
+        // a box of a rectifier beside it, as every travelling show has, with its dial lit
+        PrimitiveKit.Box("Rectifier", t, new Vector3(-0.55f, P + 0.3f, 0.65f), new Vector3(0.45f, 0.6f, 0.4f), paint);
+        PrimitiveKit.Box("RectifierDial", t, new Vector3(-0.55f, P + 0.45f, 0.44f), new Vector3(0.14f, 0.08f, 0.01f), warm, collider: false);
+        for (int i = 0; i < 4; i++)
+            PrimitiveKit.Box("RectifierVent", t, new Vector3(-0.55f, P + 0.12f + i * 0.06f, 0.442f), new Vector3(0.3f, 0.015f, 0.01f), enamel, collider: false);
 
         // ── the head, tipped up at the screen ──
-        var headAt = new Vector3(0f, 1.18f, 0.1f);
+        var headAt = new Vector3(0f, P + 1.12f, 0.05f);
         var screenMid = new Vector3(0f, (bottom + top) * 0.5f, 0f) - at;
         var head = PrimitiveKit.Group("Projector", t, headAt).transform;
         head.localRotation = Quaternion.LookRotation((screenMid - headAt).normalized);
-        // lamp house: a black box with a rounded top, its chimney, red knobs and a glowing peep window
-        PrimitiveKit.Box("LampHouse", head, new Vector3(0f, 0.2f, -0.2f), new Vector3(0.42f, 0.4f, 0.6f), enamel, collider: false);
-        PrimitiveKit.Cylinder("LampTop", head, new Vector3(0f, 0.4f, -0.2f), new Vector3(0.42f, 0.3f, 0.42f), enamel, new Vector3(90f, 0f, 0f), collider: false);
-        PrimitiveKit.Box("Vents", head, new Vector3(0f, 0.2f, -0.2f), new Vector3(0.44f, 0.12f, 0.4f), steel, collider: false);
-        PrimitiveKit.Cylinder("Chimney", head, new Vector3(0f, 0.68f, -0.3f), new Vector3(0.13f, 0.1f, 0.13f), enamel, collider: false);
-        PrimitiveKit.Cylinder("ChimneyCap", head, new Vector3(0f, 0.79f, -0.3f), new Vector3(0.17f, 0.015f, 0.17f), steel, collider: false);
-        PrimitiveKit.Box("PeepWindow", head, new Vector3(-0.215f, 0.3f, -0.15f), new Vector3(0.01f, 0.07f, 0.12f), warm, collider: false);
-        foreach (var k in new[] { new Vector3(-0.23f, 0.08f, -0.42f), new Vector3(-0.23f, 0.34f, -0.45f), new Vector3(0.23f, 0.08f, -0.42f) })
-            PrimitiveKit.Sphere("Knob", head, k, Vector3.one * 0.05f, red);
-        // film head: steel box, the lens barrel and its glass
-        PrimitiveKit.Box("FilmHead", head, new Vector3(0f, 0.2f, 0.25f), new Vector3(0.3f, 0.38f, 0.3f), steel, collider: false);
-        PrimitiveKit.Box("Gate", head, new Vector3(0.155f, 0.22f, 0.25f), new Vector3(0.01f, 0.14f, 0.1f), warm, collider: false);
-        PrimitiveKit.Cylinder("Lens", head, new Vector3(0f, 0.22f, 0.5f), new Vector3(0.12f, 0.1f, 0.12f), enamel, new Vector3(90f, 0f, 0f), collider: false);
-        var lensLocal = new Vector3(0f, 0.22f, 0.61f);
-        PrimitiveKit.Sphere("LensGlass", head, lensLocal, new Vector3(0.1f, 0.1f, 0.04f), warm);
 
-        // reels on arms, beside the film head (they spin on the head's x axis)
+        // the arc-lamp house: a long rounded drum lying along the beam
+        var drumRot = new Vector3(90f, 0f, 0f);
+        var drumScale = new Vector3(0.82f, 1f, 1.05f);
+        var drum = MeshKit.Lathe("Cinema/LampDrum", new[]
+        {
+            new Vector2(0f, 0f), new Vector2(0.15f, 0.012f), new Vector2(0.22f, 0.04f), new Vector2(0.26f, 0.09f), new Vector2(0.27f, 0.14f),
+            new Vector2(0.27f, 0.72f), new Vector2(0.26f, 0.77f), new Vector2(0.23f, 0.81f), new Vector2(0.18f, 0.85f),
+        }, 28, capTop: true, capBottom: false);
+        MeshKit.Place("LampHouse", head, drum, enamel, new Vector3(0f, 0.24f, -0.92f), drumRot, drumScale);
+        var band = MeshKit.Lathe("Cinema/LampBand", new[]
+        {
+            new Vector2(0.273f, 0f), new Vector2(0.279f, 0.01f), new Vector2(0.279f, 0.032f), new Vector2(0.273f, 0.042f),
+        }, 28, capTop: false, capBottom: false);
+        foreach (float z in new[] { -0.77f, -0.5f, -0.24f })
+            MeshKit.Place("ChromeBand", head, band, chrome, new Vector3(0f, 0.24f, z), drumRot, drumScale);
+        PrimitiveKit.Box("Fin", head, new Vector3(0f, 0.535f, -0.52f), new Vector3(0.03f, 0.04f, 0.6f), chrome, collider: false);
+        PrimitiveKit.Box("Crest", head, new Vector3(0f, 0.5f, -0.17f), new Vector3(0.03f, 0.13f, 0.1f), chrome, new Vector3(-35f, 0f, 0f), collider: false);
+        foreach (float side in new[] { -1f, 1f })
+        {
+            PrimitiveKit.Box("WindowFrame", head, new Vector3(side * 0.214f, 0.3f, -0.4f), new Vector3(0.02f, 0.09f, 0.17f), chrome, collider: false);
+            PrimitiveKit.Box("Window", head, new Vector3(side * 0.222f, 0.3f, -0.4f), new Vector3(0.012f, 0.06f, 0.13f), warm, collider: false);
+            for (int i = 0; i < 4; i++)
+                PrimitiveKit.Box("Vent", head, new Vector3(side * 0.205f, 0.11f + i * 0.026f, -0.66f), new Vector3(0.014f, 0.01f, 0.24f), chrome, collider: false);
+            PrimitiveKit.Sphere("Knob", head, new Vector3(side * 0.205f, 0.38f, -0.8f), Vector3.one * 0.045f, red);
+        }
+        PrimitiveKit.Sphere("Knob", head, new Vector3(-0.2f, 0.12f, -0.22f), Vector3.one * 0.045f, red);
+        PrimitiveKit.Sphere("Reflector", head, new Vector3(0f, 0.24f, -0.9f), new Vector3(0.22f, 0.22f, 0.08f), chrome);
+        PrimitiveKit.Cylinder("ArcKnob", head, new Vector3(0f, 0.24f, -0.95f), new Vector3(0.05f, 0.03f, 0.05f), red, new Vector3(90f, 0f, 0f), collider: false);
+        PrimitiveKit.Cylinder("Chimney", head, new Vector3(0f, 0.6f, -0.62f), new Vector3(0.11f, 0.08f, 0.11f), enamel, collider: false);
+        PrimitiveKit.Cylinder("ChimneyCap", head, new Vector3(0f, 0.69f, -0.62f), new Vector3(0.15f, 0.012f, 0.15f), chrome, collider: false);
+        PrimitiveKit.Cylinder("Collar", head, new Vector3(0f, 0.24f, -0.06f), new Vector3(0.3f, 0.02f, 0.3f), chrome, new Vector3(90f, 0f, 0f), collider: false);
+
+        // the film head: a grey-green box, its door with the lit gate window, the sound head under it
+        PrimitiveKit.Box("FilmHead", head, new Vector3(0f, 0.26f, 0.1f), new Vector3(0.3f, 0.42f, 0.3f), paint, collider: false);
+        PrimitiveKit.Box("GateFrame", head, new Vector3(0.151f, 0.3f, 0.1f), new Vector3(0.008f, 0.13f, 0.11f), chrome, collider: false);
+        PrimitiveKit.Box("Gate", head, new Vector3(0.154f, 0.3f, 0.1f), new Vector3(0.008f, 0.1f, 0.08f), warm, collider: false);
+        PrimitiveKit.Box("DoorHandle", head, new Vector3(0.158f, 0.2f, 0.21f), new Vector3(0.015f, 0.08f, 0.015f), chrome, collider: false);
+        PrimitiveKit.Box("Hinge", head, new Vector3(0.152f, 0.26f, -0.04f), new Vector3(0.01f, 0.36f, 0.015f), chrome, collider: false);
+        PrimitiveKit.Box("NamePlate", head, new Vector3(-0.152f, 0.4f, 0.1f), new Vector3(0.008f, 0.05f, 0.14f), chrome, collider: false);
+        PrimitiveKit.Cylinder("Sprocket", head, new Vector3(0f, 0.49f, 0.12f), new Vector3(0.12f, 0.08f, 0.12f), chrome, new Vector3(0f, 0f, 90f), collider: false);
+        PrimitiveKit.Box("SoundHead", head, new Vector3(0f, -0.03f, 0.12f), new Vector3(0.26f, 0.16f, 0.26f), paint, collider: false);
+        PrimitiveKit.Box("ExciterLamp", head, new Vector3(0.132f, -0.03f, 0.16f), new Vector3(0.008f, 0.04f, 0.05f), warm, collider: false);
+        // the lens: a brass barrel with a chrome ring and the lit glass
+        PrimitiveKit.Cylinder("Lens", head, new Vector3(0f, 0.3f, 0.34f), new Vector3(0.1f, 0.1f, 0.1f), brass, new Vector3(90f, 0f, 0f), collider: false);
+        PrimitiveKit.Cylinder("LensRing", head, new Vector3(0f, 0.3f, 0.44f), new Vector3(0.13f, 0.015f, 0.13f), chrome, new Vector3(90f, 0f, 0f), collider: false);
+        var lensLocal = new Vector3(0f, 0.3f, 0.46f);
+        PrimitiveKit.Sphere("LensGlass", head, new Vector3(0f, 0.3f, 0.455f), new Vector3(0.085f, 0.085f, 0.03f), warm);
+
+        // the reels: the full one high above the head, the take-up one low and to the side of the column
         var reels = new Transform[2];
-        reels[0] = Reel(head, new Vector3(0.32f, 0.85f, 0.2f), 0.34f, 0.3f, steel, film);
-        reels[1] = Reel(head, new Vector3(0.32f, -0.42f, 0.3f), 0.34f, 0.17f, steel, film);
-        PrimitiveKit.Box("UpperArm", head, new Vector3(0.28f, 0.6f, 0.22f), new Vector3(0.03f, 0.55f, 0.04f), steel, collider: false);
-        PrimitiveKit.Box("LowerArm", head, new Vector3(0.28f, -0.12f, 0.28f), new Vector3(0.03f, 0.6f, 0.04f), steel, collider: false);
-        Strip(head, new Vector3(0.32f, 0.85f, 0.2f + 0.3f), new Vector3(0.16f, 0.39f, 0.36f), film);
-        Strip(head, new Vector3(0.16f, 0.02f, 0.36f), new Vector3(0.32f, -0.42f, 0.3f + 0.17f), film);
+        reels[0] = Reel(head, new Vector3(0f, 0.98f, 0.1f), 0.4f, 0.3f, chrome, film);
+        reels[1] = Reel(head, new Vector3(0.24f, -0.48f, 0.22f), 0.38f, 0.16f, chrome, film);
+        Rod("UpperArm", head, new Vector3(-0.07f, 0.47f, 0.1f), new Vector3(-0.07f, 0.98f, 0.1f), 0.03f, chrome);
+        Rod("UpperSpindle", head, new Vector3(-0.07f, 0.98f, 0.1f), new Vector3(0f, 0.98f, 0.1f), 0.025f, chrome);
+        Rod("LowerArm", head, new Vector3(0.13f, -0.08f, 0.16f), new Vector3(0.17f, -0.48f, 0.22f), 0.03f, chrome);
+        Rod("LowerSpindle", head, new Vector3(0.17f, -0.48f, 0.22f), new Vector3(0.24f, -0.48f, 0.22f), 0.025f, chrome);
+        Strip(head, new Vector3(0f, 0.77f, 0.31f), new Vector3(0f, 0.48f, 0.2f), film);
+        Strip(head, new Vector3(0.1f, -0.11f, 0.22f), new Vector3(0.24f, -0.37f, 0.33f), film);
 
         var lampGo = new GameObject("LampGlow");
         lampGo.transform.SetParent(head, false);
-        lampGo.transform.localPosition = new Vector3(0f, 0.3f, 0.75f);
+        lampGo.transform.localPosition = new Vector3(0f, 0.3f, 0.65f);
         var lamp = lampGo.AddComponent<Light>();
         lamp.type = LightType.Point;
         lamp.color = new Color(1f, 0.82f, 0.55f);
         lamp.range = 3.5f;
         lamp.intensity = 2f;
         lamp.shadows = LightShadows.None;
+
+        // smoke from the chimney (the arc's carbons burning), drifting up into the beam of the lamps
+        var smokeAt = headAt + head.localRotation * new Vector3(0f, 0.7f, -0.62f);
+        var smoke = PrimitiveKit.Group("Smoke", t, smokeAt).transform;
+        var smokeMat = PrimitiveKit.Beam("ProjectorSmoke", new Color(0.07f, 0.07f, 0.08f, 1f));
+        var puffs = new Renderer[5];
+        for (int i = 0; i < puffs.Length; i++)
+        {
+            puffs[i] = PrimitiveKit.Sphere("Puff", smoke, Vector3.zero, Vector3.one * 0.1f, smokeMat).GetComponent<Renderer>();
+            puffs[i].shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            puffs[i].receiveShadows = false;
+        }
 
         // ── the beam: from the lens to the edges of the picture ──
         var lensInT = headAt + head.localRotation * lensLocal;
@@ -240,9 +359,9 @@ public static class OutdoorCinema
         };
         string key = big ? "Cinema/ProjectorBeam_big" : "Cinema/ProjectorBeam_small";
         var outer = MeshKit.Place("Beam", t, MeshKit.SaveCombined(key, BeamMesh(lensInT, far, 0.05f, 0.3f, 1f)),
-            PrimitiveKit.Beam("ProjectorBeam", new Color(0.05f, 0.045f, 0.035f, 1f)), lensInT);
+            PrimitiveKit.Beam("ProjectorBeam", BeamOuter), lensInT);
         var core = MeshKit.Place("BeamCore", t, MeshKit.SaveCombined(key + "_core", BeamMesh(lensInT, far, 0.03f, 0.3f, 0.55f)),
-            PrimitiveKit.Beam("ProjectorBeamCore", new Color(0.06f, 0.055f, 0.045f, 1f)), lensInT);
+            PrimitiveKit.Beam("ProjectorBeamCore", BeamCore), lensInT);
         foreach (var g in new[] { outer, core })
         {
             var r = g.GetComponent<MeshRenderer>();
@@ -252,10 +371,10 @@ public static class OutdoorCinema
 
         t.gameObject.AddComponent<FilmProjector>().Configure(reels, new[] { 55f, 95f },
             new Renderer[] { outer.GetComponent<Renderer>(), core.GetComponent<Renderer>() },
-            new[] { new Color(0.05f, 0.045f, 0.035f), new Color(0.06f, 0.055f, 0.045f) }, lamp);
+            new[] { BeamOuter, BeamCore }, lamp, puffs, new Color(0.07f, 0.07f, 0.08f));
 
         // ── the sound gear on the left: an amplifier rack and the mixer on its stand ──
-        var rack = PrimitiveKit.Group("AmpRack_เครื่องขยายเสียง", t, new Vector3(-0.72f, 0f, 0.25f), -90f).transform;
+        var rack = PrimitiveKit.Group("AmpRack_เครื่องขยายเสียง", t, new Vector3(-1.0f, P, 0.0f), -90f).transform;
         var vu = new System.Collections.Generic.List<Renderer>();
         PrimitiveKit.Box("Rack", rack, new Vector3(0f, 0.5f, 0f), new Vector3(0.62f, 1f, 0.42f), Black);
         for (int i = 0; i < 3; i++)
@@ -268,7 +387,7 @@ public static class OutdoorCinema
             vu.Add(PrimitiveKit.Box("PowerLed", rack, new Vector3(-0.24f, y + 0.07f, -0.23f), new Vector3(0.025f, 0.025f, 0.01f), Bulb, collider: false).GetComponent<Renderer>());
         }
         rack.gameObject.AddComponent<LedChase>().Configure(vu.ToArray(), LedChase.Mode.Pulse, new Color(1f, 0.55f, 0.15f), new Color(0.2f, 1f, 0.3f), 1.05f);
-        var mixer = PrimitiveKit.Group("Mixer_มิกเซอร์", t, new Vector3(-0.68f, 0f, -0.52f), 0f).transform;
+        var mixer = PrimitiveKit.Group("Mixer_มิกเซอร์", t, new Vector3(-0.95f, P, -0.75f), 0f).transform;
         PrimitiveKit.Box("Stand", mixer, new Vector3(0f, 0.38f, 0f), new Vector3(0.5f, 0.76f, 0.38f), PrimitiveKit.Mat("WoodPlank", new Color(0.6f, 0.4f, 0.22f)), collider: false);
         PrimitiveKit.Box("Desk", mixer, new Vector3(0f, 0.8f, 0f), new Vector3(0.48f, 0.07f, 0.34f), Black, new Vector3(-12f, 0f, 0f), collider: false);
         var faders = PrimitiveKit.Mat("PK_MixerFader", new Color(0.85f, 0.85f, 0.88f), 0.5f);
@@ -279,55 +398,91 @@ public static class OutdoorCinema
             for (int k = 0; k < 3; k++)
                 PrimitiveKit.Cylinder("Knob", mixer, new Vector3(x, 0.84f + k * 0.012f, -0.13f + k * 0.05f), new Vector3(0.018f, 0.01f, 0.018f), i % 2 == 0 ? red : faders, collider: false);
         }
-        // cables from the rack out to the speakers
-        PrimitiveKit.Box("Cable", t, new Vector3(-0.9f, 0.02f, 0.9f), new Vector3(0.03f, 0.02f, 1.2f), Black, collider: false);
+        // cables from the rack down off the deck to the speakers
+        PrimitiveKit.Box("Cable", t, new Vector3(-1.2f, P + 0.01f, 0.7f), new Vector3(0.03f, 0.02f, 0.9f), Black, collider: false);
 
-        // ── the film cans: a crate of reels in their round tins, two more stacked by it ──
+        // ── the film in silver flight cases, round tins on top ──
         var tins = PrimitiveKit.Mat("PK_FilmTin", new Color(0.62f, 0.6f, 0.55f), 0.6f, 0.6f);
-        var crate = PrimitiveKit.Group("FilmCans_กล่องฟิล์ม", t, new Vector3(0.66f, 0f, -0.52f)).transform;
-        PrimitiveKit.Box("Crate", crate, new Vector3(0f, 0.18f, 0f), new Vector3(0.52f, 0.36f, 0.4f), PrimitiveKit.Mat("WoodPlank", new Color(0.6f, 0.4f, 0.22f)), collider: false);
-        for (int i = 0; i < 4; i++)
-            PrimitiveKit.Cylinder("Tin", crate, new Vector3(-0.18f + i * 0.12f, 0.38f, 0f), new Vector3(0.36f, 0.04f, 0.36f), tins, new Vector3(0f, 0f, 90f), collider: false);
+        var caseMat = PrimitiveKit.Mat("PK_FlightCase", new Color(0.74f, 0.75f, 0.78f), 0.6f, 0.65f);
+        var cases = PrimitiveKit.Group("FilmCans_กล่องฟิล์ม", t, new Vector3(0.75f, P, -0.85f)).transform;
+        foreach (var (pos, size) in new[]
+        {
+            (new Vector3(-0.3f, 0.19f, 0f), new Vector3(0.5f, 0.38f, 0.4f)),
+            (new Vector3(0.28f, 0.17f, 0f), new Vector3(0.48f, 0.34f, 0.4f)),
+            (new Vector3(-0.3f, 0.52f, 0f), new Vector3(0.46f, 0.28f, 0.38f)),
+        })
+        {
+            PrimitiveKit.Box("FlightCase", cases, pos, size, caseMat);
+            foreach (float y in new[] { -0.5f, 0.5f })
+                PrimitiveKit.Box("Edge", cases, pos + new Vector3(0f, y * size.y, -size.z * 0.5f), new Vector3(size.x + 0.01f, 0.025f, 0.02f), Black, collider: false);
+            PrimitiveKit.Box("Latch", cases, pos + new Vector3(0f, size.y * 0.3f, -size.z * 0.5f - 0.01f), new Vector3(0.06f, 0.04f, 0.01f), chrome, collider: false);
+        }
         for (int i = 0; i < 3; i++)
-            PrimitiveKit.Cylinder("TinStack", crate, new Vector3(0f, 0.385f + i * 0.045f, -0.42f), new Vector3(0.34f, 0.02f, 0.34f), i == 1 ? red : tins, collider: false);
-        PrimitiveKit.Label("ฟิล์ม", crate, new Vector3(0f, 0.2f, -0.205f), 0.02f, new Color(1f, 0.9f, 0.5f));
+            PrimitiveKit.Cylinder("Tin", cases, new Vector3(0.28f, 0.355f + i * 0.045f, 0f), new Vector3(0.34f, 0.02f, 0.34f), i == 1 ? red : tins, collider: false);
+        PrimitiveKit.Label("ฟิล์ม", cases, new Vector3(-0.3f, 0.2f, -0.21f), 0.02f, new Color(1f, 0.9f, 0.5f));
 
         // the projectionist (คนฉาย) on the reel side, minding his machine
-        Npcs.Watchers(t, "Projectionist_คนฉาย", Vector3.zero, 0f, new[] { new Vector3(0.78f, 0f, 0.15f) }, new[] { -90f },
+        Npcs.Watchers(t, "Projectionist_คนฉาย", Vector3.zero, 0f, new[] { new Vector3(0.78f, P, -0.15f) }, new[] { -90f },
             new[] { SpectatorPose.Kind.Projectionist }, "", 16, 2);
 
-        // the neon name box on the back
-        var box = PrimitiveKit.Group("NameBox", t, new Vector3(0f, 2.15f, -0.88f)).transform;
-        PrimitiveKit.Box("Panel", box, new Vector3(0f, 0f, 0.02f), new Vector3(1.5f, 0.45f, 0.04f), Black, collider: false);
-        var tube = PrimitiveKit.Box("Tube", box, new Vector3(0f, -0.2f, 0f), new Vector3(1.45f, 0.04f, 0.04f), Bulb, collider: false).GetComponent<Renderer>();
-        var tube2 = PrimitiveKit.Box("Tube", box, new Vector3(0f, 0.2f, 0f), new Vector3(1.45f, 0.04f, 0.04f), Bulb, collider: false).GetComponent<Renderer>();
+        // the neon name box on two posts at the back
+        foreach (float x in new[] { -0.8f, 0.8f })
+            Rod("SignPost", t, new Vector3(x, P, -deckD * 0.5f + 0.06f), new Vector3(x, P + 2.35f, -deckD * 0.5f + 0.06f), 0.05f, truss);
+        var box = PrimitiveKit.Group("NameBox", t, new Vector3(0f, P + 2.1f, -deckD * 0.5f + 0.02f)).transform;
+        PrimitiveKit.Box("Panel", box, new Vector3(0f, 0f, 0.02f), new Vector3(1.6f, 0.45f, 0.04f), Black, collider: false);
+        var tube = PrimitiveKit.Box("Tube", box, new Vector3(0f, -0.2f, 0f), new Vector3(1.55f, 0.04f, 0.04f), Bulb, collider: false).GetComponent<Renderer>();
+        var tube2 = PrimitiveKit.Box("Tube", box, new Vector3(0f, 0.2f, 0f), new Vector3(1.55f, 0.04f, 0.04f), Bulb, collider: false).GetComponent<Renderer>();
         box.gameObject.AddComponent<LedChase>().Configure(new[] { tube, tube2 }, LedChase.Mode.Swap, new Color(1f, 0.2f, 0.6f), new Color(0.3f, 1f, 0.4f), 0.5f);
         PrimitiveKit.Label(Troupe, box, new Vector3(0f, 0f, -0.03f), 0.026f, new Color(1f, 0.4f, 0.75f));
     }
 
-    // a film reel standing on edge: hub, spokes, a rim of segments and the coil of film wound on it.
-    // The returned pivot's own y is the spin axis (FilmProjector turns it).
-    private static Transform Reel(Transform head, Vector3 at, float radius, float coil, Material steel, Material film)
+    // a wire film reel standing on edge: two spoked flanges with a thin round rim each, a hub, and the
+    // coil of film wound between them. The returned pivot's own y is the spin axis (FilmProjector turns it).
+    private static Transform Reel(Transform head, Vector3 at, float radius, float coil, Material chrome, Material film)
     {
         var pivot = PrimitiveKit.Group("Reel", head, at).transform;
         pivot.localRotation = Quaternion.Euler(0f, 0f, 90f);
-        PrimitiveKit.Cylinder("Hub", pivot, Vector3.zero, new Vector3(0.07f, 0.03f, 0.07f), steel, collider: false);
-        PrimitiveKit.Cylinder("Coil", pivot, Vector3.zero, new Vector3(coil * 2f, 0.018f, coil * 2f), film, collider: false);
-        for (int i = 0; i < 6; i++)
+        PrimitiveKit.Cylinder("Hub", pivot, Vector3.zero, new Vector3(0.07f, 0.05f, 0.07f), chrome, collider: false);
+        PrimitiveKit.Cylinder("Core", pivot, Vector3.zero, new Vector3(0.11f, 0.03f, 0.11f), chrome, collider: false);
+        PrimitiveKit.Cylinder("Coil", pivot, Vector3.zero, new Vector3(coil * 2f, 0.022f, coil * 2f), film, collider: false);
+        var rim = Ring($"Cinema/ReelRim{Mathf.RoundToInt(radius * 100f)}", radius, 0.009f);
+        var inner = Ring($"Cinema/ReelRim{Mathf.RoundToInt(radius * 45f)}", radius * 0.45f, 0.006f);
+        foreach (float y in new[] { -0.036f, 0.036f })
         {
-            float a = i * 60f;
-            var dir = Quaternion.Euler(0f, a, 0f) * Vector3.forward;
-            PrimitiveKit.Box("Spoke", pivot, dir * radius * 0.5f, new Vector3(0.018f, 0.025f, radius), steel, new Vector3(0f, a, 0f), collider: false);
-        }
-        const int segments = 20;
-        float seg = 2f * Mathf.PI * radius / segments * 1.05f;
-        for (int i = 0; i < segments; i++)
-        {
-            float a = i * 360f / segments;
-            var dir = Quaternion.Euler(0f, a, 0f) * Vector3.forward;
-            PrimitiveKit.Box("Rim", pivot, dir * radius, new Vector3(seg, 0.03f, 0.018f), steel, new Vector3(0f, a, 0f), collider: false);
+            MeshKit.Place("Rim", pivot, rim, chrome, new Vector3(0f, y, 0f));
+            MeshKit.Place("InnerRim", pivot, inner, chrome, new Vector3(0f, y, 0f));
+            for (int i = 0; i < 10; i++)
+            {
+                float a = i * 36f + (y > 0f ? 18f : 0f);
+                var dir = Quaternion.Euler(0f, a, 0f) * Vector3.forward;
+                PrimitiveKit.Box("Spoke", pivot, dir * radius * 0.5f + Vector3.up * y, new Vector3(0.012f, 0.008f, radius), chrome, new Vector3(0f, a, 0f), collider: false);
+            }
         }
         return pivot;
+    }
+
+    // a thin round ring lying flat (in the xz plane): a reel's wire rim
+    private static Mesh Ring(string key, float radius, float thickness)
+    {
+        const int n = 40;
+        var path = new Vector3[n + 1];
+        var r = new float[n + 1];
+        for (int i = 0; i <= n; i++)
+        {
+            float a = i * Mathf.PI * 2f / n;
+            path[i] = new Vector3(Mathf.Cos(a) * radius, 0f, Mathf.Sin(a) * radius);
+            r[i] = thickness;
+        }
+        return MeshKit.Sweep(key, path, r, 6);
+    }
+
+    // a straight bar from a to b (a truss tube, an arm)
+    private static void Rod(string name, Transform parent, Vector3 a, Vector3 b, float thick, Material m)
+    {
+        var d = b - a;
+        var dir = d.normalized;
+        var up = Mathf.Abs(Vector3.Dot(dir, Vector3.up)) > 0.99f ? Vector3.forward : Vector3.up;
+        PrimitiveKit.Box(name, parent, (a + b) * 0.5f, new Vector3(thick, thick, d.magnitude), m, Quaternion.LookRotation(dir, up).eulerAngles, collider: false);
     }
 
     // a length of film between two points (in the head's space)

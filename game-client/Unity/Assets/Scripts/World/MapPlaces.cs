@@ -33,6 +33,7 @@ public static class MapPlaces
         { "GoldZone", (null, "shop") }, { "PawnShop", (null, "shop") }, { "FoodCourt", (null, "food") },
         { "NoodleShop", (null, "food") }, { "Tailor", (null, "tailor") }, { "Barber", (null, "barber") },
         { "CoachZone", ("สถานีขนส่ง · รถทัวร์", "travel") }, { "BusTerminal", (null, "travel") }, { "Townhouses", (null, "home") },
+        { "MyHotel", ("โรงแรมของคุณ", "hotel") }, { "MyHotel2", ("โรงแรมของคุณ แห่งที่ 2", "hotel") }, { "CoffeeShop", ("ร้านกาแฟ", "food") },
         // ต่างจังหวัด: the landmarks (ProvinceKit.Attraction)
         { "AttrTemple", (null, "temple") }, { "AttrShrine", (null, "temple") }, { "AttrNature", (null, "farm") },
         { "AttrCity", (null, "city") }, { "AttrSport", (null, "fair") }, { "AttrMarket", (null, "market") },
@@ -65,6 +66,14 @@ public static class MapPlaces
             {
                 var area = Footprint(t);
                 string name = water ? thai : Kinds[prefix].name ?? thai;
+                // the players' own hotels: named for whoever runs them, left off the map when nobody here does
+                if (prefix == "MyHotel" || prefix == "MyHotel2")
+                {
+                    var site = t.GetComponent<HotelSite>();
+                    bool mine = site != null && site.Mine != null;
+                    if (!mine && prefix == "MyHotel2") return;
+                    if (!mine) name = "โรงแรม (ให้เช่า)";
+                }
                 if (area.size.x > 2f && seen.Add(name))
                 {
                     var at = area.center;

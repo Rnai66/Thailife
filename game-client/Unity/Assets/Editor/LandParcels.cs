@@ -246,7 +246,22 @@ public static class LandParcels
         Counter(site, new Vector3(-4.5f, 1f, -hz - 0.9f), new Vector3(3f, 2f, 2f), "city");
 
         var build = PrimitiveKit.Group("Build_shophouse", site, Vector3.zero).transform;
-        CityCivic.Block(build, new Vector3(1.5f, 0f, 1.2f), 0f, "ตึกแถวของคุณ", 16f, 13f, 3, new Color(0.96f, 0.9f, 0.8f), new Color(0.55f, 0.3f, 0.2f),
-            new Color(0.55f, 0.3f, 0.2f), new Color(1f, 0.9f, 0.6f), "Shophouse_ตึกแถว", "ให้เช่า", "office");
+        const float width = 16f, depth = 13f;
+        var b = CityCivic.Block(build, new Vector3(1.5f, 0f, 1.2f), 0f, "ตึกแถวของคุณ", width, depth, 3, new Color(0.96f, 0.9f, 0.8f), new Color(0.55f, 0.3f, 0.2f),
+            new Color(0.55f, 0.3f, 0.2f), new Color(1f, 0.9f, 0.6f), "Shophouse_ตึกแถว", kiosk: null, interior: "empty");
+        // Its name goes over the door at runtime ("ตึกแถวของ <you>" or the name you give it), so not the
+        // built-in board across the top floor or the entrance's "ยินดีต้อนรับ"
+        for (int i = b.childCount - 1; i >= 0; i--)
+        {
+            var c = b.GetChild(i);
+            var text = c.GetComponent<TextMesh>();
+            if (c.name == "NameBoard" || (text != null && (text.text == "ตึกแถวของคุณ" || text.text == "ยินดีต้อนรับ"))) Object.DestroyImmediate(c.gameObject);
+        }
+        CafeShop.DropWelcome(b);
+        // the ground floor in metres (Interiors.Rooms: 0.2 walls, a 3.2 storey, all scaled), furnished by
+        // the owner like the café (CafeSite kind "shophouse", cafe.lua shophouse_*)
+        float s = b.localScale.x;
+        b.gameObject.AddComponent<CafeSite>().Configure((width * 0.5f - 0.2f) * s, (depth * 0.5f - 0.2f) * s, 3.2f * s,
+            new Vector3(0f, 3.7f, -depth * 0.5f - 0.1f), "shophouse");
     }
 }
